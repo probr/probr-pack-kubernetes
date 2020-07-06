@@ -27,23 +27,8 @@ go_lint:
     - golint ./...
     - go vet ./...
 
+# TODO: add policy lint (see CasC)
 
-policy_lint:
-  stage: lint
-  image: golang:1.14
-  except:
-    - mirror-config
-  before_script:
-    - cd $GOPATH/src
-    - mkdir -p gitlab.com/$CI_PROJECT_NAMESPACE
-    - cd gitlab.com/$CI_PROJECT_NAMESPACE
-    - ln -s $CI_PROJECT_DIR
-    - cd $CI_PROJECT_NAME
-  script:
-    - go mod download
-    - go get -u golang.org/x/lint/golint
-    - cd test/features/general/policy_validation
-    - go test -v ./... --godog.tags=json
 
 ## Infra build ##
 # TODO: add infra build
