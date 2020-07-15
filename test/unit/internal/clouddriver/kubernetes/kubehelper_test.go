@@ -18,7 +18,7 @@ func TestMain(m *testing.M) {
 
 	if ! *integrationTest {
 		//skip
-		log.Print("SKIPPING ...")		
+		log.Print("kubehelper_test: Integration Test Flag not set. SKIPPING TEST.")
 		return
 	}
 
