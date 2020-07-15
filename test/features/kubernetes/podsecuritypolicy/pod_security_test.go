@@ -1,4 +1,4 @@
-package clouddriver
+package podsecuritypolicy
 
 import (	
 	"os"
@@ -23,7 +23,7 @@ func TestMain(m *testing.M) {
 
 	// godog testing (v0.10.0 (latest))
 	status := godog.TestSuite{
-		Name: "account_manager",		
+		Name: "pod_security_policy",		
 		TestSuiteInitializer: TestSuiteInitialize,
 		ScenarioInitializer:  ScenarioInitialize,
 		Options: &opts,

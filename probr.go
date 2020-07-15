@@ -1,42 +1,57 @@
 package main
 
 import (
-	"fmt"	 
-	"flag"
-	"os"	
+	"log"
+	"os"
 
-	server "citihub.com/probr/api"
-	api "citihub.com/probr/api/probrapi"
-	"github.com/labstack/echo/v4"
-	"github.com/deepmap/oapi-codegen/pkg/middleware"
-	echomiddleware "github.com/labstack/echo/v4/middleware"
+	"citihub.com/probr/internal/coreengine"
+	"github.com/google/uuid"
+
+	_ "citihub.com/probr/test/features/clouddriver"
+	_ "citihub.com/probr/test/features/kubernetes/podsecuritypolicy" //needed to run init on TestHandlers
 )
 
 func main() {
-	var port = flag.Int("port", 1234, "Port for test HTTP server")
-	flag.Parse()
+	//TODO: this is the cli and what will be called on Docker run ...
+	//use args to figure out what needs to be run / output paths / etc
+	//and call TestManager to make it happen :-)
 
-	swagger, err := api.GetSwagger()
+	//(possibly want to create a separate "cli" file)
+
+	// get all the below from args ... just hard code for now 
+	
+	// get the test mgr
+	tm := coreengine.NewTestManager()
+
+	//add some tests and add them to the TM - we need to tidy this up!
+	addTest(tm, "account_manager", coreengine.General)
+	addTest(tm, "pod_security_policy", coreengine.PodSecurityPolicies)
+
+	//exec 'em all (for now!)
+	s, err := tm.ExecAllTests()
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error loading swagger spec\n: %s", err)
-		os.Exit(1)
+		log.Fatalf("Error executing tests %v", err)
 	}
 
-	probrAPI := server.NewProbrAPI()
+	os.Exit(s)
 
-	e := echo.New()
-	e.Use(echomiddleware.Logger())
+}
 
-	// Use our validation middleware to check all requests against the
-	// OpenAPI schema.
-	e.Use(middleware.OapiRequestValidator(swagger))
+func addTest(tm *coreengine.TestStore, testname string, category coreengine.Category) {
 
-	// Register ProbrAPI as the handler for the interface
-	api.RegisterHandlers(e, probrAPI)
+	cat := category	
+	name := testname
+	td := coreengine.TestDescriptor {Category: cat, Name: name}
 
-	// And we serve HTTP until the world ends.
-	e.Logger.Fatal(e.Start(fmt.Sprintf("0.0.0.0:%d", *port)))
+	uuid1 := uuid.New().String()	
+	sat := coreengine.Pending	
 
-	
+	test := coreengine.Test {
+		UUID: &uuid1,
+		TestDescriptor: &td,
+		Status: &sat,
+	}
 
+	//add - don't worry about the rtn uuid
+	tm.AddTest(&test)
 }
