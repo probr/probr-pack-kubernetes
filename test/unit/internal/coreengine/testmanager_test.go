@@ -1,6 +1,7 @@
 package coreengine_test
 
 import (	
+	"log"
 	"testing"
 	
 	"github.com/stretchr/testify/assert"
@@ -105,6 +106,13 @@ func TestExecTest(t *testing.T) {
 }
 
 func TestExecAllTests(t *testing.T) {
+	
+	if ! *integrationTest {
+		//skip
+		log.Print("testmanager_test:TestExecAllTests: Integration Test Flag not set. SKIPPING TEST.")
+		return
+	}
+
 	tm := coreengine.NewTestManager()
 
 	//add some tests and add them to the TM

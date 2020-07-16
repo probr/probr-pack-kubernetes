@@ -1,8 +1,10 @@
 package coreengine_test
 
 import (
+	"os"
 	"fmt"
-	// "os"
+	"log"
+	"flag"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -12,6 +14,24 @@ import (
 	_ "citihub.com/probr/test/features/clouddriver" //needed to run init on TestHandlers
 	_ "citihub.com/probr/test/features/kubernetes/podsecuritypolicy" //needed to run init on TestHandlers
 )
+
+var (
+	integrationTest = flag.Bool("integrationTest", false, "run integration tests")
+)
+
+func TestMain(m *testing.M) {
+	flag.Parse()
+
+	if ! *integrationTest {
+		//skip
+		log.Print("testrunner_test: Integration Test Flag not set. SKIPPING TEST.")
+		return
+	}
+
+	result := m.Run()
+
+	os.Exit(result)
+}
 
 func TestTestRunner (t *testing.T) {
 	
