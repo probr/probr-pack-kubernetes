@@ -31,7 +31,7 @@ func TH() (int, error) {
 		return -1, fmt.Errorf("unable to determine probr root - not able to perform tests")
 	}
 	
-	featPath := filepath.Join(probrRoot,"test","features","clouddriver","features")
+	featPath := filepath.Join(probrRoot,"test","features","kubernetes","podsecuritypolicy","features")
 	
 	//TODO: FIX - get this from env/arg
 	outPath := filepath.Join(probrRoot,"testoutput")

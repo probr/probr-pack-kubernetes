@@ -18,11 +18,14 @@ func controlExistsToPreventPrivilegedAccess() error {
 	yesNo, err := kubernetes.PrivilegedAccessIsRestricted()	
 
 	if err != nil {
-		return fmt.Errorf("Error determining Pod Security Policy %v", err)
+		return fmt.Errorf("error determining Pod Security Policy %v", err)
+	}
+	if yesNo == nil {
+		return fmt.Errorf("result of PrivilegedAccessIsRestricted is nil despite no error being raised from the call")
 	}
 
-	if !yesNo {
-		return fmt.Errorf("Privileged Access is NOT restricted (result: %t)", yesNo)
+	if !*yesNo {
+		return fmt.Errorf("Privileged Access is NOT restricted (result: %t)", *yesNo)
 	}
 
 	return nil
@@ -31,14 +34,6 @@ func controlExistsToPreventPrivilegedAccess() error {
 func creationWillWithAMessage(arg1, arg2 string) error {
 	return godog.ErrPending
 }
-
-//FeatureContext ...
-// func FeatureContext(s *godog.Suite) {
-// 	s.Step(`^a deployment is created$`, aDeploymentIsCreated)
-// 	s.Step(`^"([^"]*)" access is requested$`, accessIsRequested)
-// 	s.Step(`^control exists to prevent privileged access$`, controlExistsToPreventPrivilegedAccess)
-// 	s.Step(`^creation will "([^"]*)" with a message "([^"]*)"$`, creationWillWithAMessage)
-// }
 
 //TestSuiteInitialize ...
 func TestSuiteInitialize(ctx *godog.TestSuiteContext) {

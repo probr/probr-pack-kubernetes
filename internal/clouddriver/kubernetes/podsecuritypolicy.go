@@ -1,74 +1,82 @@
 package kubernetes
 
-import (	
-	"log"
+import (
 	"context"
-	"time"
 	"fmt"
-		
+	"log"
+	"time"
+
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"k8s.io/api/policy/v1beta1"
 )
 
-//ClusterHasPSP - determines if the cluster has any Pod Security Policies set
-func ClusterHasPSP() (bool, error) {
+//ClusterHasPSP determines if the cluster has any Pod Security Policies set.
+func ClusterHasPSP() (*bool, error) {
 	psps, err := getPodSecurityPolicies()
 	if err != nil {
-		return false, err
+		return nil, err
 	}
 
-	return len(psps.Items)>0, nil
+	b := len(psps.Items) > 0
+	return &b, nil
 }
 
-//PrivilegedAccessIsRestricted - look for a PodSecurityPolicy with 'Privileged' set to false (ie. NOT privileged)
-func PrivilegedAccessIsRestricted() (bool, error) {
+//PrivilegedAccessIsRestricted looks for a PodSecurityPolicy with 'Privileged' set to false (ie. NOT privileged).
+func PrivilegedAccessIsRestricted() (*bool, error) {
 	psps, err := getPodSecurityPolicies()
 	if err != nil {
-		return false, err
+		return nil, err
 	}
 
 	//at least on of the PSPs should have Privileged set to false
-	for i := 0; i < len(psps.Items); i++ {
-		if !psps.Items[i].Spec.Privileged {
-			log.Printf("PASS: Privileged is set to %v on Policy: %v", psps.Items[i].Spec.Privileged, psps.Items[i].GetName())
-			return true, nil
-		}						
+	var res bool
+	for _, e := range psps.Items {
+		if !e.Spec.Privileged {
+			log.Printf("PASS: Privileged is set to %v on Policy: %v", e.Spec.Privileged, e.GetName())
+			res = true
+			break
+		}
 	}
 
-	log.Printf("FAIL: NO Policy's found with Privileged set.\n")
+	if !res {
+		log.Printf("FAIL: NO Policies found with Privileged set.\n")
+	}
 
-	return false, nil
+	return &res, nil
 }
 
-//HostPIDIsRestricted - look for a PodSecurityPolicy with 'HostPID' set to false (i.e. NO Access to HostPID )
-func HostPIDIsRestricted() (bool, error) {
+//HostPIDIsRestricted looks for a PodSecurityPolicy with 'HostPID' set to false (i.e. NO Access to HostPID ).
+func HostPIDIsRestricted() (*bool, error) {
 	psps, err := getPodSecurityPolicies()
 	if err != nil {
-		return false, err
+		return nil, err
 	}
 
 	//at least on of the PSPs should have HostPID set to false
-	for i := 0; i < len(psps.Items); i++ {
-		if !psps.Items[i].Spec.HostPID {
-			log.Printf("PASS: HostPID is set to %v on Policy: %v\n", psps.Items[i].Spec.HostPID, psps.Items[i].GetName())
-			return true, nil
-		}						
+	var res bool
+	for _, e := range psps.Items {	
+		if !e.Spec.HostPID {
+			log.Printf("PASS: HostPID is set to %v on Policy: %v\n", e.Spec.HostPID, e.GetName())
+			res = true
+			break
+		}
 	}
 
-	log.Printf("FAIL: NO Policy's found with HostPID set.\n")
-
-	return false, nil
+	if !res {
+		log.Printf("FAIL: NO Policies found with HostPID set.\n")
+	}
+	
+	return &res, nil
 }
 
-//getPodSecurityPolicies ...
-func getPodSecurityPolicies() (*v1beta1.PodSecurityPolicyList, error) {	
+func getPodSecurityPolicies() (*v1beta1.PodSecurityPolicyList, error) {
 	c, err := GetClient()
 	if err != nil {
 		return nil, err
 	}
 
-	psp := c.PolicyV1beta1().PodSecurityPolicies()	
+	psp := c.PolicyV1beta1().PodSecurityPolicies()
 	if psp == nil {
 		return nil, fmt.Errorf("Pod Security Polices could not be obtained (nil returned)")
 	}
@@ -83,13 +91,13 @@ func getPodSecurityPolicies() (*v1beta1.PodSecurityPolicyList, error) {
 	if pspList == nil {
 		return nil, fmt.Errorf("Pod Security Polices list returned a nil list")
 	}
-		
+
 	log.Printf("There are %d psp policies in the cluster\n", len(pspList.Items))
 
-	for i := 0; i < len(pspList.Items); i++ {		
-		log.Printf("PSP: %v \n", pspList.Items[i].GetName())
-		log.Printf("Spec: %+v \n", pspList.Items[i].Spec)		
+	for _, e := range pspList.Items {
+		log.Printf("PSP: %v \n", e.GetName())
+		log.Printf("Spec: %+v \n", e.Spec)
 	}
-	 	
+
 	return pspList, nil
 }

@@ -5,6 +5,7 @@ import (
 	"flag"
 	"log"
 	"os"
+	"fmt"
 
 	"citihub.com/probr/internal/clouddriver/kubernetes"
 )
@@ -15,6 +16,16 @@ var (
 
 func TestMain(m *testing.M) {
 	flag.Parse()
+
+	argLength := len(os.Args[1:])  
+    fmt.Printf("Arg length is %d\n", argLength)
+ 
+    for i, a := range os.Args[1:] {
+        fmt.Printf("Arg %d is %s\n", i+1, a) 
+	}
+	
+	args:=flag.Args()	
+	log.Printf("Args: %v", args)
 
 	if ! *integrationTest {
 		//skip
@@ -44,7 +55,9 @@ func TestClusterHasPSP(t *testing.T) {
 
 	pspClusterConfig := "C:/Users/daaad/.kube/config"	
 	kubernetes.SetKubeConfigFile(&pspClusterConfig)
-	kubernetes.ClusterHasPSP()
+	yesNo, err := kubernetes.ClusterHasPSP()
+
+	handleResult(yesNo, err)
 	
 }
 
@@ -66,11 +79,12 @@ func TestHostPIDIsRestricted(t *testing.T) {
 	handleResult(yesNo,err)
 }
 
-func handleResult(yesNo bool, err error) {
+func handleResult(yesNo *bool, err error) {
 	if err != nil {
 		//FAIL ... but don't check for this atm ...
+		fmt.Printf("Test failed: %v\n", err)
 		return
 	}
 
-	println("RESULT: ", yesNo)
+	fmt.Printf("RESULT: %t\n", *yesNo)
 }

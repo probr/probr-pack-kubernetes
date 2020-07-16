@@ -1,72 +1,70 @@
 package kubernetes
 
 import (
-	"os"
-	"flag"
-	"log"
 	"context"
-	"sync"
+	"flag"
 	"fmt"
+	"log"
+	"os"
 	"path/filepath"
+	"sync"
 
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/clientcmd"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	"k8s.io/api/core/v1"
-	
+	v1 "k8s.io/api/core/v1"
 )
 
 var (
 	kubeConfigFile *string
-	kubeClient	*kubernetes.Clientset
-	clientMutex		sync.Mutex
+	kubeClient     *kubernetes.Clientset
+	clientMutex    sync.Mutex
 )
 
-
-//SetKubeConfigFile - explict/full path to kube config .. TODO: hmm not sure I like this
-func SetKubeConfigFile(fullyQualifiedKubeConfig *string) {
-	kubeConfigFile = fullyQualifiedKubeConfig
+//SetKubeConfigFile sets the fully qualified path to the Kubernetes config file.
+func SetKubeConfigFile(f *string) {
+	kubeConfigFile = f
 }
 
-
-//GetClient ... just for initial dev - will change TODO ... will probably remove this from export
+//GetClient gets a client connection to the Kubernetes cluster specifed via @SetKubeConfigFile or from home directory.
 func GetClient() (*kubernetes.Clientset, error) {
 	clientMutex.Lock()
 	defer clientMutex.Unlock()
 
 	if kubeClient != nil {
-		return kubeClient, nil		
+		return kubeClient, nil
 	}
-
-	var kubeconfig *string	
-
-	//prefer kube config path if it's been supplied
-	if kubeConfigFile != nil && *kubeConfigFile != "" {
-		kubeconfig = flag.String("kubeconfig", *kubeConfigFile, "fully qualified and supplied absolute path to the kubeconfig file")		
-	} else if home := homeDir(); home != "" {
-		kubeconfig = flag.String("kubeconfig", filepath.Join(home, ".kube", "config"), "(optional) absolute path to the kubeconfig file")
-	} else {
-		kubeconfig = flag.String("kubeconfig", "", "absolute path to the kubeconfig file")
-	}
-	flag.Parse()
 
 	// use the current context in kubeconfig
-	config, err := clientcmd.BuildConfigFromFlags("", *kubeconfig)
-	if err != nil {
-		//TODO: DA, not sure we really need to panic here :-)
-		panic(err.Error())
-	}
-
-	// create the clientset
-	clientSet, err := kubernetes.NewForConfig(config)
+	config, err := clientcmd.BuildConfigFromFlags("", *setConfigPath())
 	if err != nil {
 		return nil, err
 	}
 
-	kubeClient = clientSet
+	// create the clientset (note: assigned to global "kubeClient")
+	kubeClient, err = kubernetes.NewForConfig(config)
+	if err != nil {
+		return nil, err
+	}
 
-	return kubeClient, nil		
+	return kubeClient, nil
+}
+
+func setConfigPath() *string {
+	var c *string
+
+	//prefer kube config path if it's been supplied
+	if kubeConfigFile != nil && *kubeConfigFile != "" {
+		c = flag.String("kubeconfig", *kubeConfigFile, "fully qualified and supplied absolute path to the kubeconfig file")
+	} else if home := homeDir(); home != "" {
+		c = flag.String("kubeconfig", filepath.Join(home, ".kube", "config"), "(optional) absolute path to the kubeconfig file")
+	} else {
+		c = flag.String("kubeconfig", "", "absolute path to the kubeconfig file")
+	}
+	flag.Parse()
+
+	return c
 }
 
 //GetPods ...
@@ -85,7 +83,7 @@ func GetPods() (*v1.PodList, error) {
 }
 
 func getPods(c *kubernetes.Clientset) (*v1.PodList, error) {
-	pods, err := c.CoreV1().Pods("").List(context.TODO(), metav1.ListOptions{})	
+	pods, err := c.CoreV1().Pods("").List(context.TODO(), metav1.ListOptions{})
 	if err != nil {
 		return nil, err
 	}
@@ -94,9 +92,9 @@ func getPods(c *kubernetes.Clientset) (*v1.PodList, error) {
 	}
 
 	log.Printf("There are %d pods in the cluster\n", len(pods.Items))
-	
+
 	for i := 0; i < len(pods.Items); i++ {
-		log.Printf("P: %v %v\n", pods.Items[i].GetNamespace() , pods.Items[i].GetName() )			
+		log.Printf("P: %v %v\n", pods.Items[i].GetNamespace(), pods.Items[i].GetName())
 	}
 
 	return pods, nil
@@ -107,7 +105,7 @@ func CreatePod() {
 
 }
 
-func homeDir() string {	
+func homeDir() string {
 	if h := os.Getenv("HOME"); h != "" {
 		return h
 	}
