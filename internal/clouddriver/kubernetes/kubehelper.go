@@ -52,8 +52,14 @@ func GetClient() (*kubernetes.Clientset, error) {
 }
 
 func setConfigPath() *string {
-	var c *string
+	
+	n := "kubeconfig"
+	f := flag.Lookup(n)
+	if f != nil {
+		return &f.DefValue
+	}
 
+	var c *string
 	//prefer kube config path if it's been supplied
 	if kubeConfigFile != nil && *kubeConfigFile != "" {
 		c = flag.String("kubeconfig", *kubeConfigFile, "fully qualified and supplied absolute path to the kubeconfig file")
