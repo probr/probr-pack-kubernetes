@@ -13,5 +13,5 @@ Feature: Cloud Driver Account Manager
 
     Examples:
       | Cloud Account | Cloud Credential | Result  | Error Description                                   |
-      | AWS           | AWS Credential   | Succeed |                                                     |
+      | AWS           | AWS Credential   | Succeed | Success                                                    |
       | AWS           | Azure Credential | Fail    | Cannot connect to account using supplied credential |

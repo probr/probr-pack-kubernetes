@@ -58,7 +58,7 @@ unit_go:
     - mirror-config  
   script:
     - cd $CI_PROJECT_DIR/test
-    #- go test -v ./...
+    - go test -v ./...
 
 # TODO: run feature/BDD (all CSPs)
 

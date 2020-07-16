@@ -1,0 +1,160 @@
+package coreengine
+
+import (
+	"errors"
+	"sync"
+
+	"github.com/google/uuid"
+)
+
+//TestStatus ..
+type TestStatus int
+
+//TestStatus enum ...
+const (
+	Pending TestStatus = iota
+	Running
+	CompleteSuccess
+	CompleteFail
+	Error
+)
+
+func (s TestStatus) String() string {
+	return [...]string{"Pending","Running","CompleteSuccess","CompleteFail","Error"}[s]
+}
+
+//Category ...
+type Category int
+
+//Category enum
+const (
+	RBAC  Category = iota
+	PodSecurityPolicies
+	NetworkPolicies
+	SecretsMgmt
+	General
+	ImageRegistry
+	ImageScanning
+	IAM
+	KeyMgmt
+	Authentication
+	Storage
+)
+
+func (c Category) String() string {
+	return [...]string{"RBAC","Pod Security Policies","Network Policies","Secrets Mgmt","General", "Image Registry", "Image Scanning", "IAM", 
+				"Key Mgmt", "Authentication", "Storage"}[c]
+}
+
+//Test - structure to hold test data
+type Test struct {
+	UUID           *string         `json:"uuid,omitempty"`
+	TestDescriptor *TestDescriptor `json:"test_descriptor,omitempty"`
+
+	Status *TestStatus `json:"status,omitempty"`
+
+	//TODO: Add Results
+}
+
+//TestDescriptor - struct to hold description of test, name, category, strictness?? etc.
+type TestDescriptor struct {
+	Category Category `json:"category,omitempty"`
+	Name     string `json:"name,omitempty"`
+}
+
+//TestStore - holds the current test suite.  
+//TODO: still not sure about the structure.
+//Below is:
+// [uuid] -> pointer to array of pointers to tests
+// this implies that we'd be setting a test run up with multiple "sub" test runs, 
+// with each run being identified by a uuid which is mapped to the array of tests
+// I think this could be too complicated, and it's just a simple uuid -> test,
+// i.e. the "test run" is a map of multiple entries, each uuid simply pointing to one
+// test, i.e.
+// [uuid] -> pointer to test
+// (done ... simples :-) )
+type TestStore struct {
+	Tests map[uuid.UUID]*[]*Test
+	FailedTests map[TestStatus]*[]*Test
+	Lock  sync.RWMutex
+}
+
+//GetAvailableTests - return the universe of available tests
+func GetAvailableTests() *[]TestDescriptor {
+
+	//not sure if this is needed
+	//TODO: get this from the TestRunner handler store - basically it's the collection of 
+	//tests that have registered a handler ..
+	
+	
+	// return &p
+	return nil
+}
+
+//NewTestManager - create a new test manager, backed by TestStore
+func NewTestManager() *TestStore {
+	return &TestStore{
+		Tests: make(map[uuid.UUID]*[]*Test),
+	}
+}
+
+//AddTest ...
+func (ts *TestStore) AddTest(t *Test) *uuid.UUID {
+	ts.Lock.Lock()
+	defer ts.Lock.Unlock()
+
+	//add the test
+	u := uuid.New()
+	a := []*Test{t}
+	ts.Tests[u] = &a
+
+	return &u
+}
+
+//GetTest by UUID ...
+func (ts *TestStore) GetTest(uuid *uuid.UUID) (*[]*Test, error) {
+	ts.Lock.Lock()
+	defer ts.Lock.Unlock()
+
+	//get the test from the store
+	t, exists := ts.Tests[*uuid]
+
+	if !exists {
+		return nil, errors.New("test with uuid " + (*uuid).String() + " not found")
+	}
+
+	return t, nil
+}
+
+//GetTest by TestDescriptor ... TODO
+
+//ExecTest by UUID in this case, but could be name, category, etc.  Probably need an ExecTests as well ...
+func (ts *TestStore) ExecTest(uuid *uuid.UUID) (int, error) {
+	t, err := ts.GetTest(uuid)
+
+	if err != nil {
+		return 1, err
+	}
+	
+	st, err := ts.RunTest( (*t)[0])
+
+	//TODO: manage store 
+	//move to FAILURE / SUCCESS as approriate ...
+
+
+	return st, err
+}
+
+//ExecTest by TestDescriptor, etc ... TODO.  In this case there may be more than one so we should set up for concurrency
+
+//ExecAllTests ... 
+func (ts *TestStore) ExecAllTests() (int, error) {
+	var st int 
+	var err error
+
+	for uuid := range ts.Tests {
+		st, err = ts.ExecTest(&uuid)
+	}
+	return st, err
+}
+
