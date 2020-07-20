@@ -242,5 +242,6 @@ neo4j/server-vm/neo4j.pub
 
 node_modules
 
-# probr misc
+# probr misc ('probr' is Linux exe)
 testoutput
+probr
