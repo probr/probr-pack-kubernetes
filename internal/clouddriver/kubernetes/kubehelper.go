@@ -59,7 +59,6 @@ func GetClient() (*kubernetes.Clientset, error) {
 }
 
 func setConfigPath() *string {
-
 	n := "kubeconfig"
 	f := flag.Lookup(n)
 	if f != nil {
@@ -69,9 +68,12 @@ func setConfigPath() *string {
 	var c *string
 	//prefer kube config path if it's been supplied
 	if kubeConfigFile != nil && *kubeConfigFile != "" {
+		log.Printf("[NOTICE] Setting Kube Config to: %v", *kubeConfigFile)
 		c = flag.String("kubeconfig", *kubeConfigFile, "fully qualified and supplied absolute path to the kubeconfig file")
 	} else if home := homeDir(); home != "" {
-		c = flag.String("kubeconfig", filepath.Join(home, ".kube", "config"), "(optional) absolute path to the kubeconfig file")
+		p := filepath.Join(home, ".kube", "config")
+		log.Printf("[NOTICE] Setting Kube Config to: %v", p)
+		c = flag.String("kubeconfig", p, "(optional) absolute path to the kubeconfig file")
 	} else {
 		c = flag.String("kubeconfig", "", "absolute path to the kubeconfig file")
 	}
@@ -121,7 +123,7 @@ func CreatePod(pname *string, ns *string, cname *string, image *string) (*apiv1.
 	}
 
 	//create the namespace for the POD (noOp if already present)
-	_,err = CreateNamespace(ns)
+	_, err = CreateNamespace(ns)
 	if err != nil {
 		return nil, err
 	}
@@ -136,7 +138,7 @@ func CreatePod(pname *string, ns *string, cname *string, image *string) (*apiv1.
 	res, err := pc.Create(ctx, p, metav1.CreateOptions{})
 	if err != nil {
 		if isAlreadyExists(err) {
-			log.Printf("[INFO] POD %v already exists. Returning existing.\n", *pname)		
+			log.Printf("[INFO] POD %v already exists. Returning existing.\n", *pname)
 			//return it and nil out err
 			return res, nil
 		}
@@ -146,7 +148,7 @@ func CreatePod(pname *string, ns *string, cname *string, image *string) (*apiv1.
 	log.Printf("[NOTICE] POD %q created.\n", res.GetObjectMeta().GetName())
 
 	//wait:
-	waitForRunning(c,ns,pname)
+	waitForRunning(c, ns, pname)
 
 	return res, nil
 }
@@ -272,7 +274,7 @@ func CreateNamespace(ns *string) (*apiv1.Namespace, error) {
 	if err != nil {
 		if isAlreadyExists(err) {
 			log.Printf("[INFO] Namespace %v already exists. Returning existing.", *ns)
-			//return it and nil out the err			
+			//return it and nil out the err
 			return n, nil
 		}
 		return nil, err
@@ -308,14 +310,14 @@ func isAlreadyExists(err error) bool {
 		//409 is already exists
 		return se.ErrStatus.Code == 409
 	}
-	return false	
+	return false
 }
 
 func waitForRunning(c *kubernetes.Clientset, ns *string, n *string) (bool, error) {
 
 	ps := c.CoreV1().Pods(*ns)
-	
-	w, err := ps.Watch(context.Background(), metav1.ListOptions {})
+
+	w, err := ps.Watch(context.Background(), metav1.ListOptions{})
 
 	if err != nil {
 		return false, nil
@@ -328,12 +330,12 @@ func waitForRunning(c *kubernetes.Clientset, ns *string, n *string) (bool, error
 			if !ok {
 				// log.Printf("unexpected type")
 				//TODO: handle
-				log.Fatal("unexpected type")				
+				log.Fatal("unexpected type")
 			}
 			// log.Printf("[INFO] Watch Container name: %v", p.Status.ContainerStatuses)
 			log.Printf("[INFO] Watch Container phase: %v", p.Status.Phase)
 			log.Printf("[DEBUG] Watch Container status: %+v", p.Status.ContainerStatuses)
-			
+
 		}
 	}()
 	time.Sleep(5 * time.Second)
@@ -348,9 +350,8 @@ func homeDir() string {
 	return os.Getenv("USERPROFILE") // windows
 }
 
-func logCmd (c *string, p *string, n *string) {
-	log.Printf("[NOTICE] Executing command: \"%v\" on POD '%v' in namespace '%v'", *c, *p, *n)	
+func logCmd(c *string, p *string, n *string) {
+	log.Printf("[NOTICE] Executing command: \"%v\" on POD '%v' in namespace '%v'", *c, *p, *n)
 	// log.Printf("on pod: %v", *p)
 	// log.Printf("in namespace: %v", *n)
 }
-

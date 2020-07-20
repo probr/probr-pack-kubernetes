@@ -5,10 +5,12 @@ import (
 	"log"
 	"os"
 
+	"citihub.com/probr/internal/clouddriver/kubernetes"
 	"citihub.com/probr/internal/coreengine"
 	"github.com/google/uuid"
 
 	_ "citihub.com/probr/internal/config" //needed for logging
+	"citihub.com/probr/test/features"
 	_ "citihub.com/probr/test/features/clouddriver"
 	_ "citihub.com/probr/test/features/kubernetes/internetaccess"    //needed to run init on TestHandlers
 	_ "citihub.com/probr/test/features/kubernetes/podsecuritypolicy" //needed to run init on TestHandlers
@@ -19,6 +21,13 @@ var (
 )
 
 func main() {
+	k := flag.String("kube", "", "kube config file")
+	o := flag.String("outputDir", "", "output directory")
+	flag.Parse()
+
+	kubernetes.SetKubeConfigFile(k)
+	features.SetOutputDirectory(o)
+
 	//TODO: this is the cli and what will be called on Docker run ...
 	//use args to figure out what needs to be run / output paths / etc
 	//and call TestManager to make it happen :-)
