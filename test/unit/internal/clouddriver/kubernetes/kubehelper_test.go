@@ -1,13 +1,14 @@
 package kubernetes_test
 
 import (
-	"testing"
 	"flag"
+	"fmt"
 	"log"
 	"os"
-	"fmt"
+	"testing"
 
 	"citihub.com/probr/internal/clouddriver/kubernetes"
+	_ "citihub.com/probr/internal/config"
 )
 
 var (
@@ -17,17 +18,17 @@ var (
 func TestMain(m *testing.M) {
 	flag.Parse()
 
-	argLength := len(os.Args[1:])  
-    fmt.Printf("Arg length is %d\n", argLength)
- 
-    for i, a := range os.Args[1:] {
-        fmt.Printf("Arg %d is %s\n", i+1, a) 
+	argLength := len(os.Args[1:])
+	fmt.Printf("Arg length is %d\n", argLength)
+
+	for i, a := range os.Args[1:] {
+		fmt.Printf("Arg %d is %s\n", i+1, a)
 	}
-	
-	args:=flag.Args()	
+
+	args := flag.Args()
 	log.Printf("Args: %v", args)
 
-	if ! *integrationTest {
+	if !*integrationTest {
 		//skip
 		log.Print("kubehelper_test: Integration Test Flag not set. SKIPPING TEST.")
 		return
@@ -38,45 +39,49 @@ func TestMain(m *testing.M) {
 	os.Exit(result)
 }
 
-func TestClusterHasPSP(t *testing.T) {
-	
-
-	//TODO: THIS IS NOT REALLY A UNIT TEST
-	//but if we want to run it as an integration test and
-	//have it interact with a cluster we really need to have
-	//either example clusters or set them up as part of the 
-	//test.   This will basically be what we're doing in the 
-	//feature/bdd tests so that's probably a more relevant place
-	//for that.   Here, just do some basic stuff ...
-	
-	//set the kube config
-	//1. to one we know has PSP's
-	//2. then to one which hasn't
-
-	pspClusterConfig := "C:/Users/daaad/.kube/config"	
-	kubernetes.SetKubeConfigFile(&pspClusterConfig)
-	yesNo, err := kubernetes.ClusterHasPSP()
-
-	handleResult(yesNo, err)
-	
-}
-
 func TestGetPods(t *testing.T) {
 	kubernetes.GetPods()
 }
 
-func TestPrivilegedAccessIsRestricted(t *testing.T) {
-	pspClusterConfig := "C:/Users/daaad/.kube/config"	
-	kubernetes.SetKubeConfigFile(&pspClusterConfig)
-	yesNo, err := kubernetes.PrivilegedAccessIsRestricted()	
+func TestCreatePod(t *testing.T) {
+	pname, ns, cname, image := "my-test2", "default", "probr", "busybox"
+	_, err := kubernetes.CreatePod(&pname, &ns, &cname, &image)
 
-	handleResult(yesNo,err)
+	handleResult(nil, err)
 }
 
-func TestHostPIDIsRestricted(t *testing.T) {
-	yesNo, err := kubernetes.HostPIDIsRestricted()	
+func TestDeletePod(t *testing.T) {
+	pname, ns := "my-test2", "default"
+	err := kubernetes.DeletePod(&pname, &ns)
 
-	handleResult(yesNo,err)
+	handleResult(nil, err)
+}
+
+func TestExecCmd(t *testing.T) {
+
+	url := "http://www.google.com"
+	cmd := fmt.Sprintf("curl -s -o /dev/null -I -L -w \"%%{http_code}\" %s", url)
+	ns, pn := "default", "my-testcurl-pod"
+	so, se, err := kubernetes.ExecCommand(&cmd, &ns, &pn)
+
+	fmt.Printf("CMD Result\n")
+	fmt.Printf("stdout:\n %v \n stderr: %v\n", so, se)
+
+	handleResult(nil, err)
+}
+
+func TestCreateNamespace(t *testing.T) {
+	ns := "default-1"
+	_, err := kubernetes.CreateNamespace(&ns)
+
+	handleResult(nil, err)
+}
+
+func TestDeleteNamespace(t *testing.T) {
+	ns := "default-1"
+	err := kubernetes.DeleteNamespace(&ns)
+
+	handleResult(nil, err)
 }
 
 func handleResult(yesNo *bool, err error) {
@@ -86,5 +91,8 @@ func handleResult(yesNo *bool, err error) {
 		return
 	}
 
-	fmt.Printf("RESULT: %t\n", *yesNo)
+	if yesNo != nil {
+		fmt.Printf("RESULT: %t\n", *yesNo)
+	}
+
 }

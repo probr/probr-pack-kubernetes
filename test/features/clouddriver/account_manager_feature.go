@@ -1,52 +1,53 @@
 package clouddriver
 
 import (
-	"fmt"
-	"github.com/cucumber/godog"		
+	"log"
+
+	"github.com/cucumber/godog"
 )
 
 //This is the main implementation of the BDD/Cucumber feature test
-//keep it in a separate file for clarity 
-//(as it will be utilised from the "test" file and the "test handler") 
+//keep it in a separate file for clarity
+//(as it will be utilised from the "test" file and the "test handler")
 
 func aResouceCanBeDeployedIntoTheAccountUsingTheLinkedCredential(arg1, arg2 string) error {
 	// return godog.ErrPending
-	fmt.Printf("*** THEN: resource can be deployed ACCOUNT: %v | *** CREDENTIAL: %v \n", arg1, arg2)
+	log.Printf("[INFO] *** THEN: resource can be deployed ACCOUNT: %v | *** CREDENTIAL: %v \n", arg1, arg2)
 	return nil
 }
 
 func credentialWithAccessToTheAccountIsAlreadyConfiguredInTheSystem(arg1, arg2 string) error {
 	// return godog.ErrPending
-	fmt.Printf("*** AND: CREDENTIAL: %v with access to ACCOUNT: %v ALREADY EXISTS \n", arg1, arg2)
+	log.Printf("[INFO] *** AND: CREDENTIAL: %v with access to ACCOUNT: %v ALREADY EXISTS \n", arg1, arg2)
 	return nil
 }
 
 func iAddTheAccountDetailsToTheSystem(arg1 string) error {
-	fmt.Printf("*** WHEN: ADD ACCOUNT: %v to the system \n", arg1)
+	log.Printf("[INFO] *** WHEN: ADD ACCOUNT: %v to the system \n", arg1)
 	// return godog.ErrPending
 	return nil
 }
 
 func iAmConfiguringAAccount(arg1 string) error {
-	fmt.Printf("*** GIVEN: Configuring ACCOUNT: %v \n", arg1)
+	log.Printf("[INFO] *** GIVEN: Configuring ACCOUNT: %v \n", arg1)
 	// return godog.ErrPending
 	return nil
 }
 
 func iLinkTheCredentialToTheAccount(arg1, arg2 string) error {
 	// return godog.ErrPending
-	fmt.Printf("*** CREDENTIAL: %v | *** ACCOUNT: %v \n", arg1, arg2)
+	log.Printf("[INFO] *** CREDENTIAL: %v | *** ACCOUNT: %v \n", arg1, arg2)
 	return nil
 }
 
 func aResouceDeploymentWillWithTheMessage(arg1, arg2 string) error {
-	fmt.Printf("*** THEN: %v %v", arg1, arg2)
+	log.Printf("[INFO] *** THEN: %v %v", arg1, arg2)
 	return godog.ErrPending
 }
 
 //TestSuiteInitialize ...
 func TestSuiteInitialize(ctx *godog.TestSuiteContext) {
-	ctx.BeforeSuite(func(){}) //nothing for now
+	ctx.BeforeSuite(func() {}) //nothing for now
 }
 
 //ScenarioInitialize ...

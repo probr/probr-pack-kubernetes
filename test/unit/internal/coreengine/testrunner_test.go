@@ -13,6 +13,7 @@ import (
 	"citihub.com/probr/internal/coreengine"
 	_ "citihub.com/probr/test/features/clouddriver" //needed to run init on TestHandlers
 	_ "citihub.com/probr/test/features/kubernetes/podsecuritypolicy" //needed to run init on TestHandlers
+	_ "citihub.com/probr/test/features/kubernetes/internetaccess" //needed to run init on TestHandlers
 )
 
 var (

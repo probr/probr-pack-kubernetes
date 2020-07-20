@@ -9,9 +9,9 @@ import (
 
 //GetProbrRoot ...
 func GetProbrRoot() (string, error) {
-	//TODO: fix this!! thing it's a tad dodgy!
+	//TODO: fix this!! think it's a tad dodgy!
 	pwd, _ := os.Getwd()
-	log.Println("PWD IS:", pwd)	
+	log.Printf("[DEBUG] GetProbrRoot pwd is: %v", pwd)	
 	
 	b := strings.Contains(pwd, "probr")
 	if !b {
@@ -19,7 +19,7 @@ func GetProbrRoot() (string, error) {
 	}
 	
 	s := strings.SplitAfter(pwd,"probr")
-	log.Printf("%v\n",s)
+	log.Printf("[DEBUG] path(s) after splitting: %v\n",s)
 
 	if len(s) < 1 { 
 		//expect at least one result

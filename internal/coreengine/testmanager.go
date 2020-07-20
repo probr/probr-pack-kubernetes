@@ -20,7 +20,7 @@ const (
 )
 
 func (s TestStatus) String() string {
-	return [...]string{"Pending","Running","CompleteSuccess","CompleteFail","Error"}[s]
+	return [...]string{"Pending", "Running", "CompleteSuccess", "CompleteFail", "Error"}[s]
 }
 
 //Category ...
@@ -28,7 +28,7 @@ type Category int
 
 //Category enum
 const (
-	RBAC  Category = iota
+	RBAC Category = iota
 	PodSecurityPolicies
 	NetworkPolicies
 	SecretsMgmt
@@ -39,11 +39,12 @@ const (
 	KeyMgmt
 	Authentication
 	Storage
+	InternetAccess
 )
 
 func (c Category) String() string {
-	return [...]string{"RBAC","Pod Security Policies","Network Policies","Secrets Mgmt","General", "Image Registry", "Image Scanning", "IAM", 
-				"Key Mgmt", "Authentication", "Storage"}[c]
+	return [...]string{"RBAC", "Pod Security Policies", "Network Policies", "Secrets Mgmt", "General", "Image Registry", "Image Scanning", "IAM",
+		"Key Mgmt", "Authentication", "Storage", "InternetAccess"}[c]
 }
 
 //Test - structure to hold test data
@@ -59,14 +60,14 @@ type Test struct {
 //TestDescriptor - struct to hold description of test, name, category, strictness?? etc.
 type TestDescriptor struct {
 	Category Category `json:"category,omitempty"`
-	Name     string `json:"name,omitempty"`
+	Name     string   `json:"name,omitempty"`
 }
 
-//TestStore - holds the current test suite.  
+//TestStore - holds the current test suite.
 //TODO: still not sure about the structure.
 //Below is:
 // [uuid] -> pointer to array of pointers to tests
-// this implies that we'd be setting a test run up with multiple "sub" test runs, 
+// this implies that we'd be setting a test run up with multiple "sub" test runs,
 // with each run being identified by a uuid which is mapped to the array of tests
 // I think this could be too complicated, and it's just a simple uuid -> test,
 // i.e. the "test run" is a map of multiple entries, each uuid simply pointing to one
@@ -74,19 +75,18 @@ type TestDescriptor struct {
 // [uuid] -> pointer to test
 // (done ... simples :-) )
 type TestStore struct {
-	Tests map[uuid.UUID]*[]*Test
+	Tests       map[uuid.UUID]*[]*Test
 	FailedTests map[TestStatus]*[]*Test
-	Lock  sync.RWMutex
+	Lock        sync.RWMutex
 }
 
 //GetAvailableTests - return the universe of available tests
 func GetAvailableTests() *[]TestDescriptor {
 
 	//not sure if this is needed
-	//TODO: get this from the TestRunner handler store - basically it's the collection of 
+	//TODO: get this from the TestRunner handler store - basically it's the collection of
 	//tests that have registered a handler ..
-	
-	
+
 	// return &p
 	return nil
 }
@@ -135,21 +135,20 @@ func (ts *TestStore) ExecTest(uuid *uuid.UUID) (int, error) {
 	if err != nil {
 		return 1, err
 	}
-	
-	st, err := ts.RunTest( (*t)[0])
 
-	//TODO: manage store 
+	st, err := ts.RunTest((*t)[0])
+
+	//TODO: manage store
 	//move to FAILURE / SUCCESS as approriate ...
-
 
 	return st, err
 }
 
 //ExecTest by TestDescriptor, etc ... TODO.  In this case there may be more than one so we should set up for concurrency
 
-//ExecAllTests ... 
+//ExecAllTests ...
 func (ts *TestStore) ExecAllTests() (int, error) {
-	var st int 
+	var st int
 	var err error
 
 	for uuid := range ts.Tests {
@@ -157,4 +156,3 @@ func (ts *TestStore) ExecAllTests() (int, error) {
 	}
 	return st, err
 }
-
