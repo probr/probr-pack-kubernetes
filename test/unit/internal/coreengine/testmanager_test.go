@@ -63,7 +63,7 @@ func TestAddGetTest(t *testing.T) {
 
 	assert.Nil(t, err)
 	assert.NotNil(t, rtntest)
-	assert.True(t, len(*rtntest) == 1)
+	assert.Equal(t, 1, len(*rtntest))
 
 	assert.Equal(t, test1.UUID, (*rtntest)[0].UUID, "test UUID %v is NOT the same as the returned test UUID %V", test1.UUID, (*rtntest)[0].UUID)
 
