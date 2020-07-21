@@ -1,12 +1,11 @@
 package coreengine_test
 
-import (	
-	"log"
+import (
 	"testing"
-	
-	"github.com/stretchr/testify/assert"
-	"github.com/google/uuid"
+
 	"citihub.com/probr/internal/coreengine"
+	"github.com/google/uuid"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestTestStatus(t *testing.T) {
@@ -37,17 +36,17 @@ func TestAddGetTest(t *testing.T) {
 	// create a test and add it to the TestStore
 
 	//test descriptor ... (general)
-	cat := coreengine.General	
-	name := "account_manager"	
-	td := coreengine.TestDescriptor {Category: cat, Name: name}
+	cat := coreengine.General
+	name := "account_manager"
+	td := coreengine.TestDescriptor{Category: cat, Name: name}
 
-	uuid1 := uuid.New().String()	
+	uuid1 := uuid.New().String()
 	sat1 := coreengine.Pending
 
-	test1 := coreengine.Test {
-		UUID: &uuid1,
+	test1 := coreengine.Test{
+		UUID:           &uuid1,
 		TestDescriptor: &td,
-		Status: &sat1,
+		Status:         &sat1,
 	}
 
 	assert.NotNil(t, test1)
@@ -57,14 +56,14 @@ func TestAddGetTest(t *testing.T) {
 
 	assert.NotNil(t, tm)
 
-	tsuuid:=tm.AddTest(&test1)
+	tsuuid := tm.AddTest(&test1)
 
 	// now try and get it back ...
 	rtntest, err := tm.GetTest(tsuuid)
 
 	assert.Nil(t, err)
 	assert.NotNil(t, rtntest)
-	assert.True(t, len(*rtntest)==1)
+	assert.Equal(t, 1, len(*rtntest))
 
 	assert.Equal(t, test1.UUID, (*rtntest)[0].UUID, "test UUID %v is NOT the same as the returned test UUID %V", test1.UUID, (*rtntest)[0].UUID)
 
@@ -74,17 +73,17 @@ func TestExecTest(t *testing.T) {
 	// create a test and add it to the TestStore
 
 	//test descriptor ... (general)
-	cat := coreengine.General	
-	name := "account_manager"	
-	td := coreengine.TestDescriptor {Category: cat, Name: name}
+	cat := coreengine.General
+	name := "account_manager"
+	td := coreengine.TestDescriptor{Category: cat, Name: name}
 
-	uuid := uuid.New().String()	
-	sat := coreengine.Pending	
+	uuid := uuid.New().String()
+	sat := coreengine.Pending
 
-	test := coreengine.Test {
-		UUID: &uuid,
+	test := coreengine.Test{
+		UUID:           &uuid,
 		TestDescriptor: &td,
-		Status: &sat,
+		Status:         &sat,
 	}
 
 	assert.NotNil(t, test)
@@ -94,9 +93,9 @@ func TestExecTest(t *testing.T) {
 
 	assert.NotNil(t, tm)
 
-	tsuuid:=tm.AddTest(&test)
+	tsuuid := tm.AddTest(&test)
 
-	s, err := tm.ExecTest(tsuuid);
+	s, err := tm.ExecTest(tsuuid)
 	if err != nil {
 		t.Fatalf("Error executing test: %v", err)
 	}
@@ -106,12 +105,6 @@ func TestExecTest(t *testing.T) {
 }
 
 func TestExecAllTests(t *testing.T) {
-	
-	if ! *integrationTest {
-		//skip
-		log.Print("testmanager_test:TestExecAllTests: Integration Test Flag not set. SKIPPING TEST.")
-		return
-	}
 
 	tm := coreengine.NewTestManager()
 
@@ -125,21 +118,20 @@ func TestExecAllTests(t *testing.T) {
 
 func addTest(tm *coreengine.TestStore, testname string, category coreengine.Category) {
 
-	cat := category	
+	cat := category
 	name := testname
-	td := coreengine.TestDescriptor {Category: cat, Name: name}
+	td := coreengine.TestDescriptor{Category: cat, Name: name}
 
-	uuid1 := uuid.New().String()	
-	sat := coreengine.Pending	
+	uuid1 := uuid.New().String()
+	sat := coreengine.Pending
 
-	test := coreengine.Test {
-		UUID: &uuid1,
+	test := coreengine.Test{
+		UUID:           &uuid1,
 		TestDescriptor: &td,
-		Status: &sat,
+		Status:         &sat,
 	}
 
 	//add - don't worry about the rtn uuid
 	tm.AddTest(&test)
 
-	
 }
