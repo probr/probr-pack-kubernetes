@@ -1,4 +1,4 @@
-package podsecuritypolicy
+package internetaccess
 
 import (
 	"fmt"
@@ -17,7 +17,7 @@ import (
 
 //Init ...
 func init() {
-	n, c := "pod_security_policy", coreengine.PodSecurityPolicies
+	n, c := "internet_access", coreengine.InternetAccess
 	td := coreengine.TestDescriptor{Category: c, Name: n}
 
 	coreengine.TestHandleFunc(td, TH)
@@ -31,7 +31,7 @@ func TH() (int, error) {
 		return -1, fmt.Errorf("unable to determine root directory - not able to perform tests")
 	}
 
-	var t = "podsecuritypolicy"
+	var t = "internetaccess"
 	featPath := filepath.Join(r, "test", "features", "kubernetes", t, "features")
 
 	f, err := features.GetOutputPath(&t)
@@ -46,7 +46,7 @@ func TH() (int, error) {
 	}
 
 	status := godog.TestSuite{
-		Name:                 "pod_security_policy",
+		Name:                 "internetaccess",
 		TestSuiteInitializer: TestSuiteInitialize,
 		ScenarioInitializer:  ScenarioInitialize,
 		Options:              &opts,

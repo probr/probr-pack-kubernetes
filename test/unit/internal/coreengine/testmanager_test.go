@@ -118,6 +118,7 @@ func TestExecAllTests(t *testing.T) {
 	//add some tests and add them to the TM
 	addTest(tm, "account_manager", coreengine.General)
 	addTest(tm, "pod_security_policy", coreengine.PodSecurityPolicies)
+	addTest(tm, "internet_access", coreengine.InternetAccess)
 
 	tm.ExecAllTests()
 }

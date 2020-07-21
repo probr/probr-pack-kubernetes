@@ -33,14 +33,14 @@ func PrivilegedAccessIsRestricted() (*bool, error) {
 	var res bool
 	for _, e := range psps.Items {
 		if !e.Spec.Privileged {
-			log.Printf("PASS: Privileged is set to %v on Policy: %v", e.Spec.Privileged, e.GetName())
+			log.Printf("[NOTICE] PASS: Privileged is set to %v on Policy: %v", e.Spec.Privileged, e.GetName())
 			res = true
 			break
 		}
 	}
 
 	if !res {
-		log.Printf("FAIL: NO Policies found with Privileged set.\n")
+		log.Printf("[NOTICE] FAIL: NO Policies found with Privileged set.\n")
 	}
 
 	return &res, nil
@@ -57,14 +57,14 @@ func HostPIDIsRestricted() (*bool, error) {
 	var res bool
 	for _, e := range psps.Items {	
 		if !e.Spec.HostPID {
-			log.Printf("PASS: HostPID is set to %v on Policy: %v\n", e.Spec.HostPID, e.GetName())
+			log.Printf("[NOTICE] PASS: HostPID is set to %v on Policy: %v\n", e.Spec.HostPID, e.GetName())
 			res = true
 			break
 		}
 	}
 
 	if !res {
-		log.Printf("FAIL: NO Policies found with HostPID set.\n")
+		log.Printf("[NOTICE] FAIL: NO Policies found with HostPID set.\n")
 	}
 	
 	return &res, nil
@@ -92,11 +92,11 @@ func getPodSecurityPolicies() (*v1beta1.PodSecurityPolicyList, error) {
 		return nil, fmt.Errorf("Pod Security Polices list returned a nil list")
 	}
 
-	log.Printf("There are %d psp policies in the cluster\n", len(pspList.Items))
+	log.Printf("[NOTICE] There are %d psp policies in the cluster\n", len(pspList.Items))
 
 	for _, e := range pspList.Items {
-		log.Printf("PSP: %v \n", e.GetName())
-		log.Printf("Spec: %+v \n", e.Spec)
+		log.Printf("[INFO] PSP: %v \n", e.GetName())
+		log.Printf("[INFO] Spec: %+v \n", e.Spec)
 	}
 
 	return pspList, nil
