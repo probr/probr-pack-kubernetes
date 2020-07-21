@@ -180,7 +180,7 @@ func getPodObject(pname string, ns string, cname string, image string) *apiv1.Po
 }
 
 //ExecCommand ...
-func ExecCommand(cmd *string, ns *string, pn *string) (string, string, error) {
+func ExecCommand(cmd, ns, pn *string) (string, string, error) {
 	if cmd == nil {
 		return "", "", fmt.Errorf("command string is nil - nothing to execute")
 	}
@@ -266,8 +266,7 @@ func CreateNamespace(ns *string) (*apiv1.Namespace, error) {
 	//try and create ...
 	apiNS := apiv1.Namespace{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      *ns,
-			Namespace: *ns,
+			Name:      *ns,		
 		},
 	}
 	n, err := c.CoreV1().Namespaces().Create(ctx, &apiNS, metav1.CreateOptions{})
@@ -307,7 +306,7 @@ func DeleteNamespace(ns *string) error {
 
 func isAlreadyExists(err error) bool {
 	if se, ok := err.(*errors.StatusError); ok {
-		//409 is already exists
+		//409 is "already exists"
 		return se.ErrStatus.Code == 409
 	}
 	return false
@@ -328,11 +327,9 @@ func waitForRunning(c *kubernetes.Clientset, ns *string, n *string) (bool, error
 			log.Printf("[INFO] Watch Event Type: %v", e.Type)
 			p, ok := e.Object.(*apiv1.Pod)
 			if !ok {
-				// log.Printf("unexpected type")
-				//TODO: handle
-				log.Fatal("unexpected type")
-			}
-			// log.Printf("[INFO] Watch Container name: %v", p.Status.ContainerStatuses)
+				log.Printf("[WARNING] Unexpected Watch Event Type - skipping")
+				break
+			}			
 			log.Printf("[INFO] Watch Container phase: %v", p.Status.Phase)
 			log.Printf("[DEBUG] Watch Container status: %+v", p.Status.ContainerStatuses)
 
@@ -351,7 +348,5 @@ func homeDir() string {
 }
 
 func logCmd(c *string, p *string, n *string) {
-	log.Printf("[NOTICE] Executing command: \"%v\" on POD '%v' in namespace '%v'", *c, *p, *n)
-	// log.Printf("on pod: %v", *p)
-	// log.Printf("in namespace: %v", *n)
+	log.Printf("[NOTICE] Executing command: \"%v\" on POD '%v' in namespace '%v'", *c, *p, *n)	
 }

@@ -15,13 +15,6 @@ func TestClusterHasPSP(t *testing.T) {
 	//test.   This will basically be what we're doing in the
 	//feature/bdd tests so that's probably a more relevant place
 	//for that.   Here, just do some basic stuff ...
-
-	//set the kube config
-	//1. to one we know has PSP's
-	//2. then to one which hasn't
-
-	pspClusterConfig := "C:/Users/daaad/.kube/config"
-	kubernetes.SetKubeConfigFile(&pspClusterConfig)
 	yesNo, err := kubernetes.ClusterHasPSP()
 
 	handleResult(yesNo, err)
@@ -29,8 +22,6 @@ func TestClusterHasPSP(t *testing.T) {
 }
 
 func TestPrivilegedAccessIsRestricted(t *testing.T) {
-	pspClusterConfig := "C:/Users/daaad/.kube/config"
-	kubernetes.SetKubeConfigFile(&pspClusterConfig)
 	yesNo, err := kubernetes.PrivilegedAccessIsRestricted()
 
 	handleResult(yesNo, err)

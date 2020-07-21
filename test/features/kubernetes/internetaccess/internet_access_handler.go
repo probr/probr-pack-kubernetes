@@ -25,14 +25,14 @@ func init() {
 
 //TH ...
 func TH() (int, error) {
-	probrRoot, err := features.GetProbrRoot()
+	r, err := features.GetRootDir()
 
 	if err != nil {
-		return -1, fmt.Errorf("unable to determine probr root - not able to perform tests")
+		return -1, fmt.Errorf("unable to determine root directory - not able to perform tests")
 	}
 
 	var t = "internetaccess"
-	featPath := filepath.Join(probrRoot, "test", "features", "kubernetes", t, "features")
+	featPath := filepath.Join(r, "test", "features", "kubernetes", t, "features")
 
 	f, err := features.GetOutputPath(&t)
 	if err != nil {

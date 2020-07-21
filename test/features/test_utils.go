@@ -8,30 +8,32 @@ import (
 	"strings"
 )
 
+const rootDirName = "probr"
+
 var outputDir *string
 
-//GetProbrRoot ...
-func GetProbrRoot() (string, error) {
+//GetRootDir ...
+func GetRootDir() (string, error) {
 	//TODO: fix this!! think it's a tad dodgy!
 	pwd, _ := os.Getwd()
-	log.Printf("[DEBUG] GetProbrRoot pwd is: %v", pwd)
+	log.Printf("[DEBUG] GetRootDir pwd is: %v", pwd)
 
-	b := strings.Contains(pwd, "probr")
+	b := strings.Contains(pwd, rootDirName)
 	if !b {
-		return "", fmt.Errorf("could not find 'probr' root directory in %v", pwd)
+		return "", fmt.Errorf("could not find '%v' root directory in %v", rootDirName, pwd)
 	}
 
-	s := strings.SplitAfter(pwd, "probr")
+	s := strings.SplitAfter(pwd, rootDirName)
 	log.Printf("[DEBUG] path(s) after splitting: %v\n", s)
 
 	if len(s) < 1 {
 		//expect at least one result
-		return "", fmt.Errorf("could not split out 'probr' from directory in %v", pwd)
+		return "", fmt.Errorf("could not split out '%v' from directory in %v", rootDirName, pwd)
 	}
 
-	if !strings.HasSuffix(s[0], "probr") {
+	if !strings.HasSuffix(s[0], rootDirName) {
 		//the first path should end with "probr"
-		return "", fmt.Errorf("first path after split (%v) does not end with 'probr'", s[0])
+		return "", fmt.Errorf("first path after split (%v) does not end with '%v'", s[0], rootDirName)
 	}
 
 	return s[0], nil
@@ -57,10 +59,10 @@ func GetOutputPath(t *string) (*os.File, error) {
 }
 
 func getOutputDirectory() (*string, error) {
-	if outputDir == nil {
+	if outputDir == nil || len(*outputDir) < 1 {
 		log.Printf("[INFO] output directory not set - attempting to default")
 		//default it:
-		r, err := GetProbrRoot()
+		r, err := GetRootDir()
 		if err != nil {
 			return nil, fmt.Errorf("output directory not set - attempt to default resulted in error: %v", err)
 		}
