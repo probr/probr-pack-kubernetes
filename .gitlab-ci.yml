@@ -59,7 +59,8 @@ unit_go:
   before_script:
     - export TEST_KUBE_CONFIG=/tmp/test-config;
     - echo ${kube_config} | base64 -id > $TEST_KUBE_CONFIG;
-    - cat $TEST_KUBE_CONFIG
+    - export KUBE_CONFIG=$TEST_KUBE_CONFIG
+    - export LOGLEVEL="NOTICE"
   script:
     - cd $CI_PROJECT_DIR/test
     - go test -v ./...

@@ -32,3 +32,9 @@ func TestIsURLAccessible(t *testing.T) {
 	assert.True(t, code==200)
 
 }
+
+func TestTeardownNetworkAccess(t *testing.T) {
+	err := kubernetes.TeardownNetworkAccessTestPod()
+
+	assert.Nil(t,err)
+}

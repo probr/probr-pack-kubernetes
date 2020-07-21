@@ -1,8 +1,6 @@
 package kubernetes_test
 
 import (
-	"flag"
-	"fmt"
 	"log"
 	"os"
 	"testing"
@@ -12,28 +10,13 @@ import (
 )
 
 var (
-	integrationTest = flag.Bool("integrationTest", false, "run integration tests")
+	testNS        = "probrtestns"
+	testPod       = "probrtestpod"
+	testContainer = "curlimages"
+	testImage     = "curlimages/curl"
 )
 
 func TestMain(m *testing.M) {
-	flag.Parse()
-
-	argLength := len(os.Args[1:])
-	fmt.Printf("Arg length is %d\n", argLength)
-
-	for i, a := range os.Args[1:] {
-		fmt.Printf("Arg %d is %s\n", i+1, a)
-	}
-
-	args := flag.Args()
-	log.Printf("Args: %v", args)
-
-	if !*integrationTest {
-		//skip
-		log.Print("kubehelper_test: Integration Test Flag not set. SKIPPING TEST.")
-		return
-	}
-
 	result := m.Run()
 
 	os.Exit(result)
@@ -43,16 +26,14 @@ func TestGetPods(t *testing.T) {
 	kubernetes.GetPods()
 }
 
-func TestCreatePod(t *testing.T) {
-	pname, ns, cname, image := "my-test2", "default", "probr", "busybox"
-	_, err := kubernetes.CreatePod(&pname, &ns, &cname, &image)
+func TestCreateNamespace(t *testing.T) {
+	_, err := kubernetes.CreateNamespace(&testNS)
 
 	handleResult(nil, err)
 }
 
-func TestDeletePod(t *testing.T) {
-	pname, ns := "my-test2", "default"
-	err := kubernetes.DeletePod(&pname, &ns)
+func TestCreatePod(t *testing.T) {
+	_, err := kubernetes.CreatePod(&testPod, &testNS, &testContainer, &testImage)
 
 	handleResult(nil, err)
 }
@@ -60,39 +41,41 @@ func TestDeletePod(t *testing.T) {
 func TestExecCmd(t *testing.T) {
 
 	url := "http://www.google.com"
-	cmd := fmt.Sprintf("curl -s -o /dev/null -I -L -w \"%%{http_code}\" %s", url)
-	ns, pn := "default", "my-testcurl-pod"
-	so, se, err := kubernetes.ExecCommand(&cmd, &ns, &pn)
+	cmd := "curl -s -o /dev/null -I -L -w %{http_code} " + url
 
-	fmt.Printf("CMD Result\n")
-	fmt.Printf("stdout:\n %v \n stderr: %v\n", so, se)
+	so, se, err := kubernetes.ExecCommand(&cmd, &testNS, &testPod)
+
+	log.Printf("[NOTICE] Test command result:")
+	log.Printf("[NOTICE] stdout: %v stderr: %v", so, se)
 
 	handleResult(nil, err)
 }
 
-func TestCreateNamespace(t *testing.T) {
-	ns := "default-1"
-	_, err := kubernetes.CreateNamespace(&ns)
+func TestDeletePod(t *testing.T) {
+	err := kubernetes.DeletePod(&testPod, &testNS)
 
 	handleResult(nil, err)
 }
 
 func TestDeleteNamespace(t *testing.T) {
-	ns := "default-1"
-	err := kubernetes.DeleteNamespace(&ns)
+	err := kubernetes.DeleteNamespace(&testNS)
 
 	handleResult(nil, err)
 }
 
 func handleResult(yesNo *bool, err error) {
 	if err != nil {
-		//FAIL ... but don't check for this atm ...
-		fmt.Printf("Test failed: %v\n", err)
+		//Log but don't check for this atm, i.e. keep tests running
+		log.Printf("[WARN] Test failed with ERROR: %v\n", err)
 		return
 	}
 
+	//if we didn't get an error, then the test was successful in the sense
+	//that it conducted the kube operation without issue
+	log.Print("[NOTICE] Test successfully performed Kubernetes operation.")
+
 	if yesNo != nil {
-		fmt.Printf("RESULT: %t\n", *yesNo)
+		log.Printf("[NOTICE] Result of operation was: %t\n", *yesNo)
 	}
 
 }

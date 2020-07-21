@@ -70,6 +70,9 @@ func setConfigPath() *string {
 	if kubeConfigFile != nil && *kubeConfigFile != "" {
 		log.Printf("[NOTICE] Setting Kube Config to: %v", *kubeConfigFile)
 		c = flag.String("kubeconfig", *kubeConfigFile, "fully qualified and supplied absolute path to the kubeconfig file")
+	} else if e := getConfigPathFromEnv(); e != "" {
+		log.Printf("[NOTICE] Setting Kube Config to: %v", e)
+		c = flag.String("kubeconfig", e, "(optional) absolute path to the kubeconfig file")
 	} else if home := homeDir(); home != "" {
 		p := filepath.Join(home, ".kube", "config")
 		log.Printf("[NOTICE] Setting Kube Config to: %v", p)
@@ -345,6 +348,10 @@ func homeDir() string {
 		return h
 	}
 	return os.Getenv("USERPROFILE") // windows
+}
+
+func getConfigPathFromEnv() string {	
+	return os.Getenv("KUBE_CONFIG")	
 }
 
 func logCmd(c *string, p *string, n *string) {
