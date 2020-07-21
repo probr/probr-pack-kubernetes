@@ -234,7 +234,7 @@ XHByb2ZpbGVzXG1pbmlrdWJlXGNsaWVudC5jcnQKICAgIGNsaWVudC1rZXk6IEM6XFVzZXJzXGRh
 YWFkXC5taW5pa3ViZVxwcm9maWxlc1xtaW5pa3ViZVxjbGllbnQua2V5Cg=="
   before_script:
     - export TEST_KUBE_CONFIG=/tmp/test-config;
-    - base64 -d $BASE64_KUBE_CONFIG > $TEST_KUBE_CONFIG;
+    - echo $BASE64_KUBE_CONFIG base64 -id > $TEST_KUBE_CONFIG;
     - cat $TEST_KUBE_CONFIG
   script:
     - cd $CI_PROJECT_DIR/test
