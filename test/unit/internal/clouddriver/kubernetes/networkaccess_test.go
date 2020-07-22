@@ -1,6 +1,7 @@
 package kubernetes_test
 
 import (
+	"log"
 	"testing"
 
 	"citihub.com/probr/internal/clouddriver/kubernetes"
@@ -28,9 +29,7 @@ func TestIsURLAccessible(t *testing.T) {
 
 	assert.Nil(t, err)
 
-	//TODO: only true for now.  Ultimately network access should be locked down.
-	assert.True(t, code == 200)
-
+	log.Printf("[NOTICE] URL: %v Result: %v", url, code)
 }
 
 func TestTeardownNetworkAccess(t *testing.T) {
