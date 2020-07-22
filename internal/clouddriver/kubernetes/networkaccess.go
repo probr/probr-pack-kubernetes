@@ -1,8 +1,8 @@
 package kubernetes
 
 import (
-	// "fmt"
 	"log"
+	"os"
 	"strconv"
 
 	apiv1 "k8s.io/api/core/v1"
@@ -29,22 +29,32 @@ func SetupNetworkAccessTestPod() (*apiv1.Pod, error) {
 }
 
 //TeardownNetworkAccessTestPod ...
-func TeardownNetworkAccessTestPod() error {	
-	ns := testNamespace
-	err := DeleteNamespace(&ns)
+func TeardownNetworkAccessTestPod() error {
+	_, exists := os.LookupEnv("DONT_DELETE")
+	if !exists {
+		ns := testNamespace
+		err := DeleteNamespace(&ns)
+		return err
+	}
 
-	return err
+	return nil
 }
 
 //AccessURL calls the supplied URL and returns the http code
 func AccessURL(url *string) (int, error) {
 
-	//create a curl command to access the supplied url		
+	//create a curl command to access the supplied url
 	cmd := "curl -s -o /dev/null -I -L -w %{http_code} " + *url
 	ns, pn := testNamespace, testPodName
-	httpCode, _, err := ExecCommand(&cmd, &ns, &pn)
+	httpCode, _, ex, err := ExecCommand(&cmd, &ns, &pn)
 
 	if err != nil {
+		//check the exit code.  If it's '6' (Couldn't resolve host.)
+		//then we want to nil out the error and return the code as this
+		//is an expected condition if access is inhibited
+		if ex == 6 {
+			return ex, nil
+		}
 		return -1, err
 	}
 
@@ -54,6 +64,6 @@ func AccessURL(url *string) (int, error) {
 	if err != nil {
 		return -1, err
 	}
-	
+
 	return httpStatusCode, nil
 }

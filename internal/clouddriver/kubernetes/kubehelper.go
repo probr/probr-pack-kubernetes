@@ -19,8 +19,9 @@ import (
 	"k8s.io/client-go/tools/clientcmd"
 	"k8s.io/client-go/tools/remotecommand"
 
+	executil "k8s.io/client-go/util/exec"
+
 	apiv1 "k8s.io/api/core/v1"
-	// appsv1 "k8s.io/api/apps/v1"
 )
 
 var (
@@ -182,16 +183,16 @@ func getPodObject(pname string, ns string, cname string, image string) *apiv1.Po
 	}
 }
 
-//ExecCommand ...
-func ExecCommand(cmd, ns, pn *string) (string, string, error) {
+//ExecCommand TODO: fix error codes
+func ExecCommand(cmd, ns, pn *string) (string, string, int, error) {
 	if cmd == nil {
-		return "", "", fmt.Errorf("command string is nil - nothing to execute")
+		return "", "", -1, fmt.Errorf("command string is nil - nothing to execute")
 	}
 	logCmd(cmd, pn, ns)
 
 	c, err := GetClient()
 	if err != nil {
-		return "", "", err
+		return "", "", -2, err
 	}
 
 	req := c.CoreV1().RESTClient().Post().Resource("pods").
@@ -199,7 +200,7 @@ func ExecCommand(cmd, ns, pn *string) (string, string, error) {
 
 	scheme := runtime.NewScheme()
 	if err := apiv1.AddToScheme(scheme); err != nil {
-		return "", "", fmt.Errorf("error adding to scheme: %v", err)
+		return "", "", -3, fmt.Errorf("error adding to scheme: %v", err)
 	}
 
 	parameterCodec := runtime.NewParameterCodec(scheme)
@@ -218,7 +219,7 @@ func ExecCommand(cmd, ns, pn *string) (string, string, error) {
 	config, err := clientcmd.BuildConfigFromFlags("", *setConfigPath())
 	exec, err := remotecommand.NewSPDYExecutor(config, "POST", req.URL())
 	if err != nil {
-		return "", "", fmt.Errorf("error while creating Executor: %v", err)
+		return "", "", -4, fmt.Errorf("error while creating Executor: %v", err)
 	}
 
 	var stdout, stderr bytes.Buffer
@@ -228,10 +229,13 @@ func ExecCommand(cmd, ns, pn *string) (string, string, error) {
 		Tty:    false,
 	})
 	if err != nil {
-		return stdout.String(), stderr.String(), fmt.Errorf("error in Stream: %v", err)
+		if ce, ok := err.(executil.CodeExitError); ok {
+			return stdout.String(), stderr.String(), ce.Code, fmt.Errorf("error in Stream: %v", err)
+		}
+		return stdout.String(), stderr.String(), -5, fmt.Errorf("error in Stream: %v", err)
 	}
 
-	return stdout.String(), stderr.String(), nil
+	return stdout.String(), stderr.String(), 0, nil
 }
 
 //DeletePod ...
@@ -269,7 +273,7 @@ func CreateNamespace(ns *string) (*apiv1.Namespace, error) {
 	//try and create ...
 	apiNS := apiv1.Namespace{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      *ns,		
+			Name: *ns,
 		},
 	}
 	n, err := c.CoreV1().Namespaces().Create(ctx, &apiNS, metav1.CreateOptions{})
@@ -332,7 +336,7 @@ func waitForRunning(c *kubernetes.Clientset, ns *string, n *string) (bool, error
 			if !ok {
 				log.Printf("[WARNING] Unexpected Watch Event Type - skipping")
 				break
-			}			
+			}
 			log.Printf("[INFO] Watch Container phase: %v", p.Status.Phase)
 			log.Printf("[DEBUG] Watch Container status: %+v", p.Status.ContainerStatuses)
 
@@ -350,10 +354,10 @@ func homeDir() string {
 	return os.Getenv("USERPROFILE") // windows
 }
 
-func getConfigPathFromEnv() string {	
-	return os.Getenv("KUBE_CONFIG")	
+func getConfigPathFromEnv() string {
+	return os.Getenv("KUBE_CONFIG")
 }
 
 func logCmd(c *string, p *string, n *string) {
-	log.Printf("[NOTICE] Executing command: \"%v\" on POD '%v' in namespace '%v'", *c, *p, *n)	
+	log.Printf("[NOTICE] Executing command: \"%v\" on POD '%v' in namespace '%v'", *c, *p, *n)
 }
