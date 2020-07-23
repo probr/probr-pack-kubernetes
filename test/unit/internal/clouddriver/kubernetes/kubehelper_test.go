@@ -43,10 +43,10 @@ func TestExecCmd(t *testing.T) {
 	url := "http://www.google.com"
 	cmd := "curl -s -o /dev/null -I -L -w %{http_code} " + url
 
-	so, se, err := kubernetes.ExecCommand(&cmd, &testNS, &testPod)
+	so, se, ec, err := kubernetes.ExecCommand(&cmd, &testNS, &testPod)
 
 	log.Printf("[NOTICE] Test command result:")
-	log.Printf("[NOTICE] stdout: %v stderr: %v", so, se)
+	log.Printf("[NOTICE] stdout: %v stderr: %v exit code: %v", so, se, ec)
 
 	handleResult(nil, err)
 }

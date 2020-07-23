@@ -40,15 +40,17 @@ func main() {
 	tm := coreengine.NewTestManager()
 
 	//add some tests and add them to the TM - we need to tidy this up!
-	addTest(tm, "account_manager", coreengine.General)
-	addTest(tm, "pod_security_policy", coreengine.PodSecurityPolicies)
 	addTest(tm, "internet_access", coreengine.InternetAccess)
+	addTest(tm, "pod_security_policy", coreengine.PodSecurityPolicies)
+	addTest(tm, "account_manager", coreengine.General)
 
 	//exec 'em all (for now!)
 	s, err := tm.ExecAllTests()
 	if err != nil {
 		log.Fatalf("[ERROR] Error executing tests %v", err)
 	}
+
+	log.Printf("[NOTICE] Overall test completion status: %v", s)
 
 	os.Exit(s)
 
