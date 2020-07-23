@@ -2,6 +2,7 @@ package coreengine
 
 import (
 	"errors"
+	"log"
 	"sync"
 
 	"github.com/google/uuid"
@@ -148,11 +149,18 @@ func (ts *TestStore) ExecTest(uuid *uuid.UUID) (int, error) {
 
 //ExecAllTests ...
 func (ts *TestStore) ExecAllTests() (int, error) {
-	var st int
+	status := 0
 	var err error
 
 	for uuid := range ts.Tests {
-		st, err = ts.ExecTest(&uuid)
+		st, err := ts.ExecTest(&uuid)
+		if err != nil {
+			//log but continue with remaining tests
+			log.Printf("[ERROR] error executing test: %v", err)
+		}
+		if st > status {
+			status = st
+		}
 	}
-	return st, err
+	return status, err
 }

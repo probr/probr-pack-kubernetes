@@ -42,7 +42,7 @@ func iLinkTheCredentialToTheAccount(arg1, arg2 string) error {
 
 func aResouceDeploymentWillWithTheMessage(arg1, arg2 string) error {
 	log.Printf("[INFO] *** THEN: %v %v", arg1, arg2)
-	return godog.ErrPending
+	return nil
 }
 
 //TestSuiteInitialize ...
