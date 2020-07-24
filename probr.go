@@ -14,6 +14,7 @@ import (
 	_ "citihub.com/probr/test/features/clouddriver"
 	_ "citihub.com/probr/test/features/kubernetes/internetaccess"    //needed to run init on TestHandlers
 	_ "citihub.com/probr/test/features/kubernetes/podsecuritypolicy" //needed to run init on TestHandlers
+	_ "citihub.com/probr/test/features/kubernetes/containerregistryaccess" //needed to run init on TestHandlers
 )
 
 var (
@@ -40,6 +41,7 @@ func main() {
 	tm := coreengine.NewTestManager()
 
 	//add some tests and add them to the TM - we need to tidy this up!
+	addTest(tm, "container_registry_access", coreengine.ImageRegistry)
 	addTest(tm, "internet_access", coreengine.InternetAccess)
 	addTest(tm, "pod_security_policy", coreengine.PodSecurityPolicies)
 	addTest(tm, "account_manager", coreengine.General)
