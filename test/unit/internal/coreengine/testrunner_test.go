@@ -91,11 +91,10 @@ func TestTestRunner(t *testing.T) {
 
 	st, err = tr.RunTest(&test2)
 
-	//TODO: atm, the network access test is actually failing because
-	//the config we are using allows internet access (it shouldn't)
-	//so, for now, the "correct" result of this test is 'fail'
+	//now testing against an evironment which should have the correct
+	//network access rules, hence this test should succeed 
 	assert.Nil(t, err)
-	assert.Equal(t, 1, st)
-	assert.Equal(t, coreengine.CompleteFail, *test2.Status)
+	assert.Equal(t, 0, st)
+	assert.Equal(t, coreengine.CompleteSuccess, *test2.Status)
 
 }
