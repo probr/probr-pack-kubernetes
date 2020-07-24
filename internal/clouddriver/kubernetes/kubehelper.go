@@ -119,8 +119,13 @@ func getPods(c *kubernetes.Clientset) (*apiv1.PodList, error) {
 	return pods, nil
 }
 
-//CreatePod ...
-func CreatePod(pname *string, ns *string, cname *string, image *string) (*apiv1.Pod, error) {
+// CreatePod creates a pod with the following parameters:
+// pname - pod name 
+// ns - namespace
+// cname - container name
+// image - image
+// w - indicates whether or not to wait for the pod to be running
+func CreatePod(pname *string, ns *string, cname *string, image *string, w bool) (*apiv1.Pod, error) {
 	c, err := GetClient()
 	if err != nil {
 		return nil, err
@@ -142,17 +147,23 @@ func CreatePod(pname *string, ns *string, cname *string, image *string) (*apiv1.
 	res, err := pc.Create(ctx, p, metav1.CreateOptions{})
 	if err != nil {
 		if isAlreadyExists(err) {
-			log.Printf("[INFO] POD %v already exists. Returning existing.\n", *pname)
+			log.Printf("[NOTICE] POD %v already exists. Returning existing.", *pname)
 			//return it and nil out err
 			return res, nil
+		} else if isForbidden(err) {
+			log.Printf("[NOTICE] Creation of POD %v is forbidden: %v", *pname, err)
+			//TODO: hmm ... think code needs to be returned
+			return nil, nil
 		}
 		return nil, err
 	}
 
 	log.Printf("[NOTICE] POD %q created.\n", res.GetObjectMeta().GetName())
 
-	//wait:
-	waitForRunning(c, ns, pname)
+	if w {
+		//wait:
+		waitForPhase(apiv1.PodRunning, c, ns, pname)
+	}
 
 	return res, nil
 }
@@ -238,8 +249,11 @@ func ExecCommand(cmd, ns, pn *string) (string, string, int, error) {
 	return stdout.String(), stderr.String(), 0, nil
 }
 
-//DeletePod ...
-func DeletePod(pname *string, ns *string) error {
+// DeletePod deletes the pod with the following parameters:
+// pname - pod name
+// ns - namespace 
+// w - indicates whether or not to wait on the deletion
+func DeletePod(pname *string, ns *string, w bool) error {
 	c, err := GetClient()
 	if err != nil {
 		return err
@@ -253,6 +267,11 @@ func DeletePod(pname *string, ns *string) error {
 	err = pc.Delete(ctx, *pname, metav1.DeleteOptions{})
 	if err != nil {
 		return err
+	}
+
+	if w {
+		//wait:
+		waitForDelete(c, ns, pname)
 	}
 
 	log.Printf("[NOTICE] POD %v deleted.", *pname)
@@ -316,35 +335,107 @@ func isAlreadyExists(err error) bool {
 		//409 is "already exists"
 		return se.ErrStatus.Code == 409
 	}
+	return false	
+}
+
+func isForbidden(err error) bool {
+	if se, ok := err.(*errors.StatusError); ok {
+		//40 is "already exists"
+		return se.ErrStatus.Code == 403
+	}
 	return false
 }
 
-func waitForRunning(c *kubernetes.Clientset, ns *string, n *string) (bool, error) {
+func waitForPhase(ph apiv1.PodPhase, c *kubernetes.Clientset, ns *string, n *string) error {
 
 	ps := c.CoreV1().Pods(*ns)
 
 	w, err := ps.Watch(context.Background(), metav1.ListOptions{})
 
 	if err != nil {
-		return false, nil
+		return err
 	}
 
-	go func() {
-		for e := range w.ResultChan() {
-			log.Printf("[INFO] Watch Event Type: %v", e.Type)
-			p, ok := e.Object.(*apiv1.Pod)
-			if !ok {
-				log.Printf("[WARNING] Unexpected Watch Event Type - skipping")
-				break
-			}
-			log.Printf("[INFO] Watch Container phase: %v", p.Status.Phase)
-			log.Printf("[DEBUG] Watch Container status: %+v", p.Status.ContainerStatuses)
+	log.Printf("[NOTICE] *** Waiting for phase %v on pod %v ...", ph, *n)	
 
+	for e := range w.ResultChan() {
+		log.Printf("[INFO] Watch Event Type: %v", e.Type)
+		p, ok := e.Object.(*apiv1.Pod)
+		if !ok {
+			log.Printf("[WARNING] Unexpected Watch Event Type - skipping")
+			break
 		}
-	}()
-	time.Sleep(5 * time.Second)
+		log.Printf("[INFO] Watch Container phase: %v", p.Status.Phase)
+		log.Printf("[DEBUG] Watch Container status: %+v", p.Status.ContainerStatuses)
 
-	return false, nil
+		// don't wait if we're getting errors:
+		if podInErrorState(p) {
+			break
+		}
+
+		if p.Status.Phase == ph {
+			break
+		}
+
+	}
+
+	log.Printf("[NOTICE] *** Completed waiting for phase %v on pod %v", ph, *n)	
+
+	return nil
+}
+
+func podInErrorState(p *apiv1.Pod) bool {
+
+	// check the container statuses for error conditions:
+	if len(p.Status.ContainerStatuses) > 0 {
+		if p.Status.ContainerStatuses[0].State.Waiting != nil {
+			n := p.GetObjectMeta().GetName()
+			r := p.Status.ContainerStatuses[0].State.Waiting.Reason
+			log.Printf("[INFO] Pod: %v Waiting reason: %v", n, r)
+
+			//TODO: other error states?
+			if r == "ErrImagePull" {
+				log.Printf("[WARN] Giving up waiting on pod %v . Error reason: %v", n, r)
+				return true
+			}
+		}
+	}
+
+	return false
+}
+
+func waitForDelete(c *kubernetes.Clientset, ns *string, n *string) error {
+
+	ps := c.CoreV1().Pods(*ns)
+
+	w, err := ps.Watch(context.Background(), metav1.ListOptions{})
+
+	if err != nil {
+		return err
+	}
+	
+	log.Printf("[NOTICE] *** Waiting for DELETE on pod %v ...", *n)
+	
+	for e := range w.ResultChan() {
+		log.Printf("[INFO] Watch Event Type: %v", e.Type)
+		p, ok := e.Object.(*apiv1.Pod)
+		if !ok {
+			log.Printf("[WARNING] Unexpected Watch Event Type received for pod %v - skipping", p.GetObjectMeta().GetName())
+			break
+		}
+		log.Printf("[INFO] Watch Container phase: %v", p.Status.Phase)
+		log.Printf("[DEBUG] Watch Container status: %+v", p.Status.ContainerStatuses)
+
+		if e.Type == "DELETED" {
+			log.Printf("[NOTICE] DELETED event received for pod %v", p.GetObjectMeta().GetName())
+			break
+		}
+
+	}
+
+	log.Printf("[NOTICE] *** Completeed waiting for DELETE on pod %v", *n)
+
+	return nil
 }
 
 func homeDir() string {
