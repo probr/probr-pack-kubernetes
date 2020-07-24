@@ -61,6 +61,7 @@ unit_go:
     - echo ${kube_config} | base64 -id > $TEST_KUBE_CONFIG
     - export KUBE_CONFIG=$TEST_KUBE_CONFIG
     - export LOGLEVEL="NOTICE"
+    - export DONT_DELETE="true"
   script:
     - cd $CI_PROJECT_DIR/test
     - go test -v ./...
