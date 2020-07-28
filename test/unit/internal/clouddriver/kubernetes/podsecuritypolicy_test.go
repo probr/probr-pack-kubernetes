@@ -32,3 +32,12 @@ func TestHostPIDIsRestricted(t *testing.T) {
 
 	handleResult(yesNo, err)
 }
+
+func TestCreatePODSettingPrivilegedAccess(t *testing.T) {
+	p, err := kubernetes.CreatePODSettingPrivilegedAccess(kubernetes.WithPrivilegedAccess)
+
+	//pod creation should fail so p should be nil
+	res := p == nil
+	handleResult(&res, err)
+
+}

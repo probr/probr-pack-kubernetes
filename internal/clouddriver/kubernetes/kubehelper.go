@@ -125,7 +125,7 @@ func getPods(c *kubernetes.Clientset) (*apiv1.PodList, error) {
 // cname - container name
 // image - image
 // w - indicates whether or not to wait for the pod to be running
-func CreatePod(pname *string, ns *string, cname *string, image *string, w bool) (*apiv1.Pod, error) {
+func CreatePod(pname *string, ns *string, cname *string, image *string, w bool, sc *apiv1.SecurityContext) (*apiv1.Pod, error) {
 	c, err := GetClient()
 	if err != nil {
 		return nil, err
@@ -139,7 +139,7 @@ func CreatePod(pname *string, ns *string, cname *string, image *string, w bool) 
 
 	//now do pod ...
 	pc := c.CoreV1().Pods(*ns)
-	p := getPodObject(*pname, *ns, *cname, *image)
+	p := getPodObject(*pname, *ns, *cname, *image, sc)
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
@@ -148,6 +148,8 @@ func CreatePod(pname *string, ns *string, cname *string, image *string, w bool) 
 	if err != nil {
 		if isAlreadyExists(err) {
 			log.Printf("[NOTICE] POD %v already exists. Returning existing.", *pname)
+			res, _ := pc.Get(ctx, *pname, metav1.GetOptions{})
+
 			//return it and nil out err
 			return res, nil
 		} else if isForbidden(err) {
@@ -168,7 +170,7 @@ func CreatePod(pname *string, ns *string, cname *string, image *string, w bool) 
 	return res, nil
 }
 
-func getPodObject(pname string, ns string, cname string, image string) *apiv1.Pod {
+func getPodObject(pname string, ns string, cname string, image string, sc *apiv1.SecurityContext) *apiv1.Pod {
 	return &apiv1.Pod{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      pname,
@@ -182,12 +184,13 @@ func getPodObject(pname string, ns string, cname string, image string) *apiv1.Po
 				{
 					Name:            cname,
 					Image:           image,
-					ImagePullPolicy: apiv1.PullIfNotPresent,
+					ImagePullPolicy: apiv1.PullIfNotPresent,					
 					Command: []string{
 						"sleep",
 						"3600",
 						// "/bin/sh", "-c",
 					},
+					SecurityContext: sc,
 				},
 			},
 		},

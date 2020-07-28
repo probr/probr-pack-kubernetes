@@ -19,7 +19,7 @@ const (
 //SetupNetworkAccessTestPod creates a pod with characteristics required for testing network access.
 func SetupNetworkAccessTestPod() (*apiv1.Pod, error) {
 	pname, ns, cname, image := testPodName, testNamespace, testContainer, testImage
-	p, err := CreatePod(&pname, &ns, &cname, &image, true)
+	p, err := CreatePod(&pname, &ns, &cname, &image, true, nil)
 
 	if err != nil {
 		return nil, err
@@ -32,8 +32,8 @@ func SetupNetworkAccessTestPod() (*apiv1.Pod, error) {
 func TeardownNetworkAccessTestPod() error {
 	_, exists := os.LookupEnv("DONT_DELETE")
 	if !exists {
-		ns := testNamespace
-		err := DeleteNamespace(&ns)
+		pname, ns := testPodName, testNamespace		
+		err := DeletePod(&pname, &ns, true)
 		return err
 	}
 

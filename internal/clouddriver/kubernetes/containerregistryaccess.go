@@ -20,7 +20,7 @@ func SetupContainerAccessTestPod(r *string) (*apiv1.Pod, error) {
 	i := *r + caTestImage
 	pname := caPodNameBase + "-" + strings.ReplaceAll(*r, ".", "-")
 	ns, cname := caNamespace, caContainer
-	p, err := CreatePod(&pname, &ns, &cname, &i, true)
+	p, err := CreatePod(&pname, &ns, &cname, &i, true, nil)
 
 	if err != nil {
 		return nil, err
