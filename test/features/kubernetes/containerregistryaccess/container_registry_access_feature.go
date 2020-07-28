@@ -16,7 +16,7 @@ type probState struct {
 
 func init() {
 	td := coreengine.TestDescriptor{Group: coreengine.Kubernetes,
-		Category: coreengine.ImageRegistry, Name: "container_registry_access"}
+		Category: coreengine.ContainerRegistryAccess, Name: "container_registry_access"}
 
 	coreengine.TestHandleFunc(td, &coreengine.GoDogTestTuple{
 		Handler: features.GodogTestHandler,

@@ -48,7 +48,7 @@ const (
 	NetworkPolicies
 	SecretsMgmt
 	General
-	ImageRegistry
+	ContainerRegistryAccess
 	ImageScanning
 	IAM
 	KeyMgmt
@@ -58,7 +58,7 @@ const (
 )
 
 func (c Category) String() string {
-	return [...]string{"RBAC", "Pod Security Policies", "Network Policies", "Secrets Mgmt", "General", "Image Registry", "Image Scanning", "IAM",
+	return [...]string{"RBAC", "Pod Security Policy", "Network Policies", "Secrets Mgmt", "General", "Container Registry Access", "Image Scanning", "IAM",
 		"Key Mgmt", "Authentication", "Storage", "InternetAccess"}[c]
 }
 

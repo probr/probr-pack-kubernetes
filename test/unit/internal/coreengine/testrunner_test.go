@@ -25,9 +25,10 @@ func TestTestRunner(t *testing.T) {
 	tr := coreengine.TestStore{}
 
 	//test descriptor ... (general)
+	grp := coreengine.CloudDriver
 	cat := coreengine.General
 	name := "account_manager"
-	td := coreengine.TestDescriptor{Category: cat, Name: name}
+	td := coreengine.TestDescriptor{Group: grp, Category: cat, Name: name}
 
 	//specific terms for *this* test
 	uuid1 := uuid.New().String()

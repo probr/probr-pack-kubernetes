@@ -2,8 +2,8 @@ package features
 
 import (
 	"fmt"
-	"strings"
 	"path/filepath"
+	"strings"
 
 	"github.com/cucumber/godog"
 	"github.com/cucumber/godog/colors"
@@ -17,26 +17,21 @@ import (
 
 //GodogTestHandler ...
 func GodogTestHandler(gd *coreengine.GodogTest) (int, error) {
-	r, err := GetRootDir()
 
+	f, err := getFeaturesPath(gd)
 	if err != nil {
-		return -1, fmt.Errorf("unable to determine root directory - not able to perform tests")
+		return -1, err
 	}
 
-	var g = gd.TestDescriptor.Group.String()
-	var c = gd.TestDescriptor.Category.String()
-	featPath := filepath.Join(r, "test", "features", 
-		strings.TrimSpace(strings.ToLower(g)), strings.TrimSpace(strings.ToLower(c)), "features")
-
-	f, err := GetOutputPath(&c)
+	o, err := GetOutputPath(&gd.TestDescriptor.Name)
 	if err != nil {
 		return -2, err
 	}
 
 	opts := godog.Options{
 		Format: "cucumber",
-		Output: colors.Colored(f),
-		Paths:  []string{featPath},
+		Output: colors.Colored(o),
+		Paths:  []string{f},
 	}
 
 	status := godog.TestSuite{
@@ -47,4 +42,25 @@ func GodogTestHandler(gd *coreengine.GodogTest) (int, error) {
 	}.Run()
 
 	return status, nil
+}
+
+func getFeaturesPath(gd *coreengine.GodogTest) (string, error) {
+	r, err := GetRootDir()
+	if err != nil {
+		return "", fmt.Errorf("unable to determine root directory - not able to perform tests")
+	}
+
+	if gd.FeaturePath != nil {
+		//if we've been given a feature path, add to root and return:
+		return filepath.Join(r, *gd.FeaturePath), nil
+	}
+
+	//otherwise derive it from the group and category data:
+	var g = gd.TestDescriptor.Group.String()
+	var c = gd.TestDescriptor.Category.String()
+
+	return filepath.Join(r, "test", "features",
+		strings.ReplaceAll(strings.ToLower(g), " ", ""),
+		strings.ReplaceAll(strings.ToLower(c), " ", ""), "features"), nil
+
 }

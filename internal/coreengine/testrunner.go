@@ -20,9 +20,10 @@ type GodogTest struct {
 	TestDescriptor       *TestDescriptor
 	TestSuiteInitializer func(*godog.TestSuiteContext)
 	ScenarioInitializer  func(*godog.ScenarioContext)
+	FeaturePath          *string
 }
 
-//GoDogTestTuple ... 
+//GoDogTestTuple ...
 type GoDogTestTuple struct {
 	Handler TestHandlerFunc
 	Data    *GodogTest
