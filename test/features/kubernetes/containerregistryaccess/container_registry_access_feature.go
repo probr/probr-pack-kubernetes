@@ -4,12 +4,28 @@ import (
 	"fmt"
 
 	"citihub.com/probr/internal/clouddriver/kubernetes"
+	"citihub.com/probr/internal/coreengine"
+	"citihub.com/probr/test/features"
 	"github.com/cucumber/godog"
 )
 
 type probState struct {
 	podName        string
 	httpStatusCode int
+}
+
+func init() {
+	td := coreengine.TestDescriptor{Group: coreengine.Kubernetes,
+		Category: coreengine.ContainerRegistryAccess, Name: "container_registry_access"}
+
+	coreengine.TestHandleFunc(td, &coreengine.GoDogTestTuple{
+		Handler: features.GodogTestHandler,
+		Data: &coreengine.GodogTest{
+			TestDescriptor:       &td,
+			TestSuiteInitializer: TestSuiteInitialize,
+			ScenarioInitializer:  ScenarioInitialize,
+		},
+	})
 }
 
 func (p *probState) aKubernetesClusterIsDeployed() error {
@@ -35,7 +51,7 @@ func (p *probState) aUserAttemptsToDeployAContainerFrom(registry string) error {
 	}
 
 	if pd == nil {
-		// this is valid if the registry should be denied		
+		// this is valid if the registry should be denied
 		return nil
 	}
 

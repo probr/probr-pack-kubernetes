@@ -2,9 +2,26 @@ package podsecuritypolicy
 
 import (
 	"fmt"
-	"github.com/cucumber/godog"		
+
 	"citihub.com/probr/internal/clouddriver/kubernetes"
+	"citihub.com/probr/internal/coreengine"
+	"citihub.com/probr/test/features"
+	"github.com/cucumber/godog"
 )
+
+func init() {
+	td := coreengine.TestDescriptor{Group: coreengine.Kubernetes,
+		Category: coreengine.PodSecurityPolicies, Name: "pod_security_policy"}
+
+	coreengine.TestHandleFunc(td, &coreengine.GoDogTestTuple{
+		Handler: features.GodogTestHandler,
+		Data: &coreengine.GodogTest{
+			TestDescriptor:       &td,
+			TestSuiteInitializer: TestSuiteInitialize,
+			ScenarioInitializer:  ScenarioInitialize,
+		},
+	})
+}
 
 func aDeploymentIsCreated() error {
 	return godog.ErrPending
@@ -15,7 +32,7 @@ func accessIsRequested(arg1 string) error {
 }
 
 func controlExistsToPreventPrivilegedAccess() error {
-	yesNo, err := kubernetes.PrivilegedAccessIsRestricted()	
+	yesNo, err := kubernetes.PrivilegedAccessIsRestricted()
 
 	if err != nil {
 		return fmt.Errorf("error determining Pod Security Policy %v", err)
@@ -37,7 +54,7 @@ func creationWillWithAMessage(arg1, arg2 string) error {
 
 //TestSuiteInitialize ...
 func TestSuiteInitialize(ctx *godog.TestSuiteContext) {
-	ctx.BeforeSuite(func(){}) //nothing for now
+	ctx.BeforeSuite(func() {}) //nothing for now
 }
 
 //ScenarioInitialize ...
