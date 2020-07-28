@@ -3,8 +3,24 @@ package clouddriver
 import (
 	"log"
 
+	"citihub.com/probr/internal/coreengine"
+	"citihub.com/probr/test/features"
 	"github.com/cucumber/godog"
 )
+
+func init() {
+	td := coreengine.TestDescriptor{Group: coreengine.CloudDriver,
+		Category: coreengine.General, Name: "account_manager"}
+
+	coreengine.TestHandleFunc(td, &coreengine.GoDogTestTuple{
+		Handler: features.GodogTestHandler,
+		Data: &coreengine.GodogTest{
+			TestDescriptor:       &td,
+			TestSuiteInitializer: TestSuiteInitialize,
+			ScenarioInitializer:  ScenarioInitialize,
+		},
+	})
+}
 
 //This is the main implementation of the BDD/Cucumber feature test
 //keep it in a separate file for clarity

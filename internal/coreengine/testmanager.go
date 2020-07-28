@@ -24,6 +24,20 @@ func (s TestStatus) String() string {
 	return [...]string{"Pending", "Running", "CompleteSuccess", "CompleteFail", "Error"}[s]
 }
 
+//Group ... TODO: not sure if this is the correct name for this?
+type Group int
+
+//Group enum
+const (
+	Kubernetes Group = iota
+	CloudDriver
+	CoreEngine
+)
+
+func (g Group) String() string {
+	return [...]string{"kubernetes", "clouddriver", "coreengine"}[g]
+}
+
 //Category ...
 type Category int
 
@@ -60,6 +74,7 @@ type Test struct {
 
 //TestDescriptor - struct to hold description of test, name, category, strictness?? etc.
 type TestDescriptor struct {
+	Group    Group    `json:"group,omitempty"`
 	Category Category `json:"category,omitempty"`
 	Name     string   `json:"name,omitempty"`
 }

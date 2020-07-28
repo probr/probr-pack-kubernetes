@@ -4,13 +4,30 @@ import (
 	"fmt"
 	"log"
 
+	"citihub.com/probr/test/features"
+
 	"citihub.com/probr/internal/clouddriver/kubernetes"
+	"citihub.com/probr/internal/coreengine"
 	"github.com/cucumber/godog"
 )
 
 type probState struct {
 	podName        string
 	httpStatusCode int
+}
+
+func init() {
+	td := coreengine.TestDescriptor{Group: coreengine.Kubernetes,
+		Category: coreengine.InternetAccess, Name: "internet_access"}
+
+	coreengine.TestHandleFunc(td, &coreengine.GoDogTestTuple{
+		Handler: features.GodogTestHandler,
+		Data: &coreengine.GodogTest{
+			TestDescriptor:       &td,
+			TestSuiteInitializer: TestSuiteInitialize,
+			ScenarioInitializer:  ScenarioInitialize,
+		},
+	})
 }
 
 func (p *probState) aKubernetesClusterIsDeployed() error {

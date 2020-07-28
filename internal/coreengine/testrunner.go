@@ -1,8 +1,10 @@
 package coreengine
 
-import (	 
-	"sync"
+import (
 	"fmt"
+	"sync"
+
+	"github.com/cucumber/godog"
 )
 
 //TestRunner ...
@@ -11,19 +13,32 @@ type TestRunner interface {
 }
 
 //TestHandlerFunc ...
-type TestHandlerFunc func()(int, error)
+type TestHandlerFunc func(t *GodogTest) (int, error)
+
+//GodogTest ...
+type GodogTest struct {
+	TestDescriptor       *TestDescriptor
+	TestSuiteInitializer func(*godog.TestSuiteContext)
+	ScenarioInitializer  func(*godog.ScenarioContext)
+}
+
+//GoDogTestTuple ... 
+type GoDogTestTuple struct {
+	Handler TestHandlerFunc
+	Data    *GodogTest
+}
 
 var (
-	handlers = make(map[TestDescriptor]TestHandlerFunc)
+	handlers    = make(map[TestDescriptor]*GoDogTestTuple)
 	handlersMux sync.RWMutex
 )
 
 //TestHandleFunc - adds the TestHandlerFunc to the handler map, keyed on the TestDescriptor
-func TestHandleFunc(td TestDescriptor, handler func()(int, error)) {
+func TestHandleFunc(td TestDescriptor, gd *GoDogTestTuple) {
 	handlersMux.Lock()
 	defer handlersMux.Unlock()
-	
-	handlers[td]=handler
+
+	handlers[td] = gd
 }
 
 //RunTest TODO: remove TestStore?
@@ -40,16 +55,16 @@ func (ts *TestStore) RunTest(t *Test) (int, error) {
 		return 3, fmt.Errorf("test descriptor is nil - cannot run test")
 	}
 
-	// get the handler (based on the test supplied)	
-	f, exists := getHandler(t)
+	// get the handler (based on the test supplied)
+	g, exists := getHandler(t)
 
 	if !exists {
 		//update status
 		*t.Status = Error
 		return 4, fmt.Errorf("no test handler available for %v - cannot run test", *t.TestDescriptor)
 	}
-	
-	s, err := f()
+
+	s, err := g.Handler(g.Data)
 
 	if s == 0 {
 		// success
@@ -64,10 +79,10 @@ func (ts *TestStore) RunTest(t *Test) (int, error) {
 	return s, err
 }
 
-func getHandler(t *Test) (func()(int, error), bool) {
+func getHandler(t *Test) (*GoDogTestTuple, bool) {
 	handlersMux.Lock()
 	defer handlersMux.Unlock()
-	f, exists := handlers[*(*t).TestDescriptor]
-	
-	return f, exists
+	g, exists := handlers[*(*t).TestDescriptor]
+
+	return g, exists
 }
