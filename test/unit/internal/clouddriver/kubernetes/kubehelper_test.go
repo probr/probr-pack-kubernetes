@@ -33,7 +33,7 @@ func TestCreateNamespace(t *testing.T) {
 }
 
 func TestCreatePod(t *testing.T) {
-	_, err := kubernetes.CreatePod(&testPod, &testNS, &testContainer, &testImage, true)
+	_, err := kubernetes.CreatePod(&testPod, &testNS, &testContainer, &testImage, true, nil)
 
 	handleResult(nil, err)
 }
