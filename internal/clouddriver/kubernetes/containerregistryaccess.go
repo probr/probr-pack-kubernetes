@@ -8,7 +8,7 @@ import (
 
 const (
 	//TODO: default to these values for MVP - need to expose in future
-	caNamespace   = "container-access-test-ns"
+	caNamespace   = "probr-container-access-test-ns"
 	caTestImage   = "/busybox:latest"
 	caContainer   = "container-access-test"
 	caPodNameBase = "ca-test"
@@ -30,8 +30,8 @@ func SetupContainerAccessTestPod(r *string) (*apiv1.Pod, error) {
 }
 
 //TeardownContainerAccessTestPod ...
-func TeardownContainerAccessTestPod(p *string) error {	
+func TeardownContainerAccessTestPod(p *string) error {
 	ns := caNamespace
 	err := DeletePod(p, &ns, true)
-	return err	
+	return err
 }

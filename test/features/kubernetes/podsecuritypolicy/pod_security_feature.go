@@ -10,8 +10,8 @@ import (
 )
 
 type probState struct {
-	podName        string
-	httpStatusCode int
+	podName       string
+	creationError *kubernetes.PodCreationError
 }
 
 func init() {
@@ -51,8 +51,8 @@ func (p *probState) aKubernetesDeploymentIsAppliedToTheActiveKubernetesCluster()
 	return nil
 }
 
-func (p *probState) privilegedAccessRequestIsMarkedForTheKubernetesDeployment(privilegedAccessRequested string) error {	
-	
+func (p *probState) privilegedAccessRequestIsMarkedForTheKubernetesDeployment(privilegedAccessRequested string) error {
+
 	var pa kubernetes.PrivilegedAccess
 	if privilegedAccessRequested == "True" {
 		pa = kubernetes.WithPrivilegedAccess
@@ -62,6 +62,12 @@ func (p *probState) privilegedAccessRequestIsMarkedForTheKubernetesDeployment(pr
 
 	pd, err := kubernetes.CreatePODSettingPrivilegedAccess(pa)
 	if err != nil {
+		//check for expected error
+		if e, ok := err.(*kubernetes.PodCreationError); ok {
+			p.creationError = e
+			return nil
+		}
+		//unexpected error
 		return fmt.Errorf("error attempting to create POD: %v", err)
 	}
 
@@ -96,18 +102,27 @@ func (p *probState) someControlExistsToPreventPrivilegedAccessForKubernetesDeplo
 
 func (p *probState) theOperationWillWithAnError(res, msg string) error {
 	if res == "Fail" {
-		//expect pod name to be empty in this case (i.e. wasn't created)
-		if p.podName != "" {
+		//expect pod creation error to be non-null
+		if p.creationError == nil {
 			//it's a fail:
 			return fmt.Errorf("pod %v was created - test failed", p.podName)
 		}
+		//should also check code:
+		if p.creationError.ReasonCode != kubernetes.PSPNoPrivilege {
+			//also a fail:
+			return fmt.Errorf("pod not was created but reason (%v) was not as expected (%v)- test failed",
+				p.creationError.ReasonCode, kubernetes.PSPNoPrivilege)
+		}
+
+		//we're good
+		return nil
 	}
 
 	if res == "Succeed" {
-		// then expect the pod name to have a value
-		if p.podName == "" {
+		// then expect the pod creation error to be nil
+		if p.creationError != nil {
 			//it's a fail:
-			return fmt.Errorf("pod was not created - test failed")
+			return fmt.Errorf("pod was not created - test failed: %v", p.creationError)
 		}
 	}
 
@@ -119,7 +134,7 @@ func (p *probState) theOperationWillWithAnError(res, msg string) error {
 func (p *probState) setup() {
 	//just make sure this is reset
 	p.podName = ""
-	p.httpStatusCode = 0
+	p.creationError = nil
 }
 
 func (p *probState) tearDown() {

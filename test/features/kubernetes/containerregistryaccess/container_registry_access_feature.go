@@ -10,8 +10,8 @@ import (
 )
 
 type probState struct {
-	podName        string
-	httpStatusCode int
+	podName       string
+	creationError *kubernetes.PodCreationError
 }
 
 func init() {
@@ -47,7 +47,13 @@ func (p *probState) aUserAttemptsToDeployAContainerFrom(registry string) error {
 	pd, err := kubernetes.SetupContainerAccessTestPod(&registry)
 
 	if err != nil {
-		return err
+		//check for expected error
+		if e, ok := err.(*kubernetes.PodCreationError); ok {
+			p.creationError = e
+			return nil
+		}
+		//unexpected error
+		return fmt.Errorf("error attempting to create POD: %v", err)
 	}
 
 	if pd == nil {
@@ -64,18 +70,27 @@ func (p *probState) aUserAttemptsToDeployAContainerFrom(registry string) error {
 
 func (p *probState) theDeploymentAttemptIs(res string) error {
 	if res == "denied" {
-		//expect pod name to be empty in this case (i.e. wasn't created)
-		if p.podName != "" {
+		//expect pod creation error to be non-null (i.e. creation was prevented)
+		if p.creationError == nil {
 			//it's a fail:
 			return fmt.Errorf("pod %v was created - test failed", p.podName)
 		}
+		//should also check code:
+		if p.creationError.ReasonCode != kubernetes.PSPContainerAllowedImages {
+			//also a fail:
+			return fmt.Errorf("pod not was created but reason (%v) was not as expected (%v)- test failed",
+				p.creationError.ReasonCode, kubernetes.PSPContainerAllowedImages)
+		}
+
+		//we're good
+		return nil
 	}
 
 	if res == "allowed" {
-		// then expect the pod name to have a value
+		// then expect the pod name to be present
 		if p.podName == "" {
 			//it's a fail:
-			return fmt.Errorf("pod was not created - test failed")
+			return fmt.Errorf("pod was not created - test failed: %v", p.creationError)
 		}
 	}
 
@@ -86,7 +101,7 @@ func (p *probState) theDeploymentAttemptIs(res string) error {
 func (p *probState) setup() {
 	//just make sure this is reset
 	p.podName = ""
-	p.httpStatusCode = 0
+	p.creationError = nil
 }
 
 func (p *probState) tearDown() {
