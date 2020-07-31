@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 	"os"
+	"time"
 
 	"github.com/Azure/azure-sdk-for-go/profiles/latest/resources/mgmt/policy"
 	"github.com/Azure/go-autorest/autorest/azure/auth"
@@ -119,7 +120,10 @@ func (p *AZSecurityPolicyProvider) getPolicies() (*map[string]*azPolicy, error) 
 
 	ac := assignmentClient(s)
 
-	l, err := ac.List(context.TODO(), "")
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	l, err := ac.List(ctx, "")
 
 	if err != nil {
 		log.Printf("[ERROR] Error getting Azure Policies: %v", err)
