@@ -24,11 +24,51 @@ import (
 	apiv1 "k8s.io/api/core/v1"
 )
 
+//PodCreationErrorReason ... TODO: not sure if this is the correct name for this?
+type PodCreationErrorReason int
+
+//PodCreationErrorReason enum
+const (
+	UndefinedPodCreationErrorReason PodCreationErrorReason = iota
+	PSPNoPrivilege 
+	PSPNoPrivilegeEscalation
+	PSPAllowedUsersGroups
+	PSPContainerAllowedImages
+	
+)
+
+func (r PodCreationErrorReason) String() string {
+	return [...]string{"podcreation-error: undefined",
+		"podcreation-error: psp-container-no-privilege",
+		"podcreation-error: psp-container-no-privilege-escalation",
+		"podcreation-error: psp-allowed-users-groups",
+		"podcreation-error: psp-container-allowed-images"}[r]
+}
+
+//PodCreationError ...
+type PodCreationError struct {
+	err        error
+	ReasonCode PodCreationErrorReason
+}
+
+func (p *PodCreationError) Error() string {
+	return fmt.Sprintf("pod creation error: %v %v", p.ReasonCode, p.err)
+}
+
 var (
 	kubeConfigFile *string
 	kubeClient     *kubernetes.Clientset
 	clientMutex    sync.Mutex
+
+	azErrorToPodCreationError = make(map[string]PodCreationErrorReason)
 )
+
+func init() {
+	azErrorToPodCreationError["azurepolicy-container-no-privilege"] = PSPNoPrivilege
+	azErrorToPodCreationError["azurepolicy-psp-container-no-privilege-escalation"] = PSPNoPrivilegeEscalation
+	azErrorToPodCreationError["azurepolicy-psp-allowed-users-groups"] = PSPAllowedUsersGroups
+	azErrorToPodCreationError["azurepolicy-container-allowed-images"] = PSPContainerAllowedImages
+}
 
 //SetKubeConfigFile sets the fully qualified path to the Kubernetes config file.
 func SetKubeConfigFile(f *string) {
@@ -120,7 +160,7 @@ func getPods(c *kubernetes.Clientset) (*apiv1.PodList, error) {
 }
 
 // CreatePod creates a pod with the following parameters:
-// pname - pod name 
+// pname - pod name
 // ns - namespace
 // cname - container name
 // image - image
@@ -154,8 +194,8 @@ func CreatePod(pname *string, ns *string, cname *string, image *string, w bool, 
 			return res, nil
 		} else if isForbidden(err) {
 			log.Printf("[NOTICE] Creation of POD %v is forbidden: %v", *pname, err)
-			//TODO: hmm ... think code needs to be returned
-			return nil, nil
+			//return a specific error:
+			return nil, &PodCreationError{err, toPodCreationErrorCode(err)}
 		}
 		return nil, err
 	}
@@ -171,6 +211,14 @@ func CreatePod(pname *string, ns *string, cname *string, image *string, w bool, 
 }
 
 func getPodObject(pname string, ns string, cname string, image string, sc *apiv1.SecurityContext) *apiv1.Pod {
+
+	a := make(map[string]string)
+	a["seccomp.security.alpha.kubernetes.io/pod"] = "runtime/default"
+
+	if sc == nil {
+		sc = defaultContainerSecurityContext()
+	}
+
 	return &apiv1.Pod{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      pname,
@@ -178,13 +226,15 @@ func getPodObject(pname string, ns string, cname string, image string, sc *apiv1
 			Labels: map[string]string{
 				"app": "demo",
 			},
+			Annotations: a,
 		},
 		Spec: apiv1.PodSpec{
+			SecurityContext: defaultPodSecurityContext(),
 			Containers: []apiv1.Container{
 				{
 					Name:            cname,
 					Image:           image,
-					ImagePullPolicy: apiv1.PullIfNotPresent,					
+					ImagePullPolicy: apiv1.PullIfNotPresent,
 					Command: []string{
 						"sleep",
 						"3600",
@@ -194,6 +244,27 @@ func getPodObject(pname string, ns string, cname string, image string, sc *apiv1
 				},
 			},
 		},
+	}
+}
+
+func defaultPodSecurityContext() *apiv1.PodSecurityContext {
+	var user, grp, fsgrp int64
+	user, grp, fsgrp = 1000, 3000, 2000
+
+	return &apiv1.PodSecurityContext{
+		RunAsUser:          &user,
+		RunAsGroup:         &grp,
+		FSGroup:            &fsgrp,
+		SupplementalGroups: []int64{1},
+	}
+}
+
+func defaultContainerSecurityContext() *apiv1.SecurityContext {
+	b := false
+
+	return &apiv1.SecurityContext{
+		Privileged:               &b,
+		AllowPrivilegeEscalation: &b,
 	}
 }
 
@@ -254,7 +325,7 @@ func ExecCommand(cmd, ns, pn *string) (string, string, int, error) {
 
 // DeletePod deletes the pod with the following parameters:
 // pname - pod name
-// ns - namespace 
+// ns - namespace
 // w - indicates whether or not to wait on the deletion
 func DeletePod(pname *string, ns *string, w bool) error {
 	c, err := GetClient()
@@ -338,7 +409,7 @@ func isAlreadyExists(err error) bool {
 		//409 is "already exists"
 		return se.ErrStatus.Code == 409
 	}
-	return false	
+	return false
 }
 
 func isForbidden(err error) bool {
@@ -347,6 +418,26 @@ func isForbidden(err error) bool {
 		return se.ErrStatus.Code == 403
 	}
 	return false
+}
+
+func toPodCreationErrorCode(err error) PodCreationErrorReason {
+	if se, ok := err.(*errors.StatusError); ok {
+		//get the reason
+		r := se.ErrStatus.Reason
+		m := se.ErrStatus.Message
+
+		log.Printf("[INFO] *** reason: %v", r)
+		log.Printf("[INFO] *** message: %v", m)
+		//map this to the pod creation code
+		for k, e := range azErrorToPodCreationError {
+			if strings.Contains(m, k) {
+				//take the element
+				return e
+			}
+		}
+	}
+
+	return UndefinedPodCreationErrorReason
 }
 
 func waitForPhase(ph apiv1.PodPhase, c *kubernetes.Clientset, ns *string, n *string) error {
@@ -359,7 +450,7 @@ func waitForPhase(ph apiv1.PodPhase, c *kubernetes.Clientset, ns *string, n *str
 		return err
 	}
 
-	log.Printf("[NOTICE] *** Waiting for phase %v on pod %v ...", ph, *n)	
+	log.Printf("[NOTICE] *** Waiting for phase %v on pod %v ...", ph, *n)
 
 	for e := range w.ResultChan() {
 		log.Printf("[INFO] Watch Event Type: %v", e.Type)
@@ -382,7 +473,7 @@ func waitForPhase(ph apiv1.PodPhase, c *kubernetes.Clientset, ns *string, n *str
 
 	}
 
-	log.Printf("[NOTICE] *** Completed waiting for phase %v on pod %v", ph, *n)	
+	log.Printf("[NOTICE] *** Completed waiting for phase %v on pod %v", ph, *n)
 
 	return nil
 }
@@ -416,9 +507,9 @@ func waitForDelete(c *kubernetes.Clientset, ns *string, n *string) error {
 	if err != nil {
 		return err
 	}
-	
+
 	log.Printf("[NOTICE] *** Waiting for DELETE on pod %v ...", *n)
-	
+
 	for e := range w.ResultChan() {
 		log.Printf("[INFO] Watch Event Type: %v", e.Type)
 		p, ok := e.Object.(*apiv1.Pod)

@@ -10,7 +10,7 @@ import (
 
 const (
 	//TODO: default to these values for MVP - need to expose in future
-	testNamespace = "network-access-test-ns"
+	testNamespace = "probr-network-access-test-ns" //this needs to be set up as an exculsion in the image registry policy
 	testImage     = "curlimages/curl"
 	testContainer = "curlimages"
 	testPodName   = "na-test-pod"
@@ -32,7 +32,7 @@ func SetupNetworkAccessTestPod() (*apiv1.Pod, error) {
 func TeardownNetworkAccessTestPod() error {
 	_, exists := os.LookupEnv("DONT_DELETE")
 	if !exists {
-		pname, ns := testPodName, testNamespace		
+		pname, ns := testPodName, testNamespace
 		err := DeletePod(&pname, &ns, true)
 		return err
 	}
