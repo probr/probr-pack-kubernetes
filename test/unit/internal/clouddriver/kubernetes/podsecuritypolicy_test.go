@@ -34,10 +34,32 @@ func TestHostPIDIsRestricted(t *testing.T) {
 }
 
 func TestCreatePODSettingPrivilegedAccess(t *testing.T) {
-	p, err := kubernetes.CreatePODSettingPrivilegedAccess(kubernetes.WithPrivilegedAccess)
+	tr := true
+	p, err := kubernetes.CreatePODSettingSecurityContext(&tr, &tr, nil)
 
 	//pod creation should fail so p should be nil
 	res := p == nil
 	handleResult(&res, err)
 
+}
+
+func TestCreatePODSettingCapabilities(t *testing.T) {
+	var c = make([]string, 1)
+	c[0] = "NET_ADMIN"
+	
+	p, err := kubernetes.CreatePODSettingCapabilities(&c)
+
+	//pod creation should fail so p should be nil
+	res := p == nil
+	handleResult(&res, err)
+
+}
+
+func TestPrivilegedEscalationPrevented(t *testing.T) {
+	res, err := kubernetes.ExecRootAccessCmd()
+
+	//this should fail against a secured cluster
+	//non-zero result required
+	b := res > 0
+	handleResult(&b, err)
 }

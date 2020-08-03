@@ -17,8 +17,10 @@ var (
 )
 
 func TestMain(m *testing.M) {
+	log.Print("[NOTICE] Running Kube tests ...")
 	result := m.Run()
 
+	log.Printf("[NOTICE] Completed Kube tests ... (result: %v)", result)	
 	os.Exit(result)
 }
 

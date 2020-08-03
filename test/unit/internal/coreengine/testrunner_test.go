@@ -1,7 +1,9 @@
 package coreengine_test
 
 import (
+	"flag"
 	"fmt"
+	"log"
 	"os"
 	"testing"
 
@@ -14,7 +16,22 @@ import (
 	_ "citihub.com/probr/test/features/kubernetes/podsecuritypolicy" //needed to run init on TestHandlers
 )
 
+var (
+	integrationTest = flag.Bool("integrationTest", false, "run integration tests")
+)
+
 func TestMain(m *testing.M) {
+	flag.Parse()
+
+	//TODO: for now, skip if integration flag isn't set
+	//need to figure out how to set the kube config in the CI pipeline
+	//before this can be run in the pipeline
+	if !*integrationTest {
+		//skip
+		log.Print("[NOTICE] testrunner_test: Integration Test Flag not set. SKIPPING TEST.")
+		return
+	}
+
 	result := m.Run()
 
 	os.Exit(result)
@@ -93,7 +110,7 @@ func TestTestRunner(t *testing.T) {
 	st, err = tr.RunTest(&test2)
 
 	//now testing against an evironment which should have the correct
-	//network access rules, hence this test should succeed 
+	//network access rules, hence this test should succeed
 	assert.Nil(t, err)
 	assert.Equal(t, 0, st)
 	assert.Equal(t, coreengine.CompleteSuccess, *test2.Status)
