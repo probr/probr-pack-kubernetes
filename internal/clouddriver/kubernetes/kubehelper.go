@@ -6,6 +6,7 @@ import (
 	"flag"
 	"fmt"
 	"log"
+	"math/rand"
 	"os"
 	"path/filepath"
 	"strings"
@@ -30,11 +31,10 @@ type PodCreationErrorReason int
 //PodCreationErrorReason enum
 const (
 	UndefinedPodCreationErrorReason PodCreationErrorReason = iota
-	PSPNoPrivilege 
+	PSPNoPrivilege
 	PSPNoPrivilegeEscalation
 	PSPAllowedUsersGroups
 	PSPContainerAllowedImages
-	
 )
 
 func (r PodCreationErrorReason) String() string {
@@ -187,7 +187,7 @@ func CreatePodFromObject(p *apiv1.Pod, pname *string, ns *string, w bool) (*apiv
 	}
 
 	//now do pod ...
-	pc := c.CoreV1().Pods(*ns)	
+	pc := c.CoreV1().Pods(*ns)
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
@@ -254,6 +254,16 @@ func GetPodObject(pname string, ns string, cname string, image string, sc *apiv1
 			},
 		},
 	}
+}
+
+//GenerateUniquePodName ...
+func GenerateUniquePodName(baseName string) string {
+	//take base and add some uniqueness
+	t := time.Now()
+	rand.Seed(t.UnixNano())
+	uniq := fmt.Sprintf("%v-%v", t.Format("020106-150405"), rand.Intn(100))
+
+	return fmt.Sprintf("%v-%v", baseName, uniq)
 }
 
 func defaultPodSecurityContext() *apiv1.PodSecurityContext {

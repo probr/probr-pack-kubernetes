@@ -75,11 +75,11 @@ So that a policy of least privilege can be enforced in order to prevent maliciou
 		Given a Kubernetes cluster exists which we can deploy into
 		And some system exists to prevent a Kubernetes deployment from running using the allowPrivilegeEscalation in an existing Kubernetes cluster
 		When a Kubernetes deployment is applied to an existing Kubernetes cluster
-		And privileged escalation is marked "<allowPrivilegeEscalation requested>" for the Kubernetes deployment 
+		And privileged escalation is marked "<AllowPrivilegeEscalation requested>" for the Kubernetes deployment 
 		Then the operation will "<RESULT>" with an error "<ERRORMESSAGE>"
 
 		Examples: 
-			| AllowprivilegeEscalation requested | RESULT        | ERRORMESSAGE							                       |
+			| AllowPrivilegeEscalation requested | RESULT        | ERRORMESSAGE							                       |
 			| True                               | Fail          | Containers cant run using the allowPrivilegeEscalation flag |
 			| False                              | Succeed       | No error would show                                         |
 			| Not Defined                        | Succeed       | No error would show                                         |

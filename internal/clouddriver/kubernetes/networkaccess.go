@@ -18,7 +18,7 @@ const (
 
 //SetupNetworkAccessTestPod creates a pod with characteristics required for testing network access.
 func SetupNetworkAccessTestPod() (*apiv1.Pod, error) {
-	pname, ns, cname, image := testPodName, testNamespace, testContainer, testImage
+	pname, ns, cname, image := GenerateUniquePodName(testPodName), testNamespace, testContainer, testImage
 	p, err := CreatePod(&pname, &ns, &cname, &image, true, nil)
 
 	if err != nil {
@@ -29,11 +29,11 @@ func SetupNetworkAccessTestPod() (*apiv1.Pod, error) {
 }
 
 //TeardownNetworkAccessTestPod ...
-func TeardownNetworkAccessTestPod() error {
+func TeardownNetworkAccessTestPod(p *string) error {
 	_, exists := os.LookupEnv("DONT_DELETE")
 	if !exists {
-		pname, ns := testPodName, testNamespace
-		err := DeletePod(&pname, &ns, true)
+		ns := testNamespace
+		err := DeletePod(p, &ns, false) //don't worry about waiting
 		return err
 	}
 
@@ -41,12 +41,12 @@ func TeardownNetworkAccessTestPod() error {
 }
 
 //AccessURL calls the supplied URL and returns the http code
-func AccessURL(url *string) (int, error) {
+func AccessURL(pn *string, url *string) (int, error) {
 
 	//create a curl command to access the supplied url
 	cmd := "curl -s -o /dev/null -I -L -w %{http_code} " + *url
-	ns, pn := testNamespace, testPodName
-	httpCode, _, ex, err := ExecCommand(&cmd, &ns, &pn)
+	ns := testNamespace
+	httpCode, _, ex, err := ExecCommand(&cmd, &ns, pn)
 
 	if err != nil {
 		//check the exit code.  If it's '6' (Couldn't resolve host.)

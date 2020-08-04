@@ -25,8 +25,6 @@ const (
 
 const (
 	//TODO: default to these values for MVP - need to expose in future
-	//TODO: also, using network-access-test-ns here as there's an exclusion on the
-	//container registry - needs to be tidied up ...
 	pspTestNamespace = "probr-pod-security-test-ns"
 	//NOTE: either the above namespace needs to be added to the exclusion list on the
 	//container registry rule or busybox need to be available in the allowed (probably internal) registry
@@ -257,20 +255,20 @@ func CreatePODSettingSecurityContext(pr *bool, pe *bool, runAsUser *int64) (*api
 		pr = &f
 	}
 	if pe == nil {
-		pe = &f		
+		pe = &f
 	}
 	if runAsUser == nil {
 		i := int64(1000)
 		runAsUser = &i
 	}
-	
+
 	sc := apiv1.SecurityContext{
 		Privileged:               pr,
 		AllowPrivilegeEscalation: pe,
 		RunAsUser:                runAsUser,
 	}
 
-	pname, ns, cname, image := pspTestPodName, pspTestNamespace, pspTestContainer, pspTestImage
+	pname, ns, cname, image := GenerateUniquePodName(pspTestPodName), pspTestNamespace, pspTestContainer, pspTestImage
 
 	p, err := CreatePod(&pname, &ns, &cname, &image, true, &sc)
 
@@ -298,7 +296,7 @@ func CreatePODSettingAttributes(hostPID *bool, hostIPC *bool, hostNetwork *bool)
 		hostNetwork = &f
 	}
 
-	pname, ns, cname, image := pspTestPodName, pspTestNamespace, pspTestContainer, pspTestImage
+	pname, ns, cname, image := GenerateUniquePodName(pspTestPodName), pspTestNamespace, pspTestContainer, pspTestImage
 
 	// get the pod object and manipulate:
 	po := GetPodObject(pname, ns, cname, image, nil)
@@ -317,26 +315,26 @@ func CreatePODSettingAttributes(hostPID *bool, hostIPC *bool, hostNetwork *bool)
 }
 
 //CreatePODSettingCapabilities ...
-func CreatePODSettingCapabilities(c *[]string) (*apiv1.Pod, error) {	
-	pname, ns, cname, image := pspTestPodName, pspTestNamespace, pspTestContainer, pspTestImage
+func CreatePODSettingCapabilities(c *[]string) (*apiv1.Pod, error) {
+	pname, ns, cname, image := GenerateUniquePodName(pspTestPodName), pspTestNamespace, pspTestContainer, pspTestImage
 
 	// get the pod object and manipulate:
 	po := GetPodObject(pname, ns, cname, image, nil)
-	
+
 	if c != nil {
 		for _, cap := range *c {
 			for _, con := range po.Spec.Containers {
 				if con.SecurityContext == nil {
-					con.SecurityContext = &apiv1.SecurityContext{}					
+					con.SecurityContext = &apiv1.SecurityContext{}
 				}
 				if con.SecurityContext.Capabilities == nil {
 					con.SecurityContext.Capabilities = &apiv1.Capabilities{}
-					con.SecurityContext.Capabilities.Add = make([]apiv1.Capability,0)
+					con.SecurityContext.Capabilities.Add = make([]apiv1.Capability, 0)
 				}
-				con.SecurityContext.Capabilities.Add = 
+				con.SecurityContext.Capabilities.Add =
 					append(con.SecurityContext.Capabilities.Add, apiv1.Capability(cap))
 			}
-		} 
+		}
 	}
 
 	// create from PO
@@ -350,19 +348,27 @@ func CreatePODSettingCapabilities(c *[]string) (*apiv1.Pod, error) {
 }
 
 // ExecRootAccessCmd ...
-func ExecRootAccessCmd() (int, error) {
-	//make sure the pod is there (want one without privileged access or escalation)
-	f := false
-	_, err := CreatePODSettingSecurityContext(&f, &f, nil)
+func ExecRootAccessCmd(pName *string) (int, error) {
+	var pn string
+	//if we've not been given a pod name, assume one needs to be created:
+	if pName == nil {
+		//want one without privileged access or escalation
+		f := false
+		p, err := CreatePODSettingSecurityContext(&f, &f, nil)
 
-	if err != nil {
-		return -1, err
+		if err != nil {
+			return -1, err
+		}
+		//grab the pod name:
+		pn = p.GetObjectMeta().GetName()
+	} else {
+		pn = *pName
 	}
 
 	//create a command that requires root access
 	//try chroot
 	cmd := "chroot ."
-	ns, pn := pspTestNamespace, pspTestPodName
+	ns := pspTestNamespace
 	stdout, _, ex, err := ExecCommand(&cmd, &ns, &pn)
 
 	log.Printf("[NOTICE] ExecRootAccessCmd: %v stdout: %v exit code: %v", cmd, stdout, ex)
@@ -377,7 +383,7 @@ func ExecRootAccessCmd() (int, error) {
 //TeardownPodSecurityTestPod ...
 func TeardownPodSecurityTestPod(p *string) error {
 	ns := pspTestNamespace
-	err := DeletePod(p, &ns, true)
+	err := DeletePod(p, &ns, false) //don't worry about waiting
 	return err
 }
 
@@ -603,7 +609,7 @@ func (p *KubeSecurityPolicyProvider) HasNETRAWRestriction() (*bool, error) {
 
 	//at least one of the PSPs should have a RequiredDropCapability of "NET_RAW"
 	var res bool
-	for _, e := range psps.Items {		
+	for _, e := range psps.Items {
 		for _, c := range e.Spec.RequiredDropCapabilities {
 			if c == "NET_RAW" || c == "ALL" {
 				log.Printf("[NOTICE] HasNETRAWRestriction PASS: RequiredDropCapability of %v is set on Policy: %v", c, e.GetName())
@@ -630,13 +636,12 @@ func (p *KubeSecurityPolicyProvider) HasAllowedCapabilitiesRestriction() (*bool,
 	//in this case we don't want "allowedCapabilities" on any PSP (default to true)
 	res := true
 	for _, e := range psps.Items {
-		if e.Spec.AllowedCapabilities != nil && len(e.Spec.AllowedCapabilities) > 0 {			
+		if e.Spec.AllowedCapabilities != nil && len(e.Spec.AllowedCapabilities) > 0 {
 			log.Printf("[NOTICE] HasAllowedCapabilitiesRestriction FAIL: at least one AllowedCapability is set on Policy: %v", e.GetName())
 			res = false
 			break
 		}
 	}
-	
 
 	if res {
 		log.Printf("[NOTICE] HasNETRAWRestriction PASS: NO Policies found with AllowedCapabilities")
