@@ -25,15 +25,9 @@ func TestIsURLAccessible(t *testing.T) {
 
 	//now substance of this test
 	url := "http://www.google.com"
-	code, err := kubernetes.AccessURL(&url)
+	n := p.GetObjectMeta().GetName()
+	code, err := kubernetes.AccessURL(&n, &url)
 
-	assert.Nil(t, err)
 
 	log.Printf("[NOTICE] URL: %v Result: %v", url, code)
-}
-
-func TestTeardownNetworkAccess(t *testing.T) {
-	err := kubernetes.TeardownNetworkAccessTestPod()
-
-	assert.Nil(t, err)
 }

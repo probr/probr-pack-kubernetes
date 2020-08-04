@@ -56,7 +56,7 @@ func TestCreatePODSettingCapabilities(t *testing.T) {
 }
 
 func TestPrivilegedEscalationPrevented(t *testing.T) {
-	res, err := kubernetes.ExecRootAccessCmd()
+	res, err := kubernetes.ExecRootAccessCmd(nil)
 
 	//this should fail against a secured cluster
 	//non-zero result required
