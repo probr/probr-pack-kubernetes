@@ -6,6 +6,7 @@ import (
 	"flag"
 	"fmt"
 	"log"
+	"math/rand"
 	"os"
 	"path/filepath"
 	"strings"
@@ -30,11 +31,10 @@ type PodCreationErrorReason int
 //PodCreationErrorReason enum
 const (
 	UndefinedPodCreationErrorReason PodCreationErrorReason = iota
-	PSPNoPrivilege 
+	PSPNoPrivilege
 	PSPNoPrivilegeEscalation
 	PSPAllowedUsersGroups
 	PSPContainerAllowedImages
-	
 )
 
 func (r PodCreationErrorReason) String() string {
@@ -165,7 +165,16 @@ func getPods(c *kubernetes.Clientset) (*apiv1.PodList, error) {
 // cname - container name
 // image - image
 // w - indicates whether or not to wait for the pod to be running
+// sc - security context
 func CreatePod(pname *string, ns *string, cname *string, image *string, w bool, sc *apiv1.SecurityContext) (*apiv1.Pod, error) {
+	//create Pod Objet ...
+	p := GetPodObject(*pname, *ns, *cname, *image, sc)
+
+	return CreatePodFromObject(p, pname, ns, w)
+}
+
+// CreatePodFromObject creates a pod from the supplied pod object in the gievn namespace
+func CreatePodFromObject(p *apiv1.Pod, pname *string, ns *string, w bool) (*apiv1.Pod, error) {
 	c, err := GetClient()
 	if err != nil {
 		return nil, err
@@ -179,7 +188,6 @@ func CreatePod(pname *string, ns *string, cname *string, image *string, w bool, 
 
 	//now do pod ...
 	pc := c.CoreV1().Pods(*ns)
-	p := getPodObject(*pname, *ns, *cname, *image, sc)
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
@@ -210,7 +218,8 @@ func CreatePod(pname *string, ns *string, cname *string, image *string, w bool, 
 	return res, nil
 }
 
-func getPodObject(pname string, ns string, cname string, image string, sc *apiv1.SecurityContext) *apiv1.Pod {
+// GetPodObject ...
+func GetPodObject(pname string, ns string, cname string, image string, sc *apiv1.SecurityContext) *apiv1.Pod {
 
 	a := make(map[string]string)
 	a["seccomp.security.alpha.kubernetes.io/pod"] = "runtime/default"
@@ -245,6 +254,16 @@ func getPodObject(pname string, ns string, cname string, image string, sc *apiv1
 			},
 		},
 	}
+}
+
+//GenerateUniquePodName ...
+func GenerateUniquePodName(baseName string) string {
+	//take base and add some uniqueness
+	t := time.Now()
+	rand.Seed(t.UnixNano())
+	uniq := fmt.Sprintf("%v-%v", t.Format("020106-150405"), rand.Intn(100))
+
+	return fmt.Sprintf("%v-%v", baseName, uniq)
 }
 
 func defaultPodSecurityContext() *apiv1.PodSecurityContext {

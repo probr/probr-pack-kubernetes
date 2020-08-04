@@ -45,6 +45,14 @@ func (p *probState) aKubernetesClusterIsDeployed() error {
 }
 
 func (p *probState) aPodIsDeployedInTheCluster() error {
+	//only one pod is needed for all scenarios
+	//if we have a pod name, then it's already created so 
+	//this step can be skipped and the pod will be reused
+	if p.podName != "" {
+		log.Printf("[INFO] Pod %v has already been created - reusing the pod", p.podName)
+		return nil
+	}
+
 	pod, err := kubernetes.SetupNetworkAccessTestPod()
 
 	if err != nil {
@@ -63,10 +71,10 @@ func (p *probState) aPodIsDeployedInTheCluster() error {
 }
 
 func (p *probState) aProcessInsideThePodEstablishesADirectHTTPSConnectionTo(url string) error {
-	code, err := kubernetes.AccessURL(&url)
+	code, err := kubernetes.AccessURL(&p.podName, &url)
 
 	if err != nil {
-		log.Printf("Error raised when attempting to access URL: %v", err)
+		log.Printf("[ERROR] Error raised when attempting to access URL: %v", err)
 		return err
 	}
 
@@ -93,28 +101,26 @@ func (p *probState) setup() {
 }
 
 func (p *probState) tearDown() {
-	kubernetes.TeardownNetworkAccessTestPod()
+	kubernetes.TeardownNetworkAccessTestPod(&p.podName)
 }
 
-// func FeatureContext(s *godog.Suite) {
-// 	s.Step(`^a Kubernetes cluster is deployed$`, aKubernetesClusterIsDeployed)
-// 	s.Step(`^a pod is deployed in the cluster$`, aPodIsDeployedInTheCluster)
-// 	s.Step(`^a process inside the pod establishes a direct http\(s\) connection to "([^"]*)"$`, aProcessInsideThePodEstablishesADirectHttpsConnectionTo)
-// 	s.Step(`^access is "([^"]*)"$`, accessIs)
-// }
+func (p *probState) scenarioTearDown() {
+	//reset the httpcode
+	p.httpStatusCode=0
+}
 
+var ps = probState{}
 //TestSuiteInitialize ...
 func TestSuiteInitialize(ctx *godog.TestSuiteContext) {
-	ctx.BeforeSuite(func() {}) //nothing for now
+	ctx.BeforeSuite(func() {}) //nothing for now	
 
-	ps := probState{}
-	ctx.AfterSuite(ps.tearDown)
+	ctx.AfterSuite(func() {
+		ps.tearDown()
+	})
 }
 
 //ScenarioInitialize ...
 func ScenarioInitialize(ctx *godog.ScenarioContext) {
-	ps := probState{}
-
 	ctx.BeforeScenario(func(*godog.Scenario) {
 		ps.setup()
 	})
@@ -124,4 +130,7 @@ func ScenarioInitialize(ctx *godog.ScenarioContext) {
 	ctx.Step(`^a process inside the pod establishes a direct http\(s\) connection to "([^"]*)"$`, ps.aProcessInsideThePodEstablishesADirectHTTPSConnectionTo)
 	ctx.Step(`^access is "([^"]*)"$`, ps.accessIs)
 
+	ctx.AfterScenario(func(sc *godog.Scenario, err error) {
+		ps.scenarioTearDown()
+	})
 }

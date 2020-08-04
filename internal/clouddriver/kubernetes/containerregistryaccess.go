@@ -18,7 +18,7 @@ const (
 func SetupContainerAccessTestPod(r *string) (*apiv1.Pod, error) {
 	//full image is the repository + the caTestImage
 	i := *r + caTestImage
-	pname := caPodNameBase + "-" + strings.ReplaceAll(*r, ".", "-")
+	pname := GenerateUniquePodName(caPodNameBase + "-" + strings.ReplaceAll(*r, ".", "-"))
 	ns, cname := caNamespace, caContainer
 	p, err := CreatePod(&pname, &ns, &cname, &i, true, nil)
 
@@ -32,6 +32,6 @@ func SetupContainerAccessTestPod(r *string) (*apiv1.Pod, error) {
 //TeardownContainerAccessTestPod ...
 func TeardownContainerAccessTestPod(p *string) error {
 	ns := caNamespace
-	err := DeletePod(p, &ns, true)
+	err := DeletePod(p, &ns, false)  //don't worry about waiting
 	return err
 }

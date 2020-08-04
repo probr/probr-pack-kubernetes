@@ -27,6 +27,9 @@ const (
 	azPSPContainerImage               = "AZPSPContainerImage"
 	azPSPContainerPrivilegeEscalation = "AZPSPContainerPrivilegeEscalation"
 	azPSPHostPIDHostIPCNS             = "AZPSPHostPIDHostIPCNS"
+	azPSPContainerPrivileged 		  = "AZPSPContainerPrivileged"
+	azPSPApprovedUsersAndGroups		  = "AZPSPApprovedUsersAndGroups"
+	azPSPAllowedCapabilitiesOnly	  = "AZPSPAllowedCapabilitiesOnly"
 )
 
 var azPolicyUUIDToProbrPolicy = make(map[string]string)
@@ -37,6 +40,9 @@ func init() {
 	azPolicyUUIDToProbrPolicy["/providers/Microsoft.Authorization/policyDefinitions/febd0533-8e55-448f-b837-bd0e06f16469"] = azPSPContainerImage
 	azPolicyUUIDToProbrPolicy["/providers/Microsoft.Authorization/policyDefinitions/1c6e92c9-99f0-4e55-9cf2-0c234dc48f99"] = azPSPContainerPrivilegeEscalation
 	azPolicyUUIDToProbrPolicy["/providers/Microsoft.Authorization/policyDefinitions/47a1ee2f-2a2a-4576-bf2a-e0e36709c2b8"] = azPSPHostPIDHostIPCNS
+	azPolicyUUIDToProbrPolicy["/providers/Microsoft.Authorization/policyDefinitions/95edb821-ddaf-4404-9732-666045e056b4"] = azPSPContainerPrivileged
+	azPolicyUUIDToProbrPolicy["/providers/Microsoft.Authorization/policyDefinitions/f06ddb64-5fa3-4b77-b166-acb36f7f6042"] = azPSPApprovedUsersAndGroups
+	azPolicyUUIDToProbrPolicy["/providers/Microsoft.Authorization/policyDefinitions/c26596ff-4d70-4e6a-9a30-c2506bd2f80c"] = azPSPAllowedCapabilitiesOnly
 }
 
 //NewAzPolicyProvider ...
@@ -61,47 +67,70 @@ func (p *AZSecurityPolicyProvider) HasSecurityPolicies() (*bool, error) {
 
 // HasPrivilegedAccessRestriction ...
 func (p *AZSecurityPolicyProvider) HasPrivilegedAccessRestriction() (*bool, error) {
-	pc, err := p.getPolicies()
-
-	if err != nil {
-		return nil, err
-	}
-
-	//interograte the policy types ..
-	//in Azure, "Privilege access" can be via a policy set or specific policy
-	//the "AZPSPLinuxRestricted" set has this restriction.  Try this first
-	//and then "AZPSPContainerPrivilegeEscalation" if that's not set
-	_, b := (*pc)[azPSPLinuxRestricted]
-	if b {
-		return &b, nil
-	}
-
-	//try "AZPSPContainerPrivilegeEscalation"
-	_, b = (*pc)[azPSPContainerPrivilegeEscalation]
-
-	return &b, nil
+	return p.checkForRestrictions(&[]string{azPSPLinuxRestricted, azPSPContainerPrivileged})
 }
+
+// For the following, the hostPID, hostIPC and hostNetwork restrictions are wrapped together 
+// in Azure policies.  This is either in the general 'Linux Restricted' policy set or in the
+// HostPID/HostIPC/HostNetwork policy:
 
 // HasHostPIDRestriction ...
 func (p *AZSecurityPolicyProvider) HasHostPIDRestriction() (*bool, error) {
+	return p.checkForRestrictions(&[]string{azPSPLinuxRestricted, azPSPHostPIDHostIPCNS})
+}
+
+// HasHostIPCRestriction ...
+func (p *AZSecurityPolicyProvider) HasHostIPCRestriction() (*bool, error) {
+	return p.checkForRestrictions(&[]string{azPSPLinuxRestricted, azPSPHostPIDHostIPCNS})
+}
+
+// HasHostNetworkRestriction ...
+func (p *AZSecurityPolicyProvider) HasHostNetworkRestriction() (*bool, error) {
+	return p.checkForRestrictions(&[]string{azPSPLinuxRestricted, azPSPHostPIDHostIPCNS})
+}
+
+// HasAllowPrivilegeEscalationRestriction ...
+func (p *AZSecurityPolicyProvider) HasAllowPrivilegeEscalationRestriction() (*bool, error) {
+	return p.checkForRestrictions(&[]string{azPSPLinuxRestricted, azPSPContainerPrivilegeEscalation})
+}
+
+// HasRootUserRestriction ...
+func (p *AZSecurityPolicyProvider) HasRootUserRestriction() (*bool, error) {
+	return p.checkForRestrictions(&[]string{azPSPLinuxRestricted, azPSPApprovedUsersAndGroups})
+}
+
+// HasNETRAWRestriction ...
+func (p *AZSecurityPolicyProvider) HasNETRAWRestriction() (*bool, error) {
+	return p.checkForRestrictions(&[]string{azPSPLinuxRestricted})
+}
+
+// HasAllowedCapabilitiesRestriction ...
+func (p *AZSecurityPolicyProvider) HasAllowedCapabilitiesRestriction() (*bool, error) {
+	return p.checkForRestrictions(&[]string{azPSPLinuxRestricted, azPSPAllowedCapabilitiesOnly})
+}
+
+// HasAssignedCapabilitiesRestriction ...
+func (p *AZSecurityPolicyProvider) HasAssignedCapabilitiesRestriction() (*bool, error) {
+	return p.checkForRestrictions(&[]string{azPSPLinuxRestricted})
+}
+
+func (p *AZSecurityPolicyProvider) checkForRestrictions(res *[]string) (*bool, error) {
 	pc, err := p.getPolicies()
 
 	if err != nil {
 		return nil, err
 	}
 
-	//interograte the policy types ..
-	//in Azure, "HostPID Restriction" can be via a policy set or specific policy
-	//the "AZPSPLinuxRestricted" set has this restriction.  Try this first
-	//and then "AZPSPHostPIDHostIPCNS" if that's not set
-	_, b := (*pc)[azPSPLinuxRestricted]
-	if b {
-		return &b, nil
+	//check for the policies we've been given
+	for _, r := range *res {
+		_, b := (*pc)[r]
+		if b {
+			return &b, nil
+		}
 	}
 
-	//try "AZPSPHostPIDHostIPCNS"
-	_, b = (*pc)[azPSPHostPIDHostIPCNS]
-
+	//haven't found any if we get to here ...
+	b := false
 	return &b, nil
 }
 
