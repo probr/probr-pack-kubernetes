@@ -165,54 +165,15 @@ func getPods(c *kubernetes.Clientset) (*apiv1.PodList, error) {
 // cname - container name
 // image - image
 // w - indicates whether or not to wait for the pod to be running
+// sc - security context
 func CreatePod(pname *string, ns *string, cname *string, image *string, w bool, sc *apiv1.SecurityContext) (*apiv1.Pod, error) {
-	// c, err := GetClient()
-	// if err != nil {
-	// 	return nil, err
-	// }
-
-	// //create the namespace for the POD (noOp if already present)
-	// _, err = CreateNamespace(ns)
-	// if err != nil {
-	// 	return nil, err
-	// }
-
-	//now do pod ...
-	//pc := c.CoreV1().Pods(*ns)
+	//create Pod Objet ...
 	p := GetPodObject(*pname, *ns, *cname, *image, sc)
 
 	return CreatePodFromObject(p, pname, ns, w)
-
-	// ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	// defer cancel()
-
-	// res, err := pc.Create(ctx, p, metav1.CreateOptions{})
-	// if err != nil {
-	// 	if isAlreadyExists(err) {
-	// 		log.Printf("[NOTICE] POD %v already exists. Returning existing.", *pname)
-	// 		res, _ := pc.Get(ctx, *pname, metav1.GetOptions{})
-
-	// 		//return it and nil out err
-	// 		return res, nil
-	// 	} else if isForbidden(err) {
-	// 		log.Printf("[NOTICE] Creation of POD %v is forbidden: %v", *pname, err)
-	// 		//return a specific error:
-	// 		return nil, &PodCreationError{err, toPodCreationErrorCode(err)}
-	// 	}
-	// 	return nil, err
-	// }
-
-	// log.Printf("[NOTICE] POD %q created.\n", res.GetObjectMeta().GetName())
-
-	// if w {
-	// 	//wait:
-	// 	waitForPhase(apiv1.PodRunning, c, ns, pname)
-	// }
-
-	// return res, nil
 }
 
-// CreatePodFromObject ...
+// CreatePodFromObject creates a pod from the supplied pod object in the gievn namespace
 func CreatePodFromObject(p *apiv1.Pod, pname *string, ns *string, w bool) (*apiv1.Pod, error) {
 	c, err := GetClient()
 	if err != nil {
