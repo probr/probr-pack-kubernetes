@@ -11,8 +11,9 @@ import (
 )
 
 type probState struct {
-	podName       string
-	creationError *kubernetes.PodCreationError
+	podName        string
+	creationError  *kubernetes.PodCreationError
+	expectedReason *kubernetes.PodCreationErrorReason
 }
 
 func init() {
@@ -62,10 +63,11 @@ func (p *probState) theOperationWillWithAnError(res, msg string) error {
 			return fmt.Errorf("pod %v was created - test failed", p.podName)
 		}
 		//should also check code:
-		if p.creationError.ReasonCode != kubernetes.PSPNoPrivilege {
+		_, exists := p.creationError.ReasonCodes[*p.expectedReason]
+		if !exists {
 			//also a fail:
-			return fmt.Errorf("pod not was created but reason (%v) was not as expected (%v)- test failed",
-				p.creationError.ReasonCode, kubernetes.PSPNoPrivilege)
+			return fmt.Errorf("pod not was created but failure reasons (%v) did not contain expected (%v)- test failed",
+				p.creationError.ReasonCodes, p.expectedReason)
 		}
 
 		//we're good
@@ -88,11 +90,12 @@ func (p *probState) theOperationWillWithAnError(res, msg string) error {
 
 }
 
-func (p *probState) processCreationResult(pd *apiv1.Pod, err error) error {
+func (p *probState) processCreationResult(pd *apiv1.Pod, expected kubernetes.PodCreationErrorReason, err error) error {
 	if err != nil {
 		//check for expected error
 		if e, ok := err.(*kubernetes.PodCreationError); ok {
 			p.creationError = e
+			p.expectedReason = &expected
 			return nil
 		}
 		//unexpected error
@@ -128,6 +131,23 @@ func (p *probState) runControlTest(cf func() (*bool, error), c string) error {
 	return nil
 }
 
+func (p *probState) runVerificationTest(c kubernetes.PSPTestCommand) error {
+	//check for pod name, which will be set if successfully created
+	if p.podName != "" {
+		ex, err := kubernetes.ExecPSPTestCmd(&p.podName, c)
+		//want this to fail as execution of a command requiring root should be blocked
+		if err != nil {
+			return nil
+		}
+		if err == nil {
+			return fmt.Errorf("verification command (%v) succeeded with exit code %v", c, ex)
+		}
+	}
+
+	//pod wasn't created so nothing to test
+	return nil
+}
+
 // CIS-5.2.1
 // privileged access
 func (p *probState) privilegedAccessRequestIsMarkedForTheKubernetesDeployment(privilegedAccessRequested string) error {
@@ -138,13 +158,17 @@ func (p *probState) privilegedAccessRequestIsMarkedForTheKubernetesDeployment(pr
 		pa = false
 	}
 
-	pd, err := kubernetes.CreatePODSettingSecurityContext(&pa,nil,nil)
+	pd, err := kubernetes.CreatePODSettingSecurityContext(&pa, nil, nil)
 
-	return p.processCreationResult(pd, err)	
+	return p.processCreationResult(pd, kubernetes.PSPNoPrivilege, err)
 }
 
 func (p *probState) someControlExistsToPreventPrivilegedAccessForKubernetesDeploymentsToAnActiveKubernetesCluster() error {
 	return p.runControlTest(kubernetes.PrivilegedAccessIsRestricted, "PrivilegedAccessIsRestricted")
+}
+
+func (p *probState) iShouldNotBeAbleToPerformACommandThatRequiresPrivilegedAccess() error {
+	return p.runVerificationTest(kubernetes.Chroot)
 }
 
 // CIS-5.2.2
@@ -159,11 +183,15 @@ func (p *probState) hostPIDRequestIsMarkedForTheKubernetesDeployment(hostPIDRequ
 
 	pd, err := kubernetes.CreatePODSettingAttributes(&hostPID, nil, nil)
 
-	return p.processCreationResult(pd, err)
+	return p.processCreationResult(pd, kubernetes.PSPHostNamespace, err)
 }
 
-func (p *probState) someSystemExistsToPreventAKubernetesContainerFromRunningUsingTheHostPIDOnTheActiveKubernetesCluster() error {	
+func (p *probState) someSystemExistsToPreventAKubernetesContainerFromRunningUsingTheHostPIDOnTheActiveKubernetesCluster() error {
 	return p.runControlTest(kubernetes.HostPIDIsRestricted, "HostPIDIsRestricted")
+}
+
+func (p *probState) iShouldNotBeAbleToPerformACommandThatProvidesAccessToTheHostPIDNamespace() error {
+	return p.runVerificationTest(kubernetes.EnterHostPIDNS)
 }
 
 //CIS-5.2.3
@@ -177,11 +205,15 @@ func (p *probState) hostIPCRequestIsMarkedForTheKubernetesDeployment(hostIPCRequ
 
 	pd, err := kubernetes.CreatePODSettingAttributes(nil, &hostIPC, nil)
 
-	return p.processCreationResult(pd, err)
+	return p.processCreationResult(pd, kubernetes.PSPHostNamespace, err)
 }
 
 func (p *probState) someSystemExistsToPreventAKubernetesDeploymentFromRunningUsingTheHostIPCInAnExistingKubernetesCluster() error {
 	return p.runControlTest(kubernetes.HostIPCIsRestricted, "HostIPCIsRestricted")
+}
+
+func (p *probState) iShouldNotBeAbleToPerformACommandThatProvidesAccessToTheHostIPCNamespace() error {
+	return p.runVerificationTest(kubernetes.EnterHostIPCNS)
 }
 
 //CIS-5.2.4
@@ -195,10 +227,13 @@ func (p *probState) hostNetworkRequestIsMarkedForTheKubernetesDeployment(hostNet
 
 	pd, err := kubernetes.CreatePODSettingAttributes(nil, nil, &hostNetwork)
 
-	return p.processCreationResult(pd, err)
+	return p.processCreationResult(pd, kubernetes.PSPHostNetwork, err)
 }
 func (p *probState) someSystemExistsToPreventAKubernetesDeploymentFromRunningUsingTheHostNetworkInAnExistingKubernetesCluster() error {
 	return p.runControlTest(kubernetes.HostNetworkIsRestricted, "HostNetworkIsRestricted")
+}
+func (p *probState) iShouldNotBeAbleToPerformACommandThatProvidesAccessToTheHostNetworkNamespace() error {
+	return p.runVerificationTest(kubernetes.EnterHostNetworkNS)
 }
 
 //CIS-5.2.5
@@ -210,13 +245,14 @@ func (p *probState) privilegedEscalationIsMarkedForTheKubernetesDeployment(privi
 		pa = false
 	}
 
-	pd, err := kubernetes.CreatePODSettingSecurityContext(nil,&pa,nil)
+	pd, err := kubernetes.CreatePODSettingSecurityContext(nil, &pa, nil)
 
-	return p.processCreationResult(pd, err)
+	return p.processCreationResult(pd, kubernetes.PSPNoPrivilegeEscalation, err)
 }
 func (p *probState) someSystemExistsToPreventAKubernetesDeploymentFromRunningUsingTheAllowPrivilegeEscalationInAnExistingKubernetesCluster() error {
 	return p.runControlTest(kubernetes.PrivilegedEscalationIsRestricted, "PrivilegedEscalationIsRestricted")
 }
+//"but" same as 5.2.1
 
 //CIS-5.2.6
 func (p *probState) theUserRequestedIsForTheKubernetesDeployment(requestedUser string) error {
@@ -228,55 +264,71 @@ func (p *probState) theUserRequestedIsForTheKubernetesDeployment(requestedUser s
 	}
 
 	pd, err := kubernetes.CreatePODSettingSecurityContext(nil, nil, &runAsUser)
-	return p.processCreationResult(pd, err)
+	return p.processCreationResult(pd, kubernetes.PSPAllowedUsersGroups, err)
 }
 func (p *probState) someSystemExistsToPreventAKubernetesDeploymentFromRunningAsTheRootUserInAnExistingKubernetesCluster() error {
-	return p.runControlTest(kubernetes.RootUserIsRestricted, "RootUserIsRestricted")		
+	return p.runControlTest(kubernetes.RootUserIsRestricted, "RootUserIsRestricted")
+}
+func (p *probState) theKubernetesDeploymentShouldRunWithANonrootUID() error {
+	return p.runVerificationTest(kubernetes.VerifyNonRootUID)
 }
 
 //CIS-5.2.7
 func (p *probState) nETRAWIsMarkedForTheKubernetesDeployment(netRawRequested string) error {
-	var c = make([]string, 1)
+	var c []string
 	if netRawRequested == "True" {
+		c = make([]string, 1)
 		c[0] = "NET_RAW"
 	}
 
 	pd, err := kubernetes.CreatePODSettingCapabilities(&c)
-	return p.processCreationResult(pd, err)
+	return p.processCreationResult(pd, kubernetes.PSPAllowedCapabilities, err)
 }
 func (p *probState) someSystemExistsToPreventAKubernetesDeploymentFromRunningWithNETRAWCapabilityInAnExistingKubernetesCluster() error {
 	return p.runControlTest(kubernetes.NETRawIsRestricted, "NETRAWIsRestricted")
 }
+func (p *probState) iShouldNotBeAbleToPerformACommandThatRequiresNETRAWCapability() error {
+	return p.runVerificationTest(kubernetes.NetRawTest)
+}
 
 //CIS-5.2.8
 func (p *probState) additionalCapabilitiesForTheKubernetesDeployment(addCapabilities string) error {
-	var c = make([]string, 1)
+	var c []string
 	if addCapabilities == "ARE" {
 		//TODO: just add net_admin for now - but is this appropriate?
+		c = make([]string, 1)
 		c[0] = "NET_ADMIN"
 	}
 
 	pd, err := kubernetes.CreatePODSettingCapabilities(&c)
-	return p.processCreationResult(pd, err)
+	return p.processCreationResult(pd, kubernetes.PSPAllowedCapabilities, err)
 }
 func (p *probState) someSystemExistsToPreventKubernetesDeploymentsWithCapabilitiesBeyondTheDefaultSetFromBeingDeployedToAnExistingKubernetesCluster() error {
 	return p.runControlTest(kubernetes.AllowedCapabilitiesAreRestricted, "AllowedCapabilitiesAreRestricted")
 }
+func (p *probState) iShouldNotBeAbleToPerformACommandThatRequiresCapabilitiesOutsideOfTheDefaultSet() error {
+	return p.runVerificationTest(kubernetes.SpecialCapTest)
+}
 
 //CIS-5.2.9
 func (p *probState) assignedCapabilitiesForTheKubernetesDeployment(assignCapabilities string) error {
-	var c = make([]string, 1)
+	var c []string
 	if assignCapabilities == "ARE" {
 		//TODO: just add net_admin for now - but is this appropriate?
 		//what's the difference with 5.2.8???
+		c = make([]string, 1)
 		c[0] = "NET_ADMIN"
 	}
 
 	pd, err := kubernetes.CreatePODSettingCapabilities(&c)
-	return p.processCreationResult(pd, err)
+	return p.processCreationResult(pd, kubernetes.PSPAllowedCapabilities, err)
 }
 func (p *probState) someSystemExistsToPreventKubernetesDeploymentsWithAssignedCapabilitiesFromBeingDeployedToAnExistingKubernetesCluster() error {
 	return p.runControlTest(kubernetes.AssignedCapabilitiesAreRestricted, "AssignedCapabilitiesAreRestricted")
+}
+
+func (p *probState) iShouldNotBeAbleToPerformACommandThatRequiresAnyCapabilities() error {
+	return p.runVerificationTest(kubernetes.SpecialCapTest)
 }
 
 func (p *probState) setup() {
@@ -287,6 +339,8 @@ func (p *probState) setup() {
 
 func (p *probState) tearDown() {
 	kubernetes.TeardownPodSecurityTestPod(&p.podName)
+	p.podName = ""
+	p.creationError = nil
 }
 
 //TestSuiteInitialize ...
@@ -309,18 +363,22 @@ func ScenarioInitialize(ctx *godog.ScenarioContext) {
 	//CIS-5.2.1
 	ctx.Step(`^privileged access request is marked "([^"]*)" for the Kubernetes deployment$`, ps.privilegedAccessRequestIsMarkedForTheKubernetesDeployment)
 	ctx.Step(`^some system exists to prevent a Kubernetes deployment running with privileged access in an existing Kubernetes cluster$`, ps.someControlExistsToPreventPrivilegedAccessForKubernetesDeploymentsToAnActiveKubernetesCluster)
+	ctx.Step(`^I should not be able to perform a command that requires privileged access$`, ps.iShouldNotBeAbleToPerformACommandThatRequiresPrivilegedAccess)
 
 	//CIS-5.2.2
 	ctx.Step(`^hostPID request is marked "([^"]*)" for the Kubernetes deployment$`, ps.hostPIDRequestIsMarkedForTheKubernetesDeployment)
 	ctx.Step(`^some system exists to prevent a Kubernetes deployment from running using the hostPID in an existing Kubernetes cluster$`, ps.someSystemExistsToPreventAKubernetesContainerFromRunningUsingTheHostPIDOnTheActiveKubernetesCluster)
+	ctx.Step(`^I should not be able to perform a command that provides access to the host PID namespace$`, ps.iShouldNotBeAbleToPerformACommandThatProvidesAccessToTheHostPIDNamespace)
 
 	//CIS-5.2.3
 	ctx.Step(`^hostIPC request is marked "([^"]*)" for the Kubernetes deployment$`, ps.hostIPCRequestIsMarkedForTheKubernetesDeployment)
 	ctx.Step(`^some system exists to prevent a Kubernetes deployment from running using the hostIPC in an existing Kubernetes cluster$`, ps.someSystemExistsToPreventAKubernetesDeploymentFromRunningUsingTheHostIPCInAnExistingKubernetesCluster)
+	ctx.Step(`^I should not be able to perform a command that provides access to the host IPC namespace$`, ps.iShouldNotBeAbleToPerformACommandThatProvidesAccessToTheHostIPCNamespace)
 
 	//CIS-5.2.4
 	ctx.Step(`^hostNetwork request is marked "([^"]*)" for the Kubernetes deployment$`, ps.hostNetworkRequestIsMarkedForTheKubernetesDeployment)
 	ctx.Step(`^some system exists to prevent a Kubernetes deployment from running using the hostNetwork in an existing Kubernetes cluster$`, ps.someSystemExistsToPreventAKubernetesDeploymentFromRunningUsingTheHostNetworkInAnExistingKubernetesCluster)
+	ctx.Step(`^I should not be able to perform a command that provides access to the host network namespace$`, ps.iShouldNotBeAbleToPerformACommandThatProvidesAccessToTheHostNetworkNamespace)
 
 	//CIS-5.2.5
 	ctx.Step(`^privileged escalation is marked "([^"]*)" for the Kubernetes deployment$`, ps.privilegedEscalationIsMarkedForTheKubernetesDeployment)
@@ -329,18 +387,22 @@ func ScenarioInitialize(ctx *godog.ScenarioContext) {
 	//CIS-5.2.6
 	ctx.Step(`^the user requested is "([^"]*)" for the Kubernetes deployment$`, ps.theUserRequestedIsForTheKubernetesDeployment)
 	ctx.Step(`^some system exists to prevent a Kubernetes deployment from running as the root user in an existing Kubernetes cluster$`, ps.someSystemExistsToPreventAKubernetesDeploymentFromRunningAsTheRootUserInAnExistingKubernetesCluster)
+	ctx.Step(`^the Kubernetes deployment should run with a non-root UID$`, ps.theKubernetesDeploymentShouldRunWithANonrootUID)
 
 	//CIS-5.2.7
 	ctx.Step(`^NET_RAW is marked "([^"]*)" for the Kubernetes deployment$`, ps.nETRAWIsMarkedForTheKubernetesDeployment)
 	ctx.Step(`^some system exists to prevent a Kubernetes deployment from running with NET_RAW capability in an existing Kubernetes cluster$`, ps.someSystemExistsToPreventAKubernetesDeploymentFromRunningWithNETRAWCapabilityInAnExistingKubernetesCluster)
+	ctx.Step(`^I should not be able to perform a command that requires NET_RAW capability$`, ps.iShouldNotBeAbleToPerformACommandThatRequiresNETRAWCapability)
 
 	//CIS-5.2.8
-	ctx.Step(`^additional capabilities "([^"]*)" for the Kubernetes deployment$`, ps.additionalCapabilitiesForTheKubernetesDeployment)
+	ctx.Step(`^additional capabilities "([^"]*)" requested for the Kubernetes deployment$`, ps.additionalCapabilitiesForTheKubernetesDeployment)
 	ctx.Step(`^some system exists to prevent Kubernetes deployments with capabilities beyond the default set from being deployed to an existing kubernetes cluster$`, ps.someSystemExistsToPreventKubernetesDeploymentsWithCapabilitiesBeyondTheDefaultSetFromBeingDeployedToAnExistingKubernetesCluster)
+	ctx.Step(`^I should not be able to perform a command that requires capabilities outside of the default set$`, ps.iShouldNotBeAbleToPerformACommandThatRequiresCapabilitiesOutsideOfTheDefaultSet)
 
 	//CIS-5.2.9
-	ctx.Step(`^assigned capabilities "([^"]*)" for the Kubernetes deployment$`, ps.assignedCapabilitiesForTheKubernetesDeployment)
+	ctx.Step(`^assigned capabilities "([^"]*)" requested for the Kubernetes deployment$`, ps.assignedCapabilitiesForTheKubernetesDeployment)
 	ctx.Step(`^some system exists to prevent Kubernetes deployments with assigned capabilities from being deployed to an existing Kubernetes cluster$`, ps.someSystemExistsToPreventKubernetesDeploymentsWithAssignedCapabilitiesFromBeingDeployedToAnExistingKubernetesCluster)
+	ctx.Step(`^I should not be able to perform a command that requires any capabilities$`, ps.iShouldNotBeAbleToPerformACommandThatRequiresAnyCapabilities)
 
 	//general - outcome
 	ctx.Step(`^the operation will "([^"]*)" with an error "([^"]*)"$`, ps.theOperationWillWithAnError)
