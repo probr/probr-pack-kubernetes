@@ -35,6 +35,7 @@ So that a policy of least privilege can be enforced in order to prevent maliciou
 		When a Kubernetes deployment is applied to an existing Kubernetes cluster 
 		And hostPID request is marked "<HostPID requested>" for the Kubernetes deployment
 		Then the operation will "<RESULT>" with an error "<ERRORMESSAGE>"
+		But I should not be able to perform a command that provides access to the host PID namespace 
 
 		Examples: 
 			| HostPID requested           | RESULT        | ERRORMESSAGE							     |
@@ -49,6 +50,7 @@ So that a policy of least privilege can be enforced in order to prevent maliciou
 		When a Kubernetes deployment is applied to an existing Kubernetes cluster 
 		And hostIPC request is marked "<hostIPC access is requested>" for the Kubernetes deployment
 		Then the operation will "<RESULT>" with an error "<ERRORMESSAGE>"
+		But I should not be able to perform a command that provides access to the host IPC namespace
 
 		Examples:
 			| hostIPC access is requested | RESULT   | ERRORMESSAGE                        |
@@ -63,6 +65,7 @@ So that a policy of least privilege can be enforced in order to prevent maliciou
 		When a Kubernetes deployment is applied to an existing Kubernetes cluster 
 		And hostNetwork request is marked "<hostNetwork access is requested>" for the Kubernetes deployment
 		Then the operation will "<RESULT>" with an error "<ERRORMESSAGE>"
+		But I should not be able to perform a command that provides access to the host network namespace
 
 		Examples:
 			| hostNetwork access is requested | RESULT   | ERRORMESSAGE |
@@ -77,6 +80,7 @@ So that a policy of least privilege can be enforced in order to prevent maliciou
 		When a Kubernetes deployment is applied to an existing Kubernetes cluster
 		And privileged escalation is marked "<AllowPrivilegeEscalation requested>" for the Kubernetes deployment 
 		Then the operation will "<RESULT>" with an error "<ERRORMESSAGE>"
+		But I should not be able to perform a command that requires privileged access
 
 		Examples: 
 			| AllowPrivilegeEscalation requested | RESULT        | ERRORMESSAGE							                       |
@@ -91,6 +95,7 @@ So that a policy of least privilege can be enforced in order to prevent maliciou
 		When a Kubernetes deployment is applied to an existing Kubernetes cluster
 		And the user requested is "<requested user>" for the Kubernetes deployment 
 		Then the operation will "<RESULT>" with an error "<ERRORMESSAGE>"
+		And the Kubernetes deployment should run with a non-root UID
 
 		Examples: 
 			| requested user | RESULT        | ERRORMESSAGE				   |
@@ -105,6 +110,7 @@ So that a policy of least privilege can be enforced in order to prevent maliciou
 		When a Kubernetes deployment is applied to an existing Kubernetes cluster
 		And  NET_RAW is marked "<NET_RAW requested>" for the Kubernetes deployment
 		Then the operation will "<RESULT>" with an error "<ERRORMESSAGE>"
+		But I should not be able to perform a command that requires NET_RAW capability
 
 		Examples: 
 			| NET_RAW requested           | RESULT        | ERRORMESSAGE							      |
@@ -117,8 +123,9 @@ So that a policy of least privilege can be enforced in order to prevent maliciou
 		Given a Kubernetes cluster exists which we can deploy into
 		And some system exists to prevent Kubernetes deployments with capabilities beyond the default set from being deployed to an existing kubernetes cluster
 		When a Kubernetes deployment is applied to an existing Kubernetes cluster
-		And additional capabilities "<requested>" for the Kubernetes deployment
+		And additional capabilities "<requested>" requested for the Kubernetes deployment
 		Then the operation will "<RESULT>" with an error "<ERRORMESSAGE>"
+		But I should not be able to perform a command that requires capabilities outside of the default set
 
 		Examples: 
 			| requested 	| RESULT        | ERRORMESSAGE						           |
@@ -131,8 +138,9 @@ So that a policy of least privilege can be enforced in order to prevent maliciou
         Given a Kubernetes cluster exists which we can deploy into
 		And some system exists to prevent Kubernetes deployments with assigned capabilities from being deployed to an existing Kubernetes cluster
         When a Kubernetes deployment is applied to an existing Kubernetes cluster
-		And assigned capabilities "<requested>" for the Kubernetes deployment
+		And assigned capabilities "<requested>" requested for the Kubernetes deployment
         Then the operation will "<RESULT>" with an error "<ERRORMESSAGE>"
+		But I should not be able to perform a command that requires any capabilities
 
     	Examples: 
         	| requested 	| RESULT   | ERRORMESSAGE                                            |

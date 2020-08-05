@@ -35,6 +35,9 @@ const (
 	PSPNoPrivilegeEscalation
 	PSPAllowedUsersGroups
 	PSPContainerAllowedImages
+	PSPHostNamespace	
+	PSPHostNetwork
+	PSPAllowedCapabilities
 )
 
 func (r PodCreationErrorReason) String() string {
@@ -42,17 +45,20 @@ func (r PodCreationErrorReason) String() string {
 		"podcreation-error: psp-container-no-privilege",
 		"podcreation-error: psp-container-no-privilege-escalation",
 		"podcreation-error: psp-allowed-users-groups",
-		"podcreation-error: psp-container-allowed-images"}[r]
+		"podcreation-error: psp-container-allowed-images",
+		"podcreation-error: psp-host-namespace",		
+		"podcreation-error: psp-host-network",
+		"podcreation-error: psp-allowed-capabilities"}[r]
 }
 
 //PodCreationError ...
 type PodCreationError struct {
-	err        error
-	ReasonCode PodCreationErrorReason
+	err         error
+	ReasonCodes map[PodCreationErrorReason]*PodCreationErrorReason
 }
 
 func (p *PodCreationError) Error() string {
-	return fmt.Sprintf("pod creation error: %v %v", p.ReasonCode, p.err)
+	return fmt.Sprintf("pod creation error: %v %v", p.ReasonCodes, p.err)
 }
 
 var (
@@ -68,6 +74,9 @@ func init() {
 	azErrorToPodCreationError["azurepolicy-psp-container-no-privilege-escalation"] = PSPNoPrivilegeEscalation
 	azErrorToPodCreationError["azurepolicy-psp-allowed-users-groups"] = PSPAllowedUsersGroups
 	azErrorToPodCreationError["azurepolicy-container-allowed-images"] = PSPContainerAllowedImages
+	azErrorToPodCreationError["azurepolicy-psp-host-namespace"] = PSPHostNamespace	
+	azErrorToPodCreationError["azurepolicy-psp-host-network"] = PSPHostNetwork
+	azErrorToPodCreationError["azurepolicy-container-allowed-capabilities"] = PSPAllowedCapabilities
 }
 
 //SetKubeConfigFile sets the fully qualified path to the Kubernetes config file.
@@ -203,7 +212,7 @@ func CreatePodFromObject(p *apiv1.Pod, pname *string, ns *string, w bool) (*apiv
 		} else if isForbidden(err) {
 			log.Printf("[NOTICE] Creation of POD %v is forbidden: %v", *pname, err)
 			//return a specific error:
-			return nil, &PodCreationError{err, toPodCreationErrorCode(err)}
+			return nil, &PodCreationError{err, *toPodCreationErrorCode(err)}
 		}
 		return nil, err
 	}
@@ -439,7 +448,11 @@ func isForbidden(err error) bool {
 	return false
 }
 
-func toPodCreationErrorCode(err error) PodCreationErrorReason {
+func toPodCreationErrorCode(err error) *map[PodCreationErrorReason]*PodCreationErrorReason {
+	//try and map the error codes within the error message issued by the service provider
+	//to known error codes (return a map so they can be easily accessed)
+
+	var pcErr = make(map[PodCreationErrorReason]*PodCreationErrorReason)
 	if se, ok := err.(*errors.StatusError); ok {
 		//get the reason
 		r := se.ErrStatus.Reason
@@ -448,15 +461,16 @@ func toPodCreationErrorCode(err error) PodCreationErrorReason {
 		log.Printf("[INFO] *** reason: %v", r)
 		log.Printf("[INFO] *** message: %v", m)
 		//map this to the pod creation code
+
 		for k, e := range azErrorToPodCreationError {
 			if strings.Contains(m, k) {
-				//take the element
-				return e
+				//take the element				
+				pcErr[e] = &e
 			}
 		}
 	}
 
-	return UndefinedPodCreationErrorReason
+	return &pcErr
 }
 
 func waitForPhase(ph apiv1.PodPhase, c *kubernetes.Clientset, ns *string, n *string) error {

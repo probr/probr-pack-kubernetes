@@ -23,6 +23,30 @@ const (
 	WithoutPrivilegedAccess
 )
 
+//PSPTestCommand ...
+type PSPTestCommand int
+
+//PSPTestCommand ...
+const (
+	Chroot PSPTestCommand = iota
+	EnterHostPIDNS
+	EnterHostIPCNS
+	EnterHostNetworkNS
+	VerifyNonRootUID
+	NetRawTest
+	SpecialCapTest
+)
+
+func (c PSPTestCommand) String() string {
+	return [...]string{"chroot .",
+		"nsenter -t 1 -p ps",
+		"nsenter -t 1 -i ps",
+		"nsenter -t 1 -n ps",
+		"id -u > 0 ",
+		"ping google.com",		
+		"ip link add dummy0 type dummy"}[c]
+}
+
 const (
 	//TODO: default to these values for MVP - need to expose in future
 	pspTestNamespace = "probr-pod-security-test-ns"
@@ -248,14 +272,28 @@ func AssignedCapabilitiesAreRestricted() (*bool, error) {
 // pr *bool - set the Privileged flag.  Defaults to false.
 // pe *bool - set the Allow Privileged Escalation flag.  Defaults to false.
 // runAsUser *int64 - set RunAsUser.  Defaults to 1000.
-func CreatePODSettingSecurityContext(pr *bool, pe *bool, runAsUser *int64) (*apiv1.Pod, error) {
+func CreatePODSettingSecurityContext(pr *bool, pe *bool, runAsUser *int64) (*apiv1.Pod, error) {	
 	//default sensibly if not provided
+	//this needs to take account of rules around allowedPrivilegdEscalation and Privileged:
+	// cannot set `allowPrivilegeEscalation` to false and `privileged` to true
 	f := false
 	if pr == nil {
-		pr = &f
+		if pe != nil {
+			pr = pe //set pr to pe value
+		}
+		//if pe is also nil then just set them both to false
+		if pe == nil {
+			pe, pr = &f, &f
+		}
 	}
 	if pe == nil {
-		pe = &f
+		if pr != nil {
+			pe = pr //set pe to pr value
+		}
+		//if pr is also nil then just set them both to false
+		if pr == nil {
+			pe, pr = &f, &f
+		}
 	}
 	if runAsUser == nil {
 		i := int64(1000)
@@ -347,8 +385,8 @@ func CreatePODSettingCapabilities(c *[]string) (*apiv1.Pod, error) {
 	return p, nil
 }
 
-// ExecRootAccessCmd ...
-func ExecRootAccessCmd(pName *string) (int, error) {
+// ExecPSPTestCmd ...
+func ExecPSPTestCmd(pName *string, cmd PSPTestCommand) (int, error) {
 	var pn string
 	//if we've not been given a pod name, assume one needs to be created:
 	if pName == nil {
@@ -364,14 +402,12 @@ func ExecRootAccessCmd(pName *string) (int, error) {
 	} else {
 		pn = *pName
 	}
-
-	//create a command that requires root access
-	//try chroot
-	cmd := "chroot ."
+	
+	c := cmd.String()
 	ns := pspTestNamespace
-	stdout, _, ex, err := ExecCommand(&cmd, &ns, &pn)
+	stdout, _, ex, err := ExecCommand(&c, &ns, &pn)
 
-	log.Printf("[NOTICE] ExecRootAccessCmd: %v stdout: %v exit code: %v", cmd, stdout, ex)
+	log.Printf("[NOTICE] ExecPSPTestCmd: %v stdout: %v exit code: %v", cmd, stdout, ex)
 
 	if err != nil {
 		return ex, err

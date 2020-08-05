@@ -76,10 +76,11 @@ func (p *probState) theDeploymentAttemptIs(res string) error {
 			return fmt.Errorf("pod %v was created - test failed", p.podName)
 		}
 		//should also check code:
-		if p.creationError.ReasonCode != kubernetes.PSPContainerAllowedImages {
+		_, exists := p.creationError.ReasonCodes[kubernetes.PSPContainerAllowedImages]
+		if !exists {		
 			//also a fail:
-			return fmt.Errorf("pod not was created but reason (%v) was not as expected (%v)- test failed",
-				p.creationError.ReasonCode, kubernetes.PSPContainerAllowedImages)
+			return fmt.Errorf("pod not was created but failure reasons (%v) did not contain expected (%v)- test failed",
+				p.creationError.ReasonCodes, kubernetes.PSPContainerAllowedImages)
 		}
 
 		//we're good
