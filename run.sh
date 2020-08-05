@@ -1,4 +1,5 @@
 #!/bin/sh
 
 ./probr
-npm view/index.js
+cd view
+node index.js /probr/testoutput
