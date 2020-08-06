@@ -1,0 +1,7 @@
+{
+  "name": "probr",
+  "version": "1.0.0",
+  "dependencies": {
+    "cucumber-html-reporter": "latest"
+  }
+}

@@ -1,0 +1,8 @@
+version: "3.8"
+services:
+        probr:
+            build: .
+            volumes:
+                - ./.kube:/probr/.kube
+                - ./static-content:/probr/testoutput
+
