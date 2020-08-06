@@ -20,22 +20,16 @@ func TestMain(m *testing.M) {
 	log.Print("[NOTICE] Running Kube tests ...")
 	result := m.Run()
 
-	log.Printf("[NOTICE] Completed Kube tests ... (result: %v)", result)	
+	log.Printf("[NOTICE] Completed Kube tests ... (result: %v)", result)
 	os.Exit(result)
 }
 
 func TestGetPods(t *testing.T) {
-	kubernetes.GetPods()
-}
-
-func TestCreateNamespace(t *testing.T) {
-	_, err := kubernetes.CreateNamespace(&testNS)
-
-	handleResult(nil, err)
+	kubernetes.GetKubeInstance().GetPods()
 }
 
 func TestCreatePod(t *testing.T) {
-	_, err := kubernetes.CreatePod(&testPod, &testNS, &testContainer, &testImage, true, nil)
+	_, err := kubernetes.GetKubeInstance().CreatePod(&testPod, &testNS, &testContainer, &testImage, true, nil)
 
 	handleResult(nil, err)
 }
@@ -45,7 +39,7 @@ func TestExecCmd(t *testing.T) {
 	url := "http://www.google.com"
 	cmd := "curl -s -o /dev/null -I -L -w %{http_code} " + url
 
-	so, se, ec, err := kubernetes.ExecCommand(&cmd, &testNS, &testPod)
+	so, se, ec, err := kubernetes.GetKubeInstance().ExecCommand(&cmd, &testNS, &testPod)
 
 	log.Printf("[NOTICE] Test command result:")
 	log.Printf("[NOTICE] stdout: %v stderr: %v exit code: %v", so, se, ec)
@@ -54,13 +48,13 @@ func TestExecCmd(t *testing.T) {
 }
 
 func TestDeletePod(t *testing.T) {
-	err := kubernetes.DeletePod(&testPod, &testNS, true)
+	err := kubernetes.GetKubeInstance().DeletePod(&testPod, &testNS, true)
 
 	handleResult(nil, err)
 }
 
 func TestDeleteNamespace(t *testing.T) {
-	err := kubernetes.DeleteNamespace(&testNS)
+	err := kubernetes.GetKubeInstance().DeleteNamespace(&testNS)
 
 	handleResult(nil, err)
 }

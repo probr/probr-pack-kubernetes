@@ -16,6 +16,14 @@ type probState struct {
 	expectedReason *kubernetes.PodCreationErrorReason
 }
 
+//TODO: revise when interface this bit up ...
+var psp kubernetes.PodSecurityPolicy
+
+// SetPodSecurityPolicy ...
+func SetPodSecurityPolicy(p kubernetes.PodSecurityPolicy) {
+	psp = p
+}
+
 func init() {
 	td := coreengine.TestDescriptor{Group: coreengine.Kubernetes,
 		Category: coreengine.PodSecurityPolicies, Name: "pod_security_policy"}
@@ -37,13 +45,10 @@ func (p *probState) creationWillWithAMessage(arg1, arg2 string) error {
 }
 
 func (p *probState) aKubernetesClusterExistsWhichWeCanDeployInto() error {
-	c, err := kubernetes.GetClient()
-	if err != nil {
-		return err
-	}
+	b := psp.ClusterIsDeployed()
 
-	if c == nil {
-		return fmt.Errorf("client is nil")
+	if b == nil || !*b {
+		return fmt.Errorf("kubernetes cluster is NOT deployed")
 	}
 
 	//else we're good ...
@@ -134,7 +139,7 @@ func (p *probState) runControlTest(cf func() (*bool, error), c string) error {
 func (p *probState) runVerificationTest(c kubernetes.PSPTestCommand) error {
 	//check for pod name, which will be set if successfully created
 	if p.podName != "" {
-		ex, err := kubernetes.ExecPSPTestCmd(&p.podName, c)
+		ex, err := psp.ExecPSPTestCmd(&p.podName, c)
 		//want this to fail as execution of a command requiring root should be blocked
 		if err != nil {
 			return nil
@@ -158,13 +163,13 @@ func (p *probState) privilegedAccessRequestIsMarkedForTheKubernetesDeployment(pr
 		pa = false
 	}
 
-	pd, err := kubernetes.CreatePODSettingSecurityContext(&pa, nil, nil)
+	pd, err := psp.CreatePODSettingSecurityContext(&pa, nil, nil)
 
 	return p.processCreationResult(pd, kubernetes.PSPNoPrivilege, err)
 }
 
 func (p *probState) someControlExistsToPreventPrivilegedAccessForKubernetesDeploymentsToAnActiveKubernetesCluster() error {
-	return p.runControlTest(kubernetes.PrivilegedAccessIsRestricted, "PrivilegedAccessIsRestricted")
+	return p.runControlTest(psp.PrivilegedAccessIsRestricted, "PrivilegedAccessIsRestricted")
 }
 
 func (p *probState) iShouldNotBeAbleToPerformACommandThatRequiresPrivilegedAccess() error {
@@ -181,13 +186,13 @@ func (p *probState) hostPIDRequestIsMarkedForTheKubernetesDeployment(hostPIDRequ
 		hostPID = false
 	}
 
-	pd, err := kubernetes.CreatePODSettingAttributes(&hostPID, nil, nil)
+	pd, err := psp.CreatePODSettingAttributes(&hostPID, nil, nil)
 
 	return p.processCreationResult(pd, kubernetes.PSPHostNamespace, err)
 }
 
 func (p *probState) someSystemExistsToPreventAKubernetesContainerFromRunningUsingTheHostPIDOnTheActiveKubernetesCluster() error {
-	return p.runControlTest(kubernetes.HostPIDIsRestricted, "HostPIDIsRestricted")
+	return p.runControlTest(psp.HostPIDIsRestricted, "HostPIDIsRestricted")
 }
 
 func (p *probState) iShouldNotBeAbleToPerformACommandThatProvidesAccessToTheHostPIDNamespace() error {
@@ -203,13 +208,13 @@ func (p *probState) hostIPCRequestIsMarkedForTheKubernetesDeployment(hostIPCRequ
 		hostIPC = false
 	}
 
-	pd, err := kubernetes.CreatePODSettingAttributes(nil, &hostIPC, nil)
+	pd, err := psp.CreatePODSettingAttributes(nil, &hostIPC, nil)
 
 	return p.processCreationResult(pd, kubernetes.PSPHostNamespace, err)
 }
 
 func (p *probState) someSystemExistsToPreventAKubernetesDeploymentFromRunningUsingTheHostIPCInAnExistingKubernetesCluster() error {
-	return p.runControlTest(kubernetes.HostIPCIsRestricted, "HostIPCIsRestricted")
+	return p.runControlTest(psp.HostIPCIsRestricted, "HostIPCIsRestricted")
 }
 
 func (p *probState) iShouldNotBeAbleToPerformACommandThatProvidesAccessToTheHostIPCNamespace() error {
@@ -225,12 +230,12 @@ func (p *probState) hostNetworkRequestIsMarkedForTheKubernetesDeployment(hostNet
 		hostNetwork = false
 	}
 
-	pd, err := kubernetes.CreatePODSettingAttributes(nil, nil, &hostNetwork)
+	pd, err := psp.CreatePODSettingAttributes(nil, nil, &hostNetwork)
 
 	return p.processCreationResult(pd, kubernetes.PSPHostNetwork, err)
 }
 func (p *probState) someSystemExistsToPreventAKubernetesDeploymentFromRunningUsingTheHostNetworkInAnExistingKubernetesCluster() error {
-	return p.runControlTest(kubernetes.HostNetworkIsRestricted, "HostNetworkIsRestricted")
+	return p.runControlTest(psp.HostNetworkIsRestricted, "HostNetworkIsRestricted")
 }
 func (p *probState) iShouldNotBeAbleToPerformACommandThatProvidesAccessToTheHostNetworkNamespace() error {
 	return p.runVerificationTest(kubernetes.EnterHostNetworkNS)
@@ -245,13 +250,14 @@ func (p *probState) privilegedEscalationIsMarkedForTheKubernetesDeployment(privi
 		pa = false
 	}
 
-	pd, err := kubernetes.CreatePODSettingSecurityContext(nil, &pa, nil)
+	pd, err := psp.CreatePODSettingSecurityContext(nil, &pa, nil)
 
 	return p.processCreationResult(pd, kubernetes.PSPNoPrivilegeEscalation, err)
 }
 func (p *probState) someSystemExistsToPreventAKubernetesDeploymentFromRunningUsingTheAllowPrivilegeEscalationInAnExistingKubernetesCluster() error {
-	return p.runControlTest(kubernetes.PrivilegedEscalationIsRestricted, "PrivilegedEscalationIsRestricted")
+	return p.runControlTest(psp.PrivilegedEscalationIsRestricted, "PrivilegedEscalationIsRestricted")
 }
+
 //"but" same as 5.2.1
 
 //CIS-5.2.6
@@ -263,11 +269,11 @@ func (p *probState) theUserRequestedIsForTheKubernetesDeployment(requestedUser s
 		runAsUser = 1000
 	}
 
-	pd, err := kubernetes.CreatePODSettingSecurityContext(nil, nil, &runAsUser)
+	pd, err := psp.CreatePODSettingSecurityContext(nil, nil, &runAsUser)
 	return p.processCreationResult(pd, kubernetes.PSPAllowedUsersGroups, err)
 }
 func (p *probState) someSystemExistsToPreventAKubernetesDeploymentFromRunningAsTheRootUserInAnExistingKubernetesCluster() error {
-	return p.runControlTest(kubernetes.RootUserIsRestricted, "RootUserIsRestricted")
+	return p.runControlTest(psp.RootUserIsRestricted, "RootUserIsRestricted")
 }
 func (p *probState) theKubernetesDeploymentShouldRunWithANonrootUID() error {
 	return p.runVerificationTest(kubernetes.VerifyNonRootUID)
@@ -281,11 +287,11 @@ func (p *probState) nETRAWIsMarkedForTheKubernetesDeployment(netRawRequested str
 		c[0] = "NET_RAW"
 	}
 
-	pd, err := kubernetes.CreatePODSettingCapabilities(&c)
+	pd, err := psp.CreatePODSettingCapabilities(&c)
 	return p.processCreationResult(pd, kubernetes.PSPAllowedCapabilities, err)
 }
 func (p *probState) someSystemExistsToPreventAKubernetesDeploymentFromRunningWithNETRAWCapabilityInAnExistingKubernetesCluster() error {
-	return p.runControlTest(kubernetes.NETRawIsRestricted, "NETRAWIsRestricted")
+	return p.runControlTest(psp.NETRawIsRestricted, "NETRAWIsRestricted")
 }
 func (p *probState) iShouldNotBeAbleToPerformACommandThatRequiresNETRAWCapability() error {
 	return p.runVerificationTest(kubernetes.NetRawTest)
@@ -300,11 +306,11 @@ func (p *probState) additionalCapabilitiesForTheKubernetesDeployment(addCapabili
 		c[0] = "NET_ADMIN"
 	}
 
-	pd, err := kubernetes.CreatePODSettingCapabilities(&c)
+	pd, err := psp.CreatePODSettingCapabilities(&c)
 	return p.processCreationResult(pd, kubernetes.PSPAllowedCapabilities, err)
 }
 func (p *probState) someSystemExistsToPreventKubernetesDeploymentsWithCapabilitiesBeyondTheDefaultSetFromBeingDeployedToAnExistingKubernetesCluster() error {
-	return p.runControlTest(kubernetes.AllowedCapabilitiesAreRestricted, "AllowedCapabilitiesAreRestricted")
+	return p.runControlTest(psp.AllowedCapabilitiesAreRestricted, "AllowedCapabilitiesAreRestricted")
 }
 func (p *probState) iShouldNotBeAbleToPerformACommandThatRequiresCapabilitiesOutsideOfTheDefaultSet() error {
 	return p.runVerificationTest(kubernetes.SpecialCapTest)
@@ -320,11 +326,11 @@ func (p *probState) assignedCapabilitiesForTheKubernetesDeployment(assignCapabil
 		c[0] = "NET_ADMIN"
 	}
 
-	pd, err := kubernetes.CreatePODSettingCapabilities(&c)
+	pd, err := psp.CreatePODSettingCapabilities(&c)
 	return p.processCreationResult(pd, kubernetes.PSPAllowedCapabilities, err)
 }
 func (p *probState) someSystemExistsToPreventKubernetesDeploymentsWithAssignedCapabilitiesFromBeingDeployedToAnExistingKubernetesCluster() error {
-	return p.runControlTest(kubernetes.AssignedCapabilitiesAreRestricted, "AssignedCapabilitiesAreRestricted")
+	return p.runControlTest(psp.AssignedCapabilitiesAreRestricted, "AssignedCapabilitiesAreRestricted")
 }
 
 func (p *probState) iShouldNotBeAbleToPerformACommandThatRequiresAnyCapabilities() error {
@@ -338,7 +344,7 @@ func (p *probState) setup() {
 }
 
 func (p *probState) tearDown() {
-	kubernetes.TeardownPodSecurityTestPod(&p.podName)
+	psp.TeardownPodSecurityTestPod(&p.podName)
 	p.podName = ""
 	p.creationError = nil
 }
@@ -346,6 +352,12 @@ func (p *probState) tearDown() {
 //TestSuiteInitialize ...
 func TestSuiteInitialize(ctx *godog.TestSuiteContext) {
 	ctx.BeforeSuite(func() {}) //nothing for now
+
+	//check dependancies ...
+	if psp == nil {
+		// not been given one so set default
+		psp = kubernetes.NewDefaultPSP()
+	}
 }
 
 //ScenarioInitialize ...

@@ -30,14 +30,19 @@ func init() {
 	})
 }
 
-func (p *probState) aKubernetesClusterIsDeployed() error {
-	c, err := kubernetes.GetClient()
-	if err != nil {
-		return err
-	}
+//TODO: revise when interface this bit up ...
+var na kubernetes.NetworkAccess
 
-	if c == nil {
-		return fmt.Errorf("client is nil")
+// SetNetworkAccess ...
+func SetNetworkAccess(n kubernetes.NetworkAccess) {
+	na = n
+}
+
+func (p *probState) aKubernetesClusterIsDeployed() error {
+	b := na.ClusterIsDeployed()
+
+	if b == nil || !*b {
+		return fmt.Errorf("kubernetes cluster is NOT deployed")
 	}
 
 	//else we're good ...
@@ -46,14 +51,14 @@ func (p *probState) aKubernetesClusterIsDeployed() error {
 
 func (p *probState) aPodIsDeployedInTheCluster() error {
 	//only one pod is needed for all scenarios
-	//if we have a pod name, then it's already created so 
+	//if we have a pod name, then it's already created so
 	//this step can be skipped and the pod will be reused
 	if p.podName != "" {
 		log.Printf("[INFO] Pod %v has already been created - reusing the pod", p.podName)
 		return nil
 	}
 
-	pod, err := kubernetes.SetupNetworkAccessTestPod()
+	pod, err := na.SetupNetworkAccessTestPod()
 
 	if err != nil {
 		return err
@@ -71,7 +76,7 @@ func (p *probState) aPodIsDeployedInTheCluster() error {
 }
 
 func (p *probState) aProcessInsideThePodEstablishesADirectHTTPSConnectionTo(url string) error {
-	code, err := kubernetes.AccessURL(&p.podName, &url)
+	code, err := na.AccessURL(&p.podName, &url)
 
 	if err != nil {
 		log.Printf("[ERROR] Error raised when attempting to access URL: %v", err)
@@ -101,22 +106,29 @@ func (p *probState) setup() {
 }
 
 func (p *probState) tearDown() {
-	kubernetes.TeardownNetworkAccessTestPod(&p.podName)
+	na.TeardownNetworkAccessTestPod(&p.podName)
 }
 
 func (p *probState) scenarioTearDown() {
 	//reset the httpcode
-	p.httpStatusCode=0
+	p.httpStatusCode = 0
 }
 
 var ps = probState{}
+
 //TestSuiteInitialize ...
 func TestSuiteInitialize(ctx *godog.TestSuiteContext) {
-	ctx.BeforeSuite(func() {}) //nothing for now	
+	ctx.BeforeSuite(func() {}) //nothing for now
 
 	ctx.AfterSuite(func() {
 		ps.tearDown()
 	})
+
+	//check dependancies ...
+	if na == nil {
+		// not been given one so set default
+		na = kubernetes.NewDefaultNA()
+	}
 }
 
 //ScenarioInitialize ...

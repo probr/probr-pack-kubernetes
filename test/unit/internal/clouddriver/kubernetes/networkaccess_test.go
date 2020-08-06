@@ -8,9 +8,12 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+//TODO: this will be revised when the unit/integration tests are refactored to be properly mocked
+var na = kubernetes.NewDefaultNA()
+
 func TestSetupNetworkAccessTestPod(t *testing.T) {
 
-	p, err := kubernetes.SetupNetworkAccessTestPod()
+	p, err := na.SetupNetworkAccessTestPod()
 
 	assert.Nil(t, err)
 	assert.NotNil(t, p)
@@ -18,7 +21,7 @@ func TestSetupNetworkAccessTestPod(t *testing.T) {
 
 func TestIsURLAccessible(t *testing.T) {
 	//need to dupe above .. fix?
-	p, err := kubernetes.SetupNetworkAccessTestPod()
+	p, err := na.SetupNetworkAccessTestPod()
 
 	assert.Nil(t, err)
 	assert.NotNil(t, p)
@@ -26,8 +29,7 @@ func TestIsURLAccessible(t *testing.T) {
 	//now substance of this test
 	url := "http://www.google.com"
 	n := p.GetObjectMeta().GetName()
-	code, err := kubernetes.AccessURL(&n, &url)
-
+	code, err := na.AccessURL(&n, &url)
 
 	log.Printf("[NOTICE] URL: %v Result: %v", url, code)
 }
