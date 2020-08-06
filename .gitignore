@@ -245,3 +245,4 @@ node_modules
 # probr misc ('probr' is Linux exe)
 testoutput
 probr
+static-content/

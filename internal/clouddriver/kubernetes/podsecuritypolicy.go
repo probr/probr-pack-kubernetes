@@ -43,7 +43,7 @@ func (c PSPTestCommand) String() string {
 		"nsenter -t 1 -i ps",
 		"nsenter -t 1 -n ps",
 		"id -u > 0 ",
-		"ping google.com",		
+		"ping google.com",
 		"ip link add dummy0 type dummy"}[c]
 }
 
@@ -57,17 +57,67 @@ const (
 	pspTestPodName   = "psp-test-pod"
 )
 
-var securityPolicyProviders = []SecurityPolicyProvider{
-	&KubeSecurityPolicyProvider{},
-	azure.NewAzPolicyProvider()}
+// PodSecurityPolicy ...
+type PodSecurityPolicy interface {
+	ClusterIsDeployed() *bool
+	ClusterHasPSP() (*bool, error)
+	PrivilegedAccessIsRestricted() (*bool, error)
+	HostPIDIsRestricted() (*bool, error)
+	HostIPCIsRestricted() (*bool, error)
+	HostNetworkIsRestricted() (*bool, error)
+	PrivilegedEscalationIsRestricted() (*bool, error)
+	RootUserIsRestricted() (*bool, error)
+	NETRawIsRestricted() (*bool, error)
+	AllowedCapabilitiesAreRestricted() (*bool, error)
+	AssignedCapabilitiesAreRestricted() (*bool, error)
+	CreatePODSettingSecurityContext(pr *bool, pe *bool, runAsUser *int64) (*apiv1.Pod, error)
+	CreatePODSettingAttributes(hostPID *bool, hostIPC *bool, hostNetwork *bool) (*apiv1.Pod, error)
+	CreatePODSettingCapabilities(c *[]string) (*apiv1.Pod, error)
+	ExecPSPTestCmd(pName *string, cmd PSPTestCommand) (int, error)
+	TeardownPodSecurityTestPod(p *string) error
+}
+
+// PSP ...
+type PSP struct {
+	k                       Kubernetes
+	securityPolicyProviders *[]SecurityPolicyProvider
+}
+
+// NewPSP ...
+func NewPSP(k Kubernetes, sp *[]SecurityPolicyProvider) *PSP {
+	p := &PSP{}
+	p.k = k
+	p.securityPolicyProviders = sp
+
+	return p
+}
+
+// NewDefaultPSP ...
+func NewDefaultPSP() *PSP {
+	p := &PSP{}
+	p.k = GetKubeInstance()
+
+	//standard security providers
+	p.securityPolicyProviders = &[]SecurityPolicyProvider{
+		NewKubeSecurityPolicyProvider(p.k),
+		azure.NewAzPolicyProvider()}
+
+	return p
+
+}
+
+// ClusterIsDeployed ...
+func (psp *PSP) ClusterIsDeployed() *bool {
+	return psp.k.ClusterIsDeployed()
+}
 
 //ClusterHasPSP determines if the cluster has any Pod Security Policies set.
-func ClusterHasPSP() (*bool, error) {
+func (psp *PSP) ClusterHasPSP() (*bool, error) {
 	var err error = nil
 	var ret *bool = nil
 
 	// iterate over providers ...
-	for _, p := range securityPolicyProviders {
+	for _, p := range *psp.securityPolicyProviders {
 		b, e := p.HasSecurityPolicies()
 		if e != nil {
 			//hold onto the error and continue
@@ -95,9 +145,9 @@ func ClusterHasPSP() (*bool, error) {
 }
 
 //PrivilegedAccessIsRestricted looks for a PodSecurityPolicy with 'Privileged' set to false (ie. NOT privileged).
-func PrivilegedAccessIsRestricted() (*bool, error) {
+func (psp *PSP) PrivilegedAccessIsRestricted() (*bool, error) {
 	// iterate over providers ...
-	for _, p := range securityPolicyProviders {
+	for _, p := range *psp.securityPolicyProviders {
 		b, err := p.HasPrivilegedAccessRestriction()
 		if err != nil {
 			return nil, err
@@ -114,9 +164,9 @@ func PrivilegedAccessIsRestricted() (*bool, error) {
 }
 
 //HostPIDIsRestricted looks for a PodSecurityPolicy with 'HostPID' set to false (i.e. NO Access to HostPID ).
-func HostPIDIsRestricted() (*bool, error) {
+func (psp *PSP) HostPIDIsRestricted() (*bool, error) {
 	// iterate over providers ...
-	for _, p := range securityPolicyProviders {
+	for _, p := range *psp.securityPolicyProviders {
 		b, err := p.HasHostPIDRestriction()
 		if err != nil {
 			return nil, err
@@ -134,9 +184,9 @@ func HostPIDIsRestricted() (*bool, error) {
 }
 
 //HostIPCIsRestricted looks for a PodSecurityPolicy with 'HostIPC' set to false (i.e. NO Access to HostIPC ).
-func HostIPCIsRestricted() (*bool, error) {
+func (psp *PSP) HostIPCIsRestricted() (*bool, error) {
 	// iterate over providers ...
-	for _, p := range securityPolicyProviders {
+	for _, p := range *psp.securityPolicyProviders {
 		b, err := p.HasHostIPCRestriction()
 		if err != nil {
 			return nil, err
@@ -154,9 +204,9 @@ func HostIPCIsRestricted() (*bool, error) {
 }
 
 //HostNetworkIsRestricted looks for a PodSecurityPolicy with 'HostIPC' set to false (i.e. NO Access to HostIPC ).
-func HostNetworkIsRestricted() (*bool, error) {
+func (psp *PSP) HostNetworkIsRestricted() (*bool, error) {
 	// iterate over providers ...
-	for _, p := range securityPolicyProviders {
+	for _, p := range *psp.securityPolicyProviders {
 		b, err := p.HasHostNetworkRestriction()
 		if err != nil {
 			return nil, err
@@ -174,9 +224,9 @@ func HostNetworkIsRestricted() (*bool, error) {
 }
 
 //PrivilegedEscalationIsRestricted looks for a PodSecurityPolicy with 'Privileged' set to false (ie. NOT privileged).
-func PrivilegedEscalationIsRestricted() (*bool, error) {
+func (psp *PSP) PrivilegedEscalationIsRestricted() (*bool, error) {
 	// iterate over providers ...
-	for _, p := range securityPolicyProviders {
+	for _, p := range *psp.securityPolicyProviders {
 		b, err := p.HasAllowPrivilegeEscalationRestriction()
 		if err != nil {
 			return nil, err
@@ -193,9 +243,9 @@ func PrivilegedEscalationIsRestricted() (*bool, error) {
 }
 
 // RootUserIsRestricted ...
-func RootUserIsRestricted() (*bool, error) {
+func (psp *PSP) RootUserIsRestricted() (*bool, error) {
 	// iterate over providers ...
-	for _, p := range securityPolicyProviders {
+	for _, p := range *psp.securityPolicyProviders {
 		b, err := p.HasRootUserRestriction()
 		if err != nil {
 			return nil, err
@@ -212,9 +262,9 @@ func RootUserIsRestricted() (*bool, error) {
 }
 
 //NETRawIsRestricted looks for a PodSecurityPolicy with 'Privileged' set to false (ie. NOT privileged).
-func NETRawIsRestricted() (*bool, error) {
+func (psp *PSP) NETRawIsRestricted() (*bool, error) {
 	// iterate over providers ...
-	for _, p := range securityPolicyProviders {
+	for _, p := range *psp.securityPolicyProviders {
 		b, err := p.HasNETRAWRestriction()
 		if err != nil {
 			return nil, err
@@ -231,9 +281,9 @@ func NETRawIsRestricted() (*bool, error) {
 }
 
 //AllowedCapabilitiesAreRestricted looks for a PodSecurityPolicy with 'Privileged' set to false (ie. NOT privileged).
-func AllowedCapabilitiesAreRestricted() (*bool, error) {
+func (psp *PSP) AllowedCapabilitiesAreRestricted() (*bool, error) {
 	// iterate over providers ...
-	for _, p := range securityPolicyProviders {
+	for _, p := range *psp.securityPolicyProviders {
 		b, err := p.HasAllowedCapabilitiesRestriction()
 		if err != nil {
 			return nil, err
@@ -250,9 +300,9 @@ func AllowedCapabilitiesAreRestricted() (*bool, error) {
 }
 
 //AssignedCapabilitiesAreRestricted looks for a PodSecurityPolicy with 'Privileged' set to false (ie. NOT privileged).
-func AssignedCapabilitiesAreRestricted() (*bool, error) {
+func (psp *PSP) AssignedCapabilitiesAreRestricted() (*bool, error) {
 	// iterate over providers ...
-	for _, p := range securityPolicyProviders {
+	for _, p := range *psp.securityPolicyProviders {
 		b, err := p.HasAssignedCapabilitiesRestriction()
 		if err != nil {
 			return nil, err
@@ -272,7 +322,7 @@ func AssignedCapabilitiesAreRestricted() (*bool, error) {
 // pr *bool - set the Privileged flag.  Defaults to false.
 // pe *bool - set the Allow Privileged Escalation flag.  Defaults to false.
 // runAsUser *int64 - set RunAsUser.  Defaults to 1000.
-func CreatePODSettingSecurityContext(pr *bool, pe *bool, runAsUser *int64) (*apiv1.Pod, error) {	
+func (psp *PSP) CreatePODSettingSecurityContext(pr *bool, pe *bool, runAsUser *int64) (*apiv1.Pod, error) {
 	//default sensibly if not provided
 	//this needs to take account of rules around allowedPrivilegdEscalation and Privileged:
 	// cannot set `allowPrivilegeEscalation` to false and `privileged` to true
@@ -308,7 +358,7 @@ func CreatePODSettingSecurityContext(pr *bool, pe *bool, runAsUser *int64) (*api
 
 	pname, ns, cname, image := GenerateUniquePodName(pspTestPodName), pspTestNamespace, pspTestContainer, pspTestImage
 
-	p, err := CreatePod(&pname, &ns, &cname, &image, true, &sc)
+	p, err := psp.k.CreatePod(&pname, &ns, &cname, &image, true, &sc)
 
 	if err != nil {
 		return nil, err
@@ -321,7 +371,7 @@ func CreatePODSettingSecurityContext(pr *bool, pe *bool, runAsUser *int64) (*api
 // hostPID *bool - set the hostPID flag, defaults to false
 // hostIPC *bool - set the hostIPC flag, defaults to false
 // hostNetwork *bool - set the hostNetwork flag, defaults to false
-func CreatePODSettingAttributes(hostPID *bool, hostIPC *bool, hostNetwork *bool) (*apiv1.Pod, error) {
+func (psp *PSP) CreatePODSettingAttributes(hostPID *bool, hostIPC *bool, hostNetwork *bool) (*apiv1.Pod, error) {
 	//default sensibly if not provided
 	f := false
 	if hostPID == nil {
@@ -337,13 +387,13 @@ func CreatePODSettingAttributes(hostPID *bool, hostIPC *bool, hostNetwork *bool)
 	pname, ns, cname, image := GenerateUniquePodName(pspTestPodName), pspTestNamespace, pspTestContainer, pspTestImage
 
 	// get the pod object and manipulate:
-	po := GetPodObject(pname, ns, cname, image, nil)
+	po := psp.k.GetPodObject(pname, ns, cname, image, nil)
 	po.Spec.HostPID = *hostPID
 	po.Spec.HostIPC = *hostIPC
 	po.Spec.HostNetwork = *hostNetwork
 
 	// create from PO
-	p, err := CreatePodFromObject(po, &pname, &ns, true)
+	p, err := psp.k.CreatePodFromObject(po, &pname, &ns, true)
 
 	if err != nil {
 		return nil, err
@@ -353,11 +403,11 @@ func CreatePODSettingAttributes(hostPID *bool, hostIPC *bool, hostNetwork *bool)
 }
 
 //CreatePODSettingCapabilities ...
-func CreatePODSettingCapabilities(c *[]string) (*apiv1.Pod, error) {
+func (psp *PSP) CreatePODSettingCapabilities(c *[]string) (*apiv1.Pod, error) {
 	pname, ns, cname, image := GenerateUniquePodName(pspTestPodName), pspTestNamespace, pspTestContainer, pspTestImage
 
 	// get the pod object and manipulate:
-	po := GetPodObject(pname, ns, cname, image, nil)
+	po := psp.k.GetPodObject(pname, ns, cname, image, nil)
 
 	if c != nil {
 		for _, cap := range *c {
@@ -376,7 +426,7 @@ func CreatePODSettingCapabilities(c *[]string) (*apiv1.Pod, error) {
 	}
 
 	// create from PO
-	p, err := CreatePodFromObject(po, &pname, &ns, true)
+	p, err := psp.k.CreatePodFromObject(po, &pname, &ns, true)
 
 	if err != nil {
 		return nil, err
@@ -386,13 +436,13 @@ func CreatePODSettingCapabilities(c *[]string) (*apiv1.Pod, error) {
 }
 
 // ExecPSPTestCmd ...
-func ExecPSPTestCmd(pName *string, cmd PSPTestCommand) (int, error) {
+func (psp *PSP) ExecPSPTestCmd(pName *string, cmd PSPTestCommand) (int, error) {
 	var pn string
 	//if we've not been given a pod name, assume one needs to be created:
 	if pName == nil {
 		//want one without privileged access or escalation
 		f := false
-		p, err := CreatePODSettingSecurityContext(&f, &f, nil)
+		p, err := psp.CreatePODSettingSecurityContext(&f, &f, nil)
 
 		if err != nil {
 			return -1, err
@@ -402,10 +452,10 @@ func ExecPSPTestCmd(pName *string, cmd PSPTestCommand) (int, error) {
 	} else {
 		pn = *pName
 	}
-	
+
 	c := cmd.String()
 	ns := pspTestNamespace
-	stdout, _, ex, err := ExecCommand(&c, &ns, &pn)
+	stdout, _, ex, err := psp.k.ExecCommand(&c, &ns, &pn)
 
 	log.Printf("[NOTICE] ExecPSPTestCmd: %v stdout: %v exit code: %v", cmd, stdout, ex)
 
@@ -417,48 +467,22 @@ func ExecPSPTestCmd(pName *string, cmd PSPTestCommand) (int, error) {
 }
 
 //TeardownPodSecurityTestPod ...
-func TeardownPodSecurityTestPod(p *string) error {
+func (psp *PSP) TeardownPodSecurityTestPod(p *string) error {
 	ns := pspTestNamespace
-	err := DeletePod(p, &ns, false) //don't worry about waiting
+	err := psp.k.DeletePod(p, &ns, false) //don't worry about waiting
 	return err
-}
-
-func getPodSecurityPolicies() (*v1beta1.PodSecurityPolicyList, error) {
-	c, err := GetClient()
-	if err != nil {
-		return nil, err
-	}
-
-	psp := c.PolicyV1beta1().PodSecurityPolicies()
-	if psp == nil {
-		return nil, fmt.Errorf("Pod Security Polices could not be obtained (nil returned)")
-	}
-
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
-
-	pspList, err := psp.List(ctx, metav1.ListOptions{})
-	if err != nil {
-		return nil, err
-	}
-	if pspList == nil {
-		return nil, fmt.Errorf("Pod Security Polices list returned a nil list")
-	}
-
-	log.Printf("[NOTICE] There are %d psp policies in the cluster\n", len(pspList.Items))
-
-	for _, e := range pspList.Items {
-		log.Printf("[INFO] PSP: %v \n", e.GetName())
-		log.Printf("[INFO] Spec: %+v \n", e.Spec)
-	}
-
-	return pspList, nil
 }
 
 // KubeSecurityPolicyProvider ...
 type KubeSecurityPolicyProvider struct {
+	k        Kubernetes
 	psps     *v1beta1.PodSecurityPolicyList
 	pspMutex sync.Mutex
+}
+
+// NewKubeSecurityPolicyProvider ...
+func NewKubeSecurityPolicyProvider(k Kubernetes) *KubeSecurityPolicyProvider {
+	return &KubeSecurityPolicyProvider{k: k}
 }
 
 func (p *KubeSecurityPolicyProvider) getPolicies() (*v1beta1.PodSecurityPolicyList, error) {
@@ -467,7 +491,7 @@ func (p *KubeSecurityPolicyProvider) getPolicies() (*v1beta1.PodSecurityPolicyLi
 
 	//already got them?
 	if p.psps == nil {
-		ps, err := getPodSecurityPolicies()
+		ps, err := p.getPodSecurityPolicies()
 		if err != nil {
 			return nil, err
 		}
@@ -690,4 +714,36 @@ func (p *KubeSecurityPolicyProvider) HasAllowedCapabilitiesRestriction() (*bool,
 func (p *KubeSecurityPolicyProvider) HasAssignedCapabilitiesRestriction() (*bool, error) {
 	f := false
 	return &f, nil
+}
+
+func (p *KubeSecurityPolicyProvider) getPodSecurityPolicies() (*v1beta1.PodSecurityPolicyList, error) {
+	c, err := p.k.GetClient()
+	if err != nil {
+		return nil, err
+	}
+
+	ps := c.PolicyV1beta1().PodSecurityPolicies()
+	if ps == nil {
+		return nil, fmt.Errorf("Pod Security Polices could not be obtained (nil returned)")
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	pspList, err := ps.List(ctx, metav1.ListOptions{})
+	if err != nil {
+		return nil, err
+	}
+	if pspList == nil {
+		return nil, fmt.Errorf("Pod Security Polices list returned a nil list")
+	}
+
+	log.Printf("[NOTICE] There are %d psp policies in the cluster\n", len(pspList.Items))
+
+	for _, e := range pspList.Items {
+		log.Printf("[INFO] PSP: %v \n", e.GetName())
+		log.Printf("[INFO] Spec: %+v \n", e.Spec)
+	}
+
+	return pspList, nil
 }

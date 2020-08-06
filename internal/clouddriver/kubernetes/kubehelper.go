@@ -35,7 +35,7 @@ const (
 	PSPNoPrivilegeEscalation
 	PSPAllowedUsersGroups
 	PSPContainerAllowedImages
-	PSPHostNamespace	
+	PSPHostNamespace
 	PSPHostNetwork
 	PSPAllowedCapabilities
 )
@@ -46,7 +46,7 @@ func (r PodCreationErrorReason) String() string {
 		"podcreation-error: psp-container-no-privilege-escalation",
 		"podcreation-error: psp-allowed-users-groups",
 		"podcreation-error: psp-container-allowed-images",
-		"podcreation-error: psp-host-namespace",		
+		"podcreation-error: psp-host-namespace",
 		"podcreation-error: psp-host-network",
 		"podcreation-error: psp-allowed-capabilities"}[r]
 }
@@ -61,54 +61,96 @@ func (p *PodCreationError) Error() string {
 	return fmt.Sprintf("pod creation error: %v %v", p.ReasonCodes, p.err)
 }
 
-var (
-	kubeConfigFile *string
-	kubeClient     *kubernetes.Clientset
-	clientMutex    sync.Mutex
+// Kubernetes ...
+type Kubernetes interface {
+	ClusterIsDeployed() *bool
+	SetKubeConfigFile(f *string)
+	GetClient() (*kubernetes.Clientset, error)
+	GetPods() (*apiv1.PodList, error)
+	CreatePod(pname *string, ns *string, cname *string, image *string, w bool, sc *apiv1.SecurityContext) (*apiv1.Pod, error)
+	CreatePodFromObject(p *apiv1.Pod, pname *string, ns *string, w bool) (*apiv1.Pod, error)
+	GetPodObject(pname string, ns string, cname string, image string, sc *apiv1.SecurityContext) *apiv1.Pod
+	ExecCommand(cmd, ns, pn *string) (string, string, int, error)
+	DeletePod(pname *string, ns *string, w bool) error
+	DeleteNamespace(ns *string) error
+}
 
-	azErrorToPodCreationError = make(map[string]PodCreationErrorReason)
-)
+var instance *Kube
+var once sync.Once
 
-func init() {
-	azErrorToPodCreationError["azurepolicy-container-no-privilege"] = PSPNoPrivilege
-	azErrorToPodCreationError["azurepolicy-psp-container-no-privilege-escalation"] = PSPNoPrivilegeEscalation
-	azErrorToPodCreationError["azurepolicy-psp-allowed-users-groups"] = PSPAllowedUsersGroups
-	azErrorToPodCreationError["azurepolicy-container-allowed-images"] = PSPContainerAllowedImages
-	azErrorToPodCreationError["azurepolicy-psp-host-namespace"] = PSPHostNamespace	
-	azErrorToPodCreationError["azurepolicy-psp-host-network"] = PSPHostNetwork
-	azErrorToPodCreationError["azurepolicy-container-allowed-capabilities"] = PSPAllowedCapabilities
+// Kube ...
+type Kube struct {
+	kubeConfigFile            *string
+	kubeClient                *kubernetes.Clientset
+	clientMutex               sync.Mutex
+	azErrorToPodCreationError map[string]PodCreationErrorReason
+}
+
+// GetKubeInstance ...
+func GetKubeInstance() *Kube {
+	//TODO: revise use of singleton here ...
+	once.Do(func() {
+		instance = &Kube{}
+
+		instance.azErrorToPodCreationError = make(map[string]PodCreationErrorReason, 7)
+		instance.azErrorToPodCreationError["azurepolicy-container-no-privilege"] = PSPNoPrivilege
+		instance.azErrorToPodCreationError["azurepolicy-psp-container-no-privilege-escalation"] = PSPNoPrivilegeEscalation
+		instance.azErrorToPodCreationError["azurepolicy-psp-allowed-users-groups"] = PSPAllowedUsersGroups
+		instance.azErrorToPodCreationError["azurepolicy-container-allowed-images"] = PSPContainerAllowedImages
+		instance.azErrorToPodCreationError["azurepolicy-psp-host-namespace"] = PSPHostNamespace
+		instance.azErrorToPodCreationError["azurepolicy-psp-host-network"] = PSPHostNetwork
+		instance.azErrorToPodCreationError["azurepolicy-container-allowed-capabilities"] = PSPAllowedCapabilities
+	})
+
+	return instance
+}
+
+// ClusterIsDeployed ...
+func (k *Kube) ClusterIsDeployed() *bool {
+	kc, err := k.GetClient()
+	if err != nil {
+		log.Printf("[ERROR] Error raised when getting Kubernetes client: %v", err)
+		return nil
+	}
+
+	t, f := true, false
+	if kc == nil {
+		return &f
+	}
+
+	return &t
 }
 
 //SetKubeConfigFile sets the fully qualified path to the Kubernetes config file.
-func SetKubeConfigFile(f *string) {
-	kubeConfigFile = f
+func (k *Kube) SetKubeConfigFile(f *string) {
+	k.kubeConfigFile = f
 }
 
 //GetClient gets a client connection to the Kubernetes cluster specifed via @SetKubeConfigFile or from home directory.
-func GetClient() (*kubernetes.Clientset, error) {
-	clientMutex.Lock()
-	defer clientMutex.Unlock()
+func (k *Kube) GetClient() (*kubernetes.Clientset, error) {
+	k.clientMutex.Lock()
+	defer k.clientMutex.Unlock()
 
-	if kubeClient != nil {
-		return kubeClient, nil
+	if k.kubeClient != nil {
+		return k.kubeClient, nil
 	}
 
 	// use the current context in kubeconfig
-	config, err := clientcmd.BuildConfigFromFlags("", *setConfigPath())
+	config, err := clientcmd.BuildConfigFromFlags("", *k.setConfigPath())
 	if err != nil {
 		return nil, err
 	}
 
 	// create the clientset (note: assigned to global "kubeClient")
-	kubeClient, err = kubernetes.NewForConfig(config)
+	k.kubeClient, err = kubernetes.NewForConfig(config)
 	if err != nil {
 		return nil, err
 	}
 
-	return kubeClient, nil
+	return k.kubeClient, nil
 }
 
-func setConfigPath() *string {
+func (k *Kube) setConfigPath() *string {
 	n := "kubeconfig"
 	f := flag.Lookup(n)
 	if f != nil {
@@ -117,9 +159,9 @@ func setConfigPath() *string {
 
 	var c *string
 	//prefer kube config path if it's been supplied
-	if kubeConfigFile != nil && *kubeConfigFile != "" {
-		log.Printf("[NOTICE] Setting Kube Config to: %v", *kubeConfigFile)
-		c = flag.String("kubeconfig", *kubeConfigFile, "fully qualified and supplied absolute path to the kubeconfig file")
+	if k.kubeConfigFile != nil && *k.kubeConfigFile != "" {
+		log.Printf("[NOTICE] Setting Kube Config to: %v", *k.kubeConfigFile)
+		c = flag.String("kubeconfig", *k.kubeConfigFile, "fully qualified and supplied absolute path to the kubeconfig file")
 	} else if e := getConfigPathFromEnv(); e != "" {
 		log.Printf("[NOTICE] Setting Kube Config to: %v", e)
 		c = flag.String("kubeconfig", e, "(optional) absolute path to the kubeconfig file")
@@ -136,8 +178,8 @@ func setConfigPath() *string {
 }
 
 //GetPods ...
-func GetPods() (*apiv1.PodList, error) {
-	c, err := GetClient()
+func (k *Kube) GetPods() (*apiv1.PodList, error) {
+	c, err := k.GetClient()
 	if err != nil {
 		return nil, err
 	}
@@ -175,22 +217,22 @@ func getPods(c *kubernetes.Clientset) (*apiv1.PodList, error) {
 // image - image
 // w - indicates whether or not to wait for the pod to be running
 // sc - security context
-func CreatePod(pname *string, ns *string, cname *string, image *string, w bool, sc *apiv1.SecurityContext) (*apiv1.Pod, error) {
+func (k *Kube) CreatePod(pname *string, ns *string, cname *string, image *string, w bool, sc *apiv1.SecurityContext) (*apiv1.Pod, error) {
 	//create Pod Objet ...
-	p := GetPodObject(*pname, *ns, *cname, *image, sc)
+	p := k.GetPodObject(*pname, *ns, *cname, *image, sc)
 
-	return CreatePodFromObject(p, pname, ns, w)
+	return k.CreatePodFromObject(p, pname, ns, w)
 }
 
 // CreatePodFromObject creates a pod from the supplied pod object in the gievn namespace
-func CreatePodFromObject(p *apiv1.Pod, pname *string, ns *string, w bool) (*apiv1.Pod, error) {
-	c, err := GetClient()
+func (k *Kube) CreatePodFromObject(p *apiv1.Pod, pname *string, ns *string, w bool) (*apiv1.Pod, error) {
+	c, err := k.GetClient()
 	if err != nil {
 		return nil, err
 	}
 
 	//create the namespace for the POD (noOp if already present)
-	_, err = CreateNamespace(ns)
+	_, err = k.createNamespace(ns)
 	if err != nil {
 		return nil, err
 	}
@@ -212,7 +254,7 @@ func CreatePodFromObject(p *apiv1.Pod, pname *string, ns *string, w bool) (*apiv
 		} else if isForbidden(err) {
 			log.Printf("[NOTICE] Creation of POD %v is forbidden: %v", *pname, err)
 			//return a specific error:
-			return nil, &PodCreationError{err, *toPodCreationErrorCode(err)}
+			return nil, &PodCreationError{err, *k.toPodCreationErrorCode(err)}
 		}
 		return nil, err
 	}
@@ -228,7 +270,7 @@ func CreatePodFromObject(p *apiv1.Pod, pname *string, ns *string, w bool) (*apiv
 }
 
 // GetPodObject ...
-func GetPodObject(pname string, ns string, cname string, image string, sc *apiv1.SecurityContext) *apiv1.Pod {
+func (k *Kube) GetPodObject(pname string, ns string, cname string, image string, sc *apiv1.SecurityContext) *apiv1.Pod {
 
 	a := make(map[string]string)
 	a["seccomp.security.alpha.kubernetes.io/pod"] = "runtime/default"
@@ -297,13 +339,13 @@ func defaultContainerSecurityContext() *apiv1.SecurityContext {
 }
 
 //ExecCommand TODO: fix error codes
-func ExecCommand(cmd, ns, pn *string) (string, string, int, error) {
+func (k *Kube) ExecCommand(cmd, ns, pn *string) (string, string, int, error) {
 	if cmd == nil {
 		return "", "", -1, fmt.Errorf("command string is nil - nothing to execute")
 	}
 	logCmd(cmd, pn, ns)
 
-	c, err := GetClient()
+	c, err := k.GetClient()
 	if err != nil {
 		return "", "", -2, err
 	}
@@ -329,7 +371,7 @@ func ExecCommand(cmd, ns, pn *string) (string, string, int, error) {
 
 	log.Printf("[INFO] ExecCommand Request URL: %v", req.URL().String())
 
-	config, err := clientcmd.BuildConfigFromFlags("", *setConfigPath())
+	config, err := clientcmd.BuildConfigFromFlags("", *k.setConfigPath())
 	exec, err := remotecommand.NewSPDYExecutor(config, "POST", req.URL())
 	if err != nil {
 		return "", "", -4, fmt.Errorf("error while creating Executor: %v", err)
@@ -355,8 +397,8 @@ func ExecCommand(cmd, ns, pn *string) (string, string, int, error) {
 // pname - pod name
 // ns - namespace
 // w - indicates whether or not to wait on the deletion
-func DeletePod(pname *string, ns *string, w bool) error {
-	c, err := GetClient()
+func (k *Kube) DeletePod(pname *string, ns *string, w bool) error {
+	c, err := k.GetClient()
 	if err != nil {
 		return err
 	}
@@ -382,8 +424,8 @@ func DeletePod(pname *string, ns *string, w bool) error {
 }
 
 //CreateNamespace ...
-func CreateNamespace(ns *string) (*apiv1.Namespace, error) {
-	c, err := GetClient()
+func (k *Kube) createNamespace(ns *string) (*apiv1.Namespace, error) {
+	c, err := k.GetClient()
 	if err != nil {
 		return nil, err
 	}
@@ -413,8 +455,8 @@ func CreateNamespace(ns *string) (*apiv1.Namespace, error) {
 }
 
 //DeleteNamespace ...
-func DeleteNamespace(ns *string) error {
-	c, err := GetClient()
+func (k *Kube) DeleteNamespace(ns *string) error {
+	c, err := k.GetClient()
 	if err != nil {
 		return err
 	}
@@ -442,13 +484,13 @@ func isAlreadyExists(err error) bool {
 
 func isForbidden(err error) bool {
 	if se, ok := err.(*errors.StatusError); ok {
-		//40 is "already exists"
+		//403 is "forbidden"
 		return se.ErrStatus.Code == 403
 	}
 	return false
 }
 
-func toPodCreationErrorCode(err error) *map[PodCreationErrorReason]*PodCreationErrorReason {
+func (k *Kube) toPodCreationErrorCode(err error) *map[PodCreationErrorReason]*PodCreationErrorReason {
 	//try and map the error codes within the error message issued by the service provider
 	//to known error codes (return a map so they can be easily accessed)
 
@@ -462,9 +504,9 @@ func toPodCreationErrorCode(err error) *map[PodCreationErrorReason]*PodCreationE
 		log.Printf("[INFO] *** message: %v", m)
 		//map this to the pod creation code
 
-		for k, e := range azErrorToPodCreationError {
-			if strings.Contains(m, k) {
-				//take the element				
+		for key, e := range k.azErrorToPodCreationError {
+			if strings.Contains(m, key) {
+				//take the element
 				pcErr[e] = &e
 			}
 		}

@@ -28,14 +28,19 @@ func init() {
 	})
 }
 
-func (p *probState) aKubernetesClusterIsDeployed() error {
-	c, err := kubernetes.GetClient()
-	if err != nil {
-		return err
-	}
+//TODO: revise when interface this bit up ...
+var cra kubernetes.ContainerRegistryAccess
 
-	if c == nil {
-		return fmt.Errorf("client is nil")
+// SetContainerRegistryAccess ...
+func SetContainerRegistryAccess(c kubernetes.ContainerRegistryAccess) {
+	cra = c
+}
+
+func (p *probState) aKubernetesClusterIsDeployed() error {
+	b := cra.ClusterIsDeployed()
+
+	if b == nil || !*b {
+		return fmt.Errorf("kubernetes cluster is NOT deployed")
 	}
 
 	//else we're good ...
@@ -44,7 +49,7 @@ func (p *probState) aKubernetesClusterIsDeployed() error {
 
 func (p *probState) aUserAttemptsToDeployAContainerFrom(registry string) error {
 
-	pd, err := kubernetes.SetupContainerAccessTestPod(&registry)
+	pd, err := cra.SetupContainerAccessTestPod(&registry)
 
 	if err != nil {
 		//check for expected error
@@ -77,7 +82,7 @@ func (p *probState) theDeploymentAttemptIs(res string) error {
 		}
 		//should also check code:
 		_, exists := p.creationError.ReasonCodes[kubernetes.PSPContainerAllowedImages]
-		if !exists {		
+		if !exists {
 			//also a fail:
 			return fmt.Errorf("pod not was created but failure reasons (%v) did not contain expected (%v)- test failed",
 				p.creationError.ReasonCodes, kubernetes.PSPContainerAllowedImages)
@@ -106,12 +111,18 @@ func (p *probState) setup() {
 }
 
 func (p *probState) tearDown() {
-	kubernetes.TeardownContainerAccessTestPod(&p.podName)
+	cra.TeardownContainerAccessTestPod(&p.podName)
 }
 
 //TestSuiteInitialize ...
 func TestSuiteInitialize(ctx *godog.TestSuiteContext) {
 	ctx.BeforeSuite(func() {}) //nothing for now
+
+	//check dependancies ...
+	if cra == nil {
+		// not been given one so set default
+		cra = kubernetes.NewDefaultCRA()
+	}
 }
 
 //ScenarioInitialize ...

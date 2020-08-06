@@ -16,10 +16,44 @@ const (
 	testPodName   = "na-test-pod"
 )
 
+// NetworkAccess ...
+type NetworkAccess interface {
+	ClusterIsDeployed() *bool
+	SetupNetworkAccessTestPod() (*apiv1.Pod, error)
+	TeardownNetworkAccessTestPod(p *string) error
+	AccessURL(pn *string, url *string) (int, error)
+}
+
+// NA ...
+type NA struct {
+	k Kubernetes
+}
+
+// NewNA ...
+func NewNA(k Kubernetes) *NA {
+	n := &NA{}
+	n.k = k
+
+	return n
+}
+
+// NewDefaultNA ...
+func NewDefaultNA() *NA {
+	n := &NA{}
+	n.k = GetKubeInstance()
+
+	return n
+}
+
+// ClusterIsDeployed ...
+func (n *NA) ClusterIsDeployed() *bool {
+	return n.k.ClusterIsDeployed()
+}
+
 //SetupNetworkAccessTestPod creates a pod with characteristics required for testing network access.
-func SetupNetworkAccessTestPod() (*apiv1.Pod, error) {
+func (n *NA) SetupNetworkAccessTestPod() (*apiv1.Pod, error) {
 	pname, ns, cname, image := GenerateUniquePodName(testPodName), testNamespace, testContainer, testImage
-	p, err := CreatePod(&pname, &ns, &cname, &image, true, nil)
+	p, err := n.k.CreatePod(&pname, &ns, &cname, &image, true, nil)
 
 	if err != nil {
 		return nil, err
@@ -29,11 +63,11 @@ func SetupNetworkAccessTestPod() (*apiv1.Pod, error) {
 }
 
 //TeardownNetworkAccessTestPod ...
-func TeardownNetworkAccessTestPod(p *string) error {
+func (n *NA) TeardownNetworkAccessTestPod(p *string) error {
 	_, exists := os.LookupEnv("DONT_DELETE")
 	if !exists {
 		ns := testNamespace
-		err := DeletePod(p, &ns, false) //don't worry about waiting
+		err := n.k.DeletePod(p, &ns, false) //don't worry about waiting
 		return err
 	}
 
@@ -41,12 +75,12 @@ func TeardownNetworkAccessTestPod(p *string) error {
 }
 
 //AccessURL calls the supplied URL and returns the http code
-func AccessURL(pn *string, url *string) (int, error) {
+func (n *NA) AccessURL(pn *string, url *string) (int, error) {
 
 	//create a curl command to access the supplied url
 	cmd := "curl -s -o /dev/null -I -L -w %{http_code} " + *url
 	ns := testNamespace
-	httpCode, _, ex, err := ExecCommand(&cmd, &ns, pn)
+	httpCode, _, ex, err := n.k.ExecCommand(&cmd, &ns, pn)
 
 	if err != nil {
 		//check the exit code.  If it's '6' (Couldn't resolve host.)

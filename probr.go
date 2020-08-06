@@ -21,12 +21,15 @@ var (
 	integrationTest = flag.Bool("integrationTest", false, "run integration tests")
 )
 
+//TODO: revise when interface this bit up ...
+var kube = kubernetes.GetKubeInstance()
+
 func main() {
 	k := flag.String("kube", "", "kube config file")
 	o := flag.String("outputDir", "", "output directory")
 	flag.Parse()
 
-	kubernetes.SetKubeConfigFile(k)
+	kube.SetKubeConfigFile(k)
 	features.SetOutputDirectory(o)
 
 	//TODO: this is the cli and what will be called on Docker run ...
