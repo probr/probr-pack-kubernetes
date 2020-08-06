@@ -6,6 +6,9 @@ import (
 	"citihub.com/probr/internal/clouddriver/kubernetes"
 )
 
+//TODO: this will be revised when the unit/integration tests are refactored to be properly mocked
+var psp = kubernetes.NewDefaultPSP()
+
 func TestClusterHasPSP(t *testing.T) {
 
 	//TODO: THIS IS NOT REALLY A UNIT TEST
@@ -15,27 +18,27 @@ func TestClusterHasPSP(t *testing.T) {
 	//test.   This will basically be what we're doing in the
 	//feature/bdd tests so that's probably a more relevant place
 	//for that.   Here, just do some basic stuff ...
-	yesNo, err := kubernetes.ClusterHasPSP()
+	yesNo, err := psp.ClusterHasPSP()
 
 	handleResult(yesNo, err)
 
 }
 
 func TestPrivilegedAccessIsRestricted(t *testing.T) {
-	yesNo, err := kubernetes.PrivilegedAccessIsRestricted()
+	yesNo, err := psp.PrivilegedAccessIsRestricted()
 
 	handleResult(yesNo, err)
 }
 
 func TestHostPIDIsRestricted(t *testing.T) {
-	yesNo, err := kubernetes.HostPIDIsRestricted()
+	yesNo, err := psp.HostPIDIsRestricted()
 
 	handleResult(yesNo, err)
 }
 
 func TestCreatePODSettingPrivilegedAccess(t *testing.T) {
 	tr := true
-	p, err := kubernetes.CreatePODSettingSecurityContext(&tr, &tr, nil)
+	p, err := psp.CreatePODSettingSecurityContext(&tr, &tr, nil)
 
 	//pod creation should fail so p should be nil
 	res := p == nil
@@ -46,8 +49,8 @@ func TestCreatePODSettingPrivilegedAccess(t *testing.T) {
 func TestCreatePODSettingCapabilities(t *testing.T) {
 	var c = make([]string, 1)
 	c[0] = "NET_ADMIN"
-	
-	p, err := kubernetes.CreatePODSettingCapabilities(&c)
+
+	p, err := psp.CreatePODSettingCapabilities(&c)
 
 	//pod creation should fail so p should be nil
 	res := p == nil
@@ -56,7 +59,7 @@ func TestCreatePODSettingCapabilities(t *testing.T) {
 }
 
 func TestPrivilegedEscalationPrevented(t *testing.T) {
-	res, err := kubernetes.ExecPSPTestCmd(nil, kubernetes.Chroot)
+	res, err := psp.ExecPSPTestCmd(nil, kubernetes.Chroot)
 
 	//this should fail against a secured cluster
 	//non-zero result required
