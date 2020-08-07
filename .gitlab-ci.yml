@@ -63,7 +63,7 @@ unit_go:
     - export LOGLEVEL="NOTICE"
     - export DONT_DELETE="true"
   script:
-    - cd $CI_PROJECT_DIR/test
+    - cd $CI_PROJECT_DIR/test/unit
     - go test -v ./...
 
 # TODO: run feature/BDD (all CSPs)
