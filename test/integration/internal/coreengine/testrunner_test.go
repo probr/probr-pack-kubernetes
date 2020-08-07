@@ -16,7 +16,9 @@ import (
 	_ "citihub.com/probr/test/features/kubernetes/podsecuritypolicy" //needed to run init on TestHandlers
 )
 
-//TODO: this will be removed when it's been properly changed to a unit test
+// Test runner integration tests, so actually calling out to Kube ...
+// TODO: complete
+
 var (
 	integrationTest = flag.Bool("integrationTest", false, "run integration tests")
 )
@@ -37,8 +39,6 @@ func TestMain(m *testing.M) {
 
 	os.Exit(result)
 }
-
-//TODO: change this to pure unit by injecting a mock kube ...
 
 func TestTestRunner(t *testing.T) {
 

@@ -118,6 +118,11 @@ func (psp *PSP) ClusterHasPSP() (*bool, error) {
 
 	// iterate over providers ...
 	for _, p := range *psp.securityPolicyProviders {
+		//defend ..
+		if p == nil {
+			continue
+		}
+		
 		b, e := p.HasSecurityPolicies()
 		if e != nil {
 			//hold onto the error and continue
