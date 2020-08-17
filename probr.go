@@ -29,8 +29,7 @@ func main() {
 	o := flag.String("outputDir", "", "output directory")
 	flag.Parse()
 
-	kube.SetKubeConfigFile(k)
-	features.SetOutputDirectory(o)
+	SetIOPaths(*k, *o)
 
 	//TODO: this is the cli and what will be called on Docker run ...
 	//use args to figure out what needs to be run / output paths / etc
@@ -39,18 +38,9 @@ func main() {
 	//(possibly want to create a separate "cli" file)
 
 	// get all the below from args ... just hard code for now
-
-	// get the test mgr
-	tm := coreengine.NewTestManager()
-
-	//add some tests and add them to the TM - we need to tidy this up!
-	addTest(tm, "container_registry_access", coreengine.Kubernetes, coreengine.ContainerRegistryAccess)
-	addTest(tm, "internet_access", coreengine.Kubernetes, coreengine.InternetAccess)
-	addTest(tm, "pod_security_policy", coreengine.Kubernetes, coreengine.PodSecurityPolicies)
-	addTest(tm, "account_manager", coreengine.CloudDriver, coreengine.General)
-
+	
 	//exec 'em all (for now!)
-	s, err := tm.ExecAllTests()
+	s, err := RunAllTests()
 	if err != nil {
 		log.Fatalf("[ERROR] Error executing tests %v", err)
 	}
@@ -76,4 +66,26 @@ func addTest(tm *coreengine.TestStore, n string, g coreengine.Group, c coreengin
 
 	//add - don't worry about the rtn uuid
 	tm.AddTest(&test)
+}
+
+// RunAllTests ...
+func RunAllTests() (int, error) {
+	// get the test mgr
+	tm := coreengine.NewTestManager()
+
+	//add some tests and add them to the TM - we need to tidy this up!
+	addTest(tm, "container_registry_access", coreengine.Kubernetes, coreengine.ContainerRegistryAccess)
+	addTest(tm, "internet_access", coreengine.Kubernetes, coreengine.InternetAccess)
+	addTest(tm, "pod_security_policy", coreengine.Kubernetes, coreengine.PodSecurityPolicies)
+	addTest(tm, "account_manager", coreengine.CloudDriver, coreengine.General)
+
+	//exec 'em all (for now!)
+	return tm.ExecAllTests()
+
+}
+
+// SetIOPaths ...
+func SetIOPaths(i string, o string) {
+	kube.SetKubeConfigFile(&i)
+	features.SetOutputDirectory(&o)
 }
