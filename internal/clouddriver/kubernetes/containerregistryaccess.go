@@ -53,13 +53,8 @@ func (c *CRA) SetupContainerAccessTestPod(r *string) (*apiv1.Pod, error) {
 	i := *r + caTestImage
 	pname := GenerateUniquePodName(caPodNameBase + "-" + strings.ReplaceAll(*r, ".", "-"))
 	ns, cname := caNamespace, caContainer
-	p, err := c.k.CreatePod(&pname, &ns, &cname, &i, true, nil)
-
-	if err != nil {
-		return nil, err
-	}
-
-	return p, nil
+	// let caller handle result ...
+	return c.k.CreatePod(&pname, &ns, &cname, &i, true, nil)
 }
 
 //TeardownContainerAccessTestPod ...

@@ -8,7 +8,6 @@ require (
 	github.com/Azure/go-autorest/autorest/to v0.4.0 // indirect
 	github.com/Azure/go-autorest/autorest/validation v0.3.0 // indirect
 	github.com/cucumber/godog v0.10.0
-	github.com/deepmap/oapi-codegen v1.3.8
 	github.com/getkin/kin-openapi v0.3.0
 	github.com/google/uuid v1.1.1
 	github.com/hashicorp/logutils v1.0.0
@@ -17,5 +16,4 @@ require (
 	k8s.io/api v0.18.0
 	k8s.io/apimachinery v0.18.0
 	k8s.io/client-go v0.18.0
-	k8s.io/utils v0.0.0-20200324210504-a9aa75ae1b89
 )
