@@ -1,7 +1,6 @@
 package kubernetes
 
 import (
-	"citihub.com/probr/internal/config"
 	"bytes"
 	"context"
 	"flag"
@@ -14,6 +13,8 @@ import (
 	"sync"
 	"time"
 
+	"citihub.com/probr/internal/config"
+
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -24,6 +25,9 @@ import (
 	executil "k8s.io/client-go/util/exec"
 
 	apiv1 "k8s.io/api/core/v1"
+
+	//needed for authentication against the various GCPs
+	_ "k8s.io/client-go/plugin/pkg/client/auth"
 )
 
 //PodCreationErrorReason ... TODO: not sure if this is the correct name for this?
@@ -267,8 +271,8 @@ func (k *Kube) CreatePodFromObject(p *apiv1.Pod, pname *string, ns *string, w bo
 
 	log.Printf("[NOTICE] POD %q creation started.", res.GetObjectMeta().GetName())
 
-	if w {		
-		//wait:		
+	if w {
+		//wait:
 		err = waitForPhase(apiv1.PodRunning, c, ns, pname)
 		if err != nil {
 			return res, err
@@ -574,11 +578,11 @@ func podInErrorState(p *apiv1.Pod) (bool, *PodCreationError) {
 			n := p.GetObjectMeta().GetName()
 			r := p.Status.ContainerStatuses[0].State.Waiting.Reason
 			log.Printf("[INFO] Pod: %v Waiting reason: %v", n, r)
- 
+
 			//TODO: other error states? Also need to tidy up the error creation
 			if r == "ErrImagePull" {
 				log.Printf("[INFO] Giving up waiting on pod %v . Error reason: %v", n, r)
-				pcErr := make(map[PodCreationErrorReason]*PodCreationErrorReason,1)
+				pcErr := make(map[PodCreationErrorReason]*PodCreationErrorReason, 1)
 				e := ImagePullError
 				pcErr[ImagePullError] = &e
 				return true, &PodCreationError{fmt.Errorf("Giving up waiting on pod %v . Error reason: %v", n, r), pcErr}
