@@ -7,8 +7,8 @@ import (
 	"sync"
 	"time"
 
-	"citihub.com/probr/internal/clouddriver/azure"
-	"citihub.com/probr/internal/config"
+	"gitlab.com/citihub/probr/internal/clouddriver/azure"
+	"gitlab.com/citihub/probr/internal/config"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	apiv1 "k8s.io/api/core/v1"
@@ -54,7 +54,7 @@ const (
 	//NOTE: either the above namespace needs to be added to the exclusion list on the
 	//container registry rule or busybox need to be available in the allowed (probably internal) registry
 	defaultPSPImageRepository = "docker.io"
-	defaultPSPTestImage       = "busybox"	
+	defaultPSPTestImage       = "busybox"
 	defaultPSPTestContainer   = "psp-test"
 	defaultPSPTestPodName     = "psp-test-pod"
 )

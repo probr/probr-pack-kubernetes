@@ -4,7 +4,7 @@ import (
 	"log"
 	"testing"
 
-	"citihub.com/probr/internal/clouddriver/kubernetes"
+	"gitlab.com/citihub/probr/internal/clouddriver/kubernetes"
 	"github.com/stretchr/testify/assert"
 )
 

@@ -13,7 +13,7 @@ import (
 	"sync"
 	"time"
 
-	"citihub.com/probr/internal/config"
+	"gitlab.com/citihub/probr/internal/config"
 
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"

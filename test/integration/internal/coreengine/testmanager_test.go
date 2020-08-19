@@ -3,7 +3,7 @@ package coreengine_test
 import (
 	"testing"
 
-	"citihub.com/probr/internal/coreengine"
+	"gitlab.com/citihub/probr/internal/coreengine"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 )

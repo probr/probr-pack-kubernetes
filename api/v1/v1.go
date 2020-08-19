@@ -1,15 +1,12 @@
-package main
+package v1
 
 import (
-	"flag"
-	"log"
-	"os"
-
-	"github.com/google/uuid"
 	"gitlab.com/citihub/probr/internal/clouddriver/kubernetes"
 	"gitlab.com/citihub/probr/internal/coreengine"
 
-	"gitlab.com/citihub/probr/internal/config" //needed for logging
+	"github.com/google/uuid"
+
+	_ "gitlab.com/citihub/probr/internal/config" //needed for logging
 	"gitlab.com/citihub/probr/test/features"
 	_ "gitlab.com/citihub/probr/test/features/clouddriver"
 	_ "gitlab.com/citihub/probr/test/features/kubernetes/containerregistryaccess" //needed to run init on TestHandlers
@@ -17,51 +14,8 @@ import (
 	_ "gitlab.com/citihub/probr/test/features/kubernetes/podsecuritypolicy"       //needed to run init on TestHandlers
 )
 
-var (
-	integrationTest = flag.Bool("integrationTest", false, "run integration tests")
-)
-
 //TODO: revise when interface this bit up ...
 var kube = kubernetes.GetKubeInstance()
-
-func main() {
-	//TODO: this (to line 45) will all move when we merge the change to move to a library
-	//just dumping in here for now ...
-	k := flag.String("kube", "", "kube config file")
-	o := flag.String("outputDir", "", "output directory")
-	flag.Parse()
-
-	SetIOPaths(*k, *o)
-
-	log.Printf("[NOTICE] Probr running with environment: ")
-	log.Printf("[NOTICE] %v", config.GetEnvConfigInstance())
-
-	if k != nil && len(*k) > 0 {
-		log.Printf("[NOTICE] Kube Config has been overridden on command line to: " + *k)
-	}
-	if o != nil && len(*o) > 0 {
-		log.Printf("[NOTICE] Output Directory has been overridden on command line to: " + *o)
-	}
-
-	//TODO: this is the cli and what will be called on Docker run ...
-	//use args to figure out what needs to be run / output paths / etc
-	//and call TestManager to make it happen :-)
-
-	//(possibly want to create a separate "cli" file)
-
-	// get all the below from args ... just hard code for now
-
-	//exec 'em all (for now!)
-	s, err := RunAllTests()
-	if err != nil {
-		log.Fatalf("[ERROR] Error executing tests %v", err)
-	}
-
-	log.Printf("[NOTICE] Overall test completion status: %v", s)
-
-	os.Exit(s)
-
-}
 
 func addTest(tm *coreengine.TestStore, n string, g coreengine.Group, c coreengine.Category) {
 
@@ -82,6 +36,7 @@ func addTest(tm *coreengine.TestStore, n string, g coreengine.Group, c coreengin
 
 // RunAllTests ...
 func RunAllTests() (int, error) {
+	// MUST run after SetIOPaths
 	// get the test mgr
 	tm := coreengine.NewTestManager()
 

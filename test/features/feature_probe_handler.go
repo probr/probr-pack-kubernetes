@@ -8,7 +8,7 @@ import (
 	"github.com/cucumber/godog"
 	"github.com/cucumber/godog/colors"
 
-	"citihub.com/probr/internal/coreengine"
+	"gitlab.com/citihub/probr/internal/coreengine"
 )
 
 //this is the "TEST HANDLER" impl  and will get called when probr is invoked from the CLI or API
