@@ -3,7 +3,7 @@ package kubernetes_test
 import (
 	"testing"
 
-	"citihub.com/probr/internal/clouddriver/kubernetes"
+	"gitlab.com/citihub/probr/internal/clouddriver/kubernetes"
 )
 
 //TODO: this will be revised when the unit/integration tests are refactored to be properly mocked

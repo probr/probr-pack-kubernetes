@@ -3,9 +3,9 @@ package containerregistryaccess
 import (
 	"fmt"
 
-	"citihub.com/probr/internal/clouddriver/kubernetes"
-	"citihub.com/probr/internal/coreengine"
-	"citihub.com/probr/test/features"
+	"gitlab.com/citihub/probr/internal/clouddriver/kubernetes"
+	"gitlab.com/citihub/probr/internal/coreengine"
+	"gitlab.com/citihub/probr/test/features"
 	"github.com/cucumber/godog"
 )
 

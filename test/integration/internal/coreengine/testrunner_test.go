@@ -10,10 +10,10 @@ import (
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 
-	"citihub.com/probr/internal/coreengine"
-	_ "citihub.com/probr/test/features/clouddriver"                  //needed to run init on TestHandlers
-	_ "citihub.com/probr/test/features/kubernetes/internetaccess"    //needed to run init on TestHandlers
-	_ "citihub.com/probr/test/features/kubernetes/podsecuritypolicy" //needed to run init on TestHandlers
+	"gitlab.com/citihub/probr/internal/coreengine"
+	_ "gitlab.com/citihub/probr/test/features/clouddriver"                  //needed to run init on TestHandlers
+	_ "gitlab.com/citihub/probr/test/features/kubernetes/internetaccess"    //needed to run init on TestHandlers
+	_ "gitlab.com/citihub/probr/test/features/kubernetes/podsecuritypolicy" //needed to run init on TestHandlers
 )
 
 // Test runner integration tests, so actually calling out to Kube ...
