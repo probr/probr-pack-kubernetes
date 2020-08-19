@@ -3,8 +3,9 @@ package azure
 import (
 	"context"
 	"log"
-	"os"
 	"time"
+
+	"citihub.com/probr/internal/config"
 
 	"github.com/Azure/azure-sdk-for-go/profiles/latest/resources/mgmt/policy"
 	"github.com/Azure/go-autorest/autorest/azure/auth"
@@ -27,9 +28,9 @@ const (
 	azPSPContainerImage               = "AZPSPContainerImage"
 	azPSPContainerPrivilegeEscalation = "AZPSPContainerPrivilegeEscalation"
 	azPSPHostPIDHostIPCNS             = "AZPSPHostPIDHostIPCNS"
-	azPSPContainerPrivileged 		  = "AZPSPContainerPrivileged"
-	azPSPApprovedUsersAndGroups		  = "AZPSPApprovedUsersAndGroups"
-	azPSPAllowedCapabilitiesOnly	  = "AZPSPAllowedCapabilitiesOnly"
+	azPSPContainerPrivileged          = "AZPSPContainerPrivileged"
+	azPSPApprovedUsersAndGroups       = "AZPSPApprovedUsersAndGroups"
+	azPSPAllowedCapabilitiesOnly      = "AZPSPAllowedCapabilitiesOnly"
 )
 
 var azPolicyUUIDToProbrPolicy = make(map[string]string)
@@ -70,7 +71,7 @@ func (p *AZSecurityPolicyProvider) HasPrivilegedAccessRestriction() (*bool, erro
 	return p.checkForRestrictions(&[]string{azPSPLinuxRestricted, azPSPContainerPrivileged})
 }
 
-// For the following, the hostPID, hostIPC and hostNetwork restrictions are wrapped together 
+// For the following, the hostPID, hostIPC and hostNetwork restrictions are wrapped together
 // in Azure policies.  This is either in the general 'Linux Restricted' policy set or in the
 // HostPID/HostIPC/HostNetwork policy:
 
@@ -141,7 +142,7 @@ func (p *AZSecurityPolicyProvider) getPolicies() (*map[string]*azPolicy, error) 
 		return &p.policiesByType, nil
 	}
 
-	s := os.Getenv("AZURE_SUBSCRIPTION_ID")
+	s := *config.GetEnvConfigInstance().GetAzureSubscriptionID()
 	log.Printf("[INFO] Using Azure Sub: %v", s)
 
 	scope := "/subscriptions/" + s

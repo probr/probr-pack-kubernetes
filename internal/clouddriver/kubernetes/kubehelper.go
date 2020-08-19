@@ -1,6 +1,7 @@
 package kubernetes
 
 import (
+	"citihub.com/probr/internal/config"
 	"bytes"
 	"context"
 	"flag"
@@ -38,6 +39,7 @@ const (
 	PSPHostNamespace
 	PSPHostNetwork
 	PSPAllowedCapabilities
+	ImagePullError
 )
 
 func (r PodCreationErrorReason) String() string {
@@ -48,7 +50,8 @@ func (r PodCreationErrorReason) String() string {
 		"podcreation-error: psp-container-allowed-images",
 		"podcreation-error: psp-host-namespace",
 		"podcreation-error: psp-host-network",
-		"podcreation-error: psp-allowed-capabilities"}[r]
+		"podcreation-error: psp-allowed-capabilities",
+		"podcreation-error: image-pull-error"}[r]
 }
 
 //PodCreationError ...
@@ -193,7 +196,10 @@ func (k *Kube) GetPods() (*apiv1.PodList, error) {
 }
 
 func getPods(c *kubernetes.Clientset) (*apiv1.PodList, error) {
-	pods, err := c.CoreV1().Pods("").List(context.TODO(), metav1.ListOptions{})
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	pods, err := c.CoreV1().Pods("").List(ctx, metav1.ListOptions{})
 	if err != nil {
 		return nil, err
 	}
@@ -259,12 +265,17 @@ func (k *Kube) CreatePodFromObject(p *apiv1.Pod, pname *string, ns *string, w bo
 		return nil, err
 	}
 
-	log.Printf("[NOTICE] POD %q created.\n", res.GetObjectMeta().GetName())
+	log.Printf("[NOTICE] POD %q creation started.", res.GetObjectMeta().GetName())
 
-	if w {
-		//wait:
-		waitForPhase(apiv1.PodRunning, c, ns, pname)
+	if w {		
+		//wait:		
+		err = waitForPhase(apiv1.PodRunning, c, ns, pname)
+		if err != nil {
+			return res, err
+		}
 	}
+
+	log.Printf("[NOTICE] POD %q creation completed. Pod is up and running.", res.GetObjectMeta().GetName())
 
 	return res, nil
 }
@@ -538,8 +549,10 @@ func waitForPhase(ph apiv1.PodPhase, c *kubernetes.Clientset, ns *string, n *str
 		log.Printf("[DEBUG] Watch Container status: %+v", p.Status.ContainerStatuses)
 
 		// don't wait if we're getting errors:
-		if podInErrorState(p) {
-			break
+		b, err := podInErrorState(p)
+		if b {
+			log.Printf("[WARN] Giving up waiting on pod creation. Error: %v", err)
+			return err
 		}
 
 		if p.Status.Phase == ph {
@@ -553,7 +566,7 @@ func waitForPhase(ph apiv1.PodPhase, c *kubernetes.Clientset, ns *string, n *str
 	return nil
 }
 
-func podInErrorState(p *apiv1.Pod) bool {
+func podInErrorState(p *apiv1.Pod) (bool, *PodCreationError) {
 
 	// check the container statuses for error conditions:
 	if len(p.Status.ContainerStatuses) > 0 {
@@ -561,16 +574,19 @@ func podInErrorState(p *apiv1.Pod) bool {
 			n := p.GetObjectMeta().GetName()
 			r := p.Status.ContainerStatuses[0].State.Waiting.Reason
 			log.Printf("[INFO] Pod: %v Waiting reason: %v", n, r)
-
-			//TODO: other error states?
+ 
+			//TODO: other error states? Also need to tidy up the error creation
 			if r == "ErrImagePull" {
-				log.Printf("[WARN] Giving up waiting on pod %v . Error reason: %v", n, r)
-				return true
+				log.Printf("[INFO] Giving up waiting on pod %v . Error reason: %v", n, r)
+				pcErr := make(map[PodCreationErrorReason]*PodCreationErrorReason,1)
+				e := ImagePullError
+				pcErr[ImagePullError] = &e
+				return true, &PodCreationError{fmt.Errorf("Giving up waiting on pod %v . Error reason: %v", n, r), pcErr}
 			}
 		}
 	}
 
-	return false
+	return false, nil
 }
 
 func waitForDelete(c *kubernetes.Clientset, ns *string, n *string) error {
@@ -615,7 +631,7 @@ func homeDir() string {
 }
 
 func getConfigPathFromEnv() string {
-	return os.Getenv("KUBE_CONFIG")
+	return *config.GetEnvConfigInstance().GetKubeConfigPath()
 }
 
 func logCmd(c *string, p *string, n *string) {

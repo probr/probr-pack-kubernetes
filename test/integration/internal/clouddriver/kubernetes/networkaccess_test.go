@@ -31,5 +31,5 @@ func TestIsURLAccessible(t *testing.T) {
 	n := p.GetObjectMeta().GetName()
 	code, err := na.AccessURL(&n, &url)
 
-	log.Printf("[NOTICE] URL: %v Result: %v", url, code)
+	log.Printf("[NOTICE] URL: %v Result: %v Error: %v", url, code, err)
 }

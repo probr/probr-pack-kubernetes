@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"citihub.com/probr/internal/clouddriver/kubernetes"
+	"citihub.com/probr/internal/config"
 	"citihub.com/probr/internal/coreengine"
 	"github.com/google/uuid"
 
@@ -25,11 +26,23 @@ var (
 var kube = kubernetes.GetKubeInstance()
 
 func main() {
+	//TODO: this (to line 45) will all move when we merge the change to move to a library
+	//just dumping in here for now ...
 	k := flag.String("kube", "", "kube config file")
 	o := flag.String("outputDir", "", "output directory")
 	flag.Parse()
 
 	SetIOPaths(*k, *o)
+
+	log.Printf("[NOTICE] Probr running with environment: ")
+	log.Printf("[NOTICE] %v", config.GetEnvConfigInstance())
+
+	if k != nil && len(*k) > 0 {
+		log.Printf("[NOTICE] Kube Config has been overridden on command line to: " + *k)
+	}
+	if o != nil && len(*o) > 0 {
+		log.Printf("[NOTICE] Output Directory has been overridden on command line to: " + *o)
+	}
 
 	//TODO: this is the cli and what will be called on Docker run ...
 	//use args to figure out what needs to be run / output paths / etc
@@ -38,7 +51,7 @@ func main() {
 	//(possibly want to create a separate "cli" file)
 
 	// get all the below from args ... just hard code for now
-	
+
 	//exec 'em all (for now!)
 	s, err := RunAllTests()
 	if err != nil {

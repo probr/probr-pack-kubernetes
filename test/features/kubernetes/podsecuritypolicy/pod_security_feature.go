@@ -96,11 +96,20 @@ func (p *probState) theOperationWillWithAnError(res, msg string) error {
 }
 
 func (p *probState) processCreationResult(pd *apiv1.Pod, expected kubernetes.PodCreationErrorReason, err error) error {
+	//first check for errors:
 	if err != nil {
-		//check for expected error
+		//check for knwon error type
 		if e, ok := err.(*kubernetes.PodCreationError); ok {
 			p.creationError = e
 			p.expectedReason = &expected
+
+			//while the error is known, it could be a partial error, 
+			//e.g. pod was created but did't get to "running" state
+			//in this case we need to hold onto the name so it can be deleted
+			if pd != nil {
+				p.podName = pd.GetObjectMeta().GetName()
+			}
+
 			return nil
 		}
 		//unexpected error
@@ -108,11 +117,12 @@ func (p *probState) processCreationResult(pd *apiv1.Pod, expected kubernetes.Pod
 	}
 
 	if pd == nil {
-		// valid if the request was for privileged (i.e. pod creation should fail)
+		// pod not created, which could be valid for some tests
 		return nil
 	}
 
-	//hold on to the pod name
+	//if we've got this far, a pod was successfully created which could be 
+	//valid for some tests
 	p.podName = pd.GetObjectMeta().GetName()
 
 	//we're good
@@ -137,8 +147,8 @@ func (p *probState) runControlTest(cf func() (*bool, error), c string) error {
 }
 
 func (p *probState) runVerificationTest(c kubernetes.PSPTestCommand) error {
-	//check for pod name, which will be set if successfully created
-	if p.podName != "" {
+	//check for lack of creation error, i.e. pod was created successfully
+	if p.creationError == nil {
 		ex, err := psp.ExecPSPTestCmd(&p.podName, c)
 		//want this to fail as execution of a command requiring root should be blocked
 		if err != nil {

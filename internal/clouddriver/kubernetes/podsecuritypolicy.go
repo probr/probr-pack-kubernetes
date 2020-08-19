@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"citihub.com/probr/internal/clouddriver/azure"
+	"citihub.com/probr/internal/config"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	apiv1 "k8s.io/api/core/v1"
@@ -48,13 +49,14 @@ func (c PSPTestCommand) String() string {
 }
 
 const (
-	//TODO: default to these values for MVP - need to expose in future
-	pspTestNamespace = "probr-pod-security-test-ns"
+	//default values.  Overrides can be supplied via the environment.
+	defaultPSPTestNamespace = "probr-pod-security-test-ns"
 	//NOTE: either the above namespace needs to be added to the exclusion list on the
 	//container registry rule or busybox need to be available in the allowed (probably internal) registry
-	pspTestImage     = "docker.io/busybox"
-	pspTestContainer = "psp-test"
-	pspTestPodName   = "psp-test-pod"
+	defaultPSPImageRepository = "docker.io"
+	defaultPSPTestImage       = "busybox"	
+	defaultPSPTestContainer   = "psp-test"
+	defaultPSPTestPodName     = "psp-test-pod"
 )
 
 // PodSecurityPolicy ...
@@ -81,14 +83,22 @@ type PodSecurityPolicy interface {
 type PSP struct {
 	k                       Kubernetes
 	securityPolicyProviders *[]SecurityPolicyProvider
+	c                       config.Config
+
+	testNamespace string
+	testImage     string
+	testContainer string
+	testPodName   string
 }
 
 // NewPSP ...
-func NewPSP(k Kubernetes, sp *[]SecurityPolicyProvider) *PSP {
+func NewPSP(k Kubernetes, sp *[]SecurityPolicyProvider, c config.Config) *PSP {
 	p := &PSP{}
 	p.k = k
 	p.securityPolicyProviders = sp
+	p.c = c
 
+	p.setup()
 	return p
 }
 
@@ -102,8 +112,32 @@ func NewDefaultPSP() *PSP {
 		NewKubeSecurityPolicyProvider(p.k),
 		azure.NewAzPolicyProvider()}
 
+	p.c = config.GetEnvConfigInstance()
+
+	p.setup()
 	return p
 
+}
+
+func (psp *PSP) setup() {
+
+	//just default these for now (not sure we'll ever want to supply):
+	psp.testNamespace = defaultPSPTestNamespace
+	psp.testContainer = defaultPSPTestContainer
+	psp.testPodName = defaultPSPTestPodName
+
+	// image repository + busy box from config
+	// but default if not supplied
+	i := *psp.c.GetImageRepository()
+	if len(i) < 1 {
+		i = defaultPSPImageRepository
+	}
+	b := *psp.c.GetBusyBoxImage()
+	if len(b) < 1 {
+		b = defaultPSPTestImage
+	}
+
+	psp.testImage = i + "/" + b
 }
 
 // ClusterIsDeployed ...
@@ -122,7 +156,7 @@ func (psp *PSP) ClusterHasPSP() (*bool, error) {
 		if p == nil {
 			continue
 		}
-		
+
 		b, e := p.HasSecurityPolicies()
 		if e != nil {
 			//hold onto the error and continue
@@ -361,15 +395,10 @@ func (psp *PSP) CreatePODSettingSecurityContext(pr *bool, pe *bool, runAsUser *i
 		RunAsUser:                runAsUser,
 	}
 
-	pname, ns, cname, image := GenerateUniquePodName(pspTestPodName), pspTestNamespace, pspTestContainer, pspTestImage
+	pname, ns, cname, image := GenerateUniquePodName(psp.testPodName), psp.testNamespace, psp.testContainer, psp.testImage
 
-	p, err := psp.k.CreatePod(&pname, &ns, &cname, &image, true, &sc)
-
-	if err != nil {
-		return nil, err
-	}
-
-	return p, nil
+	//let caller handle ...
+	return psp.k.CreatePod(&pname, &ns, &cname, &image, true, &sc)
 }
 
 // CreatePODSettingAttributes creates a POD with attributes:
@@ -389,7 +418,7 @@ func (psp *PSP) CreatePODSettingAttributes(hostPID *bool, hostIPC *bool, hostNet
 		hostNetwork = &f
 	}
 
-	pname, ns, cname, image := GenerateUniquePodName(pspTestPodName), pspTestNamespace, pspTestContainer, pspTestImage
+	pname, ns, cname, image := GenerateUniquePodName(psp.testPodName), psp.testNamespace, psp.testContainer, psp.testImage
 
 	// get the pod object and manipulate:
 	po := psp.k.GetPodObject(pname, ns, cname, image, nil)
@@ -397,19 +426,13 @@ func (psp *PSP) CreatePODSettingAttributes(hostPID *bool, hostIPC *bool, hostNet
 	po.Spec.HostIPC = *hostIPC
 	po.Spec.HostNetwork = *hostNetwork
 
-	// create from PO
-	p, err := psp.k.CreatePodFromObject(po, &pname, &ns, true)
-
-	if err != nil {
-		return nil, err
-	}
-
-	return p, nil
+	// create from PO (and let caller handle ...)
+	return psp.k.CreatePodFromObject(po, &pname, &ns, true)
 }
 
 //CreatePODSettingCapabilities ...
 func (psp *PSP) CreatePODSettingCapabilities(c *[]string) (*apiv1.Pod, error) {
-	pname, ns, cname, image := GenerateUniquePodName(pspTestPodName), pspTestNamespace, pspTestContainer, pspTestImage
+	pname, ns, cname, image := GenerateUniquePodName(psp.testPodName), psp.testNamespace, psp.testContainer, psp.testImage
 
 	// get the pod object and manipulate:
 	po := psp.k.GetPodObject(pname, ns, cname, image, nil)
@@ -430,14 +453,8 @@ func (psp *PSP) CreatePODSettingCapabilities(c *[]string) (*apiv1.Pod, error) {
 		}
 	}
 
-	// create from PO
-	p, err := psp.k.CreatePodFromObject(po, &pname, &ns, true)
-
-	if err != nil {
-		return nil, err
-	}
-
-	return p, nil
+	// create from PO (and let caller handle ...)
+	return psp.k.CreatePodFromObject(po, &pname, &ns, true)
 }
 
 // ExecPSPTestCmd ...
@@ -459,7 +476,7 @@ func (psp *PSP) ExecPSPTestCmd(pName *string, cmd PSPTestCommand) (int, error) {
 	}
 
 	c := cmd.String()
-	ns := pspTestNamespace
+	ns := psp.testNamespace
 	stdout, _, ex, err := psp.k.ExecCommand(&c, &ns, &pn)
 
 	log.Printf("[NOTICE] ExecPSPTestCmd: %v stdout: %v exit code: %v", cmd, stdout, ex)
@@ -473,7 +490,7 @@ func (psp *PSP) ExecPSPTestCmd(pName *string, cmd PSPTestCommand) (int, error) {
 
 //TeardownPodSecurityTestPod ...
 func (psp *PSP) TeardownPodSecurityTestPod(p *string) error {
-	ns := pspTestNamespace
+	ns := psp.testNamespace
 	err := psp.k.DeletePod(p, &ns, false) //don't worry about waiting
 	return err
 }
