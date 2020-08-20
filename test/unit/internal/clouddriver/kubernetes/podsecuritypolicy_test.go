@@ -182,3 +182,7 @@ func (m *securityProviderMock) HasAssignedCapabilitiesRestriction() (*bool, erro
 	b := m.Called().Bool(0)
 	return &b, nil
 }
+func (m *securityProviderMock) HasHostPortRestriction() (*bool, error) {
+	b := m.Called().Bool(0)
+	return &b, nil
+}

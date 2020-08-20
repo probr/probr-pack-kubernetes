@@ -3,10 +3,11 @@ package podsecuritypolicy
 import (
 	"fmt"
 
+	"github.com/cucumber/godog"
 	"gitlab.com/citihub/probr/internal/clouddriver/kubernetes"
 	"gitlab.com/citihub/probr/internal/coreengine"
+	"gitlab.com/citihub/probr/internal/utils"
 	"gitlab.com/citihub/probr/test/features"
-	"github.com/cucumber/godog"
 	apiv1 "k8s.io/api/core/v1"
 )
 
@@ -103,7 +104,7 @@ func (p *probState) processCreationResult(pd *apiv1.Pod, expected kubernetes.Pod
 			p.creationError = e
 			p.expectedReason = &expected
 
-			//while the error is known, it could be a partial error, 
+			//while the error is known, it could be a partial error,
 			//e.g. pod was created but did't get to "running" state
 			//in this case we need to hold onto the name so it can be deleted
 			if pd != nil {
@@ -121,7 +122,7 @@ func (p *probState) processCreationResult(pd *apiv1.Pod, expected kubernetes.Pod
 		return nil
 	}
 
-	//if we've got this far, a pod was successfully created which could be 
+	//if we've got this far, a pod was successfully created which could be
 	//valid for some tests
 	p.podName = pd.GetObjectMeta().GetName()
 
@@ -347,6 +348,35 @@ func (p *probState) iShouldNotBeAbleToPerformACommandThatRequiresAnyCapabilities
 	return p.runVerificationTest(kubernetes.SpecialCapTest)
 }
 
+//AZ Policy - port range
+func (p *probState) anPortRangeIsRequestedForTheKubernetesDeployment(portRange string) error {
+	var y []byte
+	var err error
+
+	if portRange == "unapproved" {	
+		y, err = utils.Asset("test/features/kubernetes/podsecuritypolicy/features/yaml/psp-azp-hostport-unapproved.yaml")
+	} else {		
+		y, err = utils.Asset("test/features/kubernetes/podsecuritypolicy/features/yaml/psp-azp-hostport-approved.yaml")
+	}
+
+	if err != nil {
+		return err
+	}
+
+	//create from yaml
+	pd, err := psp.CreatePodFromYaml(y)
+
+	return p.processCreationResult(pd, kubernetes.PSPAllowedPortRange, err)
+}
+
+func (p *probState) someSystemExistsToPreventKubernetesDeploymentsWithUnapprovedPortRangeFromBeingDeployedToAnExistingKubernetesCluster() error {
+	return p.runControlTest(psp.HostPortsAreRestricted, "HostPortsAreRestricted")
+}
+
+func (p *probState) iShouldNotBeAbleToPerformACommandThatAccessAnUnapprovedPortRange() error {	
+	return p.runVerificationTest(kubernetes.NetCat)
+}
+
 func (p *probState) setup() {
 	//just make sure this is reset
 	p.podName = ""
@@ -425,6 +455,11 @@ func ScenarioInitialize(ctx *godog.ScenarioContext) {
 	ctx.Step(`^assigned capabilities "([^"]*)" requested for the Kubernetes deployment$`, ps.assignedCapabilitiesForTheKubernetesDeployment)
 	ctx.Step(`^some system exists to prevent Kubernetes deployments with assigned capabilities from being deployed to an existing Kubernetes cluster$`, ps.someSystemExistsToPreventKubernetesDeploymentsWithAssignedCapabilitiesFromBeingDeployedToAnExistingKubernetesCluster)
 	ctx.Step(`^I should not be able to perform a command that requires any capabilities$`, ps.iShouldNotBeAbleToPerformACommandThatRequiresAnyCapabilities)
+
+	//AZPolicy - port range
+	ctx.Step(`^an "([^"]*)" port range is requested for the Kubernetes deployment$`, ps.anPortRangeIsRequestedForTheKubernetesDeployment)
+	ctx.Step(`^I should not be able to perform a command that access an unapproved port range$`, ps.iShouldNotBeAbleToPerformACommandThatAccessAnUnapprovedPortRange)
+	ctx.Step(`^some system exists to prevent Kubernetes deployments with unapproved port range from being deployed to an existing Kubernetes cluster$`, ps.someSystemExistsToPreventKubernetesDeploymentsWithUnapprovedPortRangeFromBeingDeployedToAnExistingKubernetesCluster)
 
 	//general - outcome
 	ctx.Step(`^the operation will "([^"]*)" with an error "([^"]*)"$`, ps.theOperationWillWithAnError)

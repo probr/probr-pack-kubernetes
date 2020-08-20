@@ -1,6 +1,7 @@
 package kubernetes_test
 
 import (
+	"io/ioutil"
 	"log"
 	"os"
 	"testing"
@@ -30,6 +31,16 @@ func TestGetPods(t *testing.T) {
 
 func TestCreatePod(t *testing.T) {
 	_, err := kubernetes.GetKubeInstance().CreatePod(&testPod, &testNS, &testContainer, &testImage, true, nil)
+
+	handleResult(nil, err)
+}
+
+func TestCreatePodFromYaml(t *testing.T) {
+	//read the yaml:
+	b, _ := ioutil.ReadFile("pod-test.yaml")
+	//y := string(b)
+
+	_, err := kubernetes.GetKubeInstance().CreatePodFromYaml(b, &testPod, &testNS, &testImage, true)
 
 	handleResult(nil, err)
 }

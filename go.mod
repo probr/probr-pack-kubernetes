@@ -8,6 +8,7 @@ require (
 	github.com/Azure/go-autorest/autorest/to v0.4.0 // indirect
 	github.com/Azure/go-autorest/autorest/validation v0.3.0 // indirect
 	github.com/cucumber/godog v0.10.0
+	github.com/go-bindata/go-bindata v3.1.2+incompatible // indirect
 	github.com/golang/protobuf v1.3.3 // indirect
 	github.com/google/uuid v1.1.1
 	github.com/hashicorp/logutils v1.0.0

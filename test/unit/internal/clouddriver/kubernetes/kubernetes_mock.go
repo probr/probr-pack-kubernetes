@@ -41,6 +41,11 @@ func (m *kubeMock) CreatePodFromObject(p *apiv1.Pod, pname *string, ns *string, 
 	e := m.Called().Error(1)
 	return po, e
 }
+func (m *kubeMock) CreatePodFromYaml(y []byte, pname *string, ns *string, image *string, w bool) (*apiv1.Pod, error) {
+	po := m.Called().Get(0).(*apiv1.Pod)
+	e := m.Called().Error(1)
+	return po, e
+}
 func (m *kubeMock) GetPodObject(pname string, ns string, cname string, image string, sc *apiv1.SecurityContext) *apiv1.Pod {
 	p := m.Called().Get(0).(*apiv1.Pod)
 	return p
