@@ -5,6 +5,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/citihub/probr/internal/config"
 	"github.com/cucumber/godog"
 	"github.com/cucumber/godog/colors"
 
@@ -17,13 +18,36 @@ import (
 
 //GodogTestHandler ...
 func GodogTestHandler(gd *coreengine.GodogTest) (int, error) {
+	if config.GetOutputType() == "INMEM" {
+		return InMemGodogTestHandler(gd)
+	}
+	return ToFileGodogTestHandler(gd)
+}
 
-	f, err := getFeaturesPath(gd)
+// GetOutputType
+
+func ToFileGodogTestHandler(gd *coreengine.GodogTest) (int, error) {
+	o, err := GetOutputPath(&gd.TestDescriptor.Name)
 	if err != nil {
 		return -1, err
 	}
 
-	o, err := GetOutputPath(&gd.TestDescriptor.Name)
+func InMemGodogTestHandler(gd *coreengine.GodogTest) (int, error) {
+	var t []byte
+	o := bytes.NewBuffer(t)
+	status, err := runTestSuite(o, gd)
+	return status, err
+}
+
+func InMemGodogTestHandler(gd *coreengine.GodogTest) (int, error) {
+	var t []byte
+	o := bytes.NewBuffer(t)
+	status, err := runTestSuite(o, gd)
+	return status, err
+}
+
+func runTestSuite(o io.Writer, gd *coreengine.GodogTest) (int, error) {
+	f, err := getFeaturesPath(gd)
 	if err != nil {
 		return -2, err
 	}
@@ -41,9 +65,15 @@ func GodogTestHandler(gd *coreengine.GodogTest) (int, error) {
 		Options:              &opts,
 	}.Run()
 
+<<<<<<< Updated upstream
+<<<<<<< Updated upstream
 	return status, nil
 }
 
+=======
+>>>>>>> Stashed changes
+=======
+>>>>>>> Stashed changes
 func getFeaturesPath(gd *coreengine.GodogTest) (string, error) {
 	r, err := GetRootDir()
 	if err != nil {

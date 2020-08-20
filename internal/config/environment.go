@@ -50,6 +50,7 @@ type Config interface {
 	GetImageRepository() *string
 	GetCurlImage() *string
 	GetBusyBoxImage() *string
+	GetOutputType() *string
 }
 
 // EnvConfig ...
@@ -65,6 +66,7 @@ type EnvConfig struct {
 	imageRepository *string
 	curlImage       *string
 	busyBoxImage    *string
+	outputType      *string
 }
 
 var instance *EnvConfig
@@ -156,6 +158,13 @@ func (e *EnvConfig) GetBusyBoxImage() *string {
 		e.busyBoxImage = utils.StringPtr(os.Getenv("BUSYBOX_IMAGE"))
 	}
 	return e.busyBoxImage
+}
+
+func (e *EnvConfig) GetOutputType() *string {
+	if e.outputType == nil {
+		e.outputType = utils.StringPtr(os.Getenv("OUTPUT_TYPE"))
+	}
+	return e.outputType
 }
 
 func (e *EnvConfig) String() string {
