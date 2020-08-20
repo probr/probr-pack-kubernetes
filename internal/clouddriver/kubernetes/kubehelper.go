@@ -19,6 +19,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/kubernetes"
+	"k8s.io/client-go/kubernetes/scheme"
 	"k8s.io/client-go/tools/clientcmd"
 	"k8s.io/client-go/tools/remotecommand"
 
@@ -43,6 +44,7 @@ const (
 	PSPHostNamespace
 	PSPHostNetwork
 	PSPAllowedCapabilities
+	PSPAllowedPortRange
 	ImagePullError
 )
 
@@ -55,6 +57,7 @@ func (r PodCreationErrorReason) String() string {
 		"podcreation-error: psp-host-namespace",
 		"podcreation-error: psp-host-network",
 		"podcreation-error: psp-allowed-capabilities",
+		"podcreation-error: psp-allowed-portrange",
 		"podcreation-error: image-pull-error"}[r]
 }
 
@@ -76,6 +79,7 @@ type Kubernetes interface {
 	GetPods() (*apiv1.PodList, error)
 	CreatePod(pname *string, ns *string, cname *string, image *string, w bool, sc *apiv1.SecurityContext) (*apiv1.Pod, error)
 	CreatePodFromObject(p *apiv1.Pod, pname *string, ns *string, w bool) (*apiv1.Pod, error)
+	CreatePodFromYaml(y []byte, pname *string, ns *string, image *string, w bool) (*apiv1.Pod, error)
 	GetPodObject(pname string, ns string, cname string, image string, sc *apiv1.SecurityContext) *apiv1.Pod
 	ExecCommand(cmd, ns, pn *string) (string, string, int, error)
 	DeletePod(pname *string, ns *string, w bool) error
@@ -107,6 +111,7 @@ func GetKubeInstance() *Kube {
 		instance.azErrorToPodCreationError["azurepolicy-psp-host-namespace"] = PSPHostNamespace
 		instance.azErrorToPodCreationError["azurepolicy-psp-host-network"] = PSPHostNetwork
 		instance.azErrorToPodCreationError["azurepolicy-container-allowed-capabilities"] = PSPAllowedCapabilities
+		instance.azErrorToPodCreationError["azurepolicy-psp-host-network-ports"] = PSPAllowedPortRange
 	})
 
 	return instance
@@ -230,6 +235,25 @@ func getPods(c *kubernetes.Clientset) (*apiv1.PodList, error) {
 func (k *Kube) CreatePod(pname *string, ns *string, cname *string, image *string, w bool, sc *apiv1.SecurityContext) (*apiv1.Pod, error) {
 	//create Pod Objet ...
 	p := k.GetPodObject(*pname, *ns, *cname, *image, sc)
+
+	return k.CreatePodFromObject(p, pname, ns, w)
+}
+
+// CreatePodFromYaml ...
+func (k *Kube) CreatePodFromYaml(y []byte, pname *string, ns *string, image *string, w bool) (*apiv1.Pod, error) {
+
+	decode := scheme.Codecs.UniversalDeserializer().Decode
+	
+	o, _, _ := decode(y, nil, nil)
+
+	p := o.(*apiv1.Pod)
+	//update the name to the one that's supplied
+	p.SetName(*pname)
+	//also update the image (which could have been supplied via the env)
+	//(only expecting one container, but loop in case of many)
+	for _, c := range p.Spec.Containers {		
+		c.Image = *image
+	}
 
 	return k.CreatePodFromObject(p, pname, ns, w)
 }

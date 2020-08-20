@@ -12,4 +12,5 @@ type SecurityPolicyProvider interface {
 	HasNETRAWRestriction() (*bool, error)
 	HasAllowedCapabilitiesRestriction() (*bool, error)
 	HasAssignedCapabilitiesRestriction() (*bool, error)
+	HasHostPortRestriction() (*bool, error)
 }
