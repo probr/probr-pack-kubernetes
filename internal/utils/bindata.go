@@ -2,6 +2,8 @@
 // sources:
 // test/features/kubernetes/podsecuritypolicy/features/yaml/psp-azp-hostport-approved.yaml
 // test/features/kubernetes/podsecuritypolicy/features/yaml/psp-azp-hostport-unapproved.yaml
+// test/features/kubernetes/podsecuritypolicy/features/yaml/psp-azp-volumetypes-approved.yaml
+// test/features/kubernetes/podsecuritypolicy/features/yaml/psp-azp-volumetypes-unapproved.yaml
 package utils
 
 import (
@@ -118,6 +120,46 @@ func testFeaturesKubernetesPodsecuritypolicyFeaturesYamlPspAzpHostportUnapproved
 	return a, nil
 }
 
+var _testFeaturesKubernetesPodsecuritypolicyFeaturesYamlPspAzpVolumetypesApprovedYaml = []byte("\x1f\x8b\x08\x00\x00\x00\x00\x00\x00\xff\x7c\x92\xbd\xae\x9c\x30\x10\x85\xfb\x95\xf6\x1d\x46\xd4\x61\x17\x92\xce\x5d\x14\x45\xa9\xae\xb4\x4d\xd2\x5c\x45\x57\xb3\x66\x58\x2c\x6c\x8f\xe5\x1f\xb2\xbc\x7d\x64\x0c\x0b\x45\x14\x0a\x84\xe6\x3b\x3e\xcc\x9c\x31\x3a\xf5\x8b\x7c\x50\x6c\x05\x4c\xed\xf9\x34\x2a\xdb\x09\xb8\x71\x77\x3e\x19\x8a\xd8\x61\x44\x71\x3e\x01\x58\x34\x24\x20\x90\x4c\x5e\xc5\xb9\x96\x6c\x23\x3d\x63\xdd\x91\xe1\x8c\xd1\x5a\x8e\x18\x15\xdb\xb0\xc8\x21\x4b\x25\x1b\x77\xd9\x8e\x5c\x50\xbb\x01\x2f\x63\xba\x93\xb7\x14\x29\x5c\x14\x5f\x1d\x77\x02\x2a\x9f\x6c\x54\x86\xae\x1d\xf5\x98\x74\xac\xce\xa7\xe0\x48\x0a\x80\xec\xb4\x9d\xff\x56\xfe\xb8\xba\xfb\x64\xbf\x86\x9f\x81\xbc\x80\xb6\x69\x9a\x5c\x3a\x80\x1f\x9e\x93\x13\xf0\xa5\x69\x9a\x52\xed\xb7\xd2\xe7\x57\x29\x24\xe7\x34\x19\xb2\x11\xf5\x02\x83\x80\x77\x68\xe1\xf7\xe6\x35\xb1\x4e\x86\xd6\x71\xea\x35\x00\x74\xce\xf3\x44\x5d\x5d\x68\xb1\x02\xc9\xb6\x57\x8f\x37\x74\x6b\x77\xf9\x29\xfa\x42\x3e\x0c\xba\x9d\xa8\x48\x26\x1c\x94\xd9\x7d\xa4\x59\x80\x99\x3f\x46\x9a\x8f\x00\xc0\x61\x1c\x16\x92\x3f\x32\xca\xc9\xa3\xb2\xe4\x8b\x45\xbd\x6f\xa6\x96\xf1\xf9\x5a\x08\x80\x32\xf8\x20\x01\xf7\x14\xe6\x3b\x3f\x4b\x4d\xb2\x31\x98\x17\xfc\x0e\x55\x18\xaa\x4f\x50\xd5\x32\xbf\x83\x26\x72\xd0\x0e\x55\x19\x7f\x8f\xb3\x8c\xf9\xc6\xc9\xc6\xad\xe5\xff\x47\x01\x26\x6b\x6f\x4b\xd7\xd7\x7c\x7b\xae\x7b\x47\x9b\xe9\xbf\x57\x0a\x80\x5a\xf3\x9f\x9b\x57\x93\xd2\xf4\xa0\xef\x41\xa2\x5e\xae\x94\x80\x1e\x75\xa0\x63\x2c\x7f\x03\x00\x00\xff\xff\xb9\x6c\x7f\xf1\xb7\x02\x00\x00")
+
+func testFeaturesKubernetesPodsecuritypolicyFeaturesYamlPspAzpVolumetypesApprovedYamlBytes() ([]byte, error) {
+	return bindataRead(
+		_testFeaturesKubernetesPodsecuritypolicyFeaturesYamlPspAzpVolumetypesApprovedYaml,
+		"test/features/kubernetes/podsecuritypolicy/features/yaml/psp-azp-volumetypes-approved.yaml",
+	)
+}
+
+func testFeaturesKubernetesPodsecuritypolicyFeaturesYamlPspAzpVolumetypesApprovedYaml() (*asset, error) {
+	bytes, err := testFeaturesKubernetesPodsecuritypolicyFeaturesYamlPspAzpVolumetypesApprovedYamlBytes()
+	if err != nil {
+		return nil, err
+	}
+
+	info := bindataFileInfo{name: "test/features/kubernetes/podsecuritypolicy/features/yaml/psp-azp-volumetypes-approved.yaml", size: 695, mode: os.FileMode(438), modTime: time.Unix(1598032429, 0)}
+	a := &asset{bytes: bytes, info: info}
+	return a, nil
+}
+
+var _testFeaturesKubernetesPodsecuritypolicyFeaturesYamlPspAzpVolumetypesUnapprovedYaml = []byte("\x1f\x8b\x08\x00\x00\x00\x00\x00\x00\xff\x84\x52\x3d\xab\xdc\x30\x10\xec\x0f\xfc\x1f\x16\xd7\xf1\x57\xd2\xa9\x0b\x21\xa4\x0a\xb8\x49\x9a\x47\x8a\x3d\x79\xef\x2c\x9e\xa4\x15\x5a\xc9\xb9\xf7\xef\x83\x4e\xf6\xbb\x2b\x02\xcf\x85\xc1\x33\xab\xf1\xec\x8c\x30\x98\xdf\x14\xc5\xb0\x57\xb0\x4d\xcd\xe9\xd5\xf8\x45\xc1\xcc\x4b\x73\x72\x94\x70\xc1\x84\xaa\x39\x01\x78\x74\xa4\x40\x48\xe7\x68\xd2\x5b\xa7\xd9\x27\xba\xa5\x6e\x21\xc7\x85\x46\xef\x39\x61\x32\xec\xe5\x3e\x0e\x65\x54\xb3\x0b\xfd\x71\xa4\x47\x1b\x56\xec\x5f\xf3\x99\xa2\xa7\x44\xd2\x1b\x1e\x02\x2f\x0a\xda\x98\x7d\x32\x8e\x86\x85\x2e\x98\x6d\x6a\x9b\x93\x04\xd2\x0a\xa0\x28\x1d\xe7\xbf\xd5\x3f\xee\xea\x31\xfb\xaf\xf2\x4b\x28\x2a\x98\xc6\x71\x2c\xd0\x13\xf1\x23\x72\x0e\x0a\xbe\x8c\xe3\x58\xd1\xcb\x01\x7d\x7e\x87\x24\x87\x60\xc9\x91\x4f\x68\xef\xa4\x28\x78\x81\x09\xfe\x1c\x5a\x1b\xdb\xec\x68\x5f\xa7\xdb\x03\xc8\x1e\x43\x88\xbc\xd1\xd2\x55\xbe\x8a\xc1\xca\x92\x66\x4c\xeb\x6e\x0f\x20\x94\x0f\x18\x36\x8c\x83\xe5\x6b\x59\x54\x0a\x55\x72\x43\xe3\x29\x56\xdd\xee\x91\x6b\xa7\xd3\xed\x3d\x4e\x00\xe3\xf0\x4a\x0a\xce\x59\xde\xce\x7c\xab\x98\x66\xe7\xb0\xd4\xf3\x02\xad\xac\xed\x27\x68\x3b\x5d\xde\x62\x89\x02\x4c\x6b\x5b\xcd\x3f\xc2\xa8\x16\x7f\x72\xf6\xe9\xa8\xe5\xa3\x45\xc0\x95\xe9\xb9\xba\x2f\xed\x0f\x0f\x4f\x87\xec\xff\x2b\x01\x40\x6b\xf9\xef\x1c\xcd\x66\x2c\x5d\xe9\xbb\x68\xb4\xf7\x2b\xa1\xe0\x82\x56\x08\x9e\x9e\x7f\x01\x00\x00\xff\xff\xd4\x7f\x20\xcb\x77\x02\x00\x00")
+
+func testFeaturesKubernetesPodsecuritypolicyFeaturesYamlPspAzpVolumetypesUnapprovedYamlBytes() ([]byte, error) {
+	return bindataRead(
+		_testFeaturesKubernetesPodsecuritypolicyFeaturesYamlPspAzpVolumetypesUnapprovedYaml,
+		"test/features/kubernetes/podsecuritypolicy/features/yaml/psp-azp-volumetypes-unapproved.yaml",
+	)
+}
+
+func testFeaturesKubernetesPodsecuritypolicyFeaturesYamlPspAzpVolumetypesUnapprovedYaml() (*asset, error) {
+	bytes, err := testFeaturesKubernetesPodsecuritypolicyFeaturesYamlPspAzpVolumetypesUnapprovedYamlBytes()
+	if err != nil {
+		return nil, err
+	}
+
+	info := bindataFileInfo{name: "test/features/kubernetes/podsecuritypolicy/features/yaml/psp-azp-volumetypes-unapproved.yaml", size: 631, mode: os.FileMode(438), modTime: time.Unix(1598032435, 0)}
+	a := &asset{bytes: bytes, info: info}
+	return a, nil
+}
+
 // Asset loads and returns the asset for the given name.
 // It returns an error if the asset could not be found or
 // could not be loaded.
@@ -170,8 +212,10 @@ func AssetNames() []string {
 
 // _bindata is a table, holding each asset generator, mapped to its name.
 var _bindata = map[string]func() (*asset, error){
-	"test/features/kubernetes/podsecuritypolicy/features/yaml/psp-azp-hostport-approved.yaml":   testFeaturesKubernetesPodsecuritypolicyFeaturesYamlPspAzpHostportApprovedYaml,
-	"test/features/kubernetes/podsecuritypolicy/features/yaml/psp-azp-hostport-unapproved.yaml": testFeaturesKubernetesPodsecuritypolicyFeaturesYamlPspAzpHostportUnapprovedYaml,
+	"test/features/kubernetes/podsecuritypolicy/features/yaml/psp-azp-hostport-approved.yaml":      testFeaturesKubernetesPodsecuritypolicyFeaturesYamlPspAzpHostportApprovedYaml,
+	"test/features/kubernetes/podsecuritypolicy/features/yaml/psp-azp-hostport-unapproved.yaml":    testFeaturesKubernetesPodsecuritypolicyFeaturesYamlPspAzpHostportUnapprovedYaml,
+	"test/features/kubernetes/podsecuritypolicy/features/yaml/psp-azp-volumetypes-approved.yaml":   testFeaturesKubernetesPodsecuritypolicyFeaturesYamlPspAzpVolumetypesApprovedYaml,
+	"test/features/kubernetes/podsecuritypolicy/features/yaml/psp-azp-volumetypes-unapproved.yaml": testFeaturesKubernetesPodsecuritypolicyFeaturesYamlPspAzpVolumetypesUnapprovedYaml,
 }
 
 // AssetDir returns the file names below a certain
@@ -221,8 +265,10 @@ var _bintree = &bintree{nil, map[string]*bintree{
 				"podsecuritypolicy": &bintree{nil, map[string]*bintree{
 					"features": &bintree{nil, map[string]*bintree{
 						"yaml": &bintree{nil, map[string]*bintree{
-							"psp-azp-hostport-approved.yaml":   &bintree{testFeaturesKubernetesPodsecuritypolicyFeaturesYamlPspAzpHostportApprovedYaml, map[string]*bintree{}},
-							"psp-azp-hostport-unapproved.yaml": &bintree{testFeaturesKubernetesPodsecuritypolicyFeaturesYamlPspAzpHostportUnapprovedYaml, map[string]*bintree{}},
+							"psp-azp-hostport-approved.yaml":      &bintree{testFeaturesKubernetesPodsecuritypolicyFeaturesYamlPspAzpHostportApprovedYaml, map[string]*bintree{}},
+							"psp-azp-hostport-unapproved.yaml":    &bintree{testFeaturesKubernetesPodsecuritypolicyFeaturesYamlPspAzpHostportUnapprovedYaml, map[string]*bintree{}},
+							"psp-azp-volumetypes-approved.yaml":   &bintree{testFeaturesKubernetesPodsecuritypolicyFeaturesYamlPspAzpVolumetypesApprovedYaml, map[string]*bintree{}},
+							"psp-azp-volumetypes-unapproved.yaml": &bintree{testFeaturesKubernetesPodsecuritypolicyFeaturesYamlPspAzpVolumetypesUnapprovedYaml, map[string]*bintree{}},
 						}},
 					}},
 				}},

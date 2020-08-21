@@ -162,3 +162,18 @@ So that a policy of least privilege can be enforced in order to prevent maliciou
 			| unapproved  	| Fail  	| Cannot access unapproved port range	|	
 			| approved		| Succeed	|									  	|
 			| not defined	| Succeed	|										|
+	
+	@preventitive @AZP-0.2
+	Scenario Outline: Prevent deployments from accessing unapproved volume types
+		Given a Kubernetes cluster exists which we can deploy into
+		And some system exists to prevent Kubernetes deployments with unapproved volume types from being deployed to an existing Kubernetes cluster
+        When a Kubernetes deployment is applied to an existing Kubernetes cluster
+		And an "<requested>" volume type is requested for the Kubernetes deployment
+		Then the operation will "<RESULT>" with an error "<ERRORMESSAGE>"
+		But I should not be able to perform a command that accesses an unapproved volume type
+
+		Examples:
+			| requested 	| RESULT 	| ERRORMESSAGE							|
+			| unapproved  	| Fail  	| Cannot access unapproved volume type	|	
+			| approved		| Succeed	|									  	|
+			| not defined	| Succeed	|										|

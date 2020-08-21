@@ -13,4 +13,5 @@ type SecurityPolicyProvider interface {
 	HasAllowedCapabilitiesRestriction() (*bool, error)
 	HasAssignedCapabilitiesRestriction() (*bool, error)
 	HasHostPortRestriction() (*bool, error)
+	HasVolumeTypeRestriction() (*bool, error)
 }

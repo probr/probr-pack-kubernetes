@@ -76,6 +76,7 @@ type PodSecurityPolicy interface {
 	AllowedCapabilitiesAreRestricted() (*bool, error)
 	AssignedCapabilitiesAreRestricted() (*bool, error)
 	HostPortsAreRestricted() (*bool, error)
+	VolumeTypesAreRestricted() (*bool, error)
 	CreatePODSettingSecurityContext(pr *bool, pe *bool, runAsUser *int64) (*apiv1.Pod, error)
 	CreatePODSettingAttributes(hostPID *bool, hostIPC *bool, hostNetwork *bool) (*apiv1.Pod, error)
 	CreatePODSettingCapabilities(c *[]string) (*apiv1.Pod, error)
@@ -367,6 +368,25 @@ func (psp *PSP) HostPortsAreRestricted() (*bool, error) {
 	// iterate over providers ...
 	for _, p := range *psp.securityPolicyProviders {
 		b, err := p.HasHostPortRestriction()
+		if err != nil {
+			return nil, err
+		}
+		if b != nil && *b {
+			//return on first 'true' - only trying to establish if we have any ...
+			return b, nil
+		}
+	}
+
+	//if we get to here, we haven't got any ...
+	b := false
+	return &b, nil
+}
+
+// VolumeTypesAreRestricted ...
+func (psp *PSP) VolumeTypesAreRestricted() (*bool, error) {
+	// iterate over providers ...
+	for _, p := range *psp.securityPolicyProviders {
+		b, err := p.HasVolumeTypeRestriction()
 		if err != nil {
 			return nil, err
 		}
@@ -778,6 +798,43 @@ func (p *KubeSecurityPolicyProvider) HasHostPortRestriction() (*bool, error) {
 	//(see: https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#hostportrange-v1beta1-policy)
 
 	return utils.BoolPtr(true), nil
+}
+
+// HasVolumeTypeRestriction ...
+func (p *KubeSecurityPolicyProvider) HasVolumeTypeRestriction() (*bool, error) {
+	psps, err := p.getPolicies()
+	if err != nil {
+		return nil, err
+	}
+
+	//only want allowed volumes
+	//TODO: this could be use case specific, so we may have to inject the 'good' volumes
+	// allowed volume types are configMap, emptyDir, projected, downwardAPI, persistentVolumeClaim
+	g := make(map[string]*string, 10)
+	g["configMap"] = nil
+	g["emptyDir"] = nil
+	g["projected"] = nil
+	g["downwardAPI"] = nil
+	g["persistentVolumeClaim"] = nil
+
+	res := true
+	for _, e := range psps.Items {
+		for _, v := range e.Spec.Volumes {
+			_, exists := g[string(v)]
+			if !exists {
+				log.Printf("[NOTICE] HasVolumeTypeRestriction: at least one unapproved volume type (%v) is set on Policy: %v",
+					v, e.GetName())
+				res = false
+				break
+			}
+		}
+	}
+
+	if res {
+		log.Printf("[NOTICE] HasVolumeTypeRestriction: NO Policies found with unapproved volume types")
+	}
+
+	return &res, nil
 }
 
 func (p *KubeSecurityPolicyProvider) getPodSecurityPolicies() (*v1beta1.PodSecurityPolicyList, error) {
