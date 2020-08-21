@@ -3,9 +3,9 @@ package coreengine_test
 import (
 	"testing"
 
-	"gitlab.com/citihub/probr/internal/coreengine"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
+	"gitlab.com/citihub/probr/internal/coreengine"
 )
 
 // Test manager integration tests, so actually calling out to Kube ...
@@ -60,7 +60,7 @@ func TestExecAllTests(t *testing.T) {
 }
 
 func addTest(tm *coreengine.TestStore, testname string, grp coreengine.Group, cat coreengine.Category) {
-	
+
 	td := coreengine.TestDescriptor{Group: grp, Category: cat, Name: testname}
 
 	uuid1 := uuid.New().String()

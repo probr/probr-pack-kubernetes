@@ -1,13 +1,15 @@
 package features
 
 import (
+	"bytes"
 	"fmt"
+	"io"
 	"path/filepath"
 	"strings"
 
-	"github.com/citihub/probr/internal/config"
 	"github.com/cucumber/godog"
 	"github.com/cucumber/godog/colors"
+	"gitlab.com/citihub/probr/internal/config"
 
 	"gitlab.com/citihub/probr/internal/coreengine"
 )
@@ -17,33 +19,27 @@ import (
 //and call to the "feature" implementation (i.e the same impl when godog / go test is invoked)
 
 //GodogTestHandler ...
-func GodogTestHandler(gd *coreengine.GodogTest) (int, error) {
-	if config.GetOutputType() == "INMEM" {
+func GodogTestHandler(gd *coreengine.GodogTest) (int, *bytes.Buffer, error) {
+	if *config.GetEnvConfigInstance().GetOutputType() == "INMEM" {
 		return InMemGodogTestHandler(gd)
 	}
 	return ToFileGodogTestHandler(gd)
 }
 
-// GetOutputType
-
-func ToFileGodogTestHandler(gd *coreengine.GodogTest) (int, error) {
+func ToFileGodogTestHandler(gd *coreengine.GodogTest) (int, *bytes.Buffer, error) {
 	o, err := GetOutputPath(&gd.TestDescriptor.Name)
 	if err != nil {
-		return -1, err
+		return -1, nil, err
 	}
-
-func InMemGodogTestHandler(gd *coreengine.GodogTest) (int, error) {
-	var t []byte
-	o := bytes.NewBuffer(t)
 	status, err := runTestSuite(o, gd)
-	return status, err
+	return status, nil, err
 }
 
-func InMemGodogTestHandler(gd *coreengine.GodogTest) (int, error) {
+func InMemGodogTestHandler(gd *coreengine.GodogTest) (int, *bytes.Buffer, error) {
 	var t []byte
 	o := bytes.NewBuffer(t)
 	status, err := runTestSuite(o, gd)
-	return status, err
+	return status, o, err
 }
 
 func runTestSuite(o io.Writer, gd *coreengine.GodogTest) (int, error) {
@@ -65,15 +61,9 @@ func runTestSuite(o io.Writer, gd *coreengine.GodogTest) (int, error) {
 		Options:              &opts,
 	}.Run()
 
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
 	return status, nil
 }
 
-=======
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
 func getFeaturesPath(gd *coreengine.GodogTest) (string, error) {
 	r, err := GetRootDir()
 	if err != nil {

@@ -10,6 +10,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 
+	"gitlab.com/citihub/probr/internal/config"
 	"gitlab.com/citihub/probr/internal/coreengine"
 	_ "gitlab.com/citihub/probr/test/features/clouddriver"                  //needed to run init on TestHandlers
 	_ "gitlab.com/citihub/probr/test/features/kubernetes/internetaccess"    //needed to run init on TestHandlers
@@ -118,4 +119,36 @@ func TestTestRunner(t *testing.T) {
 	assert.Equal(t, 0, st)
 	assert.Equal(t, coreengine.CompleteSuccess, *test2.Status)
 
+}
+
+func TestTestRunnerInMem(t *testing.T) {
+	config.GetEnvConfigInstance().SetOutputType("INMEM")
+
+	tr := coreengine.TestStore{}
+
+	//test descriptor ... (general)
+	grp := coreengine.CloudDriver
+	cat := coreengine.General
+	name := "account_manager"
+	td := coreengine.TestDescriptor{Group: grp, Category: cat, Name: name}
+
+	//specific terms for *this* test
+	uuid1 := uuid.New().String()
+	sat1 := coreengine.Pending
+
+	//construct the test to run
+	test1 := coreengine.Test{
+		UUID:           &uuid1,
+		TestDescriptor: &td,
+		Status:         &sat1,
+	}
+
+	assert.NotNil(t, test1)
+
+	st, err := tr.RunTest(&test1)
+
+	//not expecting this one to fail:
+	assert.Nil(t, err)
+	assert.Equal(t, 0, st)
+	assert.Equal(t, coreengine.CompleteSuccess, *test1.Status)
 }

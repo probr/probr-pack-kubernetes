@@ -4,9 +4,9 @@ import (
 	"log"
 	"path/filepath"
 
+	"github.com/cucumber/godog"
 	"gitlab.com/citihub/probr/internal/coreengine"
 	"gitlab.com/citihub/probr/test/features"
-	"github.com/cucumber/godog"
 )
 
 func init() {

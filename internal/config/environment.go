@@ -51,6 +51,7 @@ type Config interface {
 	GetCurlImage() *string
 	GetBusyBoxImage() *string
 	GetOutputType() *string
+	SetOutputType(string)
 }
 
 // EnvConfig ...
@@ -160,11 +161,18 @@ func (e *EnvConfig) GetBusyBoxImage() *string {
 	return e.busyBoxImage
 }
 
+// GetOutputType ...
 func (e *EnvConfig) GetOutputType() *string {
 	if e.outputType == nil {
 		e.outputType = utils.StringPtr(os.Getenv("OUTPUT_TYPE"))
 	}
 	return e.outputType
+}
+
+// SetOutputType
+func (e *EnvConfig) SetOutputType(s string) {
+	// For unit testing
+	e.outputType = &s
 }
 
 func (e *EnvConfig) String() string {
