@@ -1,12 +1,15 @@
 package features
 
 import (
+	"bytes"
 	"fmt"
+	"io"
 	"path/filepath"
 	"strings"
 
 	"github.com/cucumber/godog"
 	"github.com/cucumber/godog/colors"
+	"gitlab.com/citihub/probr/internal/config"
 
 	"gitlab.com/citihub/probr/internal/coreengine"
 )
@@ -16,14 +19,31 @@ import (
 //and call to the "feature" implementation (i.e the same impl when godog / go test is invoked)
 
 //GodogTestHandler ...
-func GodogTestHandler(gd *coreengine.GodogTest) (int, error) {
-
-	f, err := getFeaturesPath(gd)
-	if err != nil {
-		return -1, err
+func GodogTestHandler(gd *coreengine.GodogTest) (int, *bytes.Buffer, error) {
+	if *config.GetEnvConfigInstance().GetOutputType() == "INMEM" {
+		return InMemGodogTestHandler(gd)
 	}
+	return ToFileGodogTestHandler(gd)
+}
 
+func ToFileGodogTestHandler(gd *coreengine.GodogTest) (int, *bytes.Buffer, error) {
 	o, err := GetOutputPath(&gd.TestDescriptor.Name)
+	if err != nil {
+		return -1, nil, err
+	}
+	status, err := runTestSuite(o, gd)
+	return status, nil, err
+}
+
+func InMemGodogTestHandler(gd *coreengine.GodogTest) (int, *bytes.Buffer, error) {
+	var t []byte
+	o := bytes.NewBuffer(t)
+	status, err := runTestSuite(o, gd)
+	return status, o, err
+}
+
+func runTestSuite(o io.Writer, gd *coreengine.GodogTest) (int, error) {
+	f, err := getFeaturesPath(gd)
 	if err != nil {
 		return -2, err
 	}
