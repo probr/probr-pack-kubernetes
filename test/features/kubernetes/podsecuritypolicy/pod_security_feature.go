@@ -377,6 +377,36 @@ func (p *probState) iShouldNotBeAbleToPerformACommandThatAccessAnUnapprovedPortR
 	return p.runVerificationTest(kubernetes.NetCat)
 }
 
+//AZ Policy - volume type
+func (p *probState) anVolumeTypeIsRequestedForTheKubernetesDeployment(volumeType string) error {
+	var y []byte
+	var err error
+
+	if volumeType == "unapproved" {	
+		y, err = utils.Asset("test/features/kubernetes/podsecuritypolicy/features/yaml/psp-azp-volumetypes-unapproved.yaml")
+	} else {		
+		y, err = utils.Asset("test/features/kubernetes/podsecuritypolicy/features/yaml/psp-azp-volumetypes-approved.yaml")
+	}
+
+	if err != nil {
+		return err
+	}
+
+	//create from yaml
+	pd, err := psp.CreatePodFromYaml(y)
+
+	return p.processCreationResult(pd, kubernetes.PSPAllowedVolumeTypes, err)
+}
+
+func (p *probState) someSystemExistsToPreventKubernetesDeploymentsWithUnapprovedVolumeTypesFromBeingDeployedToAnExistingKubernetesCluster() error {
+	return p.runControlTest(psp.VolumeTypesAreRestricted, "VolumeTypesAreRestricted")
+}
+
+func (p *probState) iShouldNotBeAbleToPerformACommandThatAccessesAnUnapprovedVolumeType() error {
+	//TODO: Not sure what the test is here - if any
+	return nil
+}
+
 func (p *probState) setup() {
 	//just make sure this is reset
 	p.podName = ""
@@ -460,6 +490,11 @@ func ScenarioInitialize(ctx *godog.ScenarioContext) {
 	ctx.Step(`^an "([^"]*)" port range is requested for the Kubernetes deployment$`, ps.anPortRangeIsRequestedForTheKubernetesDeployment)
 	ctx.Step(`^I should not be able to perform a command that access an unapproved port range$`, ps.iShouldNotBeAbleToPerformACommandThatAccessAnUnapprovedPortRange)
 	ctx.Step(`^some system exists to prevent Kubernetes deployments with unapproved port range from being deployed to an existing Kubernetes cluster$`, ps.someSystemExistsToPreventKubernetesDeploymentsWithUnapprovedPortRangeFromBeingDeployedToAnExistingKubernetesCluster)
+
+	//AZPolicy - volume types
+	ctx.Step(`^an "([^"]*)" volume type is requested for the Kubernetes deployment$`, ps.anVolumeTypeIsRequestedForTheKubernetesDeployment)
+	ctx.Step(`^I should not be able to perform a command that accesses an unapproved volume type$`, ps.iShouldNotBeAbleToPerformACommandThatAccessesAnUnapprovedVolumeType)
+	ctx.Step(`^some system exists to prevent Kubernetes deployments with unapproved volume types from being deployed to an existing Kubernetes cluster$`, ps.someSystemExistsToPreventKubernetesDeploymentsWithUnapprovedVolumeTypesFromBeingDeployedToAnExistingKubernetesCluster)
 
 	//general - outcome
 	ctx.Step(`^the operation will "([^"]*)" with an error "([^"]*)"$`, ps.theOperationWillWithAnError)

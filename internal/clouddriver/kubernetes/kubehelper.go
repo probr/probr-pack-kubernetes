@@ -45,6 +45,7 @@ const (
 	PSPHostNetwork
 	PSPAllowedCapabilities
 	PSPAllowedPortRange
+	PSPAllowedVolumeTypes
 	ImagePullError
 )
 
@@ -58,6 +59,7 @@ func (r PodCreationErrorReason) String() string {
 		"podcreation-error: psp-host-network",
 		"podcreation-error: psp-allowed-capabilities",
 		"podcreation-error: psp-allowed-portrange",
+		"podcreation-error: psp-allowed-volumetypes",
 		"podcreation-error: image-pull-error"}[r]
 }
 
@@ -112,6 +114,7 @@ func GetKubeInstance() *Kube {
 		instance.azErrorToPodCreationError["azurepolicy-psp-host-network"] = PSPHostNetwork
 		instance.azErrorToPodCreationError["azurepolicy-container-allowed-capabilities"] = PSPAllowedCapabilities
 		instance.azErrorToPodCreationError["azurepolicy-psp-host-network-ports"] = PSPAllowedPortRange
+		instance.azErrorToPodCreationError["azurepolicy-psp-volume-types"] = PSPAllowedVolumeTypes
 	})
 
 	return instance
