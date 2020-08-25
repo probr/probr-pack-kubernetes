@@ -353,9 +353,9 @@ func (p *probState) anPortRangeIsRequestedForTheKubernetesDeployment(portRange s
 	var y []byte
 	var err error
 
-	if portRange == "unapproved" {	
+	if portRange == "unapproved" {
 		y, err = utils.Asset("test/features/kubernetes/podsecuritypolicy/features/yaml/psp-azp-hostport-unapproved.yaml")
-	} else {		
+	} else {
 		y, err = utils.Asset("test/features/kubernetes/podsecuritypolicy/features/yaml/psp-azp-hostport-approved.yaml")
 	}
 
@@ -373,7 +373,7 @@ func (p *probState) someSystemExistsToPreventKubernetesDeploymentsWithUnapproved
 	return p.runControlTest(psp.HostPortsAreRestricted, "HostPortsAreRestricted")
 }
 
-func (p *probState) iShouldNotBeAbleToPerformACommandThatAccessAnUnapprovedPortRange() error {	
+func (p *probState) iShouldNotBeAbleToPerformACommandThatAccessAnUnapprovedPortRange() error {
 	return p.runVerificationTest(kubernetes.NetCat)
 }
 
@@ -382,9 +382,9 @@ func (p *probState) anVolumeTypeIsRequestedForTheKubernetesDeployment(volumeType
 	var y []byte
 	var err error
 
-	if volumeType == "unapproved" {	
+	if volumeType == "unapproved" {
 		y, err = utils.Asset("test/features/kubernetes/podsecuritypolicy/features/yaml/psp-azp-volumetypes-unapproved.yaml")
-	} else {		
+	} else {
 		y, err = utils.Asset("test/features/kubernetes/podsecuritypolicy/features/yaml/psp-azp-volumetypes-approved.yaml")
 	}
 
@@ -405,6 +405,35 @@ func (p *probState) someSystemExistsToPreventKubernetesDeploymentsWithUnapproved
 func (p *probState) iShouldNotBeAbleToPerformACommandThatAccessesAnUnapprovedVolumeType() error {
 	//TODO: Not sure what the test is here - if any
 	return nil
+}
+
+//AZ Policy - seccomp profile
+func (p *probState) anSeccompProfileIsRequestedForTheKubernetesDeployment(seccompProfile string) error {
+	var y []byte
+	var err error
+
+	if seccompProfile == "unapproved" {
+		y, err = utils.Asset("test/features/kubernetes/podsecuritypolicy/features/yaml/psp-azp-seccomp-unapproved.yaml")
+	} else if seccompProfile == "undefined" {
+		y, err = utils.Asset("test/features/kubernetes/podsecuritypolicy/features/yaml/psp-azp-seccomp-undefined.yaml")
+	} else if seccompProfile == "approved" {
+		y, err = utils.Asset("test/features/kubernetes/podsecuritypolicy/features/yaml/psp-azp-seccomp-approved.yaml")
+	}
+
+	if err != nil {
+		return err
+	}
+
+	//create from yaml
+	pd, err := psp.CreatePodFromYaml(y)
+
+	return p.processCreationResult(pd, kubernetes.PSPSeccompProfile, err)
+}
+func (p *probState) someSystemExistsToPreventKubernetesDeploymentsWithoutApprovedSeccompProfilesFromBeingDeployedToAnExistingKubernetesCluster() error {
+	return p.runControlTest(psp.SeccompProfilesAreRestricted, "SeccompProfilesAreRestricted")
+}
+func (p *probState) iShouldNotBeAbleToPerformASystemCallThatIsBlockedByTheSeccompProfile() error {
+	return p.runVerificationTest(kubernetes.Unshare)
 }
 
 func (p *probState) setup() {
@@ -495,6 +524,11 @@ func ScenarioInitialize(ctx *godog.ScenarioContext) {
 	ctx.Step(`^an "([^"]*)" volume type is requested for the Kubernetes deployment$`, ps.anVolumeTypeIsRequestedForTheKubernetesDeployment)
 	ctx.Step(`^I should not be able to perform a command that accesses an unapproved volume type$`, ps.iShouldNotBeAbleToPerformACommandThatAccessesAnUnapprovedVolumeType)
 	ctx.Step(`^some system exists to prevent Kubernetes deployments with unapproved volume types from being deployed to an existing Kubernetes cluster$`, ps.someSystemExistsToPreventKubernetesDeploymentsWithUnapprovedVolumeTypesFromBeingDeployedToAnExistingKubernetesCluster)
+
+	//AZPolicy - seccomp profile
+	ctx.Step(`^an "([^"]*)" seccomp profile is requested for the Kubernetes deployment$`, ps.anSeccompProfileIsRequestedForTheKubernetesDeployment)
+	ctx.Step(`^some system exists to prevent Kubernetes deployments without approved seccomp profiles from being deployed to an existing Kubernetes cluster$`, ps.someSystemExistsToPreventKubernetesDeploymentsWithoutApprovedSeccompProfilesFromBeingDeployedToAnExistingKubernetesCluster)
+	ctx.Step(`^I should not be able to perform a system call that is blocked by the seccomp profile$`, ps.iShouldNotBeAbleToPerformASystemCallThatIsBlockedByTheSeccompProfile)
 
 	//general - outcome
 	ctx.Step(`^the operation will "([^"]*)" with an error "([^"]*)"$`, ps.theOperationWillWithAnError)

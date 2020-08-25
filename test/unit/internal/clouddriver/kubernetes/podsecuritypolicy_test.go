@@ -190,3 +190,8 @@ func (m *securityProviderMock) HasVolumeTypeRestriction() (*bool, error) {
 	b := m.Called().Bool(0)
 	return &b, nil
 }
+func (m *securityProviderMock) HasSeccompProfileRestriction() (*bool, error) {
+	b := m.Called().Bool(0)
+	return &b, nil
+}
+
