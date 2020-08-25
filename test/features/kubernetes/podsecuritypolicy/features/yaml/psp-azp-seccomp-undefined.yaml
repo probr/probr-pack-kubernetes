@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: probr-seccomp-undefined
+  #annotations:
+   # seccomp.security.alpha.kubernetes.io/pod: "runtime/default"
+spec:  
+  securityContext:
+    runAsUser: 1000    
+    runAsGroup: 3000
+    fsGroup: 2000
+    supplementalGroups: [ 1 ]      
+  containers:
+  - name: sec-ctx-demo
+    image: busybox
+    command: [ "sh", "-c", "sleep 1h" ]
+    securityContext:
+      allowPrivilegeEscalation: false            

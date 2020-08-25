@@ -38,6 +38,7 @@ const (
 	NetRawTest
 	SpecialCapTest
 	NetCat
+	Unshare
 )
 
 func (c PSPTestCommand) String() string {
@@ -48,7 +49,8 @@ func (c PSPTestCommand) String() string {
 		"id -u > 0 ",
 		"ping google.com",
 		"ip link add dummy0 type dummy",
-		"nc -l 1234"}[c]
+		"nc -l 1234",
+		"unshare"}[c]
 }
 
 const (
@@ -77,6 +79,7 @@ type PodSecurityPolicy interface {
 	AssignedCapabilitiesAreRestricted() (*bool, error)
 	HostPortsAreRestricted() (*bool, error)
 	VolumeTypesAreRestricted() (*bool, error)
+	SeccompProfilesAreRestricted() (*bool, error)
 	CreatePODSettingSecurityContext(pr *bool, pe *bool, runAsUser *int64) (*apiv1.Pod, error)
 	CreatePODSettingAttributes(hostPID *bool, hostIPC *bool, hostNetwork *bool) (*apiv1.Pod, error)
 	CreatePODSettingCapabilities(c *[]string) (*apiv1.Pod, error)
@@ -401,6 +404,25 @@ func (psp *PSP) VolumeTypesAreRestricted() (*bool, error) {
 	return &b, nil
 }
 
+// SeccompProfilesAreRestricted ...
+func (psp *PSP) SeccompProfilesAreRestricted() (*bool, error) {
+	// iterate over providers ...
+	for _, p := range *psp.securityPolicyProviders {
+		b, err := p.HasSeccompProfileRestriction()
+		if err != nil {
+			return nil, err
+		}
+		if b != nil && *b {
+			//return on first 'true' - only trying to establish if we have any ...
+			return b, nil
+		}
+	}
+
+	//if we get to here, we haven't got any ...
+	b := false
+	return &b, nil
+}
+
 // CreatePODSettingSecurityContext creates POD with a SecurityContext conforming to the parameters:
 // pr *bool - set the Privileged flag.  Defaults to false.
 // pe *bool - set the Allow Privileged Escalation flag.  Defaults to false.
@@ -531,9 +553,9 @@ func (psp *PSP) ExecPSPTestCmd(pName *string, cmd PSPTestCommand) (int, error) {
 	ns := psp.testNamespace
 	stdout, _, ex, err := psp.k.ExecCommand(&c, &ns, &pn)
 
-	log.Printf("[NOTICE] ExecPSPTestCmd: %v stdout: %v exit code: %v", cmd, stdout, ex)
+	log.Printf("[NOTICE] ExecPSPTestCmd: %v stdout: %v exit code: %v (error: %v)", cmd, stdout, ex, err)
 
-	if err != nil {
+	if err != nil {		
 		return ex, err
 	}
 
@@ -832,6 +854,33 @@ func (p *KubeSecurityPolicyProvider) HasVolumeTypeRestriction() (*bool, error) {
 
 	if res {
 		log.Printf("[NOTICE] HasVolumeTypeRestriction: NO Policies found with unapproved volume types")
+	}
+
+	return &res, nil
+}
+
+// HasSeccompProfileRestriction ...
+func (p *KubeSecurityPolicyProvider) HasSeccompProfileRestriction() (*bool, error) {	
+	psps, err := p.getPolicies()
+	if err != nil {
+		return nil, err
+	}
+
+	//at least one of the PSPs should have an annotation of "seccomp.security.alpha.kubernetes.io/allowedProfileNames"
+	a := "seccomp.security.alpha.kubernetes.io/allowedProfileNames"
+	var res bool
+	for _, e := range psps.Items {
+		v, exists := e.Annotations[a]
+		if exists {
+			log.Printf("[NOTICE] HasSeccompProfileRestriction: annotation of %v with value %v is set on Policy: %v",
+				a, v, e.GetName())
+			res = true
+			break
+		}
+	}
+
+	if !res {
+		log.Printf("[NOTICE] HasSeccompProfileRestriction: NO Policies found with annotation %v set.", a)
 	}
 
 	return &res, nil

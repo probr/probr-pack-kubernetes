@@ -32,7 +32,8 @@ const (
 	azPSPApprovedUsersAndGroups       = "AZPSPApprovedUsersAndGroups"
 	azPSPAllowedCapabilitiesOnly      = "AZPSPAllowedCapabilitiesOnly"
 	azPSPApprovedPortRangeOnly        = "AZPSPApprovedPortRangeOnly"
-	azPSPApprovedVolumeTypeOnly        = "AZPSPApprovedVolumeTypeOnly"
+	azPSPApprovedVolumeTypeOnly       = "AZPSPApprovedVolumeTypeOnly"
+	azPSPApprovedSeccompProfile       = "AZPSPApprovedSeccompProfile"
 )
 
 var azPolicyUUIDToProbrPolicy = make(map[string]string)
@@ -48,6 +49,7 @@ func init() {
 	azPolicyUUIDToProbrPolicy["/providers/Microsoft.Authorization/policyDefinitions/c26596ff-4d70-4e6a-9a30-c2506bd2f80c"] = azPSPAllowedCapabilitiesOnly
 	azPolicyUUIDToProbrPolicy["/providers/Microsoft.Authorization/policyDefinitions/82985f06-dc18-4a48-bc1c-b9f4f0098cfe"] = azPSPApprovedPortRangeOnly
 	azPolicyUUIDToProbrPolicy["/providers/Microsoft.Authorization/policyDefinitions/16697877-1118-4fb1-9b65-9898ec2509ec"] = azPSPApprovedVolumeTypeOnly
+	azPolicyUUIDToProbrPolicy["/providers/Microsoft.Authorization/policyDefinitions/975ce327-682c-4f2e-aa46-b9598289b86c"] = azPSPApprovedSeccompProfile
 }
 
 //NewAzPolicyProvider ...
@@ -126,6 +128,11 @@ func (p *AZSecurityPolicyProvider) HasHostPortRestriction() (*bool, error) {
 
 // HasVolumeTypeRestriction ...
 func (p *AZSecurityPolicyProvider) HasVolumeTypeRestriction() (*bool, error) {
+	return p.checkForRestrictions(&[]string{azPSPLinuxRestricted, azPSPApprovedPortRangeOnly})
+}
+
+// HasSeccompProfileRestriction ...
+func (p *AZSecurityPolicyProvider) HasSeccompProfileRestriction() (*bool, error) {
 	return p.checkForRestrictions(&[]string{azPSPLinuxRestricted, azPSPApprovedPortRangeOnly})
 }
 
