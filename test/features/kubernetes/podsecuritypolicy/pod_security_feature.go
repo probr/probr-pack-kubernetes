@@ -98,25 +98,29 @@ func (p *probState) theOperationWillWithAnError(res, msg string) error {
 
 func (p *probState) processCreationResult(pd *apiv1.Pod, expected kubernetes.PodCreationErrorReason, err error) error {
 	//first check for errors:
-	if err != nil {
-		//check for knwon error type
+	if err != nil {		
+		//check if we've got a partial pod creation
+		//e.g. pod was created but did't get to "running" state
+		//in this case we need to hold onto the name so it can be deleted
+		if pd != nil {
+			p.podName = pd.GetObjectMeta().GetName()
+		}
+
+		//check for known error type
+		//this means the pod has not been created for an expected reason and
+		//is a valid result if the test is addressing prevention of insecure pod creation
 		if e, ok := err.(*kubernetes.PodCreationError); ok {
 			p.creationError = e
 			p.expectedReason = &expected
-
-			//while the error is known, it could be a partial error,
-			//e.g. pod was created but did't get to "running" state
-			//in this case we need to hold onto the name so it can be deleted
-			if pd != nil {
-				p.podName = pd.GetObjectMeta().GetName()
-			}
-
 			return nil
 		}
 		//unexpected error
+		//in this case something unexpected has happened, return an error to cucumber
 		return fmt.Errorf("error attempting to create POD: %v", err)
 	}
 
+	//No errors: pod creation may or may not have been expected.  This will be determined
+	//by the specific test case
 	if pd == nil {
 		// pod not created, which could be valid for some tests
 		return nil

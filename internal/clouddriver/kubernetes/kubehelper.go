@@ -564,7 +564,11 @@ func waitForPhase(ph apiv1.PodPhase, c *kubernetes.Clientset, ns *string, n *str
 
 	ps := c.CoreV1().Pods(*ns)
 
-	w, err := ps.Watch(context.Background(), metav1.ListOptions{})
+	//don't wait for more than 1 min ...
+	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Minute)
+	defer cancel()
+
+	w, err := ps.Watch(ctx, metav1.ListOptions{})
 
 	if err != nil {
 		return err
@@ -577,10 +581,23 @@ func waitForPhase(ph apiv1.PodPhase, c *kubernetes.Clientset, ns *string, n *str
 		p, ok := e.Object.(*apiv1.Pod)
 		if !ok {
 			log.Printf("[WARNING] Unexpected Watch Event Type - skipping")
-			break
+			//check for timeout
+			if ctx.Err() != nil {
+				log.Printf("[WARNING] Context error received while waiting on pod %v. Error: %v", *n, ctx.Err())
+				return ctx.Err()
+			}
+			// break
+			continue
 		}
-		log.Printf("[INFO] Watch Container phase: %v", p.Status.Phase)
-		log.Printf("[DEBUG] Watch Container status: %+v", p.Status.ContainerStatuses)
+		if p.GetName() != *n {
+			log.Printf("[INFO] Event received for pod %v which we're not waiting on. Skipping.", p.GetName())
+			continue
+		}
+
+		log.Printf("[NOTICE] Pod %v Phase: %v", p.GetName(), p.Status.Phase)
+		for _, con := range p.Status.ContainerStatuses {
+			log.Printf("[INFO] Container Status: %+v", con)
+		}
 
 		// don't wait if we're getting errors:
 		b, err := podInErrorState(p)

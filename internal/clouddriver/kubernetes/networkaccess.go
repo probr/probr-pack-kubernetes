@@ -11,7 +11,7 @@ import (
 
 const (
 	//default values.  Overrides can be set via the environment.
-	defaultNATestNamespace   = "probr-network-access-test-ns" //this needs to be set up as an exculsion in the image registry policy	
+	defaultNATestNamespace   = "probr-network-access-test-ns" //this needs to be set up as an exculsion in the image registry policy
 	defaultNAImageRepository = "curlimages"
 	defaultNATestImage       = "curl"
 	defaultNATestContainer   = "na-test"
@@ -87,7 +87,7 @@ func (n *NA) ClusterIsDeployed() *bool {
 func (n *NA) SetupNetworkAccessTestPod() (*apiv1.Pod, error) {
 	pname, ns, cname, image := GenerateUniquePodName(n.testPodName), n.testNamespace, n.testContainer, n.testImage
 	//let caller handle result:
-	return n.k.CreatePod(&pname, &ns, &cname, &image, true, nil)	
+	return n.k.CreatePod(&pname, &ns, &cname, &image, true, nil)
 }
 
 //TeardownNetworkAccessTestPod ...
@@ -110,6 +110,8 @@ func (n *NA) AccessURL(pn *string, url *string) (int, error) {
 	ns := n.testNamespace
 	httpCode, _, ex, err := n.k.ExecCommand(&cmd, &ns, pn)
 
+	log.Printf("[NOTICE] URL: %v HTTP Code: %v Exit Code: %v (error: %v)", *url, httpCode, ex, err)
+
 	if err != nil {
 		//check the exit code.  If it's '6' (Couldn't resolve host.)
 		//then we want to nil out the error and return the code as this
@@ -119,8 +121,6 @@ func (n *NA) AccessURL(pn *string, url *string) (int, error) {
 		}
 		return -1, err
 	}
-
-	log.Printf("[NOTICE] URL: %v HTTP Code: %v", *url, httpCode)
 
 	httpStatusCode, err := strconv.Atoi(httpCode)
 	if err != nil {

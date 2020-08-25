@@ -52,6 +52,12 @@ func (p *probState) aUserAttemptsToDeployAContainerFrom(registry string) error {
 	pd, err := cra.SetupContainerAccessTestPod(&registry)
 
 	if err != nil {
+		//check for partial creation, if we've got a pod, hold onto it's name so we can delete
+		//(this could happen with imagepullerr etc)
+		if pd != nil {
+			p.podName = pd.GetObjectMeta().GetName()		
+		}
+		
 		//check for expected error
 		if e, ok := err.(*kubernetes.PodCreationError); ok {
 			p.creationError = e
