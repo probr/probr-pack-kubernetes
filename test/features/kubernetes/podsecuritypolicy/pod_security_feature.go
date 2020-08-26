@@ -96,6 +96,25 @@ func (p *probState) theOperationWillWithAnError(res, msg string) error {
 
 }
 
+func (p *probState) performAllowedCommand() error {
+	//check for lack of creation error, i.e. pod was created successfully
+	if p.creationError == nil {
+		// execute 'general allowed' command.  This is a simple inocuous cmd, e.g. ls
+		c := kubernetes.Ls
+		ex, err := psp.ExecPSPTestCmd(&p.podName, c)
+
+		//want this to succeed - no errors & 0 exit code:
+		if err != nil && ex == 0 {
+			return fmt.Errorf("allowed command (%v) failed. Exit code: %v Error: %v", c, ex, err)			
+		}
+		return nil		
+	}
+
+	//pod wasn't created so nothing to test
+	return nil
+}
+
+// common helper funcs
 func (p *probState) processCreationResult(pd *apiv1.Pod, expected kubernetes.PodCreationErrorReason, err error) error {
 	//first check for errors:
 	if err != nil {		
@@ -167,6 +186,8 @@ func (p *probState) runVerificationTest(c kubernetes.PSPTestCommand) error {
 	//pod wasn't created so nothing to test
 	return nil
 }
+
+// TEST STEPS:
 
 // CIS-5.2.1
 // privileged access
@@ -541,6 +562,7 @@ func ScenarioInitialize(ctx *godog.ScenarioContext) {
 
 	//general - outcome
 	ctx.Step(`^the operation will "([^"]*)" with an error "([^"]*)"$`, ps.theOperationWillWithAnError)
+	ctx.Step(`^I should be able to perform an allowed command$`, ps.performAllowedCommand)
 
 	ctx.AfterScenario(func(sc *godog.Scenario, err error) {
 		ps.tearDown()
