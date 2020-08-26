@@ -70,6 +70,19 @@ func TestDeleteNamespace(t *testing.T) {
 	handleResult(nil, err)
 }
 
+func TestConfigMap(t *testing.T) {
+	c := "test-cm"
+	cm, err := kubernetes.GetKubeInstance().CreateConfigMap(&c, &testNS)
+
+	handleResult(nil, err)
+
+	//now delete it:
+	if cm != nil {
+		err = kubernetes.GetKubeInstance().DeleteConfigMap(&c, &testNS)
+		handleResult(nil, err)
+	}
+}
+
 func handleResult(yesNo *bool, err error) {
 	if err != nil {
 		//Log but don't check for this atm, i.e. keep tests running

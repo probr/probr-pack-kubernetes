@@ -447,20 +447,25 @@ func (p *probState) setup() {
 }
 
 func (p *probState) tearDown() {
-	psp.TeardownPodSecurityTestPod(&p.podName)
+	psp.TeardownPodSecurityTest(&p.podName)
 	p.podName = ""
 	p.creationError = nil
 }
 
 //TestSuiteInitialize ...
 func TestSuiteInitialize(ctx *godog.TestSuiteContext) {
-	ctx.BeforeSuite(func() {}) //nothing for now
+	ctx.BeforeSuite(func() {
+		//check dependancies ...
+		if psp == nil {
+			// not been given one so set default
+			psp = kubernetes.NewDefaultPSP()		
+		}
+		psp.CreateConfigMap()
+	}) 
 
-	//check dependancies ...
-	if psp == nil {
-		// not been given one so set default
-		psp = kubernetes.NewDefaultPSP()
-	}
+	ctx.AfterSuite(func() {
+		psp.DeleteConfigMap()
+	})
 }
 
 //ScenarioInitialize ...

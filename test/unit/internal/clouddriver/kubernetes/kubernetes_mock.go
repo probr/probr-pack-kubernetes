@@ -65,3 +65,12 @@ func (m *kubeMock) DeleteNamespace(ns *string) error {
 	e := m.Called().Error(0)
 	return e
 }
+func (m *kubeMock) CreateConfigMap(n *string, ns *string) (*apiv1.ConfigMap, error) {
+	cm := m.Called().Get(0).(*apiv1.ConfigMap)
+	e := m.Called().Error(1)
+	return cm, e
+}	
+func (m *kubeMock) DeleteConfigMap(n *string, ns *string) error {
+	e := m.Called().Error(0)
+	return e
+}

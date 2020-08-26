@@ -88,6 +88,8 @@ type Kubernetes interface {
 	ExecCommand(cmd, ns, pn *string) (string, string, int, error)
 	DeletePod(pname *string, ns *string, w bool) error
 	DeleteNamespace(ns *string) error
+	CreateConfigMap(n *string, ns *string) (*apiv1.ConfigMap, error)
+	DeleteConfigMap(n *string, ns *string) error
 }
 
 var instance *Kube
@@ -350,6 +352,72 @@ func (k *Kube) GetPodObject(pname string, ns string, cname string, image string,
 			},
 		},
 	}
+}
+
+// CreateConfigMap ...
+func (k *Kube) CreateConfigMap(n *string, ns *string) (*apiv1.ConfigMap, error) {
+	c, err := k.GetClient()
+	if err != nil {
+		return nil, err
+	}
+
+	//create the namespace for the POD (noOp if already present)
+	_, err = k.createNamespace(ns)
+	if err != nil {
+		return nil, err
+	}
+
+	//now do config map ...
+	cms := c.CoreV1().ConfigMaps(*ns)
+
+	cm := apiv1.ConfigMap {
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      *n,
+			Namespace: *ns,
+			Labels: map[string]string{
+				"app": "demo",
+			},			
+		},
+		Data: map[string]string{
+			"key": "value",
+		},
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	res, err := cms.Create(ctx, &cm, metav1.CreateOptions{})
+
+	if err != nil {
+		log.Printf("[WARN] Error creating ConfigMap %q: %v", res.GetObjectMeta().GetName(), err)			
+		return nil, err
+	}
+
+	log.Printf("[NOTICE] ConfigMap %q created.", res.GetObjectMeta().GetName())
+
+	return res, nil
+}
+
+// DeleteConfigMap ...
+func (k *Kube) DeleteConfigMap(n *string, ns *string) error {
+	c, err := k.GetClient()
+	if err != nil {
+		return err
+	}
+
+	cms := c.CoreV1().ConfigMaps(*ns)
+
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	err = cms.Delete(ctx, *n, metav1.DeleteOptions{})
+	if err != nil {
+		return err
+	}
+
+	log.Printf("[NOTICE] ConfigMap %v deleted.", *n)
+
+	return nil
 }
 
 //GenerateUniquePodName ...
