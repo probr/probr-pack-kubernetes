@@ -39,6 +39,7 @@ const (
 	SpecialCapTest
 	NetCat
 	Unshare
+	Ls
 )
 
 func (c PSPTestCommand) String() string {
@@ -50,7 +51,8 @@ func (c PSPTestCommand) String() string {
 		"ping google.com",
 		"ip link add dummy0 type dummy",
 		"nc -l 1234",
-		"unshare"}[c]
+		"unshare",
+		"ls"}[c]
 }
 
 const (
