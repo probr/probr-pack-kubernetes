@@ -13,17 +13,14 @@ spec:
   volumes:
    - name: approved-volume
      configMap:
-        name: config_map
-        items:
-          - key: my_key
-            path: my_path
+        name: test-config-map        
   containers:
   - name: sec-ctx-demo
     image: busybox
     command: [ "sh", "-c", "sleep 1h" ]        
     volumeMounts:
     - name: approved-volume
-      mountPath: /data/demo
+      mountPath: /tmp/test
       
     securityContext:
-      allowPrivilegeEscalation: false            
+      allowPrivilegeEscalation: false

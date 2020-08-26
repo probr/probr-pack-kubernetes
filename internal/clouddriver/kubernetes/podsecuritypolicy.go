@@ -85,7 +85,9 @@ type PodSecurityPolicy interface {
 	CreatePODSettingCapabilities(c *[]string) (*apiv1.Pod, error)
 	CreatePodFromYaml(y []byte) (*apiv1.Pod, error)
 	ExecPSPTestCmd(pName *string, cmd PSPTestCommand) (int, error)
-	TeardownPodSecurityTestPod(p *string) error
+	TeardownPodSecurityTest(p *string) error
+	CreateConfigMap() error
+	DeleteConfigMap() error
 }
 
 // PSP ...
@@ -107,7 +109,7 @@ func NewPSP(k Kubernetes, sp *[]SecurityPolicyProvider, c config.Config) *PSP {
 	p.securityPolicyProviders = sp
 	p.c = c
 
-	p.setup()
+	p.setenv()
 	return p
 }
 
@@ -123,12 +125,12 @@ func NewDefaultPSP() *PSP {
 
 	p.c = config.GetEnvConfigInstance()
 
-	p.setup()
+	p.setenv()
 	return p
 
 }
 
-func (psp *PSP) setup() {
+func (psp *PSP) setenv() {
 
 	//just default these for now (not sure we'll ever want to supply):
 	psp.testNamespace = defaultPSPTestNamespace
@@ -562,8 +564,26 @@ func (psp *PSP) ExecPSPTestCmd(pName *string, cmd PSPTestCommand) (int, error) {
 	return ex, nil
 }
 
-//TeardownPodSecurityTestPod ...
-func (psp *PSP) TeardownPodSecurityTestPod(p *string) error {
+// CreateConfigMap ...
+func (psp *PSP) CreateConfigMap() error {
+	//set up anything that may be required for testing
+	//1. config map
+	_, err := psp.k.CreateConfigMap(utils.StringPtr("test-config-map"), &psp.testNamespace)
+
+	if err != nil {
+		log.Printf("[NOTICE] Failed to create test config map: %v", err)		
+	}
+	
+	return err
+}
+
+// DeleteConfigMap ...
+func (psp *PSP) DeleteConfigMap() error {
+	return psp.k.DeleteConfigMap(utils.StringPtr("test-config-map"), &psp.testNamespace)
+}
+
+//TeardownPodSecurityTest ...
+func (psp *PSP) TeardownPodSecurityTest(p *string) error {
 	ns := psp.testNamespace
 	err := psp.k.DeletePod(p, &ns, false) //don't worry about waiting
 	return err
