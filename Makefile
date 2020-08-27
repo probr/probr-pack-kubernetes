@@ -17,14 +17,16 @@ STDERR := /tmp/.$(PROJECTNAME)-stderr.txt
 # Make is verbose in Linux. Make it silent.
 #MAKEFLAGS += --silent
 
-## install: Install missing dependencies. Runs `go get` internally. e.g; make install get=github.com/foo/bar
-install: go-get
+## install: Run go install.
+install: go-install
+
+## clean-build: Perform a full clean, re-generate generated files and compile.
+clean-build: clean go-generate compile
 
 ## compile: Compile the binary.
 compile:
 	@-touch $(STDERR)
-	@-rm $(STDERR)
-	@-$(MAKE) go-generate
+	@-rm $(STDERR)	
 	@-$(MAKE) -s go-compile 2> $(STDERR)
 	@cat $(STDERR) | sed -e '1s/.*/\nError:\n/'  | sed 's/make\[.*/ /' | sed "/^/s/^/     /" 1>&2
 
@@ -32,6 +34,9 @@ compile:
 clean:
 	@-rm $(GOBIN)/$(PROJECTNAME) 2> /dev/null
 	@-$(MAKE) go-clean
+
+## test: Run unit tests, building if necessary.
+test: go-compile go-test
 
 go-compile: go-get go-build
 
@@ -42,6 +47,10 @@ go-build:
 go-generate:
 	@echo "  >  Generating dependency files..."
 	@GOPATH=$(GOPATH) GOBIN=$(GOBIN) go generate -x ./...
+
+go-test:
+	@echo "  >  Running unit tests ..."
+	cd $(GOBASE)/test/unit; go test -v ./...
 
 go-get:
 	@echo "  >  Checking if there are any missing dependencies..."
