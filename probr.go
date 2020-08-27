@@ -1,68 +1,86 @@
-package main
+package probr
 
 import (
-	"flag"
-	"log"
-	"os"
-
-	v1 "gitlab.com/citihub/probr/api/v1"
 	"gitlab.com/citihub/probr/internal/clouddriver/kubernetes"
+	"gitlab.com/citihub/probr/internal/coreengine"
 
-	"gitlab.com/citihub/probr/internal/config" //needed for logging
+	"github.com/google/uuid"
+
+	_ "gitlab.com/citihub/probr/internal/config" //needed for logging
+	"gitlab.com/citihub/probr/test/features"
 	_ "gitlab.com/citihub/probr/test/features/clouddriver"
 	_ "gitlab.com/citihub/probr/test/features/kubernetes/containerregistryaccess" //needed to run init on TestHandlers
 	_ "gitlab.com/citihub/probr/test/features/kubernetes/internetaccess"          //needed to run init on TestHandlers
 	_ "gitlab.com/citihub/probr/test/features/kubernetes/podsecuritypolicy"       //needed to run init on TestHandlers
 )
 
-var (
-	integrationTest = flag.Bool("integrationTest", false, "run integration tests")
-)
-
 //TODO: revise when interface this bit up ...
 var kube = kubernetes.GetKubeInstance()
 
-func main() {
-	//TODO: this (to line 45) will all move when we merge the change to move to a library
-	//just dumping in here for now ...
-	k := flag.String("kube", "", "kube config file")
-	o := flag.String("outputDir", "", "output directory")
-	flag.Parse()
+func addTest(tm *coreengine.TestStore, n string, g coreengine.Group, c coreengine.Category) {
 
-	v1.SetIOPaths(*k, *o)
+	td := coreengine.TestDescriptor{Group: g, Category: c, Name: n}
 
-	log.Printf("[NOTICE] Probr running with environment: ")
-	log.Printf("[NOTICE] %v", config.GetEnvConfigInstance())
+	uuid1 := uuid.New().String()
+	sat := coreengine.Pending
 
-	if k != nil && len(*k) > 0 {
-		log.Printf("[NOTICE] Kube Config has been overridden on command line to: " + *k)
-	}
-	if o != nil && len(*o) > 0 {
-		log.Printf("[NOTICE] Output Directory has been overridden on command line to: " + *o)
+	test := coreengine.Test{
+		UUID:           &uuid1,
+		TestDescriptor: &td,
+		Status:         &sat,
 	}
 
-	//TODO: this is the cli and what will be called on Docker run ...
-	//use args to figure out what needs to be run / output paths / etc
-	//and call TestManager to make it happen :-)
+	//add - don't worry about the rtn uuid
+	tm.AddTest(&test)
+}
 
-	//(possibly want to create a separate "cli" file)
+// RunAllTests ...
+func RunAllTests() (int, *coreengine.TestStore, error) {
+	// MUST run after SetIOPaths
+	// get the test mgr
+	tm := coreengine.NewTestManager()
 
-	// get all the below from args ... just hard code for now
+	//add some tests and add them to the TM - we need to tidy this up!
+	addTest(tm, "container_registry_access", coreengine.Kubernetes, coreengine.ContainerRegistryAccess)
+	addTest(tm, "internet_access", coreengine.Kubernetes, coreengine.InternetAccess)
+	addTest(tm, "pod_security_policy", coreengine.Kubernetes, coreengine.PodSecurityPolicies)
+	addTest(tm, "account_manager", coreengine.CloudDriver, coreengine.General)
 
 	//exec 'em all (for now!)
-	s, ts, err := v1.RunAllTests()
+	s, err := tm.ExecAllTests()
+	return s, tm, err
+}
 
-	if err != nil {
-		log.Fatalf("[ERROR] Error executing tests %v", err)
+func GetAllTestResults(ts *coreengine.TestStore) (map[string]string, error) {
+	out := make(map[string]string)
+	for id := range ts.Tests {
+		r, n, err := ReadTestResults(ts, id)
+		if err != nil {
+			return nil, err
+		}
+		if r != "" {
+			out[n] = r
+		}
 	}
-	log.Printf("[NOTICE] Overall test completion status: %v", s)
+	return out, nil
+}
 
-	out, err := v1.GetAllTestResults(ts)
+func ReadTestResults(ts *coreengine.TestStore, id uuid.UUID) (string, string, error) {
+	t, err := ts.GetTest(&id)
 	if err != nil {
-		log.Fatalf("[ERROR] Experienced error getting test results: %v", s)
+		return "", "", err
 	}
-	for k, _ := range out {
-		log.Printf("Test results in memory: %v", k)
+	r := (*t)[0].Results
+	n := (*t)[0].TestDescriptor.Name
+	if r != nil {
+		b := r.Bytes()
+		return string(b), n, nil
 	}
-	os.Exit(s)
+	return "", "", nil
+}
+
+// SetIOPaths ...
+func SetIOPaths(i string, o string) {
+	kube.SetKubeConfigFile(&i)
+	features.SetOutputDirectory(&o)
 }
