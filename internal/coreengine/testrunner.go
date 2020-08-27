@@ -78,10 +78,7 @@ func (ts *TestStore) RunTest(t *Test) (int, error) {
 		//TODO: this could be adjusted based on test strictness ...
 	}
 
-	if o != nil {
-		t.Results = o // If in-mem output provided, store as Results
-	}
-
+	t.Results = o // If in-mem output provided, store as Results
 	return s, err
 }
 

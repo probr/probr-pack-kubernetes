@@ -139,7 +139,6 @@ func (ts *TestStore) GetTest(uuid *uuid.UUID) (*[]*Test, error) {
 	if !exists {
 		return nil, errors.New("test with uuid " + (*uuid).String() + " not found")
 	}
-
 	return t, nil
 }
 

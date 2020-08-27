@@ -35,7 +35,7 @@ func addTest(tm *coreengine.TestStore, n string, g coreengine.Group, c coreengin
 }
 
 // RunAllTests ...
-func RunAllTests() (int, error) {
+func RunAllTests() (int, *coreengine.TestStore, error) {
 	// MUST run after SetIOPaths
 	// get the test mgr
 	tm := coreengine.NewTestManager()
@@ -47,8 +47,36 @@ func RunAllTests() (int, error) {
 	addTest(tm, "account_manager", coreengine.CloudDriver, coreengine.General)
 
 	//exec 'em all (for now!)
-	return tm.ExecAllTests()
+	s, err := tm.ExecAllTests()
+	return s, tm, err
+}
 
+func GetAllTestResults(ts *coreengine.TestStore) (map[string]string, error) {
+	out := make(map[string]string)
+	for id := range ts.Tests {
+		r, n, err := ReadTestResults(ts, id)
+		if err != nil {
+			return nil, err
+		}
+		if r != "" {
+			out[n] = r
+		}
+	}
+	return out, nil
+}
+
+func ReadTestResults(ts *coreengine.TestStore, id uuid.UUID) (string, string, error) {
+	t, err := ts.GetTest(&id)
+	if err != nil {
+		return "", "", err
+	}
+	r := (*t)[0].Results
+	n := (*t)[0].TestDescriptor.Name
+	if r != nil {
+		b := r.Bytes()
+		return string(b), n, nil
+	}
+	return "", "", nil
 }
 
 // SetIOPaths ...
