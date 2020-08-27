@@ -1,12 +1,10 @@
 package containerregistryaccess
 
 import (
-	"fmt"
-
+	"github.com/cucumber/godog"
 	"gitlab.com/citihub/probr/internal/clouddriver/kubernetes"
 	"gitlab.com/citihub/probr/internal/coreengine"
 	"gitlab.com/citihub/probr/test/features"
-	"github.com/cucumber/godog"
 )
 
 type probState struct {
@@ -40,7 +38,7 @@ func (p *probState) aKubernetesClusterIsDeployed() error {
 	b := cra.ClusterIsDeployed()
 
 	if b == nil || !*b {
-		return fmt.Errorf("kubernetes cluster is NOT deployed")
+		return features.LogAndReturnError("kubernetes cluster is NOT deployed")
 	}
 
 	//else we're good ...
@@ -55,16 +53,16 @@ func (p *probState) aUserAttemptsToDeployAContainerFrom(registry string) error {
 		//check for partial creation, if we've got a pod, hold onto it's name so we can delete
 		//(this could happen with imagepullerr etc)
 		if pd != nil {
-			p.podName = pd.GetObjectMeta().GetName()		
+			p.podName = pd.GetObjectMeta().GetName()
 		}
-		
+
 		//check for expected error
 		if e, ok := err.(*kubernetes.PodCreationError); ok {
 			p.creationError = e
 			return nil
 		}
 		//unexpected error
-		return fmt.Errorf("error attempting to create POD: %v", err)
+		return features.LogAndReturnError("error attempting to create POD: %v", err)
 	}
 
 	if pd == nil {
@@ -84,13 +82,13 @@ func (p *probState) theDeploymentAttemptIs(res string) error {
 		//expect pod creation error to be non-null (i.e. creation was prevented)
 		if p.creationError == nil {
 			//it's a fail:
-			return fmt.Errorf("pod %v was created - test failed", p.podName)
+			return features.LogAndReturnError("pod %v was created - test failed", p.podName)
 		}
 		//should also check code:
 		_, exists := p.creationError.ReasonCodes[kubernetes.PSPContainerAllowedImages]
 		if !exists {
 			//also a fail:
-			return fmt.Errorf("pod not was created but failure reasons (%v) did not contain expected (%v)- test failed",
+			return features.LogAndReturnError("pod not was created but failure reasons (%v) did not contain expected (%v)- test failed",
 				p.creationError.ReasonCodes, kubernetes.PSPContainerAllowedImages)
 		}
 
@@ -102,7 +100,7 @@ func (p *probState) theDeploymentAttemptIs(res string) error {
 		// then expect the pod name to be present
 		if p.podName == "" {
 			//it's a fail:
-			return fmt.Errorf("pod was not created - test failed: %v", p.creationError)
+			return features.LogAndReturnError("pod was not created - test failed: %v", p.creationError)
 		}
 	}
 

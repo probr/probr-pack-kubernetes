@@ -75,3 +75,16 @@ func getOutputDirectory() (*string, error) {
 
 	return outputDir, nil
 }
+
+// LogAndReturnError logs the given string and raise an error with the same string.  This is useful in Godog steps
+// where an error is displayed in the test report but not logged.
+func LogAndReturnError(e string, v ...interface{}) error {
+	var b  strings.Builder
+	b.WriteString("[ERROR] ")
+	b.WriteString(e)
+
+	s := fmt.Sprintf(b.String(), v...)
+	log.Print(s)
+
+	return fmt.Errorf(s)
+}
