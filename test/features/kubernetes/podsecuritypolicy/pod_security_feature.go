@@ -1,13 +1,15 @@
 package podsecuritypolicy
 
+//go:generate go-bindata.exe -pkg $GOPACKAGE -o assets/assets.go assets/yaml
+
 import (
 	"fmt"
 
 	"github.com/cucumber/godog"
 	"gitlab.com/citihub/probr/internal/clouddriver/kubernetes"
 	"gitlab.com/citihub/probr/internal/coreengine"
-	"gitlab.com/citihub/probr/internal/utils"
 	"gitlab.com/citihub/probr/test/features"
+	podsecuritypolicy "gitlab.com/citihub/probr/test/features/kubernetes/podsecuritypolicy/assets"
 	apiv1 "k8s.io/api/core/v1"
 )
 
@@ -105,9 +107,9 @@ func (p *probState) performAllowedCommand() error {
 
 		//want this to succeed - no errors & 0 exit code:
 		if err != nil && ex == 0 {
-			return fmt.Errorf("allowed command (%v) failed. Exit code: %v Error: %v", c, ex, err)			
+			return fmt.Errorf("allowed command (%v) failed. Exit code: %v Error: %v", c, ex, err)
 		}
-		return nil		
+		return nil
 	}
 
 	//pod wasn't created so nothing to test
@@ -117,7 +119,7 @@ func (p *probState) performAllowedCommand() error {
 // common helper funcs
 func (p *probState) processCreationResult(pd *apiv1.Pod, expected kubernetes.PodCreationErrorReason, err error) error {
 	//first check for errors:
-	if err != nil {		
+	if err != nil {
 		//check if we've got a partial pod creation
 		//e.g. pod was created but did't get to "running" state
 		//in this case we need to hold onto the name so it can be deleted
@@ -379,9 +381,9 @@ func (p *probState) anPortRangeIsRequestedForTheKubernetesDeployment(portRange s
 	var err error
 
 	if portRange == "unapproved" {
-		y, err = utils.Asset("test/features/kubernetes/podsecuritypolicy/features/yaml/psp-azp-hostport-unapproved.yaml")
+		y, err = podsecuritypolicy.Asset("assets/yaml/psp-azp-hostport-unapproved.yaml")
 	} else {
-		y, err = utils.Asset("test/features/kubernetes/podsecuritypolicy/features/yaml/psp-azp-hostport-approved.yaml")
+		y, err = podsecuritypolicy.Asset("assets/yaml/psp-azp-hostport-approved.yaml")
 	}
 
 	if err != nil {
@@ -408,9 +410,9 @@ func (p *probState) anVolumeTypeIsRequestedForTheKubernetesDeployment(volumeType
 	var err error
 
 	if volumeType == "unapproved" {
-		y, err = utils.Asset("test/features/kubernetes/podsecuritypolicy/features/yaml/psp-azp-volumetypes-unapproved.yaml")
+		y, err = podsecuritypolicy.Asset("assets/yaml/psp-azp-volumetypes-unapproved.yaml")
 	} else {
-		y, err = utils.Asset("test/features/kubernetes/podsecuritypolicy/features/yaml/psp-azp-volumetypes-approved.yaml")
+		y, err = podsecuritypolicy.Asset("assets/yaml/psp-azp-volumetypes-approved.yaml")
 	}
 
 	if err != nil {
@@ -438,11 +440,11 @@ func (p *probState) anSeccompProfileIsRequestedForTheKubernetesDeployment(seccom
 	var err error
 
 	if seccompProfile == "unapproved" {
-		y, err = utils.Asset("test/features/kubernetes/podsecuritypolicy/features/yaml/psp-azp-seccomp-unapproved.yaml")
+		y, err = podsecuritypolicy.Asset("assets/yaml/psp-azp-seccomp-unapproved.yaml")
 	} else if seccompProfile == "undefined" {
-		y, err = utils.Asset("test/features/kubernetes/podsecuritypolicy/features/yaml/psp-azp-seccomp-undefined.yaml")
+		y, err = podsecuritypolicy.Asset("assets/yaml/psp-azp-seccomp-undefined.yaml")
 	} else if seccompProfile == "approved" {
-		y, err = utils.Asset("test/features/kubernetes/podsecuritypolicy/features/yaml/psp-azp-seccomp-approved.yaml")
+		y, err = podsecuritypolicy.Asset("assets/yaml/psp-azp-seccomp-approved.yaml")
 	}
 
 	if err != nil {
@@ -479,10 +481,10 @@ func TestSuiteInitialize(ctx *godog.TestSuiteContext) {
 		//check dependancies ...
 		if psp == nil {
 			// not been given one so set default
-			psp = kubernetes.NewDefaultPSP()		
+			psp = kubernetes.NewDefaultPSP()
 		}
 		psp.CreateConfigMap()
-	}) 
+	})
 
 	ctx.AfterSuite(func() {
 		psp.DeleteConfigMap()
