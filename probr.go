@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"github.com/google/uuid"
+	v1 "gitlab.com/citihub/probr/api/v1"
 	"gitlab.com/citihub/probr/internal/clouddriver/kubernetes"
 	"gitlab.com/citihub/probr/internal/coreengine"
 
@@ -52,15 +53,21 @@ func main() {
 	// get all the below from args ... just hard code for now
 
 	//exec 'em all (for now!)
-	s, err := RunAllTests()
+	s, ts, err := v1.RunAllTests()
+
 	if err != nil {
 		log.Fatalf("[ERROR] Error executing tests %v", err)
 	}
-
 	log.Printf("[NOTICE] Overall test completion status: %v", s)
 
+	out, err := v1.GetAllTestResults(ts)
+	if err != nil {
+		log.Fatalf("[ERROR] Experienced error getting test results: %v", s)
+	}
+	for k, _ := range out {
+		log.Printf("Test results in memory: %v", k)
+	}
 	os.Exit(s)
-
 }
 
 func addTest(tm *coreengine.TestStore, n string, g coreengine.Group, c coreengine.Category) {
