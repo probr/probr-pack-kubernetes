@@ -1,14 +1,13 @@
 package internetaccess
 
 import (
-	"fmt"
 	"log"
 
 	"gitlab.com/citihub/probr/test/features"
 
+	"github.com/cucumber/godog"
 	"gitlab.com/citihub/probr/internal/clouddriver/kubernetes"
 	"gitlab.com/citihub/probr/internal/coreengine"
-	"github.com/cucumber/godog"
 )
 
 type probState struct {
@@ -42,7 +41,7 @@ func (p *probState) aKubernetesClusterIsDeployed() error {
 	b := na.ClusterIsDeployed()
 
 	if b == nil || !*b {
-		return fmt.Errorf("kubernetes cluster is NOT deployed")
+		return features.LogAndReturnError("kubernetes cluster is NOT deployed")
 	}
 
 	//else we're good ...
@@ -65,7 +64,7 @@ func (p *probState) aPodIsDeployedInTheCluster() error {
 	}
 
 	if pod == nil {
-		return fmt.Errorf("POD is nil")
+		return features.LogAndReturnError("POD is nil")
 	}
 
 	//hold on to the pod name
@@ -79,7 +78,7 @@ func (p *probState) aProcessInsideThePodEstablishesADirectHTTPSConnectionTo(url 
 	code, err := na.AccessURL(&p.podName, &url)
 
 	if err != nil {
-		log.Printf("[ERROR] Error raised when attempting to access URL: %v", err)
+		features.LogAndReturnError("[ERROR] Error raised when attempting to access URL: %v", err)
 		return err
 	}
 
@@ -94,7 +93,7 @@ func (p *probState) accessIs(accessResult string) error {
 		//then the result should be anything other than 200
 		if p.httpStatusCode == 200 {
 			//it's a fail:
-			return fmt.Errorf("got HTTP Status Code %v - failed", p.httpStatusCode)
+			return features.LogAndReturnError("got HTTP Status Code %v - failed", p.httpStatusCode)
 		}
 	}
 	//otherwise good

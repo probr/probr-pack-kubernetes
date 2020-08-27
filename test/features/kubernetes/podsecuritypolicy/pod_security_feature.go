@@ -3,8 +3,6 @@ package podsecuritypolicy
 //go:generate go-bindata.exe -pkg $GOPACKAGE -o assets/assets.go assets/yaml
 
 import (
-	"fmt"
-
 	"github.com/cucumber/godog"
 	"gitlab.com/citihub/probr/internal/clouddriver/kubernetes"
 	"gitlab.com/citihub/probr/internal/coreengine"
@@ -51,7 +49,7 @@ func (p *probState) aKubernetesClusterExistsWhichWeCanDeployInto() error {
 	b := psp.ClusterIsDeployed()
 
 	if b == nil || !*b {
-		return fmt.Errorf("kubernetes cluster is NOT deployed")
+		return features.LogAndReturnError("kubernetes cluster is NOT deployed")
 	}
 
 	//else we're good ...
@@ -68,13 +66,13 @@ func (p *probState) theOperationWillWithAnError(res, msg string) error {
 		//expect pod creation error to be non-null
 		if p.creationError == nil {
 			//it's a fail:
-			return fmt.Errorf("pod %v was created - test failed", p.podName)
+			return features.LogAndReturnError("pod %v was created - test failed", p.podName)
 		}
 		//should also check code:
 		_, exists := p.creationError.ReasonCodes[*p.expectedReason]
 		if !exists {
 			//also a fail:
-			return fmt.Errorf("pod not was created but failure reasons (%v) did not contain expected (%v)- test failed",
+			return features.LogAndReturnError("pod not was created but failure reasons (%v) did not contain expected (%v)- test failed",
 				p.creationError.ReasonCodes, p.expectedReason)
 		}
 
@@ -86,7 +84,7 @@ func (p *probState) theOperationWillWithAnError(res, msg string) error {
 		// then expect the pod creation error to be nil
 		if p.creationError != nil {
 			//it's a fail:
-			return fmt.Errorf("pod was not created - test failed: %v", p.creationError)
+			return features.LogAndReturnError("pod was not created - test failed: %v", p.creationError)
 		}
 
 		//else we're good ...
@@ -94,7 +92,7 @@ func (p *probState) theOperationWillWithAnError(res, msg string) error {
 	}
 
 	// we've been given a result that we don't know about ...
-	return fmt.Errorf("desired result %v is not recognised", res)
+	return features.LogAndReturnError("desired result %v is not recognised", res)
 
 }
 
@@ -107,7 +105,7 @@ func (p *probState) performAllowedCommand() error {
 
 		//want this to succeed - no errors & 0 exit code:
 		if err != nil && ex == 0 {
-			return fmt.Errorf("allowed command (%v) failed. Exit code: %v Error: %v", c, ex, err)
+			return features.LogAndReturnError("allowed command (%v) failed. Exit code: %v Error: %v", c, ex, err)
 		}
 		return nil
 	}
@@ -137,7 +135,7 @@ func (p *probState) processCreationResult(pd *apiv1.Pod, expected kubernetes.Pod
 		}
 		//unexpected error
 		//in this case something unexpected has happened, return an error to cucumber
-		return fmt.Errorf("error attempting to create POD: %v", err)
+		return features.LogAndReturnError("error attempting to create POD: %v", err)
 	}
 
 	//No errors: pod creation may or may not have been expected.  This will be determined
@@ -159,14 +157,14 @@ func (p *probState) runControlTest(cf func() (*bool, error), c string) error {
 	yesNo, err := cf()
 
 	if err != nil {
-		return fmt.Errorf("error determining Pod Security Policy: %v error: %v", c, err)
+		return features.LogAndReturnError("error determining Pod Security Policy: %v error: %v", c, err)
 	}
 	if yesNo == nil {
-		return fmt.Errorf("result of %v is nil despite no error being raised from the call", c)
+		return features.LogAndReturnError("result of %v is nil despite no error being raised from the call", c)
 	}
 
 	if !*yesNo {
-		return fmt.Errorf("%v is NOT restricted (result: %t)", c, *yesNo)
+		return features.LogAndReturnError("%v is NOT restricted (result: %t)", c, *yesNo)
 	}
 
 	return nil
@@ -181,7 +179,7 @@ func (p *probState) runVerificationTest(c kubernetes.PSPTestCommand) error {
 			return nil
 		}
 		if err == nil {
-			return fmt.Errorf("verification command (%v) succeeded with exit code %v", c, ex)
+			return features.LogAndReturnError("verification command (%v) succeeded with exit code %v", c, ex)
 		}
 	}
 
