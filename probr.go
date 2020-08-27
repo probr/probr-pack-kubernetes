@@ -5,13 +5,10 @@ import (
 	"log"
 	"os"
 
-	"github.com/google/uuid"
 	v1 "gitlab.com/citihub/probr/api/v1"
 	"gitlab.com/citihub/probr/internal/clouddriver/kubernetes"
-	"gitlab.com/citihub/probr/internal/coreengine"
 
 	"gitlab.com/citihub/probr/internal/config" //needed for logging
-	"gitlab.com/citihub/probr/test/features"
 	_ "gitlab.com/citihub/probr/test/features/clouddriver"
 	_ "gitlab.com/citihub/probr/test/features/kubernetes/containerregistryaccess" //needed to run init on TestHandlers
 	_ "gitlab.com/citihub/probr/test/features/kubernetes/internetaccess"          //needed to run init on TestHandlers
@@ -32,7 +29,7 @@ func main() {
 	o := flag.String("outputDir", "", "output directory")
 	flag.Parse()
 
-	SetIOPaths(*k, *o)
+	v1.SetIOPaths(*k, *o)
 
 	log.Printf("[NOTICE] Probr running with environment: ")
 	log.Printf("[NOTICE] %v", config.GetEnvConfigInstance())
@@ -68,43 +65,4 @@ func main() {
 		log.Printf("Test results in memory: %v", k)
 	}
 	os.Exit(s)
-}
-
-func addTest(tm *coreengine.TestStore, n string, g coreengine.Group, c coreengine.Category) {
-
-	td := coreengine.TestDescriptor{Group: g, Category: c, Name: n}
-
-	uuid1 := uuid.New().String()
-	sat := coreengine.Pending
-
-	test := coreengine.Test{
-		UUID:           &uuid1,
-		TestDescriptor: &td,
-		Status:         &sat,
-	}
-
-	//add - don't worry about the rtn uuid
-	tm.AddTest(&test)
-}
-
-// RunAllTests ...
-func RunAllTests() (int, error) {
-	// get the test mgr
-	tm := coreengine.NewTestManager()
-
-	//add some tests and add them to the TM - we need to tidy this up!
-	addTest(tm, "container_registry_access", coreengine.Kubernetes, coreengine.ContainerRegistryAccess)
-	addTest(tm, "internet_access", coreengine.Kubernetes, coreengine.InternetAccess)
-	addTest(tm, "pod_security_policy", coreengine.Kubernetes, coreengine.PodSecurityPolicies)
-	addTest(tm, "account_manager", coreengine.CloudDriver, coreengine.General)
-
-	//exec 'em all (for now!)
-	return tm.ExecAllTests()
-
-}
-
-// SetIOPaths ...
-func SetIOPaths(i string, o string) {
-	kube.SetKubeConfigFile(&i)
-	features.SetOutputDirectory(&o)
 }
