@@ -45,7 +45,7 @@ func (p *probState) aKubernetesClusterIsDeployed() error {
 	return nil
 }
 
-func (p *probState) aUserAttemptsToDeployAContainerFrom(registry string) error {
+func (p *probState) aUserAttemptsToDeployAContainerFrom(auth string, registry string) error {
 
 	pd, err := cra.SetupContainerAccessTestPod(&registry)
 
@@ -138,7 +138,7 @@ func ScenarioInitialize(ctx *godog.ScenarioContext) {
 	})
 
 	ctx.Step(`^a Kubernetes cluster is deployed$`, ps.aKubernetesClusterIsDeployed)
-	ctx.Step(`^a user attempts to deploy a container from "([^"]*)"$`, ps.aUserAttemptsToDeployAContainerFrom)
+	ctx.Step(`^a user attempts to deploy a container from "([^"]*)" registry "([^"]*)"$`, ps.aUserAttemptsToDeployAContainerFrom)
 	ctx.Step(`^the deployment attempt is "([^"]*)"$`, ps.theDeploymentAttemptIs)
 
 	ctx.AfterScenario(func(sc *godog.Scenario, err error) {
