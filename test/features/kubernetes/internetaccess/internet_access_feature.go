@@ -132,8 +132,9 @@ func TestSuiteInitialize(ctx *godog.TestSuiteContext) {
 
 //ScenarioInitialize ...
 func ScenarioInitialize(ctx *godog.ScenarioContext) {
-	ctx.BeforeScenario(func(*godog.Scenario) {
+	ctx.BeforeScenario(func(s *godog.Scenario) {
 		ps.setup()
+		features.LogScenarioStart(s)
 	})
 
 	ctx.Step(`^a Kubernetes cluster is deployed$`, ps.aKubernetesClusterIsDeployed)
@@ -141,7 +142,8 @@ func ScenarioInitialize(ctx *godog.ScenarioContext) {
 	ctx.Step(`^a process inside the pod establishes a direct http\(s\) connection to "([^"]*)"$`, ps.aProcessInsideThePodEstablishesADirectHTTPSConnectionTo)
 	ctx.Step(`^access is "([^"]*)"$`, ps.accessIs)
 
-	ctx.AfterScenario(func(sc *godog.Scenario, err error) {
+	ctx.AfterScenario(func(s *godog.Scenario, err error) {
 		ps.scenarioTearDown()
+		features.LogScenarioEnd(s)
 	})
 }

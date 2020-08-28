@@ -493,8 +493,9 @@ func TestSuiteInitialize(ctx *godog.TestSuiteContext) {
 func ScenarioInitialize(ctx *godog.ScenarioContext) {
 	ps := probState{}
 
-	ctx.BeforeScenario(func(*godog.Scenario) {
+	ctx.BeforeScenario(func(s *godog.Scenario) {
 		ps.setup()
+		features.LogScenarioStart(s)
 	})
 
 	ctx.Step(`^a Kubernetes cluster exists which we can deploy into$`, ps.aKubernetesClusterExistsWhichWeCanDeployInto)
@@ -564,8 +565,9 @@ func ScenarioInitialize(ctx *godog.ScenarioContext) {
 	ctx.Step(`^the operation will "([^"]*)" with an error "([^"]*)"$`, ps.theOperationWillWithAnError)
 	ctx.Step(`^I should be able to perform an allowed command$`, ps.performAllowedCommand)
 
-	ctx.AfterScenario(func(sc *godog.Scenario, err error) {
+	ctx.AfterScenario(func(s *godog.Scenario, err error) {
 		ps.tearDown()
+		features.LogScenarioEnd(s)
 	})
 
 }
