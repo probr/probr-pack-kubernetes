@@ -6,6 +6,8 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/cucumber/godog"
 )
 
 const rootDirName = "probr"
@@ -79,7 +81,7 @@ func getOutputDirectory() (*string, error) {
 // LogAndReturnError logs the given string and raise an error with the same string.  This is useful in Godog steps
 // where an error is displayed in the test report but not logged.
 func LogAndReturnError(e string, v ...interface{}) error {
-	var b  strings.Builder
+	var b strings.Builder
 	b.WriteString("[ERROR] ")
 	b.WriteString(e)
 
@@ -87,4 +89,32 @@ func LogAndReturnError(e string, v ...interface{}) error {
 	log.Print(s)
 
 	return fmt.Errorf(s)
+}
+
+// LogScenarioStart logs the name and tags associtated with the supplied scenario. 
+func LogScenarioStart(s *godog.Scenario) {	
+	log.Print(scenarioString(true, s))
+}
+
+// LogScenarioEnd logs the name and tags associtated with the supplied scenario. 
+func LogScenarioEnd(s *godog.Scenario) {	
+	log.Print(scenarioString(false, s))
+}
+
+func scenarioString(st bool, s *godog.Scenario) string {
+	var b strings.Builder
+	if st {
+		b.WriteString("[NOTICE] *** Scenario Start: ")
+	} else {
+		b.WriteString("[NOTICE] *** Scenario End: ")
+	}
+
+	b.WriteString(s.Name)
+	b.WriteString(". (Tags: ")
+
+	for _, t := range s.Tags {
+		b.WriteString(t.GetName())
+	}
+	b.WriteString(").")
+	return b.String()
 }
