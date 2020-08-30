@@ -1,6 +1,8 @@
 package kubernetesunit
 
 import (
+	"fmt"
+	"reflect"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -26,55 +28,138 @@ func TestPSPTestCommand(t *testing.T) {
 //TODO: more tests for all interface methods
 
 func TestClusterHasPSP(t *testing.T) {
+	runTest(t, "HasSecurityPolicies", "ClusterHasPSP")
+}
+
+func TestPrivilegedAccessIsRestricted(t *testing.T) {
+	runTest(t, "HasPrivilegedAccessRestriction", "PrivilegedAccessIsRestricted")	
+}
+
+func TestHostPIDIsRestricted(t *testing.T) {	
+	runTest(t, "HasHostPIDRestriction", "HostPIDIsRestricted")
+}
+
+func TestHostIPCIsRestricted(t *testing.T) {	
+	runTest(t, "HasHostIPCRestriction", "HostIPCIsRestricted")
+}
+
+func TestHostNetworkIsRestricted(t *testing.T) {	
+	runTest(t, "HasHostNetworkRestriction", "HostNetworkIsRestricted")
+}
+
+func TestPrivilegedEscalationIsRestricted(t *testing.T) {	
+	runTest(t, "HasAllowPrivilegeEscalationRestriction", "PrivilegedEscalationIsRestricted")
+}
+
+func TestRootUserIsRestricted(t *testing.T) {	
+	runTest(t, "HasRootUserRestriction", "RootUserIsRestricted")
+}
+
+func TestNETRawIsRestricted(t *testing.T) {	
+	runTest(t, "HasNETRAWRestriction", "NETRawIsRestricted")
+}
+
+func TestAllowedCapabilitiesAreRestricted(t *testing.T) {	
+	runTest(t, "HasAllowedCapabilitiesRestriction", "AllowedCapabilitiesAreRestricted")
+}
+
+func TestAssignedCapabilitiesAreRestricted(t *testing.T) {	
+	runTest(t, "HasAssignedCapabilitiesRestriction", "AssignedCapabilitiesAreRestricted")
+}
+
+func TestHostPortsAreRestricted(t *testing.T) {	
+	runTest(t, "HasHostPortRestriction", "HostPortsAreRestricted")
+}
+
+func TestVolumeTypesAreRestricted(t *testing.T) {	
+	runTest(t, "HasVolumeTypeRestriction", "VolumeTypesAreRestricted")
+}
+
+func TestSeccompProfilesAreRestricted(t *testing.T) {	
+	runTest(t, "HasSeccompProfileRestriction", "SeccompProfilesAreRestricted")
+}
+
+func runTest(t *testing.T, mockMethod string, testMethod string) {
+	fmt.Printf("==== Running PSP test for %v with mock %v \n", testMethod, mockMethod)
+
 	//create and set a 'true' provider
 	tmp := &securityProviderMock{}
-	tmp.On("HasSecurityPolicies").Return(true, nil)
+	tmp.On(mockMethod).Return(true, nil)
 
 	psp := kubernetes.NewPSP(nil, &[]kubernetes.SecurityPolicyProvider{tmp}, config.GetEnvConfigInstance())
 
-	b, _ := psp.ClusterHasPSP()
+	b, _ := reflectiveCall(psp, testMethod)
 	assert.True(t, *b)
-	tmp.AssertNumberOfCalls(t, "HasSecurityPolicies", 1)
+	tmp.AssertNumberOfCalls(t, mockMethod, 1)
 	tmp.AssertExpectations(t)
 
 	//create and set a 'false' provider
 	fmp := &securityProviderMock{}
-	fmp.On("HasSecurityPolicies").Return(false, nil)
+	fmp.On(mockMethod).Return(false, nil)
 
 	//need a different PSP with the false provider
 	psp = kubernetes.NewPSP(nil, &[]kubernetes.SecurityPolicyProvider{fmp}, config.GetEnvConfigInstance())
 
-	b, _ = psp.ClusterHasPSP()
+	b, _ = reflectiveCall(psp, testMethod)
 	assert.False(t, *b)
-	fmp.AssertNumberOfCalls(t, "HasSecurityPolicies", 1)
+	fmp.AssertNumberOfCalls(t, mockMethod, 1)
 	fmp.AssertExpectations(t)
 
 	//add both true & false providers:
 	//true first ...
 	psp = kubernetes.NewPSP(nil, &[]kubernetes.SecurityPolicyProvider{tmp, fmp}, config.GetEnvConfigInstance())
 
-	b, _ = psp.ClusterHasPSP()
-	assert.True(t, *b)                                   //expect this to be true ...
-	tmp.AssertNumberOfCalls(t, "HasSecurityPolicies", 2) //expect another call to true (so two in total)
+	b, _ = reflectiveCall(psp, testMethod)
+	assert.True(t, *b)               //expect this to be true ...
+	tmp.AssertNumberOfCalls(t, mockMethod, 2) //expect another call to true (so two in total)
 	tmp.AssertExpectations(t)
-	fmp.AssertNumberOfCalls(t, "HasSecurityPolicies", 1) //but false should only be at 1 as PSP should return on first +ve
+	fmp.AssertNumberOfCalls(t, mockMethod, 1) //but false should only be at 1 as PSP should return on first +ve
 
 	//switch order of true/false (so false first)
 	psp = kubernetes.NewPSP(nil, &[]kubernetes.SecurityPolicyProvider{fmp, tmp}, config.GetEnvConfigInstance())
-	b, _ = psp.ClusterHasPSP()
-	assert.True(t, *b)                                   //expect this to be true ...
-	tmp.AssertNumberOfCalls(t, "HasSecurityPolicies", 3) //expect another call to true (three in total now)
+	b, _ = reflectiveCall(psp, testMethod)
+	assert.True(t, *b)               //expect this to be true ...
+	tmp.AssertNumberOfCalls(t, mockMethod, 3) //expect another call to true (three in total now)
 	tmp.AssertExpectations(t)
-	fmp.AssertNumberOfCalls(t, "HasSecurityPolicies", 2) //false should be up to 2 by now ...
+	fmp.AssertNumberOfCalls(t, mockMethod, 2) //false should be up to 2 by now ...
 
 	//add nil provider in the first slot ...
 	psp = kubernetes.NewPSP(nil, &[]kubernetes.SecurityPolicyProvider{nil, tmp}, config.GetEnvConfigInstance())
-	b, _ = psp.ClusterHasPSP()
-	assert.True(t, *b)                                   //should still get an overall true result...
-	tmp.AssertNumberOfCalls(t, "HasSecurityPolicies", 4) //true up to four
+	b, _ = reflectiveCall(psp, testMethod)
+	assert.True(t, *b)               //should still get an overall true result...
+	tmp.AssertNumberOfCalls(t, mockMethod, 4) //true up to four
 	tmp.AssertExpectations(t)
-	fmp.AssertNumberOfCalls(t, "HasSecurityPolicies", 2) //no call to false
+	fmp.AssertNumberOfCalls(t, mockMethod, 2) //no call to false
 
+}
+
+func reflectiveCall(p *kubernetes.PSP, tm string) (*bool, error) {
+
+	fmt.Printf("Reflectively calling %v on %T\n", tm, p)
+
+	res := reflect.ValueOf(p).MethodByName(tm).Call([]reflect.Value{})	
+
+	fmt.Printf("Reflection Result: %v\n", res)
+
+	//expect two params in the result:
+	if len(res) != 2 {
+		panic("unexpected number of values in function return") 
+	}
+
+	b := res[0].Elem()
+	e := res[1].Interface()
+
+	fmt.Printf("Extracted Results: %v, %v\n", b, e)
+
+	if bb, ok := b.Interface().(bool); ok {		
+		return &bb, nil
+	}
+	if err, ok := e.(error); ok {
+		return nil, err
+	}
+
+	//unexpected:
+	return nil, nil
 }
 
 //TODO: this feel rough - we need access to some 'kube' functions, but want to short circuit any external calls
@@ -194,4 +279,3 @@ func (m *securityProviderMock) HasSeccompProfileRestriction() (*bool, error) {
 	b := m.Called().Bool(0)
 	return &b, nil
 }
-
