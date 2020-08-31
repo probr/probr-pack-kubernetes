@@ -81,6 +81,5 @@ func ReadTestResults(ts *coreengine.TestStore, id uuid.UUID) (string, string, er
 
 // SetIOPaths ...
 func SetIOPaths(i string, o string) {
-	kube.SetKubeConfigFile(&i)
 	features.SetOutputDirectory(&o)
 }

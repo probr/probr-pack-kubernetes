@@ -8,7 +8,6 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"gitlab.com/citihub/probr/internal/clouddriver/kubernetes"
-	"gitlab.com/citihub/probr/internal/config"
 	"gitlab.com/citihub/probr/internal/utils"
 	apiv1 "k8s.io/api/core/v1"
 )
@@ -83,7 +82,7 @@ func runTest(t *testing.T, mockMethod string, testMethod string) {
 	tmp := &securityProviderMock{}
 	tmp.On(mockMethod).Return(true, nil)
 
-	psp := kubernetes.NewPSP(nil, &[]kubernetes.SecurityPolicyProvider{tmp}, config.Vars)
+	psp := kubernetes.NewPSP(nil, &[]kubernetes.SecurityPolicyProvider{tmp})
 
 	b, _ := reflectiveCall(psp, testMethod)
 	assert.True(t, *b)
@@ -95,7 +94,7 @@ func runTest(t *testing.T, mockMethod string, testMethod string) {
 	fmp.On(mockMethod).Return(false, nil)
 
 	//need a different PSP with the false provider
-	psp = kubernetes.NewPSP(nil, &[]kubernetes.SecurityPolicyProvider{fmp}, config.Vars)
+	psp = kubernetes.NewPSP(nil, &[]kubernetes.SecurityPolicyProvider{fmp})
 
 	b, _ = reflectiveCall(psp, testMethod)
 	assert.False(t, *b)
@@ -104,7 +103,7 @@ func runTest(t *testing.T, mockMethod string, testMethod string) {
 
 	//add both true & false providers:
 	//true first ...
-	psp = kubernetes.NewPSP(nil, &[]kubernetes.SecurityPolicyProvider{tmp, fmp}, config.Vars)
+	psp = kubernetes.NewPSP(nil, &[]kubernetes.SecurityPolicyProvider{tmp, fmp})
 
 	b, _ = reflectiveCall(psp, testMethod)
 	assert.True(t, *b)                        //expect this to be true ...
@@ -113,19 +112,15 @@ func runTest(t *testing.T, mockMethod string, testMethod string) {
 	fmp.AssertNumberOfCalls(t, mockMethod, 1) //but false should only be at 1 as PSP should return on first +ve
 
 	//switch order of true/false (so false first)
-	psp = kubernetes.NewPSP(nil, &[]kubernetes.SecurityPolicyProvider{fmp, tmp}, config.GetEnvConfigInstance())
+	psp = kubernetes.NewPSP(nil, &[]kubernetes.SecurityPolicyProvider{fmp, tmp})
 	b, _ = reflectiveCall(psp, testMethod)
 	assert.True(t, *b)                        //expect this to be true ...
 	tmp.AssertNumberOfCalls(t, mockMethod, 3) //expect another call to true (three in total now)
-	psp = kubernetes.NewPSP(nil, &[]kubernetes.SecurityPolicyProvider{fmp, tmp}, config.Vars)
-	b, _ = psp.ClusterHasPSP()
-	assert.True(t, *b)                                   //expect this to be true ...
-	tmp.AssertNumberOfCalls(t, "HasSecurityPolicies", 3) //expect another call to true (three in total now)
 	tmp.AssertExpectations(t)
 	fmp.AssertNumberOfCalls(t, mockMethod, 2) //false should be up to 2 by now ...
 
 	//add nil provider in the first slot ...
-	psp = kubernetes.NewPSP(nil, &[]kubernetes.SecurityPolicyProvider{nil, tmp}, config.GetEnvConfigInstance())
+	psp = kubernetes.NewPSP(nil, &[]kubernetes.SecurityPolicyProvider{nil, tmp})
 	b, _ = reflectiveCall(psp, testMethod)
 	assert.True(t, *b)                        //should still get an overall true result...
 	tmp.AssertNumberOfCalls(t, mockMethod, 4) //true up to four
@@ -170,7 +165,7 @@ var k = kubernetes.GetKubeInstance()
 func TestCreatePODSettingSecurityContext(t *testing.T) {
 	//need a mock kube
 	mk := &kubeMock{}
-	psp := kubernetes.NewPSP(mk, nil, config.Vars)
+	psp := kubernetes.NewPSP(mk, nil)
 
 	//set up the mock
 	sc := apiv1.SecurityContext{
@@ -227,7 +222,7 @@ func TestCreatePODSettingSecurityContext(t *testing.T) {
 func TestCreatePODSettingAttributes(t *testing.T) {
 	//need a mock kube
 	mk := &kubeMock{}
-	psp := kubernetes.NewPSP(mk, nil, config.GetEnvConfigInstance())
+	psp := kubernetes.NewPSP(mk, nil)
 
 	//set up the mock
 	po := k.GetPodObject("n", "ns", "c", "i", nil)
@@ -301,7 +296,7 @@ func TestCreatePODSettingAttributes(t *testing.T) {
 func TestCreatePODSettingCapabilities(t *testing.T) {
 	//need a mock kube
 	mk := &kubeMock{}
-	psp := kubernetes.NewPSP(mk, nil, config.GetEnvConfigInstance())
+	psp := kubernetes.NewPSP(mk, nil)
 
 	//set up the mock
 	po := k.GetPodObject("n", "ns", "c", "i", nil)

@@ -31,17 +31,6 @@ func main() {
 	o := flag.String("outputDir", "", "output directory")
 	flag.Parse()
 
-	if ot == "IO" {
-		probr.SetIOPaths(*i, *o)
-	}
-
-	if i != nil && len(*i) > 0 {
-		log.Printf("[NOTICE] Kube Config has been overridden via command line to: " + *i)
-	}
-	if o != nil && len(*o) > 0 {
-		log.Printf("[NOTICE] Output Directory has been overridden via command line to: " + *o)
-	}
-
 	// Will make config.Vars.XYZ available for the rest of the runtime
 	err := config.Init(v)
 	if err != nil {
@@ -49,6 +38,16 @@ func main() {
 	}
 	log.Printf("[NOTICE] Probr running with environment: ")
 	log.Printf("[NOTICE] %v", config.Vars)
+	if len(*i) > 0 {
+		config.Vars.SetKubeConfigPath(*i)
+		log.Printf("[NOTICE] Kube Config has been overridden via command line to: " + *i)
+	}
+	if o != nil && len(*o) > 0 {
+		log.Printf("[NOTICE] Output Directory has been overridden via command line to: " + *o)
+	}
+	if ot == "IO" {
+		probr.SetIOPaths(*i, *o)
+	}
 
 	//exec 'em all (for now!)
 	s, ts, err := probr.RunAllTests()
