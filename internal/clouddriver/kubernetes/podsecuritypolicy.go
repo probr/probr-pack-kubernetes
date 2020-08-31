@@ -96,7 +96,6 @@ type PodSecurityPolicy interface {
 type PSP struct {
 	k                       Kubernetes
 	securityPolicyProviders *[]SecurityPolicyProvider
-	c                       config.Config
 
 	testNamespace string
 	testImage     string
@@ -105,11 +104,10 @@ type PSP struct {
 }
 
 // NewPSP ...
-func NewPSP(k Kubernetes, sp *[]SecurityPolicyProvider, c config.Config) *PSP {
+func NewPSP(k Kubernetes, sp *[]SecurityPolicyProvider) *PSP {
 	p := &PSP{}
 	p.k = k
 	p.securityPolicyProviders = sp
-	p.c = c
 
 	p.setenv()
 	return p

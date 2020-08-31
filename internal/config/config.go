@@ -2,7 +2,6 @@ package config
 
 import (
 	"fmt"
-	"log"
 	"os"
 
 	"gopkg.in/yaml.v2"
@@ -10,8 +9,8 @@ import (
 )
 
 // Config contains all possible config vars. May be set by .yml, env, or defaults.
-type Config struct {
-	KubeConfigPath string
+type ConfigVars struct {
+	KubeConfigPath string `yaml:"kubeConfig"`
 	OutputType     string `yaml:"outputType"`
 	Images         struct {
 		Repository string `yaml:"repository"`
@@ -27,7 +26,7 @@ type Config struct {
 	} `yaml:"azure"`
 }
 
-var Vars Config
+var Vars ConfigVars
 
 // Init will override Vars when it is used
 func Init(configPath string) error {
@@ -41,18 +40,15 @@ func Init(configPath string) error {
 }
 
 // NewConfig can be used multiple times, if the need arises
-func NewConfig(c string) (Config, error) {
+func NewConfig(c string) (ConfigVars, error) {
 	// Create config structure
-	config := Config{}
+	config := ConfigVars{}
+	if c == "" {
+		return config, nil
+	}
 	err := ValidateConfigPath(c)
 	if err != nil {
-		if c != "./config.yml" {
-			// If config path isn't at the default value, panic on failure
-			return config, err
-		} else {
-			log.Printf("[NOTICE] Config vars not found at default filepath. Continuing with env vars and/or defaults.")
-			return config, nil
-		}
+		return config, err
 	}
 	// Open config file
 	file, err := os.Open(c)

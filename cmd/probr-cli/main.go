@@ -25,9 +25,9 @@ var kube = kubernetes.GetKubeInstance()
 func main() {
 	var v string
 	var ot string
-	flag.StringVar(&v, "varsFile", "./config.yml", "path to config file")
+	flag.StringVar(&v, "varsFile", "", "path to config file")
 	flag.StringVar(&ot, "outputType", "INMEM", "output defaults to write in memory, if 'IO' will write to specified output directory")
-	i := flag.String("kubeConfigFile", "", "kube config file")
+	i := flag.String("kubeConfig", "", "kube config file")
 	o := flag.String("outputDir", "", "output directory")
 	flag.Parse()
 

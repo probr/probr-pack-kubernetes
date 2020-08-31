@@ -5,17 +5,17 @@ import (
 )
 
 // GetKubeConfigPath ...
-func (e *Config) GetKubeConfigPath(d string) {
+func (e *ConfigVars) GetKubeConfigPath(d string) {
 	if e.KubeConfigPath == "" {
 		e.KubeConfigPath = os.Getenv("KUBE_CONFIG")
 	}
 	if e.KubeConfigPath == "" {
-		e.KubeConfigPath = d
+		e.KubeConfigPath = d // default is specified in caller: config/defaults.go
 	}
 }
 
 // GetAzureSubscriptionID ...
-func (e *Config) GetAzureSubscriptionID() string {
+func (e *ConfigVars) GetAzureSubscriptionID() string {
 	if e.Azure.SubscriptionID == "" {
 		e.Azure.SubscriptionID = os.Getenv("AZURE_SUBSCRIPTION_ID")
 	}
@@ -23,7 +23,7 @@ func (e *Config) GetAzureSubscriptionID() string {
 }
 
 // GetAzureClientID ...
-func (e *Config) GetAzureClientID() string {
+func (e *ConfigVars) GetAzureClientID() string {
 	if e.Azure.ClientID == "" {
 		e.Azure.ClientID = os.Getenv("AZURE_CLIENT_ID")
 	}
@@ -31,7 +31,7 @@ func (e *Config) GetAzureClientID() string {
 }
 
 // GetAzureClientSecret ...
-func (e *Config) GetAzureClientSecret() string {
+func (e *ConfigVars) GetAzureClientSecret() string {
 	if e.Azure.ClientSecret == "" {
 		e.Azure.ClientSecret = os.Getenv("AZURE_CLIENT_SECRET")
 	}
@@ -40,7 +40,7 @@ func (e *Config) GetAzureClientSecret() string {
 }
 
 // GetAzureTenantID ...
-func (e *Config) GetAzureTenantID() string {
+func (e *ConfigVars) GetAzureTenantID() string {
 	if e.Azure.TenantID == "" {
 		e.Azure.TenantID = os.Getenv("AZURE_TENANT_ID")
 	}
@@ -48,7 +48,7 @@ func (e *Config) GetAzureTenantID() string {
 }
 
 // GetAzureLocationDefault ...
-func (e *Config) GetAzureLocationDefault() string {
+func (e *ConfigVars) GetAzureLocationDefault() string {
 	if e.Azure.LocationDefault == "" {
 		e.Azure.LocationDefault = os.Getenv("AZURE_LOCATION_DEFAULT")
 	}
@@ -56,7 +56,7 @@ func (e *Config) GetAzureLocationDefault() string {
 }
 
 // GetImageRepository ...
-func (e *Config) GetImageRepository() string {
+func (e *ConfigVars) GetImageRepository() string {
 	if e.Images.Repository == "" {
 		e.Images.Repository = os.Getenv("IMAGE_REPOSITORY")
 	}
@@ -64,7 +64,7 @@ func (e *Config) GetImageRepository() string {
 }
 
 // GetCurlImage ...
-func (e *Config) GetCurlImage() string {
+func (e *ConfigVars) GetCurlImage() string {
 	if e.Images.Curl == "" {
 		e.Images.Curl = os.Getenv("CURL_IMAGE")
 	}
@@ -72,7 +72,7 @@ func (e *Config) GetCurlImage() string {
 }
 
 // GetBusyBoxImage ...
-func (e *Config) GetBusyBoxImage() string {
+func (e *ConfigVars) GetBusyBoxImage() string {
 	if e.Images.BusyBox == "" {
 		e.Images.BusyBox = os.Getenv("BUSYBOX_IMAGE")
 	}
@@ -80,7 +80,7 @@ func (e *Config) GetBusyBoxImage() string {
 }
 
 // GetOutputType ...
-func (e *Config) GetOutputType() string {
+func (e *ConfigVars) GetOutputType() string {
 	if e.OutputType == "" {
 		e.OutputType = os.Getenv("OUTPUT_TYPE")
 	}

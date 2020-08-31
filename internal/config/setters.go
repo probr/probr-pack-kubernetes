@@ -1,11 +1,11 @@
 package config
 
 // SetOutputType
-func (e *Config) SetOutputType(s string) {
+func (e *ConfigVars) SetOutputType(s string) {
 	e.OutputType = s
 }
 
 // SetKubeConfigPath ...
-func (e *Config) SetKubeConfigPath(p string) {
+func (e *ConfigVars) SetKubeConfigPath(p string) {
 	e.KubeConfigPath = p
 }
