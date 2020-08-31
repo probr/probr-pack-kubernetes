@@ -122,7 +122,7 @@ func TestTestRunner(t *testing.T) {
 }
 
 func TestTestRunnerInMem(t *testing.T) {
-	config.GetEnvConfigInstance().SetOutputType("INMEM")
+	config.Vars.SetOutputType("INMEM")
 
 	tr := coreengine.TestStore{}
 

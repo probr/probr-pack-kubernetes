@@ -251,7 +251,7 @@ func (k *Kube) CreatePod(pname *string, ns *string, cname *string, image *string
 func (k *Kube) CreatePodFromYaml(y []byte, pname *string, ns *string, image *string, w bool) (*apiv1.Pod, error) {
 
 	decode := scheme.Codecs.UniversalDeserializer().Decode
-	
+
 	o, _, _ := decode(y, nil, nil)
 
 	p := o.(*apiv1.Pod)
@@ -259,7 +259,7 @@ func (k *Kube) CreatePodFromYaml(y []byte, pname *string, ns *string, image *str
 	p.SetName(*pname)
 	//also update the image (which could have been supplied via the env)
 	//(only expecting one container, but loop in case of many)
-	for _, c := range p.Spec.Containers {		
+	for _, c := range p.Spec.Containers {
 		c.Image = *image
 	}
 
@@ -370,13 +370,13 @@ func (k *Kube) CreateConfigMap(n *string, ns *string) (*apiv1.ConfigMap, error) 
 	//now do config map ...
 	cms := c.CoreV1().ConfigMaps(*ns)
 
-	cm := apiv1.ConfigMap {
+	cm := apiv1.ConfigMap{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      *n,
 			Namespace: *ns,
 			Labels: map[string]string{
 				"app": "demo",
-			},			
+			},
 		},
 		Data: map[string]string{
 			"key": "value",
@@ -389,7 +389,7 @@ func (k *Kube) CreateConfigMap(n *string, ns *string) (*apiv1.ConfigMap, error) 
 	res, err := cms.Create(ctx, &cm, metav1.CreateOptions{})
 
 	if err != nil {
-		log.Printf("[WARN] Error creating ConfigMap %q: %v", res.GetObjectMeta().GetName(), err)			
+		log.Printf("[WARN] Error creating ConfigMap %q: %v", res.GetObjectMeta().GetName(), err)
 		return nil, err
 	}
 
@@ -750,7 +750,7 @@ func homeDir() string {
 }
 
 func getConfigPathFromEnv() string {
-	return *config.GetEnvConfigInstance().GetKubeConfigPath()
+	return config.Vars.KubeConfigPath
 }
 
 func logCmd(c *string, p *string, n *string) {

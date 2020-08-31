@@ -125,8 +125,6 @@ func NewDefaultPSP() *PSP {
 		NewKubeSecurityPolicyProvider(p.k),
 		azure.NewAzPolicyProvider()}
 
-	p.c = config.GetEnvConfigInstance()
-
 	p.setenv()
 	return p
 
@@ -141,11 +139,11 @@ func (psp *PSP) setenv() {
 
 	// image repository + busy box from config
 	// but default if not supplied
-	i := *psp.c.GetImageRepository()
+	i := config.Vars.Images.Repository
 	if len(i) < 1 {
 		i = defaultPSPImageRepository
 	}
-	b := *psp.c.GetBusyBoxImage()
+	b := config.Vars.Images.BusyBox
 	if len(b) < 1 {
 		b = defaultPSPTestImage
 	}
@@ -594,7 +592,7 @@ func (psp *PSP) ExecPSPTestCmd(pName *string, cmd PSPTestCommand) (int, error) {
 
 	log.Printf("[NOTICE] ExecPSPTestCmd: %v stdout: %v exit code: %v (error: %v)", cmd, stdout, ex, err)
 
-	if err != nil {		
+	if err != nil {
 		return ex, err
 	}
 
@@ -608,9 +606,9 @@ func (psp *PSP) CreateConfigMap() error {
 	_, err := psp.k.CreateConfigMap(utils.StringPtr("test-config-map"), &psp.testNamespace)
 
 	if err != nil {
-		log.Printf("[NOTICE] Failed to create test config map: %v", err)		
+		log.Printf("[NOTICE] Failed to create test config map: %v", err)
 	}
-	
+
 	return err
 }
 
@@ -917,7 +915,7 @@ func (p *KubeSecurityPolicyProvider) HasVolumeTypeRestriction() (*bool, error) {
 }
 
 // HasSeccompProfileRestriction ...
-func (p *KubeSecurityPolicyProvider) HasSeccompProfileRestriction() (*bool, error) {	
+func (p *KubeSecurityPolicyProvider) HasSeccompProfileRestriction() (*bool, error) {
 	psps, err := p.getPolicies()
 	if err != nil {
 		return nil, err
