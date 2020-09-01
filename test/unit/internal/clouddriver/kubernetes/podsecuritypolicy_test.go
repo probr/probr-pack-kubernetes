@@ -8,7 +8,6 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"gitlab.com/citihub/probr/internal/clouddriver/kubernetes"
-	"gitlab.com/citihub/probr/internal/config"
 	"gitlab.com/citihub/probr/internal/utils"
 	apiv1 "k8s.io/api/core/v1"
 )
@@ -29,50 +28,50 @@ func TestClusterHasPSP(t *testing.T) {
 }
 
 func TestPrivilegedAccessIsRestricted(t *testing.T) {
-	runTest(t, "HasPrivilegedAccessRestriction", "PrivilegedAccessIsRestricted")	
+	runTest(t, "HasPrivilegedAccessRestriction", "PrivilegedAccessIsRestricted")
 }
 
-func TestHostPIDIsRestricted(t *testing.T) {	
+func TestHostPIDIsRestricted(t *testing.T) {
 	runTest(t, "HasHostPIDRestriction", "HostPIDIsRestricted")
 }
 
-func TestHostIPCIsRestricted(t *testing.T) {	
+func TestHostIPCIsRestricted(t *testing.T) {
 	runTest(t, "HasHostIPCRestriction", "HostIPCIsRestricted")
 }
 
-func TestHostNetworkIsRestricted(t *testing.T) {	
+func TestHostNetworkIsRestricted(t *testing.T) {
 	runTest(t, "HasHostNetworkRestriction", "HostNetworkIsRestricted")
 }
 
-func TestPrivilegedEscalationIsRestricted(t *testing.T) {	
+func TestPrivilegedEscalationIsRestricted(t *testing.T) {
 	runTest(t, "HasAllowPrivilegeEscalationRestriction", "PrivilegedEscalationIsRestricted")
 }
 
-func TestRootUserIsRestricted(t *testing.T) {	
+func TestRootUserIsRestricted(t *testing.T) {
 	runTest(t, "HasRootUserRestriction", "RootUserIsRestricted")
 }
 
-func TestNETRawIsRestricted(t *testing.T) {	
+func TestNETRawIsRestricted(t *testing.T) {
 	runTest(t, "HasNETRAWRestriction", "NETRawIsRestricted")
 }
 
-func TestAllowedCapabilitiesAreRestricted(t *testing.T) {	
+func TestAllowedCapabilitiesAreRestricted(t *testing.T) {
 	runTest(t, "HasAllowedCapabilitiesRestriction", "AllowedCapabilitiesAreRestricted")
 }
 
-func TestAssignedCapabilitiesAreRestricted(t *testing.T) {	
+func TestAssignedCapabilitiesAreRestricted(t *testing.T) {
 	runTest(t, "HasAssignedCapabilitiesRestriction", "AssignedCapabilitiesAreRestricted")
 }
 
-func TestHostPortsAreRestricted(t *testing.T) {	
+func TestHostPortsAreRestricted(t *testing.T) {
 	runTest(t, "HasHostPortRestriction", "HostPortsAreRestricted")
 }
 
-func TestVolumeTypesAreRestricted(t *testing.T) {	
+func TestVolumeTypesAreRestricted(t *testing.T) {
 	runTest(t, "HasVolumeTypeRestriction", "VolumeTypesAreRestricted")
 }
 
-func TestSeccompProfilesAreRestricted(t *testing.T) {	
+func TestSeccompProfilesAreRestricted(t *testing.T) {
 	runTest(t, "HasSeccompProfileRestriction", "SeccompProfilesAreRestricted")
 }
 
@@ -83,7 +82,7 @@ func runTest(t *testing.T, mockMethod string, testMethod string) {
 	tmp := &securityProviderMock{}
 	tmp.On(mockMethod).Return(true, nil)
 
-	psp := kubernetes.NewPSP(nil, &[]kubernetes.SecurityPolicyProvider{tmp}, config.GetEnvConfigInstance())
+	psp := kubernetes.NewPSP(nil, &[]kubernetes.SecurityPolicyProvider{tmp})
 
 	b, _ := reflectiveCall(psp, testMethod)
 	assert.True(t, *b)
@@ -95,7 +94,7 @@ func runTest(t *testing.T, mockMethod string, testMethod string) {
 	fmp.On(mockMethod).Return(false, nil)
 
 	//need a different PSP with the false provider
-	psp = kubernetes.NewPSP(nil, &[]kubernetes.SecurityPolicyProvider{fmp}, config.GetEnvConfigInstance())
+	psp = kubernetes.NewPSP(nil, &[]kubernetes.SecurityPolicyProvider{fmp})
 
 	b, _ = reflectiveCall(psp, testMethod)
 	assert.False(t, *b)
@@ -104,26 +103,26 @@ func runTest(t *testing.T, mockMethod string, testMethod string) {
 
 	//add both true & false providers:
 	//true first ...
-	psp = kubernetes.NewPSP(nil, &[]kubernetes.SecurityPolicyProvider{tmp, fmp}, config.GetEnvConfigInstance())
+	psp = kubernetes.NewPSP(nil, &[]kubernetes.SecurityPolicyProvider{tmp, fmp})
 
 	b, _ = reflectiveCall(psp, testMethod)
-	assert.True(t, *b)               //expect this to be true ...
+	assert.True(t, *b)                        //expect this to be true ...
 	tmp.AssertNumberOfCalls(t, mockMethod, 2) //expect another call to true (so two in total)
 	tmp.AssertExpectations(t)
 	fmp.AssertNumberOfCalls(t, mockMethod, 1) //but false should only be at 1 as PSP should return on first +ve
 
 	//switch order of true/false (so false first)
-	psp = kubernetes.NewPSP(nil, &[]kubernetes.SecurityPolicyProvider{fmp, tmp}, config.GetEnvConfigInstance())
+	psp = kubernetes.NewPSP(nil, &[]kubernetes.SecurityPolicyProvider{fmp, tmp})
 	b, _ = reflectiveCall(psp, testMethod)
-	assert.True(t, *b)               //expect this to be true ...
+	assert.True(t, *b)                        //expect this to be true ...
 	tmp.AssertNumberOfCalls(t, mockMethod, 3) //expect another call to true (three in total now)
 	tmp.AssertExpectations(t)
 	fmp.AssertNumberOfCalls(t, mockMethod, 2) //false should be up to 2 by now ...
 
 	//add nil provider in the first slot ...
-	psp = kubernetes.NewPSP(nil, &[]kubernetes.SecurityPolicyProvider{nil, tmp}, config.GetEnvConfigInstance())
+	psp = kubernetes.NewPSP(nil, &[]kubernetes.SecurityPolicyProvider{nil, tmp})
 	b, _ = reflectiveCall(psp, testMethod)
-	assert.True(t, *b)               //should still get an overall true result...
+	assert.True(t, *b)                        //should still get an overall true result...
 	tmp.AssertNumberOfCalls(t, mockMethod, 4) //true up to four
 	tmp.AssertExpectations(t)
 	fmp.AssertNumberOfCalls(t, mockMethod, 2) //no call to false
@@ -134,13 +133,13 @@ func reflectiveCall(p *kubernetes.PSP, tm string) (*bool, error) {
 
 	fmt.Printf("Reflectively calling %v on %T\n", tm, p)
 
-	res := reflect.ValueOf(p).MethodByName(tm).Call([]reflect.Value{})	
+	res := reflect.ValueOf(p).MethodByName(tm).Call([]reflect.Value{})
 
 	fmt.Printf("Reflection Result: %v\n", res)
 
 	//expect two params in the result:
 	if len(res) != 2 {
-		panic("unexpected number of values in function return") 
+		panic("unexpected number of values in function return")
 	}
 
 	b := res[0].Elem()
@@ -148,7 +147,7 @@ func reflectiveCall(p *kubernetes.PSP, tm string) (*bool, error) {
 
 	fmt.Printf("Extracted Results: %v, %v\n", b, e)
 
-	if bb, ok := b.Interface().(bool); ok {		
+	if bb, ok := b.Interface().(bool); ok {
 		return &bb, nil
 	}
 	if err, ok := e.(error); ok {
@@ -166,7 +165,7 @@ var k = kubernetes.GetKubeInstance()
 func TestCreatePODSettingSecurityContext(t *testing.T) {
 	//need a mock kube
 	mk := &kubeMock{}
-	psp := kubernetes.NewPSP(mk, nil, config.GetEnvConfigInstance())
+	psp := kubernetes.NewPSP(mk, nil)
 
 	//set up the mock
 	sc := apiv1.SecurityContext{
@@ -223,41 +222,41 @@ func TestCreatePODSettingSecurityContext(t *testing.T) {
 func TestCreatePODSettingAttributes(t *testing.T) {
 	//need a mock kube
 	mk := &kubeMock{}
-	psp := kubernetes.NewPSP(mk, nil, config.GetEnvConfigInstance())
+	psp := kubernetes.NewPSP(mk, nil)
 
 	//set up the mock
-	po := k.GetPodObject("n", "ns", "c", "i", nil)	
+	po := k.GetPodObject("n", "ns", "c", "i", nil)
 	mk.On("GetPodObject", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).
 		Return(po, nil)
 	mk.On("CreatePodFromObject", mock.Anything, mock.Anything, mock.Anything, mock.Anything).
 		Return(po, nil)
 
 	//hostPID, hostIPC & hostNetwork all true:
-	p, err := psp.CreatePODSettingAttributes(utils.BoolPtr(true), utils.BoolPtr(true),  utils.BoolPtr(true))
+	p, err := psp.CreatePODSettingAttributes(utils.BoolPtr(true), utils.BoolPtr(true), utils.BoolPtr(true))
 
 	//don't expect an error
 	assert.Nil(t, err)
 	//do expect pod
 	assert.NotNil(t, p)
-	//check hostPID, hostIPC & hostNetwork values:		
+	//check hostPID, hostIPC & hostNetwork values:
 	assert.Equal(t, true, p.Spec.HostPID)
 	assert.Equal(t, true, p.Spec.HostIPC)
-	assert.Equal(t, true, p.Spec.HostNetwork)	
+	assert.Equal(t, true, p.Spec.HostNetwork)
 	mk.AssertNumberOfCalls(t, "GetPodObject", 1)
 	mk.AssertNumberOfCalls(t, "CreatePodFromObject", 1)
 	mk.AssertExpectations(t)
 
 	//hostPID, hostIPC & hostNetwork all false:
-	p, err = psp.CreatePODSettingAttributes(utils.BoolPtr(false), utils.BoolPtr(false),  utils.BoolPtr(false))
+	p, err = psp.CreatePODSettingAttributes(utils.BoolPtr(false), utils.BoolPtr(false), utils.BoolPtr(false))
 
 	//don't expect an error
 	assert.Nil(t, err)
 	//do expect pod
 	assert.NotNil(t, p)
-	//check hostPID, hostIPC & hostNetwork values:		
+	//check hostPID, hostIPC & hostNetwork values:
 	assert.Equal(t, false, p.Spec.HostPID)
 	assert.Equal(t, false, p.Spec.HostIPC)
-	assert.Equal(t, false, p.Spec.HostNetwork)	
+	assert.Equal(t, false, p.Spec.HostNetwork)
 	mk.AssertNumberOfCalls(t, "GetPodObject", 2)
 	mk.AssertNumberOfCalls(t, "CreatePodFromObject", 2)
 	mk.AssertExpectations(t)
@@ -269,10 +268,10 @@ func TestCreatePODSettingAttributes(t *testing.T) {
 	assert.Nil(t, err)
 	//do expect pod
 	assert.NotNil(t, p)
-	//check hostPID, hostIPC & hostNetwork values:		
+	//check hostPID, hostIPC & hostNetwork values:
 	assert.Equal(t, false, p.Spec.HostPID)
 	assert.Equal(t, true, p.Spec.HostIPC)
-	assert.Equal(t, false, p.Spec.HostNetwork)	
+	assert.Equal(t, false, p.Spec.HostNetwork)
 	mk.AssertNumberOfCalls(t, "GetPodObject", 3)
 	mk.AssertNumberOfCalls(t, "CreatePodFromObject", 3)
 	mk.AssertExpectations(t)
@@ -284,23 +283,23 @@ func TestCreatePODSettingAttributes(t *testing.T) {
 	assert.Nil(t, err)
 	//do expect pod
 	assert.NotNil(t, p)
-	//check hostPID, hostIPC & hostNetwork values:		
+	//check hostPID, hostIPC & hostNetwork values:
 	assert.Equal(t, false, p.Spec.HostPID)
 	assert.Equal(t, false, p.Spec.HostIPC)
-	assert.Equal(t, false, p.Spec.HostNetwork)	
+	assert.Equal(t, false, p.Spec.HostNetwork)
 	mk.AssertNumberOfCalls(t, "GetPodObject", 4)
 	mk.AssertNumberOfCalls(t, "CreatePodFromObject", 4)
 	mk.AssertExpectations(t)
-	
+
 }
 
 func TestCreatePODSettingCapabilities(t *testing.T) {
 	//need a mock kube
 	mk := &kubeMock{}
-	psp := kubernetes.NewPSP(mk, nil, config.GetEnvConfigInstance())
+	psp := kubernetes.NewPSP(mk, nil)
 
 	//set up the mock
-	po := k.GetPodObject("n", "ns", "c", "i", nil)	
+	po := k.GetPodObject("n", "ns", "c", "i", nil)
 	mk.On("GetPodObject", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).
 		Return(po, nil)
 	mk.On("CreatePodFromObject", mock.Anything, mock.Anything, mock.Anything, mock.Anything).
@@ -312,29 +311,29 @@ func TestCreatePODSettingCapabilities(t *testing.T) {
 	//don't expect an error
 	assert.Nil(t, err)
 	//do expect pod
-	assert.NotNil(t, p)	
+	assert.NotNil(t, p)
 	//only expect one container
 	assert.Equal(t, 1, len(p.Spec.Containers))
 	//don't expect any capabilites, and container sec context should be non-nil though
 	assert.NotNil(t, p.Spec.Containers[0].SecurityContext)
-	assert.Nil(t, p.Spec.Containers[0].SecurityContext.Capabilities)	
+	assert.Nil(t, p.Spec.Containers[0].SecurityContext.Capabilities)
 	mk.AssertNumberOfCalls(t, "GetPodObject", 1)
 	mk.AssertNumberOfCalls(t, "CreatePodFromObject", 1)
 	mk.AssertExpectations(t)
 
 	//some capabilities:
-	c := []string{"NET_RAW"}	
+	c := []string{"NET_RAW"}
 	p, err = psp.CreatePODSettingCapabilities(&c)
 
 	//don't expect an error
 	assert.Nil(t, err)
 	//do expect pod
-	assert.NotNil(t, p)	
+	assert.NotNil(t, p)
 	//only expect one container
 	assert.Equal(t, 1, len(p.Spec.Containers))
 	//don't expect any capabilites, and container sec context should be non-nil though
 	assert.NotNil(t, p.Spec.Containers[0].SecurityContext)
-	assert.NotNil(t, p.Spec.Containers[0].SecurityContext.Capabilities)	
+	assert.NotNil(t, p.Spec.Containers[0].SecurityContext.Capabilities)
 	//expect one capability
 	assert.Equal(t, 1, len(p.Spec.Containers[0].SecurityContext.Capabilities.Add))
 	//should be "NET_RAW"
@@ -343,7 +342,7 @@ func TestCreatePODSettingCapabilities(t *testing.T) {
 	mk.AssertNumberOfCalls(t, "GetPodObject", 2)
 	mk.AssertNumberOfCalls(t, "CreatePodFromObject", 2)
 	mk.AssertExpectations(t)
-	
+
 }
 
 type securityProviderMock struct {

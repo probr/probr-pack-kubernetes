@@ -9,8 +9,8 @@ import (
 
 	"github.com/cucumber/godog"
 	"github.com/cucumber/godog/colors"
-	"gitlab.com/citihub/probr/internal/config"
 
+	"gitlab.com/citihub/probr/internal/config"
 	"gitlab.com/citihub/probr/internal/coreengine"
 )
 
@@ -20,7 +20,7 @@ import (
 
 //GodogTestHandler ...
 func GodogTestHandler(gd *coreengine.GodogTest) (int, *bytes.Buffer, error) {
-	if *config.GetEnvConfigInstance().GetOutputType() == "INMEM" {
+	if config.Vars.OutputType == "INMEM" {
 		return InMemGodogTestHandler(gd)
 	}
 	return ToFileGodogTestHandler(gd)

@@ -29,7 +29,6 @@ type NetworkAccess interface {
 // NA ...
 type NA struct {
 	k Kubernetes
-	c config.Config
 
 	testNamespace string
 	testImage     string
@@ -38,10 +37,9 @@ type NA struct {
 }
 
 // NewNA ...
-func NewNA(k Kubernetes, c config.Config) *NA {
+func NewNA(k Kubernetes) *NA {
 	n := &NA{}
 	n.k = k
-	n.c = c
 
 	n.setup()
 	return n
@@ -51,7 +49,6 @@ func NewNA(k Kubernetes, c config.Config) *NA {
 func NewDefaultNA() *NA {
 	n := &NA{}
 	n.k = GetKubeInstance()
-	n.c = config.GetEnvConfigInstance()
 
 	n.setup()
 	return n
@@ -66,11 +63,11 @@ func (n *NA) setup() {
 
 	// image repository + curl from config
 	// but default if not supplied
-	i := *n.c.GetImageRepository()
+	i := config.Vars.Images.Repository
 	if len(i) < 1 {
 		i = defaultNAImageRepository
 	}
-	b := *n.c.GetCurlImage()
+	b := config.Vars.Images.Curl
 	if len(b) < 1 {
 		b = defaultNATestImage
 	}

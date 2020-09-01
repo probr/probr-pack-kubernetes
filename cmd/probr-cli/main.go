@@ -23,31 +23,31 @@ var (
 var kube = kubernetes.GetKubeInstance()
 
 func main() {
-	//TODO: this (to line 45) will all move when we merge the change to move to a library
-	//just dumping in here for now ...
-	k := flag.String("kube", "", "kube config file")
+	var v string
+	var ot string
+	flag.StringVar(&v, "varsFile", "", "path to config file")
+	flag.StringVar(&ot, "outputType", "INMEM", "output defaults to write in memory, if 'IO' will write to specified output directory")
+	i := flag.String("kubeConfig", "", "kube config file")
 	o := flag.String("outputDir", "", "output directory")
 	flag.Parse()
 
-	probr.SetIOPaths(*k, *o)
-
+	// Will make config.Vars.XYZ available for the rest of the runtime
+	err := config.Init(v)
+	if err != nil {
+		log.Fatalf("[ERROR] Could not create config from provided filepath: %v", err)
+	}
 	log.Printf("[NOTICE] Probr running with environment: ")
-	log.Printf("[NOTICE] %v", config.GetEnvConfigInstance())
-
-	if k != nil && len(*k) > 0 {
-		log.Printf("[NOTICE] Kube Config has been overridden on command line to: " + *k)
+	log.Printf("[NOTICE] %v", config.Vars)
+	if len(*i) > 0 {
+		config.Vars.SetKubeConfigPath(*i)
+		log.Printf("[NOTICE] Kube Config has been overridden via command line to: " + *i)
 	}
 	if o != nil && len(*o) > 0 {
-		log.Printf("[NOTICE] Output Directory has been overridden on command line to: " + *o)
+		log.Printf("[NOTICE] Output Directory has been overridden via command line to: " + *o)
 	}
-
-	//TODO: this is the cli and what will be called on Docker run ...
-	//use args to figure out what needs to be run / output paths / etc
-	//and call TestManager to make it happen :-)
-
-	//(possibly want to create a separate "cli" file)
-
-	// get all the below from args ... just hard code for now
+	if ot == "IO" {
+		probr.SetIOPaths(*i, *o)
+	}
 
 	//exec 'em all (for now!)
 	s, ts, err := probr.RunAllTests()
