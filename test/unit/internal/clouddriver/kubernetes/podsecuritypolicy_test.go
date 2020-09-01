@@ -24,9 +24,6 @@ func TestPSPTestCommand(t *testing.T) {
 
 }
 
-//TODO: need to add tests in for all "Has..." functions:
-//TODO: more tests for all interface methods
-
 func TestClusterHasPSP(t *testing.T) {
 	runTest(t, "HasSecurityPolicies", "ClusterHasPSP")
 }
@@ -221,6 +218,132 @@ func TestCreatePODSettingSecurityContext(t *testing.T) {
 	mk.AssertNumberOfCalls(t, "CreatePod", 2) //2 calls now.  TODO: need to figure out how to reset this!
 	mk.AssertExpectations(t)
 
+}
+
+func TestCreatePODSettingAttributes(t *testing.T) {
+	//need a mock kube
+	mk := &kubeMock{}
+	psp := kubernetes.NewPSP(mk, nil, config.GetEnvConfigInstance())
+
+	//set up the mock
+	po := k.GetPodObject("n", "ns", "c", "i", nil)	
+	mk.On("GetPodObject", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).
+		Return(po, nil)
+	mk.On("CreatePodFromObject", mock.Anything, mock.Anything, mock.Anything, mock.Anything).
+		Return(po, nil)
+
+	//hostPID, hostIPC & hostNetwork all true:
+	p, err := psp.CreatePODSettingAttributes(utils.BoolPtr(true), utils.BoolPtr(true),  utils.BoolPtr(true))
+
+	//don't expect an error
+	assert.Nil(t, err)
+	//do expect pod
+	assert.NotNil(t, p)
+	//check hostPID, hostIPC & hostNetwork values:		
+	assert.Equal(t, true, p.Spec.HostPID)
+	assert.Equal(t, true, p.Spec.HostIPC)
+	assert.Equal(t, true, p.Spec.HostNetwork)	
+	mk.AssertNumberOfCalls(t, "GetPodObject", 1)
+	mk.AssertNumberOfCalls(t, "CreatePodFromObject", 1)
+	mk.AssertExpectations(t)
+
+	//hostPID, hostIPC & hostNetwork all false:
+	p, err = psp.CreatePODSettingAttributes(utils.BoolPtr(false), utils.BoolPtr(false),  utils.BoolPtr(false))
+
+	//don't expect an error
+	assert.Nil(t, err)
+	//do expect pod
+	assert.NotNil(t, p)
+	//check hostPID, hostIPC & hostNetwork values:		
+	assert.Equal(t, false, p.Spec.HostPID)
+	assert.Equal(t, false, p.Spec.HostIPC)
+	assert.Equal(t, false, p.Spec.HostNetwork)	
+	mk.AssertNumberOfCalls(t, "GetPodObject", 2)
+	mk.AssertNumberOfCalls(t, "CreatePodFromObject", 2)
+	mk.AssertExpectations(t)
+
+	//hostPID, hostIPC & hostNetwork mixed:
+	p, err = psp.CreatePODSettingAttributes(utils.BoolPtr(false), utils.BoolPtr(true), nil)
+
+	//don't expect an error
+	assert.Nil(t, err)
+	//do expect pod
+	assert.NotNil(t, p)
+	//check hostPID, hostIPC & hostNetwork values:		
+	assert.Equal(t, false, p.Spec.HostPID)
+	assert.Equal(t, true, p.Spec.HostIPC)
+	assert.Equal(t, false, p.Spec.HostNetwork)	
+	mk.AssertNumberOfCalls(t, "GetPodObject", 3)
+	mk.AssertNumberOfCalls(t, "CreatePodFromObject", 3)
+	mk.AssertExpectations(t)
+
+	//hostPID, hostIPC & hostNetwork all nil (should default to false):
+	p, err = psp.CreatePODSettingAttributes(nil, nil, nil)
+
+	//don't expect an error
+	assert.Nil(t, err)
+	//do expect pod
+	assert.NotNil(t, p)
+	//check hostPID, hostIPC & hostNetwork values:		
+	assert.Equal(t, false, p.Spec.HostPID)
+	assert.Equal(t, false, p.Spec.HostIPC)
+	assert.Equal(t, false, p.Spec.HostNetwork)	
+	mk.AssertNumberOfCalls(t, "GetPodObject", 4)
+	mk.AssertNumberOfCalls(t, "CreatePodFromObject", 4)
+	mk.AssertExpectations(t)
+	
+}
+
+func TestCreatePODSettingCapabilities(t *testing.T) {
+	//need a mock kube
+	mk := &kubeMock{}
+	psp := kubernetes.NewPSP(mk, nil, config.GetEnvConfigInstance())
+
+	//set up the mock
+	po := k.GetPodObject("n", "ns", "c", "i", nil)	
+	mk.On("GetPodObject", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).
+		Return(po, nil)
+	mk.On("CreatePodFromObject", mock.Anything, mock.Anything, mock.Anything, mock.Anything).
+		Return(po, nil)
+
+	//no capabilities:
+	p, err := psp.CreatePODSettingCapabilities(nil)
+
+	//don't expect an error
+	assert.Nil(t, err)
+	//do expect pod
+	assert.NotNil(t, p)	
+	//only expect one container
+	assert.Equal(t, 1, len(p.Spec.Containers))
+	//don't expect any capabilites, and container sec context should be non-nil though
+	assert.NotNil(t, p.Spec.Containers[0].SecurityContext)
+	assert.Nil(t, p.Spec.Containers[0].SecurityContext.Capabilities)	
+	mk.AssertNumberOfCalls(t, "GetPodObject", 1)
+	mk.AssertNumberOfCalls(t, "CreatePodFromObject", 1)
+	mk.AssertExpectations(t)
+
+	//some capabilities:
+	c := []string{"NET_RAW"}	
+	p, err = psp.CreatePODSettingCapabilities(&c)
+
+	//don't expect an error
+	assert.Nil(t, err)
+	//do expect pod
+	assert.NotNil(t, p)	
+	//only expect one container
+	assert.Equal(t, 1, len(p.Spec.Containers))
+	//don't expect any capabilites, and container sec context should be non-nil though
+	assert.NotNil(t, p.Spec.Containers[0].SecurityContext)
+	assert.NotNil(t, p.Spec.Containers[0].SecurityContext.Capabilities)	
+	//expect one capability
+	assert.Equal(t, 1, len(p.Spec.Containers[0].SecurityContext.Capabilities.Add))
+	//should be "NET_RAW"
+	assert.Equal(t, "NET_RAW", string(p.Spec.Containers[0].SecurityContext.Capabilities.Add[0]))
+
+	mk.AssertNumberOfCalls(t, "GetPodObject", 2)
+	mk.AssertNumberOfCalls(t, "CreatePodFromObject", 2)
+	mk.AssertExpectations(t)
+	
 }
 
 type securityProviderMock struct {
