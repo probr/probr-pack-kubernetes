@@ -164,8 +164,7 @@ func (psp *PSP) ClusterHasPSP() (*bool, error) {
 	var ret *bool = nil
 
 	// iterate over providers ...
-	for _, p := range *psp.securityPolicyProviders {
-		//defend ..
+	for _, p := range *psp.securityPolicyProviders {		
 		if p == nil {
 			continue
 		}
@@ -199,7 +198,10 @@ func (psp *PSP) ClusterHasPSP() (*bool, error) {
 //PrivilegedAccessIsRestricted looks for a PodSecurityPolicy with 'Privileged' set to false (ie. NOT privileged).
 func (psp *PSP) PrivilegedAccessIsRestricted() (*bool, error) {
 	// iterate over providers ...
-	for _, p := range *psp.securityPolicyProviders {
+	for _, p := range *psp.securityPolicyProviders {		
+		if p == nil {
+			continue
+		}
 		b, err := p.HasPrivilegedAccessRestriction()
 		if err != nil {
 			return nil, err
@@ -219,6 +221,9 @@ func (psp *PSP) PrivilegedAccessIsRestricted() (*bool, error) {
 func (psp *PSP) HostPIDIsRestricted() (*bool, error) {
 	// iterate over providers ...
 	for _, p := range *psp.securityPolicyProviders {
+		if p == nil {
+			continue
+		}
 		b, err := p.HasHostPIDRestriction()
 		if err != nil {
 			return nil, err
@@ -238,7 +243,10 @@ func (psp *PSP) HostPIDIsRestricted() (*bool, error) {
 //HostIPCIsRestricted looks for a PodSecurityPolicy with 'HostIPC' set to false (i.e. NO Access to HostIPC ).
 func (psp *PSP) HostIPCIsRestricted() (*bool, error) {
 	// iterate over providers ...
-	for _, p := range *psp.securityPolicyProviders {
+	for _, p := range *psp.securityPolicyProviders {		
+		if p == nil {
+			continue
+		}
 		b, err := p.HasHostIPCRestriction()
 		if err != nil {
 			return nil, err
@@ -259,6 +267,9 @@ func (psp *PSP) HostIPCIsRestricted() (*bool, error) {
 func (psp *PSP) HostNetworkIsRestricted() (*bool, error) {
 	// iterate over providers ...
 	for _, p := range *psp.securityPolicyProviders {
+		if p == nil {
+			continue
+		}
 		b, err := p.HasHostNetworkRestriction()
 		if err != nil {
 			return nil, err
@@ -279,6 +290,9 @@ func (psp *PSP) HostNetworkIsRestricted() (*bool, error) {
 func (psp *PSP) PrivilegedEscalationIsRestricted() (*bool, error) {
 	// iterate over providers ...
 	for _, p := range *psp.securityPolicyProviders {
+		if p == nil {
+			continue
+		}
 		b, err := p.HasAllowPrivilegeEscalationRestriction()
 		if err != nil {
 			return nil, err
@@ -297,7 +311,10 @@ func (psp *PSP) PrivilegedEscalationIsRestricted() (*bool, error) {
 // RootUserIsRestricted ...
 func (psp *PSP) RootUserIsRestricted() (*bool, error) {
 	// iterate over providers ...
-	for _, p := range *psp.securityPolicyProviders {
+	for _, p := range *psp.securityPolicyProviders {		
+		if p == nil {
+			continue
+		}
 		b, err := p.HasRootUserRestriction()
 		if err != nil {
 			return nil, err
@@ -316,7 +333,10 @@ func (psp *PSP) RootUserIsRestricted() (*bool, error) {
 //NETRawIsRestricted looks for a PodSecurityPolicy with 'Privileged' set to false (ie. NOT privileged).
 func (psp *PSP) NETRawIsRestricted() (*bool, error) {
 	// iterate over providers ...
-	for _, p := range *psp.securityPolicyProviders {
+	for _, p := range *psp.securityPolicyProviders {		
+		if p == nil {
+			continue
+		}
 		b, err := p.HasNETRAWRestriction()
 		if err != nil {
 			return nil, err
@@ -336,6 +356,9 @@ func (psp *PSP) NETRawIsRestricted() (*bool, error) {
 func (psp *PSP) AllowedCapabilitiesAreRestricted() (*bool, error) {
 	// iterate over providers ...
 	for _, p := range *psp.securityPolicyProviders {
+		if p == nil {
+			continue
+		}
 		b, err := p.HasAllowedCapabilitiesRestriction()
 		if err != nil {
 			return nil, err
@@ -355,6 +378,9 @@ func (psp *PSP) AllowedCapabilitiesAreRestricted() (*bool, error) {
 func (psp *PSP) AssignedCapabilitiesAreRestricted() (*bool, error) {
 	// iterate over providers ...
 	for _, p := range *psp.securityPolicyProviders {
+		if p == nil {
+			continue
+		}
 		b, err := p.HasAssignedCapabilitiesRestriction()
 		if err != nil {
 			return nil, err
@@ -374,6 +400,9 @@ func (psp *PSP) AssignedCapabilitiesAreRestricted() (*bool, error) {
 func (psp *PSP) HostPortsAreRestricted() (*bool, error) {
 	// iterate over providers ...
 	for _, p := range *psp.securityPolicyProviders {
+		if p == nil {
+			continue
+		}
 		b, err := p.HasHostPortRestriction()
 		if err != nil {
 			return nil, err
@@ -393,6 +422,9 @@ func (psp *PSP) HostPortsAreRestricted() (*bool, error) {
 func (psp *PSP) VolumeTypesAreRestricted() (*bool, error) {
 	// iterate over providers ...
 	for _, p := range *psp.securityPolicyProviders {
+		if p == nil {
+			continue
+		}
 		b, err := p.HasVolumeTypeRestriction()
 		if err != nil {
 			return nil, err
@@ -412,6 +444,9 @@ func (psp *PSP) VolumeTypesAreRestricted() (*bool, error) {
 func (psp *PSP) SeccompProfilesAreRestricted() (*bool, error) {
 	// iterate over providers ...
 	for _, p := range *psp.securityPolicyProviders {
+		if p == nil {
+			continue
+		}
 		b, err := p.HasSeccompProfileRestriction()
 		if err != nil {
 			return nil, err
