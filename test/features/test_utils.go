@@ -104,9 +104,9 @@ func LogScenarioEnd(s *godog.Scenario) {
 func scenarioString(st bool, s *godog.Scenario) string {
 	var b strings.Builder
 	if st {
-		b.WriteString("[NOTICE] *** Scenario Start: ")
+		b.WriteString("[NOTICE] >>> Scenario Start: ")
 	} else {
-		b.WriteString("[NOTICE] *** Scenario End: ")
+		b.WriteString("[NOTICE] <<< Scenario End: ")
 	}
 
 	b.WriteString(s.Name)
@@ -114,6 +114,7 @@ func scenarioString(st bool, s *godog.Scenario) string {
 
 	for _, t := range s.Tags {
 		b.WriteString(t.GetName())
+		b.WriteString(" ")
 	}
 	b.WriteString(").")
 	return b.String()
