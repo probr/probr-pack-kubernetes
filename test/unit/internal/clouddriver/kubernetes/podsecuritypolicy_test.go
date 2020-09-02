@@ -110,6 +110,7 @@ func runTest(t *testing.T, mockMethod string, testMethod string) {
 	tmp.AssertNumberOfCalls(t, mockMethod, 2) //expect another call to true (so two in total)
 	tmp.AssertExpectations(t)
 	fmp.AssertNumberOfCalls(t, mockMethod, 1) //but false should only be at 1 as PSP should return on first +ve
+	fmp.AssertExpectations(t)
 
 	//switch order of true/false (so false first)
 	psp = kubernetes.NewPSP(nil, &[]kubernetes.SecurityPolicyProvider{fmp, tmp})
@@ -118,6 +119,7 @@ func runTest(t *testing.T, mockMethod string, testMethod string) {
 	tmp.AssertNumberOfCalls(t, mockMethod, 3) //expect another call to true (three in total now)
 	tmp.AssertExpectations(t)
 	fmp.AssertNumberOfCalls(t, mockMethod, 2) //false should be up to 2 by now ...
+	fmp.AssertExpectations(t)
 
 	//add nil provider in the first slot ...
 	psp = kubernetes.NewPSP(nil, &[]kubernetes.SecurityPolicyProvider{nil, tmp})
@@ -126,6 +128,34 @@ func runTest(t *testing.T, mockMethod string, testMethod string) {
 	tmp.AssertNumberOfCalls(t, mockMethod, 4) //true up to four
 	tmp.AssertExpectations(t)
 	fmp.AssertNumberOfCalls(t, mockMethod, 2) //no call to false
+	fmp.AssertExpectations(t)
+
+	//try with just an "error" provider:
+	emp := &securityProviderMock{}
+	emp.On(mockMethod).Return(false, fmt.Errorf("SPM ERROR"))
+
+	psp = kubernetes.NewPSP(nil, &[]kubernetes.SecurityPolicyProvider{emp})
+	b, err := reflectiveCall(psp, testMethod)
+	assert.False(t, *b)                        //overall should be false...
+	assert.NotNil(t, err)						// and we should have an error in this case
+	tmp.AssertNumberOfCalls(t, mockMethod, 4) //no call to true (so same as above)
+	tmp.AssertExpectations(t)
+	fmp.AssertNumberOfCalls(t, mockMethod, 2) //no call to false (so same as above)
+	fmp.AssertExpectations(t)
+	emp.AssertNumberOfCalls(t, mockMethod, 1) //one call to "error provider"
+	emp.AssertExpectations(t)
+
+	//now, add a true provider to the second slot
+	psp = kubernetes.NewPSP(nil, &[]kubernetes.SecurityPolicyProvider{emp, tmp})
+	b, err = reflectiveCall(psp, testMethod)
+	assert.True(t, *b)                        //in this case, should still get an overall true result...
+	assert.Nil(t, err)						// and error should be nil (as we've had at least one success)	
+	tmp.AssertNumberOfCalls(t, mockMethod, 5) //true up to five
+	tmp.AssertExpectations(t)
+	fmp.AssertNumberOfCalls(t, mockMethod, 2) //no call to false (so as above)
+	fmp.AssertExpectations(t)
+	emp.AssertNumberOfCalls(t, mockMethod, 2) //another call to "error provider" so up to two
+	emp.AssertExpectations(t)
 
 }
 
@@ -147,15 +177,16 @@ func reflectiveCall(p *kubernetes.PSP, tm string) (*bool, error) {
 
 	fmt.Printf("Extracted Results: %v, %v\n", b, e)
 
+	var ret *bool
+	var err error
 	if bb, ok := b.Interface().(bool); ok {
-		return &bb, nil
+		ret = &bb
 	}
-	if err, ok := e.(error); ok {
-		return nil, err
+	if er, ok := e.(error); ok {
+		err = er
 	}
-
-	//unexpected:
-	return nil, nil
+	
+	return ret, err
 }
 
 //TODO: this feel rough - we need access to some 'kube' functions, but want to short circuit any external calls
@@ -349,55 +380,47 @@ type securityProviderMock struct {
 	mock.Mock
 }
 
-func (m *securityProviderMock) HasSecurityPolicies() (*bool, error) {
-	b := m.Called().Bool(0)
-	return &b, nil
+func (m *securityProviderMock) HasSecurityPolicies() (*bool, error) {	 
+	return m.returnArgs(m.Called())
 }
 func (m *securityProviderMock) HasPrivilegedAccessRestriction() (*bool, error) {
-	b := m.Called().Bool(0)
-	return &b, nil
+	return m.returnArgs(m.Called())
 }
 func (m *securityProviderMock) HasHostPIDRestriction() (*bool, error) {
-	b := m.Called().Bool(0)
-	return &b, nil
+	return m.returnArgs(m.Called())
 }
 func (m *securityProviderMock) HasHostIPCRestriction() (*bool, error) {
-	b := m.Called().Bool(0)
-	return &b, nil
+	return m.returnArgs(m.Called())
 }
 func (m *securityProviderMock) HasHostNetworkRestriction() (*bool, error) {
-	b := m.Called().Bool(0)
-	return &b, nil
+	return m.returnArgs(m.Called())
 }
 func (m *securityProviderMock) HasAllowPrivilegeEscalationRestriction() (*bool, error) {
-	b := m.Called().Bool(0)
-	return &b, nil
+	return m.returnArgs(m.Called())
 }
 func (m *securityProviderMock) HasRootUserRestriction() (*bool, error) {
-	b := m.Called().Bool(0)
-	return &b, nil
+	return m.returnArgs(m.Called())
 }
 func (m *securityProviderMock) HasNETRAWRestriction() (*bool, error) {
-	b := m.Called().Bool(0)
-	return &b, nil
+	return m.returnArgs(m.Called())
 }
 func (m *securityProviderMock) HasAllowedCapabilitiesRestriction() (*bool, error) {
-	b := m.Called().Bool(0)
-	return &b, nil
+	return m.returnArgs(m.Called())
 }
 func (m *securityProviderMock) HasAssignedCapabilitiesRestriction() (*bool, error) {
-	b := m.Called().Bool(0)
-	return &b, nil
+	return m.returnArgs(m.Called())
 }
 func (m *securityProviderMock) HasHostPortRestriction() (*bool, error) {
-	b := m.Called().Bool(0)
-	return &b, nil
+	return m.returnArgs(m.Called())
 }
 func (m *securityProviderMock) HasVolumeTypeRestriction() (*bool, error) {
-	b := m.Called().Bool(0)
-	return &b, nil
+	return m.returnArgs(m.Called())
 }
 func (m *securityProviderMock) HasSeccompProfileRestriction() (*bool, error) {
-	b := m.Called().Bool(0)
-	return &b, nil
+	return m.returnArgs(m.Called())
+}
+func (m *securityProviderMock) returnArgs(a mock.Arguments) (*bool, error) {	
+	b := a.Bool(0)
+	e := a.Error(1)
+	return &b, e
 }
