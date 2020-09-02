@@ -37,7 +37,7 @@ func main() {
 		log.Fatalf("[ERROR] Could not create config from provided filepath: %v", err)
 	}
 	log.Printf("[NOTICE] Probr running with environment: ")
-	log.Printf("[NOTICE] %v", config.Vars)
+	log.Printf("[NOTICE] %+v", config.Vars)
 	if len(*i) > 0 {
 		config.Vars.SetKubeConfigPath(*i)
 		log.Printf("[NOTICE] Kube Config has been overridden via command line to: " + *i)
