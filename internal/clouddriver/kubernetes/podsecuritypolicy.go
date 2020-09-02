@@ -156,306 +156,359 @@ func (psp *PSP) ClusterIsDeployed() *bool {
 
 //ClusterHasPSP determines if the cluster has any Pod Security Policies set.
 func (psp *PSP) ClusterHasPSP() (*bool, error) {
-	var err error = nil
-	var ret *bool = nil
+	var err error
+	var ret, success bool
 
 	// iterate over providers ...
-	for _, p := range *psp.securityPolicyProviders {		
+	for _, p := range *psp.securityPolicyProviders {
 		if p == nil {
 			continue
 		}
-
-		b, e := p.HasSecurityPolicies()
-		if e != nil {
-			//hold onto the error and continue
-			err = e
-			continue
+		if makeSecurityPolicyCall(p.HasSecurityPolicies, &ret, &success, &err) {
+			break
 		}
-		if *b {
-			//return on first 'true' - only trying to establish if we have any ...
-			//nil out any errors
-			return b, nil
-		}
-		//if no policies (but a successful call), then make sure the ret value is set
-		ret = b
 	}
 
-	//if we get to here, we haven't got any, but that could have been because of
-	//errors from all providers, in which case "ret" will be nil
-	if ret != nil {
+	//if we 've had a success, ignore the error ...
+	if success {
 		//then we've made at least one successful call - nil out err, for client simplification
-		return ret, nil
+		return &ret, nil
 	}
 
 	//otherwise just return
-	return ret, err
+	return &ret, err
 }
 
 //PrivilegedAccessIsRestricted looks for a PodSecurityPolicy with 'Privileged' set to false (ie. NOT privileged).
 func (psp *PSP) PrivilegedAccessIsRestricted() (*bool, error) {
+	var err error
+	var ret, success bool
+
 	// iterate over providers ...
-	for _, p := range *psp.securityPolicyProviders {		
+	for _, p := range *psp.securityPolicyProviders {
 		if p == nil {
 			continue
 		}
-		b, err := p.HasPrivilegedAccessRestriction()
-		if err != nil {
-			return nil, err
-		}
-		if b != nil && *b {
-			//return on first 'true' - only trying to establish if we have any ...
-			return b, nil
+		if makeSecurityPolicyCall(p.HasPrivilegedAccessRestriction, &ret, &success, &err) {
+			break
 		}
 	}
 
-	//if we get to here, we haven't got any ...
-	b := false
-	return &b, nil
+	//if we 've had a success, ignore the error ...
+	if success {
+		//then we've made at least one successful call - nil out err, for client simplification
+		return &ret, nil
+	}
+
+	//otherwise just return
+	return &ret, err
 }
 
 //HostPIDIsRestricted looks for a PodSecurityPolicy with 'HostPID' set to false (i.e. NO Access to HostPID ).
 func (psp *PSP) HostPIDIsRestricted() (*bool, error) {
+	var err error
+	var ret, success bool
+
 	// iterate over providers ...
 	for _, p := range *psp.securityPolicyProviders {
 		if p == nil {
 			continue
 		}
-		b, err := p.HasHostPIDRestriction()
-		if err != nil {
-			return nil, err
-		}
-		if *b {
-			//return on first 'true' - only trying to establish if we have any ...
-			return b, nil
+		if makeSecurityPolicyCall(p.HasHostPIDRestriction, &ret, &success, &err) {
+			break
 		}
 	}
 
-	//if we get to here, we haven't got any ...
-	b := false
-	return &b, nil
+	//if we 've had a success, ignore the error ...
+	if success {
+		//then we've made at least one successful call - nil out err, for client simplification
+		return &ret, nil
+	}
 
+	//otherwise just return
+	return &ret, err
 }
 
 //HostIPCIsRestricted looks for a PodSecurityPolicy with 'HostIPC' set to false (i.e. NO Access to HostIPC ).
 func (psp *PSP) HostIPCIsRestricted() (*bool, error) {
+	var err error
+	var ret, success bool
+
 	// iterate over providers ...
-	for _, p := range *psp.securityPolicyProviders {		
+	for _, p := range *psp.securityPolicyProviders {
 		if p == nil {
 			continue
 		}
-		b, err := p.HasHostIPCRestriction()
-		if err != nil {
-			return nil, err
-		}
-		if *b {
-			//return on first 'true' - only trying to establish if we have any ...
-			return b, nil
+		if makeSecurityPolicyCall(p.HasHostIPCRestriction, &ret, &success, &err) {
+			break
 		}
 	}
 
-	//if we get to here, we haven't got any ...
-	b := false
-	return &b, nil
+	//if we 've had a success, ignore the error ...
+	if success {
+		//then we've made at least one successful call - nil out err, for client simplification
+		return &ret, nil
+	}
 
+	//otherwise just return
+	return &ret, err
 }
 
 //HostNetworkIsRestricted looks for a PodSecurityPolicy with 'HostIPC' set to false (i.e. NO Access to HostIPC ).
 func (psp *PSP) HostNetworkIsRestricted() (*bool, error) {
+	var err error
+	var ret, success bool
+
 	// iterate over providers ...
 	for _, p := range *psp.securityPolicyProviders {
 		if p == nil {
 			continue
 		}
-		b, err := p.HasHostNetworkRestriction()
-		if err != nil {
-			return nil, err
-		}
-		if *b {
-			//return on first 'true' - only trying to establish if we have any ...
-			return b, nil
+		if makeSecurityPolicyCall(p.HasHostNetworkRestriction, &ret, &success, &err) {
+			break
 		}
 	}
 
-	//if we get to here, we haven't got any ...
-	b := false
-	return &b, nil
+	//if we 've had a success, ignore the error ...
+	if success {
+		//then we've made at least one successful call - nil out err, for client simplification
+		return &ret, nil
+	}
 
+	//otherwise just return
+	return &ret, err
 }
 
 //PrivilegedEscalationIsRestricted looks for a PodSecurityPolicy with 'Privileged' set to false (ie. NOT privileged).
 func (psp *PSP) PrivilegedEscalationIsRestricted() (*bool, error) {
+	var err error
+	var ret, success bool
+
 	// iterate over providers ...
 	for _, p := range *psp.securityPolicyProviders {
 		if p == nil {
 			continue
 		}
-		b, err := p.HasAllowPrivilegeEscalationRestriction()
-		if err != nil {
-			return nil, err
-		}
-		if b != nil && *b {
-			//return on first 'true' - only trying to establish if we have any ...
-			return b, nil
+		if makeSecurityPolicyCall(p.HasAllowPrivilegeEscalationRestriction, &ret, &success, &err) {
+			break
 		}
 	}
 
-	//if we get to here, we haven't got any ...
-	b := false
-	return &b, nil
+	//if we 've had a success, ignore the error ...
+	if success {
+		//then we've made at least one successful call - nil out err, for client simplification
+		return &ret, nil
+	}
+
+	//otherwise just return
+	return &ret, err
 }
 
 // RootUserIsRestricted ...
 func (psp *PSP) RootUserIsRestricted() (*bool, error) {
+	var err error
+	var ret, success bool
+
 	// iterate over providers ...
-	for _, p := range *psp.securityPolicyProviders {		
+	for _, p := range *psp.securityPolicyProviders {
 		if p == nil {
 			continue
 		}
-		b, err := p.HasRootUserRestriction()
-		if err != nil {
-			return nil, err
-		}
-		if b != nil && *b {
-			//return on first 'true' - only trying to establish if we have any ...
-			return b, nil
+		if makeSecurityPolicyCall(p.HasRootUserRestriction, &ret, &success, &err) {
+			break
 		}
 	}
 
-	//if we get to here, we haven't got any ...
-	b := false
-	return &b, nil
+	//if we 've had a success, ignore the error ...
+	if success {
+		//then we've made at least one successful call - nil out err, for client simplification
+		return &ret, nil
+	}
+
+	//otherwise just return
+	return &ret, err
 }
 
 //NETRawIsRestricted looks for a PodSecurityPolicy with 'Privileged' set to false (ie. NOT privileged).
 func (psp *PSP) NETRawIsRestricted() (*bool, error) {
+	var err error
+	var ret, success bool
+
 	// iterate over providers ...
-	for _, p := range *psp.securityPolicyProviders {		
+	for _, p := range *psp.securityPolicyProviders {
 		if p == nil {
 			continue
 		}
-		b, err := p.HasNETRAWRestriction()
-		if err != nil {
-			return nil, err
-		}
-		if b != nil && *b {
-			//return on first 'true' - only trying to establish if we have any ...
-			return b, nil
+		if makeSecurityPolicyCall(p.HasNETRAWRestriction, &ret, &success, &err) {
+			break
 		}
 	}
 
-	//if we get to here, we haven't got any ...
-	b := false
-	return &b, nil
+	//if we 've had a success, ignore the error ...
+	if success {
+		//then we've made at least one successful call - nil out err, for client simplification
+		return &ret, nil
+	}
+
+	//otherwise just return
+	return &ret, err
 }
 
 //AllowedCapabilitiesAreRestricted looks for a PodSecurityPolicy with 'Privileged' set to false (ie. NOT privileged).
 func (psp *PSP) AllowedCapabilitiesAreRestricted() (*bool, error) {
+	var err error
+	var ret, success bool
+
 	// iterate over providers ...
 	for _, p := range *psp.securityPolicyProviders {
 		if p == nil {
 			continue
 		}
-		b, err := p.HasAllowedCapabilitiesRestriction()
-		if err != nil {
-			return nil, err
-		}
-		if b != nil && *b {
-			//return on first 'true' - only trying to establish if we have any ...
-			return b, nil
+		if makeSecurityPolicyCall(p.HasAllowedCapabilitiesRestriction, &ret, &success, &err) {
+			break
 		}
 	}
 
-	//if we get to here, we haven't got any ...
-	b := false
-	return &b, nil
+	//if we 've had a success, ignore the error ...
+	if success {
+		//then we've made at least one successful call - nil out err, for client simplification
+		return &ret, nil
+	}
+
+	//otherwise just return
+	return &ret, err
 }
 
 //AssignedCapabilitiesAreRestricted looks for a PodSecurityPolicy with 'Privileged' set to false (ie. NOT privileged).
 func (psp *PSP) AssignedCapabilitiesAreRestricted() (*bool, error) {
+	var err error
+	var ret, success bool
+
 	// iterate over providers ...
 	for _, p := range *psp.securityPolicyProviders {
 		if p == nil {
 			continue
 		}
-		b, err := p.HasAssignedCapabilitiesRestriction()
-		if err != nil {
-			return nil, err
-		}
-		if b != nil && *b {
-			//return on first 'true' - only trying to establish if we have any ...
-			return b, nil
+		if makeSecurityPolicyCall(p.HasAssignedCapabilitiesRestriction, &ret, &success, &err) {
+			break
 		}
 	}
 
-	//if we get to here, we haven't got any ...
-	b := false
-	return &b, nil
+	//if we 've had a success, ignore the error ...
+	if success {
+		//then we've made at least one successful call - nil out err, for client simplification
+		return &ret, nil
+	}
+
+	//otherwise just return
+	return &ret, err
 }
 
 // HostPortsAreRestricted ...
 func (psp *PSP) HostPortsAreRestricted() (*bool, error) {
+	var err error
+	var ret, success bool
+
 	// iterate over providers ...
 	for _, p := range *psp.securityPolicyProviders {
 		if p == nil {
 			continue
 		}
-		b, err := p.HasHostPortRestriction()
-		if err != nil {
-			return nil, err
-		}
-		if b != nil && *b {
-			//return on first 'true' - only trying to establish if we have any ...
-			return b, nil
+		if makeSecurityPolicyCall(p.HasHostPortRestriction, &ret, &success, &err) {
+			break
 		}
 	}
 
-	//if we get to here, we haven't got any ...
-	b := false
-	return &b, nil
+	//if we 've had a success, ignore the error ...
+	if success {
+		//then we've made at least one successful call - nil out err, for client simplification
+		return &ret, nil
+	}
+
+	//otherwise just return
+	return &ret, err
 }
 
 // VolumeTypesAreRestricted ...
 func (psp *PSP) VolumeTypesAreRestricted() (*bool, error) {
+	var err error
+	var ret, success bool
+
 	// iterate over providers ...
 	for _, p := range *psp.securityPolicyProviders {
 		if p == nil {
 			continue
 		}
-		b, err := p.HasVolumeTypeRestriction()
-		if err != nil {
-			return nil, err
-		}
-		if b != nil && *b {
-			//return on first 'true' - only trying to establish if we have any ...
-			return b, nil
+		if makeSecurityPolicyCall(p.HasVolumeTypeRestriction, &ret, &success, &err) {
+			break
 		}
 	}
 
-	//if we get to here, we haven't got any ...
-	b := false
-	return &b, nil
+	//if we 've had a success, ignore the error ...
+	if success {
+		//then we've made at least one successful call - nil out err, for client simplification
+		return &ret, nil
+	}
+
+	//otherwise just return
+	return &ret, err
 }
 
 // SeccompProfilesAreRestricted ...
 func (psp *PSP) SeccompProfilesAreRestricted() (*bool, error) {
+	var err error
+	var ret, success bool
+
 	// iterate over providers ...
 	for _, p := range *psp.securityPolicyProviders {
 		if p == nil {
 			continue
 		}
-		b, err := p.HasSeccompProfileRestriction()
-		if err != nil {
-			return nil, err
-		}
-		if b != nil && *b {
-			//return on first 'true' - only trying to establish if we have any ...
-			return b, nil
+		if makeSecurityPolicyCall(p.HasSeccompProfileRestriction, &ret, &success, &err) {
+			break
 		}
 	}
 
-	//if we get to here, we haven't got any ...
-	b := false
-	return &b, nil
+	//if we 've had a success, ignore the error ...
+	if success {
+		//then we've made at least one successful call - nil out err, for client simplification
+		return &ret, nil
+	}
+
+	//otherwise just return
+	return &ret, err
+}
+
+//convenience func to call the supplied 'SecurityPolicy' call and manage the results.
+//Expects two bool pointers, one to track overall result and one to capture if any successful call has been made.
+//Also requires an error pointer which will be updated based on supplied func call.
+//The returned bool informs the caller on whether or not to break the loop, "true" indicating the loop can be broken.
+func makeSecurityPolicyCall(f func() (*bool, error), b *bool, s *bool, e *error) bool {
+
+	res, err := f()
+
+	if err != nil {
+		//hold onto the error
+		*e = err
+		//return false to the caller so loop will be continued
+		return false
+	}
+	if res != nil {
+		//set the overall result
+		*b = *res
+
+		//if we've got a result (irrespective of true/false), then we've had a successful, i.e. non-error call
+		//update the success flag to capture
+		//(note: this shouldn't be updated on futher errors - at least one success is all that's needed)
+		*s = true
+
+		if *res {
+			//if true, we've got a successful result and loop can break
+			return true
+		}
+	}
+
+	return false
 }
 
 // CreatePODSettingSecurityContext creates POD with a SecurityContext conforming to the parameters:
