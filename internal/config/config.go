@@ -4,11 +4,10 @@ import (
 	"fmt"
 	"os"
 
-	"gopkg.in/yaml.v2"
-	_ "gopkg.in/yaml.v2"
+	"gopkg.in/yaml.v2"	
 )
 
-// Config contains all possible config vars. May be set by .yml, env, or defaults.
+// ConfigVars contains all possible config vars. May be set by .yml, env, or defaults.
 type ConfigVars struct {
 	KubeConfigPath string `yaml:"kubeConfig"`
 	OutputType     string `yaml:"outputType"`
@@ -27,6 +26,11 @@ type ConfigVars struct {
 }
 
 var Vars ConfigVars
+
+func init() {
+	//create a defaulted config
+	Init("")
+}
 
 // Init will override Vars when it is used
 func Init(configPath string) error {
