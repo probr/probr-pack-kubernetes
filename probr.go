@@ -8,8 +8,9 @@ import (
 
 	_ "gitlab.com/citihub/probr/internal/config" //needed for logging
 	"gitlab.com/citihub/probr/test/features"
-	_ "gitlab.com/citihub/probr/test/features/clouddriver"
+	_ "gitlab.com/citihub/probr/test/features/clouddriver"                        //needed to run init on TestHandlers
 	_ "gitlab.com/citihub/probr/test/features/kubernetes/containerregistryaccess" //needed to run init on TestHandlers
+	_ "gitlab.com/citihub/probr/test/features/kubernetes/general"                 //needed to run init on TestHandlers
 	_ "gitlab.com/citihub/probr/test/features/kubernetes/internetaccess"          //needed to run init on TestHandlers
 	_ "gitlab.com/citihub/probr/test/features/kubernetes/podsecuritypolicy"       //needed to run init on TestHandlers
 )
@@ -45,12 +46,14 @@ func RunAllTests() (int, *coreengine.TestStore, error) {
 	addTest(tm, "internet_access", coreengine.Kubernetes, coreengine.InternetAccess)
 	addTest(tm, "pod_security_policy", coreengine.Kubernetes, coreengine.PodSecurityPolicies)
 	addTest(tm, "account_manager", coreengine.CloudDriver, coreengine.General)
+	addTest(tm, "general", coreengine.Kubernetes, coreengine.General)
 
 	//exec 'em all (for now!)
 	s, err := tm.ExecAllTests()
 	return s, tm, err
 }
 
+//GetAllTestResults ...
 func GetAllTestResults(ts *coreengine.TestStore) (map[string]string, error) {
 	out := make(map[string]string)
 	for id := range ts.Tests {
@@ -65,6 +68,7 @@ func GetAllTestResults(ts *coreengine.TestStore) (map[string]string, error) {
 	return out, nil
 }
 
+//ReadTestResults ...
 func ReadTestResults(ts *coreengine.TestStore, id uuid.UUID) (string, string, error) {
 	t, err := ts.GetTest(&id)
 	if err != nil {

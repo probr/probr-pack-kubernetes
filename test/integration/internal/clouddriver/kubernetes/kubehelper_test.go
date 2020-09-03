@@ -27,7 +27,7 @@ func TestMain(m *testing.M) {
 }
 
 func TestGetPods(t *testing.T) {
-	kubernetes.GetKubeInstance().GetPods()
+	kubernetes.GetKubeInstance().GetPods("")
 }
 
 func TestCreatePod(t *testing.T) {

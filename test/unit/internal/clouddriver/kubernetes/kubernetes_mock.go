@@ -26,9 +26,10 @@ func (m *kubeMock) GetClient() (*k8s.Clientset, error) {
 	return c, e
 }
 
-func (m *kubeMock) GetPods() (*apiv1.PodList, error) {
-	pl := m.Called().Get(0).(*apiv1.PodList)
-	e := m.Called().Error(1)
+func (m *kubeMock) GetPods(ns string) (*apiv1.PodList, error) {
+	a := m.Called()
+	pl := a.Get(0).(*apiv1.PodList)
+	e := a.Error(1)
 	return pl, e
 }
 func (m *kubeMock) CreatePod(pname *string, ns *string, cname *string, image *string, w bool, sc *apiv1.SecurityContext) (*apiv1.Pod, error) {
@@ -54,7 +55,7 @@ func (m *kubeMock) GetPodObject(pname string, ns string, cname string, image str
 	return p
 }
 func (m *kubeMock) ExecCommand(cmd, ns, pn *string) *kubernetes.CmdExecutionResult {
-	a := m.Called()	
+	a := m.Called()
 	return a.Get(0).(*kubernetes.CmdExecutionResult)
 }
 func (m *kubeMock) DeletePod(pname *string, ns *string, w bool) error {
