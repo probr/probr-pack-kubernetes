@@ -91,12 +91,12 @@ func (e *CmdExecutionResult) Error() string {
 type Kubernetes interface {
 	ClusterIsDeployed() *bool
 	GetClient() (*kubernetes.Clientset, error)
-	GetPods() (*apiv1.PodList, error)
+	GetPods(ns string) (*apiv1.PodList, error)
 	CreatePod(pname *string, ns *string, cname *string, image *string, w bool, sc *apiv1.SecurityContext) (*apiv1.Pod, error)
 	CreatePodFromObject(p *apiv1.Pod, pname *string, ns *string, w bool) (*apiv1.Pod, error)
 	CreatePodFromYaml(y []byte, pname *string, ns *string, image *string, w bool) (*apiv1.Pod, error)
 	GetPodObject(pname string, ns string, cname string, image string, sc *apiv1.SecurityContext) *apiv1.Pod
-	ExecCommand(cmd, ns, pn *string) (*CmdExecutionResult)
+	ExecCommand(cmd, ns, pn *string) *CmdExecutionResult
 	DeletePod(pname *string, ns *string, w bool) error
 	DeleteNamespace(ns *string) error
 	CreateConfigMap(n *string, ns *string) (*apiv1.ConfigMap, error)
@@ -177,13 +177,13 @@ func (k *Kube) GetClient() (*kubernetes.Clientset, error) {
 }
 
 //GetPods ...
-func (k *Kube) GetPods() (*apiv1.PodList, error) {
+func (k *Kube) GetPods(ns string) (*apiv1.PodList, error) {
 	c, err := k.GetClient()
 	if err != nil {
 		return nil, err
 	}
 
-	pl, err := getPods(c)
+	pl, err := getPods(c, ns)
 	if err != nil {
 		return nil, err
 	}
@@ -191,11 +191,12 @@ func (k *Kube) GetPods() (*apiv1.PodList, error) {
 	return pl, nil
 }
 
-func getPods(c *kubernetes.Clientset) (*apiv1.PodList, error) {
+func getPods(c *kubernetes.Clientset, ns string) (*apiv1.PodList, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	pods, err := c.CoreV1().Pods("").List(ctx, metav1.ListOptions{})
+	pods, err := c.CoreV1().Pods(ns).List(ctx, metav1.ListOptions{})	
+	
 	if err != nil {
 		return nil, err
 	}
