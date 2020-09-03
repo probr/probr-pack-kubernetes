@@ -87,6 +87,7 @@ type Kubernetes interface {
 	DeleteNamespace(ns *string) error
 	CreateConfigMap(n *string, ns *string) (*apiv1.ConfigMap, error)
 	DeleteConfigMap(n *string, ns *string) error
+	GetConstraintTemplates(prefix *string) (*map[string]interface{}, error)
 }
 
 var instance *Kube
@@ -232,6 +233,13 @@ func (k *Kube) CreatePodFromYaml(y []byte, pname *string, ns *string, image *str
 
 // CreatePodFromObject creates a pod from the supplied pod object in the gievn namespace
 func (k *Kube) CreatePodFromObject(p *apiv1.Pod, pname *string, ns *string, w bool) (*apiv1.Pod, error) {
+	if p == nil || pname == nil || ns == nil {
+		return nil, fmt.Errorf("one or more of pod (%v), podName (%v) or namespace (%v) is nil - cannot create POD", p, pname, ns)	
+	}
+	
+	log.Printf("[NOTICE] Creating pod %v in namespace %v", *pname, *ns)
+	log.Printf("[DEBUG] Pod details: %+v", *p)
+	
 	c, err := k.GetClient()
 	if err != nil {
 		return nil, err
@@ -549,6 +557,46 @@ func (k *Kube) DeleteNamespace(ns *string) error {
 	log.Printf("[NOTICE] Namespace %v deleted.", *ns)
 
 	return nil
+}
+
+//GetConstraintTemplates returns the constraint templates associated with the active cluster.
+func (k *Kube) GetConstraintTemplates(prefix *string) (*map[string]interface{}, error) {
+	c, err := k.GetClient()
+	if err != nil {
+		return nil, err
+	}
+
+	_, arl, err := c.ServerGroupsAndResources()
+
+	if err != nil {
+		return nil, err
+	}
+
+	var con = make(map[string]interface{})
+	for _, ar := range arl {
+		if ar == nil {
+			continue
+		}
+		for _, a := range ar.APIResources {
+			for _, cat := range a.Categories {
+				if cat == "constraint" {
+					log.Printf("[INFO] CONSTRAINT Resource - Name: %v Category: %v Kind: %v", a.Name, cat, a.Kind)
+					//skip if it doesn't pass the prefix filter (if one has been supplied):
+					if prefix != nil && !strings.HasPrefix(a.Name, *prefix){
+						continue
+					}
+					//treat it like a set ...
+					_, exists := con[a.Name]
+					if !exists {
+						con[a.Name] = nil
+					}
+				}
+			}
+		}
+	}	
+
+	return &con, nil
+
 }
 
 func isAlreadyExists(err error) bool {

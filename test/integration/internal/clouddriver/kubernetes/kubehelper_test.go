@@ -8,6 +8,7 @@ import (
 
 	"gitlab.com/citihub/probr/internal/clouddriver/kubernetes"
 	_ "gitlab.com/citihub/probr/internal/config"
+	"gitlab.com/citihub/probr/internal/utils"
 )
 
 var (
@@ -81,6 +82,14 @@ func TestConfigMap(t *testing.T) {
 		err = kubernetes.GetKubeInstance().DeleteConfigMap(&c, &testNS)
 		handleResult(nil, err)
 	}
+}
+
+func TestGetConstraintTemplate(t *testing.T) {	
+	con, err := kubernetes.GetKubeInstance().GetConstraintTemplates(utils.StringPtr("k8sazure"))
+
+	log.Printf("[NOTICE] constraints: %v", con)
+
+	handleResult(nil, err)
 }
 
 func handleResult(yesNo *bool, err error) {

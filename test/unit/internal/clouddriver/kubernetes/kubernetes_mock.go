@@ -76,3 +76,7 @@ func (m *kubeMock) DeleteConfigMap(n *string, ns *string) error {
 	e := m.Called().Error(0)
 	return e
 }
+func (m *kubeMock) GetConstraintTemplates(prefix *string) (*map[string]interface{}, error) {
+	a := m.Called()
+	return a.Get(0).(*map[string]interface{}), a.Error(1)
+}

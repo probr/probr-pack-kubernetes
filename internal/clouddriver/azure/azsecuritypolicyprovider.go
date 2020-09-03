@@ -18,7 +18,9 @@ type azPolicy struct {
 	uuid        *string
 }
 
-// AZSecurityPolicyProvider ...
+//AZSecurityPolicyProvider queries the policies applied on the supplied subscription and resource group.  This may be deprecated in favour 
+//of azk8sconstrainttemplate which queries the kubernetes cluster directly.
+//TODO: decide if this should be kept.
 type AZSecurityPolicyProvider struct {
 	policiesByType map[string]*azPolicy
 }
