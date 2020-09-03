@@ -1,6 +1,6 @@
 package config
 
-// SetOutputType
+// SetOutputType ...
 func (e *ConfigVars) SetOutputType(s string) {
 	e.OutputType = s
 }
