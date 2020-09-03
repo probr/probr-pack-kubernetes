@@ -43,10 +43,9 @@ unit_tests:
     - merge_requests
   before_script:
     - export TEST_KUBE_CONFIG=/tmp/test-config
-    - echo ${kube_config} | base64 -d > $TEST_KUBE_CONFIG
+    - echo ${kube_config} | base64 -id > $TEST_KUBE_CONFIG
     - export KUBE_CONFIG=$TEST_KUBE_CONFIG
-    - export LOGLEVEL="NOTICE"
-    - export DONT_DELETE="true"
+    - export LOGLEVEL=INFO
   script:
     - cd $CI_PROJECT_DIR/test/unit
     - go test -v ./...
