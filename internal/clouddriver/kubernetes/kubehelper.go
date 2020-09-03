@@ -73,6 +73,20 @@ func (p *PodCreationError) Error() string {
 	return fmt.Sprintf("pod creation error: %v %v", p.ReasonCodes, p.err)
 }
 
+//CmdExecutionResult ...
+type CmdExecutionResult struct {
+	Stdout string
+	Stderr string
+
+	Err      error
+	Code     int
+	Internal bool
+}
+
+func (e *CmdExecutionResult) Error() string {
+	return fmt.Sprintf("cmd execution error - internal=%t code=%v error=%v", e.Internal, e.Code, e.Err)
+}
+
 // Kubernetes ...
 type Kubernetes interface {
 	ClusterIsDeployed() *bool
@@ -82,7 +96,7 @@ type Kubernetes interface {
 	CreatePodFromObject(p *apiv1.Pod, pname *string, ns *string, w bool) (*apiv1.Pod, error)
 	CreatePodFromYaml(y []byte, pname *string, ns *string, image *string, w bool) (*apiv1.Pod, error)
 	GetPodObject(pname string, ns string, cname string, image string, sc *apiv1.SecurityContext) *apiv1.Pod
-	ExecCommand(cmd, ns, pn *string) (string, string, int, error)
+	ExecCommand(cmd, ns, pn *string) (*CmdExecutionResult)
 	DeletePod(pname *string, ns *string, w bool) error
 	DeleteNamespace(ns *string) error
 	CreateConfigMap(n *string, ns *string) (*apiv1.ConfigMap, error)
@@ -234,12 +248,12 @@ func (k *Kube) CreatePodFromYaml(y []byte, pname *string, ns *string, image *str
 // CreatePodFromObject creates a pod from the supplied pod object in the gievn namespace
 func (k *Kube) CreatePodFromObject(p *apiv1.Pod, pname *string, ns *string, w bool) (*apiv1.Pod, error) {
 	if p == nil || pname == nil || ns == nil {
-		return nil, fmt.Errorf("one or more of pod (%v), podName (%v) or namespace (%v) is nil - cannot create POD", p, pname, ns)	
+		return nil, fmt.Errorf("one or more of pod (%v), podName (%v) or namespace (%v) is nil - cannot create POD", p, pname, ns)
 	}
-	
+
 	log.Printf("[NOTICE] Creating pod %v in namespace %v", *pname, *ns)
 	log.Printf("[DEBUG] Pod details: %+v", *p)
-	
+
 	c, err := k.GetClient()
 	if err != nil {
 		return nil, err
@@ -424,15 +438,15 @@ func defaultContainerSecurityContext() *apiv1.SecurityContext {
 }
 
 //ExecCommand TODO: fix error codes
-func (k *Kube) ExecCommand(cmd, ns, pn *string) (string, string, int, error) {
+func (k *Kube) ExecCommand(cmd, ns, pn *string) (s *CmdExecutionResult) {
 	if cmd == nil {
-		return "", "", -1, fmt.Errorf("command string is nil - nothing to execute")
+		return &CmdExecutionResult{Err: fmt.Errorf("command string is nil - nothing to execute"), Internal: true}
 	}
 	logCmd(cmd, pn, ns)
 
 	c, err := k.GetClient()
 	if err != nil {
-		return "", "", -2, err
+		return &CmdExecutionResult{Err: err, Internal: true}
 	}
 
 	req := c.CoreV1().RESTClient().Post().Resource("pods").
@@ -440,7 +454,7 @@ func (k *Kube) ExecCommand(cmd, ns, pn *string) (string, string, int, error) {
 
 	scheme := runtime.NewScheme()
 	if err := apiv1.AddToScheme(scheme); err != nil {
-		return "", "", -3, fmt.Errorf("error adding to scheme: %v", err)
+		return &CmdExecutionResult{Err: fmt.Errorf("error adding to scheme: %v", err), Internal: true}
 	}
 
 	parameterCodec := runtime.NewParameterCodec(scheme)
@@ -459,7 +473,7 @@ func (k *Kube) ExecCommand(cmd, ns, pn *string) (string, string, int, error) {
 	config, err := clientcmd.BuildConfigFromFlags("", config.Vars.KubeConfigPath)
 	exec, err := remotecommand.NewSPDYExecutor(config, "POST", req.URL())
 	if err != nil {
-		return "", "", -4, fmt.Errorf("error while creating Executor: %v", err)
+		return &CmdExecutionResult{Err: fmt.Errorf("error while creating Executor: %v", err), Internal: true}
 	}
 
 	var stdout, stderr bytes.Buffer
@@ -470,12 +484,15 @@ func (k *Kube) ExecCommand(cmd, ns, pn *string) (string, string, int, error) {
 	})
 	if err != nil {
 		if ce, ok := err.(executil.CodeExitError); ok {
-			return stdout.String(), stderr.String(), ce.Code, fmt.Errorf("error in Stream: %v", err)
+			//the command has been executed on the container, but the underlying command raised an error
+			//this is an 'external' error and represents a successful communication with the cluster
+			return &CmdExecutionResult{Stdout: stdout.String(), Stderr: stderr.String(), Code: ce.Code, Err: fmt.Errorf("error raised on cmd execution: %v", err)}
 		}
-		return stdout.String(), stderr.String(), -5, fmt.Errorf("error in Stream: %v", err)
+		return &CmdExecutionResult{Stdout: stdout.String(), Stderr: stderr.String(), Err: fmt.Errorf("error in Stream: %v", err), Internal: true}
 	}
 
-	return stdout.String(), stderr.String(), 0, nil
+	//all good:
+	return &CmdExecutionResult{Stdout: stdout.String(), Stderr: stderr.String()}
 }
 
 // DeletePod deletes the pod with the following parameters:
@@ -582,7 +599,7 @@ func (k *Kube) GetConstraintTemplates(prefix *string) (*map[string]interface{}, 
 				if cat == "constraint" {
 					log.Printf("[INFO] CONSTRAINT Resource - Name: %v Category: %v Kind: %v", a.Name, cat, a.Kind)
 					//skip if it doesn't pass the prefix filter (if one has been supplied):
-					if prefix != nil && !strings.HasPrefix(a.Name, *prefix){
+					if prefix != nil && !strings.HasPrefix(a.Name, *prefix) {
 						continue
 					}
 					//treat it like a set ...
@@ -593,7 +610,7 @@ func (k *Kube) GetConstraintTemplates(prefix *string) (*map[string]interface{}, 
 				}
 			}
 		}
-	}	
+	}
 
 	return &con, nil
 
