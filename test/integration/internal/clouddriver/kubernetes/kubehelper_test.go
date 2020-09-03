@@ -51,12 +51,12 @@ func TestExecCmd(t *testing.T) {
 	url := "http://www.google.com"
 	cmd := "curl -s -o /dev/null -I -L -w %{http_code} " + url
 
-	so, se, ec, err := kubernetes.GetKubeInstance().ExecCommand(&cmd, &testNS, &testPod)
+	res := kubernetes.GetKubeInstance().ExecCommand(&cmd, &testNS, &testPod)
 
 	log.Printf("[NOTICE] Test command result:")
-	log.Printf("[NOTICE] stdout: %v stderr: %v exit code: %v", so, se, ec)
+	log.Printf("[NOTICE] stdout: %v stderr: %v exit code: %v", res.Stdout, res.Stderr, res.Code)
 
-	handleResult(nil, err)
+	handleResult(nil, res.Err)
 }
 
 func TestDeletePod(t *testing.T) {

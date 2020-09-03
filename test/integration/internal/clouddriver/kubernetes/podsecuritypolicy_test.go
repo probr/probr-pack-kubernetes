@@ -63,6 +63,6 @@ func TestPrivilegedEscalationPrevented(t *testing.T) {
 
 	//this should fail against a secured cluster
 	//non-zero result required
-	b := res > 0
+	b := res.Code > 0
 	handleResult(&b, err)
 }

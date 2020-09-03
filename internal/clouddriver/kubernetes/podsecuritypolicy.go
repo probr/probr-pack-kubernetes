@@ -54,6 +54,12 @@ func (c PSPTestCommand) String() string {
 		"ls"}[c]
 }
 
+// PSPVerificationProbe ...
+type PSPVerificationProbe struct {
+	Cmd              PSPTestCommand
+	ExpectedExitCode int
+}
+
 const (
 	//default values.  Overrides can be supplied via the environment.
 	defaultPSPTestNamespace = "probr-pod-security-test-ns"
@@ -85,7 +91,7 @@ type PodSecurityPolicy interface {
 	CreatePODSettingAttributes(hostPID *bool, hostIPC *bool, hostNetwork *bool) (*apiv1.Pod, error)
 	CreatePODSettingCapabilities(c *[]string) (*apiv1.Pod, error)
 	CreatePodFromYaml(y []byte) (*apiv1.Pod, error)
-	ExecPSPTestCmd(pName *string, cmd PSPTestCommand) (int, error)
+	ExecPSPTestCmd(pName *string, cmd PSPTestCommand) (*CmdExecutionResult, error)
 	TeardownPodSecurityTest(p *string) error
 	CreateConfigMap() error
 	DeleteConfigMap() error
@@ -555,7 +561,7 @@ func (psp *PSP) CreatePodFromYaml(y []byte) (*apiv1.Pod, error) {
 }
 
 // ExecPSPTestCmd ...
-func (psp *PSP) ExecPSPTestCmd(pName *string, cmd PSPTestCommand) (int, error) {
+func (psp *PSP) ExecPSPTestCmd(pName *string, cmd PSPTestCommand) (*CmdExecutionResult, error) {
 	var pn string
 	//if we've not been given a pod name, assume one needs to be created:
 	if pName == nil {
@@ -564,7 +570,7 @@ func (psp *PSP) ExecPSPTestCmd(pName *string, cmd PSPTestCommand) (int, error) {
 		p, err := psp.CreatePODSettingSecurityContext(&f, &f, nil)
 
 		if err != nil {
-			return -1, err
+			return nil, err
 		}
 		//grab the pod name:
 		pn = p.GetObjectMeta().GetName()
@@ -574,15 +580,12 @@ func (psp *PSP) ExecPSPTestCmd(pName *string, cmd PSPTestCommand) (int, error) {
 
 	c := cmd.String()
 	ns := psp.testNamespace
-	stdout, _, ex, err := psp.k.ExecCommand(&c, &ns, &pn)
+	res := psp.k.ExecCommand(&c, &ns, &pn)
 
-	log.Printf("[NOTICE] ExecPSPTestCmd: %v stdout: %v exit code: %v (error: %v)", cmd, stdout, ex, err)
+	log.Printf("[NOTICE] ExecPSPTestCmd: %v stdout: %v exit code: %v (error: %v)", cmd, res.Stdout, res.Code, res.Err)
 
-	if err != nil {
-		return ex, err
-	}
-
-	return ex, nil
+	
+	return res, nil
 }
 
 // CreateConfigMap ...
