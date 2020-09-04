@@ -58,13 +58,15 @@ func main() {
 	s, ts, err := probr.RunAllTests()
 
 	if err != nil {
-		log.Fatalf("[ERROR] Error executing tests %v", err)
+		log.Printf("[ERROR] Error executing tests %v", err)
+		os.Exit(2) // Error code 1 is reserved for probe test failures, and should not fail in CI
 	}
 	log.Printf("[NOTICE] Overall test completion status: %v", s)
 
 	out, err := probr.GetAllTestResults(ts)
 	if err != nil {
-		log.Fatalf("[ERROR] Experienced error getting test results: %v", s)
+		log.Printf("[ERROR] Experienced error getting test results: %v", s)
+		os.Exit(2) // Error code 1 is reserved for probe test failures, and should not fail in CI
 	}
 	for k := range out {
 		log.Printf("Test results in memory: %v", k)

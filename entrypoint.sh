@@ -1,5 +1,6 @@
 #!/bin/sh
 
 ./probr
-cd view
-node index.js /probr/testoutput
+cd internal/view
+mkdir ./testoutput
+node index.js ./testoutput

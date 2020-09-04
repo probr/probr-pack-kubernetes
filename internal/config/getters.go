@@ -80,9 +80,12 @@ func (e *ConfigVars) GetBusyBoxImage() string {
 }
 
 // GetOutputType ...
-func (e *ConfigVars) GetOutputType() string {
+func (e *ConfigVars) GetOutputType(s string) string {
 	if e.OutputType == "" {
 		e.OutputType = os.Getenv("OUTPUT_TYPE")
+	}
+	if e.OutputType == "" {
+		e.OutputType = s
 	}
 	return e.OutputType
 }
