@@ -10,6 +10,8 @@ go_lint:
   image: golang:1.14
   only:
     - merge_requests
+  artifacts:
+    untracked: true
   before_script:
     - cd $GOPATH/src
     - mkdir -p gitlab.com/$CI_PROJECT_NAMESPACE
@@ -30,6 +32,8 @@ build_executable:
     - merge_requests
   artifacts:
     untracked: true
+  dependencies:
+    - go_lint
   image: golang:1.14
   script:
     - go build -o probr cmd/probr-cli/main.go
@@ -41,6 +45,8 @@ unit_tests:
   image: citihub/build:latest
   only:
     - merge_requests
+  dependencies:
+    - go_lint
   before_script:
     - export TEST_KUBE_CONFIG=/tmp/test-config
     - echo ${kube_config} | base64 -id > $TEST_KUBE_CONFIG
