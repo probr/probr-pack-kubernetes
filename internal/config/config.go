@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"gopkg.in/yaml.v2"	
+	"gopkg.in/yaml.v2"
 )
 
 // ConfigVars contains all possible config vars. May be set by .yml, env, or defaults.
@@ -23,8 +23,12 @@ type ConfigVars struct {
 		TenantID        string `yaml:"tenantID"`
 		LocationDefault string `yaml:"locationDefault"`
 	} `yaml:"azure"`
+	Tests struct {
+		Tags string `yaml:"tags"`
+	} `yaml:"Tests"`
 }
 
+//Vars ...
 var Vars ConfigVars
 
 func init() {

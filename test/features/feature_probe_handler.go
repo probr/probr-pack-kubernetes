@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"io"
+	"os"
 	"path/filepath"
 	"strings"
 
@@ -32,6 +33,19 @@ func ToFileGodogTestHandler(gd *coreengine.GodogTest) (int, *bytes.Buffer, error
 		return -1, nil, err
 	}
 	status, err := runTestSuite(o, gd)
+
+	//TODO - review!
+	//FUDGE! If the tests are skipped due to tags, then an empty file may 
+	//be left lingering.  This will have a non-zero size as we've actually
+	//had to create the file prior to the test run (see line 31).  If it's
+	//less than 4 bytes, it's fairly certain that this will indeed be empty 
+	//and can be removed.
+	i, err := o.Stat()
+	s := i.Size()
+
+	if s < 4 {
+		os.Remove(o.Name())
+	}
 	return status, nil, err
 }
 
@@ -48,10 +62,13 @@ func runTestSuite(o io.Writer, gd *coreengine.GodogTest) (int, error) {
 		return -2, err
 	}
 
+	tags := config.Vars.Tests.Tags
+
 	opts := godog.Options{
 		Format: "cucumber",
 		Output: colors.Colored(o),
 		Paths:  []string{f},
+		Tags:   tags,
 	}
 
 	status := godog.TestSuite{
