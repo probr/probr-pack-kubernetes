@@ -24,9 +24,7 @@ var kube = kubernetes.GetKubeInstance()
 
 func main() {
 	var v string
-	var ot string
 	flag.StringVar(&v, "varsFile", "", "path to config file")
-	flag.StringVar(&ot, "outputType", "INMEM", "output defaults to write in memory, if 'IO' will write to specified output directory")
 	i := flag.String("kubeConfig", "", "kube config file")
 	o := flag.String("outputDir", "", "output directory")
 	flag.Parse()
@@ -36,8 +34,8 @@ func main() {
 	if err != nil {
 		log.Fatalf("[ERROR] Could not create config from provided filepath: %v", err)
 	}
-	log.Printf("[NOTICE] Probr running with environment: ")
-	log.Printf("[NOTICE] %+v", config.Vars)
+	log.Printf("[INFO] Probr running with environment: ")
+	log.Printf("[INFO] %+v", config.Vars)
 	if len(*i) > 0 {
 		config.Vars.SetKubeConfigPath(*i)
 		log.Printf("[NOTICE] Kube Config has been overridden via command line to: " + *i)
@@ -45,7 +43,7 @@ func main() {
 	if o != nil && len(*o) > 0 {
 		log.Printf("[NOTICE] Output Directory has been overridden via command line to: " + *o)
 	}
-	if ot == "IO" {
+	if config.Vars.OutputType == "IO" {
 		probr.SetIOPaths(*i, *o)
 	}
 
@@ -53,13 +51,15 @@ func main() {
 	s, ts, err := probr.RunAllTests()
 
 	if err != nil {
-		log.Fatalf("[ERROR] Error executing tests %v", err)
+		log.Printf("[ERROR] Error executing tests %v", err)
+		os.Exit(2) // Error code 1 is reserved for probe test failures, and should not fail in CI
 	}
 	log.Printf("[NOTICE] Overall test completion status: %v", s)
 
 	out, err := probr.GetAllTestResults(ts)
 	if err != nil {
-		log.Fatalf("[ERROR] Experienced error getting test results: %v", s)
+		log.Printf("[ERROR] Experienced error getting test results: %v", s)
+		os.Exit(2) // Error code 1 is reserved for probe test failures, and should not fail in CI
 	}
 	for k, _ := range out {
 		log.Printf("Test results in memory: %v", k)
