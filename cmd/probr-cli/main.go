@@ -23,10 +23,13 @@ var (
 var kube = kubernetes.GetKubeInstance()
 
 func main() {
-	var v string
+	var v, ot, t, i, o string
+	
 	flag.StringVar(&v, "varsFile", "", "path to config file")
-	i := flag.String("kubeConfig", "", "kube config file")
-	o := flag.String("outputDir", "", "output directory")
+	flag.StringVar(&ot, "outputType", "INMEM", "output defaults to write in memory, if 'IO' will write to specified output directory")
+	flag.StringVar(&t, "tags", "", "test tags, e.g. -tags=\"@CIS-1.2.3, @CIS-4.5.6\".")
+	flag.StringVar(&i, "kubeConfig", "", "kube config file")
+	flag.StringVar(&o, "outputDir", "", "output directory")
 	flag.Parse()
 
 	// Will make config.Vars.XYZ available for the rest of the runtime
@@ -34,17 +37,21 @@ func main() {
 	if err != nil {
 		log.Fatalf("[ERROR] Could not create config from provided filepath: %v", err)
 	}
-	log.Printf("[INFO] Probr running with environment: ")
-	log.Printf("[INFO] %+v", config.Vars)
-	if len(*i) > 0 {
-		config.Vars.SetKubeConfigPath(*i)
-		log.Printf("[NOTICE] Kube Config has been overridden via command line to: " + *i)
+	log.Printf("[NOTICE] Probr running with environment: ")
+	log.Printf("[NOTICE] %+v", config.Vars)
+	if len(i) > 0 {
+		config.Vars.SetKubeConfigPath(i)
+		log.Printf("[NOTICE] Kube Config has been overridden via command line to: " + i)
 	}
-	if o != nil && len(*o) > 0 {
-		log.Printf("[NOTICE] Output Directory has been overridden via command line to: " + *o)
+	if len(o) > 0 {
+		log.Printf("[NOTICE] Output Directory has been overridden via command line to: " + o)
 	}
-	if config.Vars.OutputType == "IO" {
-		probr.SetIOPaths(*i, *o)
+	if ot == "IO" {
+		probr.SetIOPaths(i, o)
+	}
+	if len(t) > 0 {
+		config.Vars.SetTags(t)
+		log.Printf("[NOTICE] Tags have been added via command line to: " + t)
 	}
 
 	//exec 'em all (for now!)
@@ -61,7 +68,7 @@ func main() {
 		log.Printf("[ERROR] Experienced error getting test results: %v", s)
 		os.Exit(2) // Error code 1 is reserved for probe test failures, and should not fail in CI
 	}
-	for k, _ := range out {
+	for k := range out {
 		log.Printf("Test results in memory: %v", k)
 	}
 	os.Exit(s)
