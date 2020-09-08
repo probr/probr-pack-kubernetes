@@ -22,17 +22,8 @@ func addTest(tm *coreengine.TestStore, n string, g coreengine.Group, c coreengin
 
 	td := coreengine.TestDescriptor{Group: g, Category: c, Name: n}
 
-	uuid1 := uuid.New().String()
-	sat := coreengine.Pending
-
-	test := coreengine.Test{
-		UUID:           &uuid1,
-		TestDescriptor: &td,
-		Status:         &sat,
-	}
-
 	//add - don't worry about the rtn uuid
-	tm.AddTest(&test)
+	tm.AddTest(td)
 }
 
 // RunAllTests MUST run after SetIOPaths
@@ -68,11 +59,13 @@ func GetAllTestResults(ts *coreengine.TestStore) (map[string]string, error) {
 //ReadTestResults ...
 func ReadTestResults(ts *coreengine.TestStore, id uuid.UUID) (string, string, error) {
 	t, err := ts.GetTest(&id)
+	test := (*t)[0]
+	ts.AuditLog.Audit(id.String(), "status", test.Status.String())
 	if err != nil {
 		return "", "", err
 	}
-	r := (*t)[0].Results
-	n := (*t)[0].TestDescriptor.Name
+	r := test.Results
+	n := test.TestDescriptor.Name
 	if r != nil {
 		b := r.Bytes()
 		return string(b), n, nil

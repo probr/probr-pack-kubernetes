@@ -4,9 +4,11 @@ import (
 	"bytes"
 	"errors"
 	"log"
+	"strconv"
 	"sync"
 
 	"github.com/google/uuid"
+	"gitlab.com/citihub/probr/internal/output"
 )
 
 //TestStatus ..
@@ -65,7 +67,7 @@ func (c Category) String() string {
 
 //Test - structure to hold test data
 type Test struct {
-	UUID           *string         `json:"uuid,omitempty"`
+	UUID           string          `json:"uuid,omitempty"`
 	TestDescriptor *TestDescriptor `json:"test_descriptor,omitempty"`
 
 	Status *TestStatus `json:"status,omitempty"`
@@ -95,6 +97,7 @@ type TestStore struct {
 	Tests       map[uuid.UUID]*[]*Test
 	FailedTests map[TestStatus]*[]*Test
 	Lock        sync.RWMutex
+	AuditLog    *output.AuditLog
 }
 
 //GetAvailableTests - return the universe of available tests
@@ -111,21 +114,33 @@ func GetAvailableTests() *[]TestDescriptor {
 //NewTestManager - create a new test manager, backed by TestStore
 func NewTestManager() *TestStore {
 	return &TestStore{
-		Tests: make(map[uuid.UUID]*[]*Test),
+		Tests:    make(map[uuid.UUID]*[]*Test),
+		AuditLog: new(output.AuditLog),
 	}
 }
 
 //AddTest ...
-func (ts *TestStore) AddTest(t *Test) *uuid.UUID {
+func (ts *TestStore) AddTest(td TestDescriptor) *uuid.UUID {
 	ts.Lock.Lock()
 	defer ts.Lock.Unlock()
 
 	//add the test
-	u := uuid.New()
-	a := []*Test{t}
-	ts.Tests[u] = &a
 
-	return &u
+	uid := uuid.New()
+	u := uid.String()
+	s := Pending
+	t := Test{
+		TestDescriptor: &td,
+		Status:         &s,
+		UUID:           u,
+	}
+	a := []*Test{&t}
+	ts.Tests[uid] = &a
+
+	ts.AuditLog.Audit(u, "status", t.Status.String())
+	ts.AuditLog.Audit(u, "descriptor", t.TestDescriptor.Name)
+
+	return &uid
 }
 
 //GetTest by UUID ...
@@ -169,6 +184,7 @@ func (ts *TestStore) ExecAllTests() (int, error) {
 
 	for uuid := range ts.Tests {
 		st, err := ts.ExecTest(&uuid)
+		ts.AuditLog.Audit(uuid.String(), "status", "Exited: "+strconv.Itoa(st))
 		if err != nil {
 			//log but continue with remaining tests
 			log.Printf("[ERROR] error executing test: %v", err)

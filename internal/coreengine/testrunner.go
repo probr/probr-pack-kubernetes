@@ -45,6 +45,7 @@ func TestHandleFunc(td TestDescriptor, gd *GoDogTestTuple) {
 
 //RunTest TODO: remove TestStore?
 func (ts *TestStore) RunTest(t *Test) (int, error) {
+	ts.AuditLog.Audit(t.UUID, "status", "running")
 
 	//TODO: error codes!
 	if t == nil {
