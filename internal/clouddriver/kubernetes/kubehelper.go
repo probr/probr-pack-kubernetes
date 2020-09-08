@@ -46,6 +46,7 @@ const (
 	PSPAllowedVolumeTypes
 	PSPSeccompProfile
 	ImagePullError
+	Blocked
 )
 
 func (r PodCreationErrorReason) String() string {
@@ -60,7 +61,8 @@ func (r PodCreationErrorReason) String() string {
 		"podcreation-error: psp-allowed-portrange",
 		"podcreation-error: psp-allowed-volume-types-profile",
 		"podcreation-error: psp-allowed-seccomp-profile",
-		"podcreation-error: image-pull-error"}[r]
+		"podcreation-error: image-pull-error",
+		"podcreation-error: blocked"}[r]
 }
 
 //PodCreationError ...
@@ -109,9 +111,11 @@ var once sync.Once
 
 // Kube ...
 type Kube struct {
-	kubeClient                *kubernetes.Clientset
-	clientMutex               sync.Mutex
-	azErrorToPodCreationError map[string]PodCreationErrorReason
+	kubeClient                   *kubernetes.Clientset
+	clientMutex                  sync.Mutex
+	cspErrorToProbrCreationError map[string]PodCreationErrorReason
+
+	k8statusToPodCreationError map[string]PodCreationErrorReason
 }
 
 // GetKubeInstance ...
@@ -120,17 +124,46 @@ func GetKubeInstance() *Kube {
 	once.Do(func() {
 		instance = &Kube{}
 
-		instance.azErrorToPodCreationError = make(map[string]PodCreationErrorReason, 7)
-		instance.azErrorToPodCreationError["azurepolicy-container-no-privilege"] = PSPNoPrivilege
-		instance.azErrorToPodCreationError["azurepolicy-psp-container-no-privilege-escalation"] = PSPNoPrivilegeEscalation
-		instance.azErrorToPodCreationError["azurepolicy-psp-allowed-users-groups"] = PSPAllowedUsersGroups
-		instance.azErrorToPodCreationError["azurepolicy-container-allowed-images"] = PSPContainerAllowedImages
-		instance.azErrorToPodCreationError["azurepolicy-psp-host-namespace"] = PSPHostNamespace
-		instance.azErrorToPodCreationError["azurepolicy-psp-host-network"] = PSPHostNetwork
-		instance.azErrorToPodCreationError["azurepolicy-container-allowed-capabilities"] = PSPAllowedCapabilities
-		instance.azErrorToPodCreationError["azurepolicy-psp-host-network-ports"] = PSPAllowedPortRange
-		instance.azErrorToPodCreationError["azurepolicy-psp-volume-types"] = PSPAllowedVolumeTypes
-		instance.azErrorToPodCreationError["azurepolicy-psp-seccomp"] = PSPSeccompProfile
+		//This is brittle!:
+		//Map error message strings to common creation error types
+		//unfortunately there is no alternative mechanism to interpret the reason for
+		//pod creation failure.
+		//('azurepolicy' messages are from AKS via Azure Policy constraints; 'securityContext' are from 
+		//EKS via underlying PSP)
+		instance.cspErrorToProbrCreationError = make(map[string]PodCreationErrorReason, 7)
+		instance.cspErrorToProbrCreationError["azurepolicy-container-no-privilege"] = PSPNoPrivilege
+		instance.cspErrorToProbrCreationError["securityContext.privileged: Invalid value: true"] = PSPNoPrivilege
+
+		instance.cspErrorToProbrCreationError["azurepolicy-psp-container-no-privilege-escalation"] = PSPNoPrivilegeEscalation
+		instance.cspErrorToProbrCreationError["securityContext.allowPrivilegeEscalation: Invalid value: true"] = PSPNoPrivilegeEscalation
+
+		instance.cspErrorToProbrCreationError["azurepolicy-psp-allowed-users-groups"] = PSPAllowedUsersGroups
+		instance.cspErrorToProbrCreationError["securityContext.runAsUser: Invalid value: 0"] = PSPAllowedUsersGroups
+
+		instance.cspErrorToProbrCreationError["azurepolicy-container-allowed-images"] = PSPContainerAllowedImages
+
+		instance.cspErrorToProbrCreationError["azurepolicy-psp-host-namespace"] = PSPHostNamespace
+		instance.cspErrorToProbrCreationError["securityContext.hostPID: Invalid value: true"] = PSPHostNamespace
+		instance.cspErrorToProbrCreationError["securityContext.hostIPC: Invalid value: true"] = PSPHostNamespace
+
+		instance.cspErrorToProbrCreationError["azurepolicy-psp-host-network"] = PSPHostNetwork
+		instance.cspErrorToProbrCreationError["securityContext.hostNetwork: Invalid value: true"] = PSPHostNetwork
+
+		instance.cspErrorToProbrCreationError["azurepolicy-container-allowed-capabilities"] = PSPAllowedCapabilities
+		instance.cspErrorToProbrCreationError["securityContext.capabilities.add: Invalid value: \"NET_RAW\""] = PSPAllowedCapabilities
+		instance.cspErrorToProbrCreationError["securityContext.capabilities.add: Invalid value: \"NET_ADMIN\""] = PSPAllowedCapabilities
+
+		instance.cspErrorToProbrCreationError["azurepolicy-psp-host-network-ports"] = PSPAllowedPortRange
+		instance.cspErrorToProbrCreationError["hostPort: Invalid value"] = PSPAllowedPortRange
+
+		instance.cspErrorToProbrCreationError["azurepolicy-psp-volume-types"] = PSPAllowedVolumeTypes
+
+		instance.cspErrorToProbrCreationError["azurepolicy-psp-seccomp"] = PSPSeccompProfile
+		instance.cspErrorToProbrCreationError["not an allowed seccomp profile"] = PSPSeccompProfile
+
+		instance.k8statusToPodCreationError = make(map[string]PodCreationErrorReason, 2)
+		instance.k8statusToPodCreationError["ErrImagePull"] = ImagePullError
+		instance.k8statusToPodCreationError["Blocked"] = Blocked
 	})
 
 	return instance
@@ -195,8 +228,8 @@ func getPods(c *kubernetes.Clientset, ns string) (*apiv1.PodList, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	pods, err := c.CoreV1().Pods(ns).List(ctx, metav1.ListOptions{})	
-	
+	pods, err := c.CoreV1().Pods(ns).List(ctx, metav1.ListOptions{})
+
 	if err != nil {
 		return nil, err
 	}
@@ -292,7 +325,7 @@ func (k *Kube) CreatePodFromObject(p *apiv1.Pod, pname *string, ns *string, w bo
 
 	if w {
 		//wait:
-		err = waitForPhase(apiv1.PodRunning, c, ns, pname)
+		err = k.waitForPhase(apiv1.PodRunning, c, ns, pname)
 		if err != nil {
 			return res, err
 		}
@@ -647,7 +680,7 @@ func (k *Kube) toPodCreationErrorCode(err error) *map[PodCreationErrorReason]*Po
 		log.Printf("[INFO] *** message: %v", m)
 		//map this to the pod creation code
 
-		for key, e := range k.azErrorToPodCreationError {
+		for key, e := range k.cspErrorToProbrCreationError {
 			if strings.Contains(m, key) {
 				//take the element
 				pcErr[e] = &e
@@ -658,7 +691,7 @@ func (k *Kube) toPodCreationErrorCode(err error) *map[PodCreationErrorReason]*Po
 	return &pcErr
 }
 
-func waitForPhase(ph apiv1.PodPhase, c *kubernetes.Clientset, ns *string, n *string) error {
+func (k *Kube) waitForPhase(ph apiv1.PodPhase, c *kubernetes.Clientset, ns *string, n *string) error {
 
 	ps := c.CoreV1().Pods(*ns)
 
@@ -698,7 +731,7 @@ func waitForPhase(ph apiv1.PodPhase, c *kubernetes.Clientset, ns *string, n *str
 		}
 
 		// don't wait if we're getting errors:
-		b, err := podInErrorState(p)
+		b, err := k.podInErrorState(p)
 		if b {
 			log.Printf("[WARN] Giving up waiting on pod creation. Error: %v", err)
 			return err
@@ -715,7 +748,7 @@ func waitForPhase(ph apiv1.PodPhase, c *kubernetes.Clientset, ns *string, n *str
 	return nil
 }
 
-func podInErrorState(p *apiv1.Pod) (bool, *PodCreationError) {
+func (k *Kube) podInErrorState(p *apiv1.Pod) (bool, *PodCreationError) {
 
 	// check the container statuses for error conditions:
 	if len(p.Status.ContainerStatuses) > 0 {
@@ -725,11 +758,13 @@ func podInErrorState(p *apiv1.Pod) (bool, *PodCreationError) {
 			log.Printf("[INFO] Pod: %v Waiting reason: %v", n, r)
 
 			//TODO: other error states? Also need to tidy up the error creation
-			if r == "ErrImagePull" {
+			pe, exists := k.k8statusToPodCreationError[r]
+
+			if exists {
 				log.Printf("[INFO] Giving up waiting on pod %v . Error reason: %v", n, r)
 				pcErr := make(map[PodCreationErrorReason]*PodCreationErrorReason, 1)
-				e := ImagePullError
-				pcErr[ImagePullError] = &e
+
+				pcErr[pe] = &pe
 				return true, &PodCreationError{fmt.Errorf("Giving up waiting on pod %v . Error reason: %v", n, r), pcErr}
 			}
 		}
