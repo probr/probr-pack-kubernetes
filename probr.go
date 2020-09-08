@@ -35,11 +35,9 @@ func addTest(tm *coreengine.TestStore, n string, g coreengine.Group, c coreengin
 	tm.AddTest(&test)
 }
 
-// RunAllTests ...
+// RunAllTests MUST run after SetIOPaths
 func RunAllTests() (int, *coreengine.TestStore, error) {
-	// MUST run after SetIOPaths
-	// get the test mgr
-	tm := coreengine.NewTestManager()
+	tm := coreengine.NewTestManager() // get the test mgr
 
 	//add some tests and add them to the TM - we need to tidy this up!
 	addTest(tm, "container_registry_access", coreengine.Kubernetes, coreengine.ContainerRegistryAccess)
@@ -48,8 +46,7 @@ func RunAllTests() (int, *coreengine.TestStore, error) {
 	addTest(tm, "account_manager", coreengine.CloudDriver, coreengine.General)
 	addTest(tm, "general", coreengine.Kubernetes, coreengine.General)
 
-	//exec 'em all (for now!)
-	s, err := tm.ExecAllTests()
+	s, err := tm.ExecAllTests() // Executes all added (queued) tests
 	return s, tm, err
 }
 
