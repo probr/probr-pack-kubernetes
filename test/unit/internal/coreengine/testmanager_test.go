@@ -41,11 +41,11 @@ func TestAddGetTest(t *testing.T) {
 	name := "account_manager"
 	td := coreengine.TestDescriptor{Group: grp, Category: cat, Name: name}
 
-	uuid1 := uuid.New().String()
+	uid := uuid.New().String()
 	sat1 := coreengine.Pending
 
 	test1 := coreengine.Test{
-		UUID:           &uuid1,
+		UUID:           uid,
 		TestDescriptor: &td,
 		Status:         &sat1,
 	}
@@ -75,11 +75,11 @@ func addTest(tm *coreengine.TestStore, testname string, grp coreengine.Group, ca
 	
 	td := coreengine.TestDescriptor{Group: grp, Category: cat, Name: testname}
 
-	uuid1 := uuid.New().String()
+	uid := uuid.New().String()
 	sat := coreengine.Pending
 
 	test := coreengine.Test{
-		UUID:           &uuid1,
+		UUID:           uid,
 		TestDescriptor: &td,
 		Status:         &sat,
 	}
