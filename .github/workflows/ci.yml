@@ -1,0 +1,36 @@
+on:
+
+  pull_request:
+    branches: 
+      - master
+
+jobs:
+  test:
+    strategy:
+      matrix:
+        platform: [ubuntu-latest, macos-latest, windows-latest]
+    runs-on: ${{ matrix.platform }}
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions/setup-go@v2
+      with:
+        go-version: '^1.14.0'
+
+    - name: Setup GO environment
+      run: |
+            go mod download
+            go get -u golang.org/x/lint/golint
+    
+    - name: Lint
+      run: golint ./...
+
+    - name: Vet
+      run: go vet ./...
+
+    - name: Unit tests
+      run: |
+            cd test/unit
+            go test ./...
+
+    - name: Build
+      run: go build -o probr cmd/probr-cli/main.go
