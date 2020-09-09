@@ -104,7 +104,7 @@ func TestTestRunner(t *testing.T) {
 
 	//construct the test to run
 	test2 := coreengine.Test{
-		UUID:           &uuid2,
+		UUID:           uuid2,
 		TestDescriptor: &td2,
 		Status:         &sat2,
 	}
