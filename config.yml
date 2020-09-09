@@ -1,1 +1,14 @@
 kubeConfig: .kube/config1
+outputType: INMEM
+tests:
+    tags: "@CIS-5.2.1,@CIS-6.1.3,@CIS-6.10"
+images:
+    repository:
+    curl:
+    busyBox:
+azure:
+    subscriptionID:
+    clientID:
+    clientSecret:
+    tenantID:
+    locationDefault:

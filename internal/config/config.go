@@ -15,7 +15,7 @@ type ConfigVars struct {
 		Repository string `yaml:"repository"`
 		Curl       string `yaml:"curl"`
 		BusyBox    string `yaml:"busyBox"`
-	} `yaml:"Images"`
+	} `yaml:"images"`
 	Azure struct {
 		SubscriptionID  string `yaml:"subscriptionID"`
 		ClientID        string `yaml:"clientID"`
@@ -25,7 +25,7 @@ type ConfigVars struct {
 	} `yaml:"azure"`
 	Tests struct {
 		Tags string `yaml:"tags"`
-	} `yaml:"Tests"`
+	} `yaml:"tests"`
 }
 
 //Vars ...
