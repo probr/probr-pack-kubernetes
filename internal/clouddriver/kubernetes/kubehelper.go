@@ -128,7 +128,7 @@ func GetKubeInstance() *Kube {
 		//Map error message strings to common creation error types
 		//unfortunately there is no alternative mechanism to interpret the reason for
 		//pod creation failure.
-		//('azurepolicy' messages are from AKS via Azure Policy constraints; 'securityContext' are from 
+		//('azurepolicy' messages are from AKS via Azure Policy constraints; 'securityContext' are from
 		//EKS via underlying PSP)
 		instance.cspErrorToProbrCreationError = make(map[string]PodCreationErrorReason, 7)
 		instance.cspErrorToProbrCreationError["azurepolicy-container-no-privilege"] = PSPNoPrivilege

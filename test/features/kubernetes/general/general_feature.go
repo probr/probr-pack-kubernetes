@@ -1,6 +1,7 @@
 package general
 
 import (
+	"log"
 	"strings"
 
 	"gitlab.com/citihub/probr/test/features"
@@ -33,7 +34,7 @@ func (p *probeState) aKubernetesClusterIsDeployed() error {
 	b := kubernetes.GetKubeInstance().ClusterIsDeployed()
 
 	if b == nil || !*b {
-		return features.LogAndReturnError("kubernetes cluster is NOT deployed")
+		log.Fatalf("[ERROR] Kubernetes cluster is not deployed")
 	}
 
 	//else we're good ...

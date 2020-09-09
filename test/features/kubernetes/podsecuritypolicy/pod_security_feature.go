@@ -3,6 +3,8 @@ package podsecuritypolicy
 //go:generate go-bindata.exe -pkg $GOPACKAGE -o assets/assets.go assets/yaml
 
 import (
+	"log"
+
 	"github.com/cucumber/godog"
 	"gitlab.com/citihub/probr/internal/clouddriver/kubernetes"
 	"gitlab.com/citihub/probr/internal/coreengine"
@@ -48,7 +50,7 @@ func (p *probeState) aKubernetesClusterExistsWhichWeCanDeployInto() error {
 	b := psp.ClusterIsDeployed()
 
 	if b == nil || !*b {
-		return features.LogAndReturnError("kubernetes cluster is NOT deployed")
+		log.Fatalf("[ERROR] Kubernetes cluster is not deployed")
 	}
 
 	//else we're good ...
@@ -92,22 +94,22 @@ func (p *probeState) runControlTest(cf func() (*bool, error), c string) error {
 func (p *probeState) runVerificationTest(c kubernetes.PSPVerificationProbe) error {
 
 	//check for lack of creation error, i.e. pod was created successfully
-	if p.state.CreationError == nil {		
+	if p.state.CreationError == nil {
 		res, err := psp.ExecPSPTestCmd(&p.state.PodName, c.Cmd)
 
 		//analyse the results
 		if err != nil {
-			//this is an error from trying to execute the command as opposed to 
+			//this is an error from trying to execute the command as opposed to
 			//the command itself returning an error
 			return features.LogAndReturnError("error raised trying to execute verification command (%v) - %v", c.Cmd, err)
 		}
 		if res == nil {
 			return features.LogAndReturnError("<nil> result received when trying to execute verification command (%v)", c.Cmd)
-		}		
+		}
 		if res.Err != nil && res.Internal {
 			//we have an error which was raised before reaching the cluster (i.e. it's "internal")
 			//this indicates that the command was not successfully executed
-			return features.LogAndReturnError("error raised trying to execute verification command (%v)", c.Cmd)			
+			return features.LogAndReturnError("error raised trying to execute verification command (%v)", c.Cmd)
 		}
 
 		//we've managed to execution against the cluster.  This may have failed due to pod security, but this
@@ -118,12 +120,12 @@ func (p *probeState) runVerificationTest(c kubernetes.PSPVerificationProbe) erro
 			return nil
 		}
 		//else it's a fail:
-		return features.LogAndReturnError("exit code %d from verification commnad %q did not match expected %d", 
+		return features.LogAndReturnError("exit code %d from verification commnad %q did not match expected %d",
 			res.Code, c.Cmd, c.ExpectedExitCode)
 	}
 
 	//pod wasn't created so nothing to test
-	//TODO: really, we don't want to 'pass' this.  Is there an alternative?	
+	//TODO: really, we don't want to 'pass' this.  Is there an alternative?
 	return nil
 }
 
