@@ -3,9 +3,9 @@ package coreengine_test
 import (
 	"testing"
 
-	"gitlab.com/citihub/probr/internal/coreengine"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
+	"gitlab.com/citihub/probr/internal/coreengine"
 )
 
 func TestTestStatus(t *testing.T) {
@@ -41,11 +41,11 @@ func TestAddGetTest(t *testing.T) {
 	name := "account_manager"
 	td := coreengine.TestDescriptor{Group: grp, Category: cat, Name: name}
 
-	uuid1 := uuid.New().String()
+	uid := uuid.New().String()
 	sat1 := coreengine.Pending
 
 	test1 := coreengine.Test{
-		UUID:           &uuid1,
+		UUID:           uid,
 		TestDescriptor: &td,
 		Status:         &sat1,
 	}
@@ -57,7 +57,7 @@ func TestAddGetTest(t *testing.T) {
 
 	assert.NotNil(t, tm)
 
-	tsuuid := tm.AddTest(&test1)
+	tsuuid := tm.AddTest(td)
 
 	// now try and get it back ...
 	rtntest, err := tm.GetTest(tsuuid)
@@ -70,21 +70,9 @@ func TestAddGetTest(t *testing.T) {
 
 }
 
-
 func addTest(tm *coreengine.TestStore, testname string, grp coreengine.Group, cat coreengine.Category) {
-	
+
 	td := coreengine.TestDescriptor{Group: grp, Category: cat, Name: testname}
-
-	uuid1 := uuid.New().String()
-	sat := coreengine.Pending
-
-	test := coreengine.Test{
-		UUID:           &uuid1,
-		TestDescriptor: &td,
-		Status:         &sat,
-	}
-
-	//add - don't worry about the rtn uuid
-	tm.AddTest(&test)
+	tm.AddTest(td) // add - don't worry about the rtn uuid
 
 }
