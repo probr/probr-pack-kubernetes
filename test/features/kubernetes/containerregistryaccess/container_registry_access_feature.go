@@ -1,6 +1,8 @@
 package containerregistryaccess
 
 import (
+	"log"
+
 	"github.com/cucumber/godog"
 	"gitlab.com/citihub/probr/internal/clouddriver/kubernetes"
 	"gitlab.com/citihub/probr/internal/coreengine"
@@ -38,7 +40,7 @@ func (p *probState) aKubernetesClusterIsDeployed() error {
 	b := cra.ClusterIsDeployed()
 
 	if b == nil || !*b {
-		return features.LogAndReturnError("kubernetes cluster is NOT deployed")
+		log.Fatalf("[ERROR] Kubernetes cluster is not deployed")
 	}
 
 	//else we're good ...
