@@ -8,8 +8,10 @@ import (
 )
 
 // ConfigVars contains all possible config vars. May be set by .yml, env, or defaults.
+// NOTE: Env and Defaults are ONLY available if corresponding logic is added to defaults.go and getters.go
 type ConfigVars struct {
 	KubeConfigPath string `yaml:"kubeConfig"`
+	KubeContext    string `yaml:"kubeContext"`
 	OutputType     string `yaml:"outputType"`
 	Images         struct {
 		Repository string `yaml:"repository"`

@@ -185,30 +185,6 @@ func (k *Kube) ClusterIsDeployed() *bool {
 	return &t
 }
 
-//GetClient gets a client connection to the Kubernetes cluster specifed via config.Vars.KubeConfigPath
-func (k *Kube) GetClient() (*kubernetes.Clientset, error) {
-	k.clientMutex.Lock()
-	defer k.clientMutex.Unlock()
-
-	if k.kubeClient != nil {
-		return k.kubeClient, nil
-	}
-
-	// use the current context in kubeconfig
-	config, err := clientcmd.BuildConfigFromFlags("", config.Vars.KubeConfigPath)
-	if err != nil {
-		return nil, err
-	}
-
-	// create the clientset (note: assigned to global "kubeClient")
-	k.kubeClient, err = kubernetes.NewForConfig(config)
-	if err != nil {
-		return nil, err
-	}
-
-	return k.kubeClient, nil
-}
-
 //GetPods ...
 func (k *Kube) GetPods(ns string) (*apiv1.PodList, error) {
 	c, err := k.GetClient()
