@@ -21,6 +21,13 @@ func (e *ConfigVars) GetKubeContext() {
 	}
 }
 
+// GetProbrTags ...
+func (e *ConfigVars) GetProbrTags() {
+	if e.Tests.Tags == "" {
+		e.Tests.Tags = os.Getenv("PROBR_TAGS")
+	}
+}
+
 // GetOutputType ...
 func (e *ConfigVars) GetOutputType(s string) {
 	if e.OutputType == "" {
