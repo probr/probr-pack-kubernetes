@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"io"
+	"log"
 	"os"
 	"path/filepath"
 	"strings"
@@ -44,7 +45,10 @@ func ToFileGodogTestHandler(gd *coreengine.GodogTest) (int, *bytes.Buffer, error
 	s := i.Size()
 
 	if s < 4 {
-		os.Remove(o.Name())
+		err = os.Remove(o.Name())
+		if err != nil {
+			log.Printf("[WARN] error removing empty test result file: %v", err)
+		}
 	}
 	return status, nil, err
 }

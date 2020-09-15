@@ -9,7 +9,9 @@ import (
 
 	"github.com/cucumber/godog"
 	"gitlab.com/citihub/probr/internal/clouddriver/kubernetes"
+	"gitlab.com/citihub/probr/internal/config"
 	"gitlab.com/citihub/probr/internal/coreengine"
+	"gitlab.com/citihub/probr/internal/utils"
 )
 
 type probeState struct {
@@ -30,6 +32,7 @@ func init() {
 	})
 }
 
+//general
 func (p *probeState) aKubernetesClusterIsDeployed() error {
 	b := kubernetes.GetKubeInstance().ClusterIsDeployed()
 
@@ -41,6 +44,30 @@ func (p *probeState) aKubernetesClusterIsDeployed() error {
 	return nil
 }
 
+//@CIS-5.6.3
+func (p *probeState) iAttemptToCreateADeploymentWhichDoesNotHaveASecurityContext() error {
+
+	b := "probr-general"
+	n := kubernetes.GenerateUniquePodName(b)
+	i := config.Vars.Images.Repository + "/" + config.Vars.Images.BusyBox
+
+	//create pod with nil security context
+	pd, err := kubernetes.GetKubeInstance().CreatePod(&n, utils.StringPtr("probr-general-test-ns"), &b, &i, true, nil)
+
+	return probe.ProcessPodCreationResult(&p.state, pd, kubernetes.UndefinedPodCreationErrorReason, err)
+}
+
+func (p *probeState) theDeploymentIsRejected() error {
+	//looking for a non-nil creation error
+	if p.state.CreationError == nil {
+		return features.LogAndReturnError("pod %v was created successfully. Test fail.", p.state.PodName)
+	}
+
+	//nil creation error so test pass
+	return nil
+}
+
+//@CIS-6.10.1
 func (p *probeState) iShouldNotBeAbleToAccessTheKubernetesWebUI() error {
 	//TODO: will be difficult to test this.  To access it, a proxy needs to be created:
 	//az aks browse --resource-group rg-probr-all-policies --name ProbrAllPolicies
@@ -88,7 +115,13 @@ func ScenarioInitialize(ctx *godog.ScenarioContext) {
 		features.LogScenarioStart(s)
 	})
 
+	//general
 	ctx.Step(`^a Kubernetes cluster is deployed$`, ps.aKubernetesClusterIsDeployed)
+
+	//@CIS-5.6.3
+	ctx.Step(`^I attempt to create a deployment which does not have a Security Context$`, ps.iAttemptToCreateADeploymentWhichDoesNotHaveASecurityContext)
+	ctx.Step(`^the deployment is rejected$`, ps.theDeploymentIsRejected)
+
 	ctx.Step(`^I should not be able to access the Kubernetes Web UI$`, ps.iShouldNotBeAbleToAccessTheKubernetesWebUI)
 	ctx.Step(`^the Kubernetes Web UI is disabled$`, ps.theKubernetesWebUIIsDisabled)
 
