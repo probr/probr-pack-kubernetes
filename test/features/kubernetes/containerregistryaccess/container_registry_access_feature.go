@@ -6,12 +6,13 @@ import (
 	"github.com/cucumber/godog"
 	"gitlab.com/citihub/probr/internal/clouddriver/kubernetes"
 	"gitlab.com/citihub/probr/internal/coreengine"
+	"gitlab.com/citihub/probr/internal/utils"
 	"gitlab.com/citihub/probr/test/features"
+	"gitlab.com/citihub/probr/test/features/kubernetes/probe"
 )
 
-type probState struct {
-	podName       string
-	creationError *kubernetes.PodCreationError
+type probeState struct {
+	state probe.State
 }
 
 func init() {
@@ -36,7 +37,7 @@ func SetContainerRegistryAccess(c kubernetes.ContainerRegistryAccess) {
 	cra = c
 }
 
-func (p *probState) aKubernetesClusterIsDeployed() error {
+func (p *probeState) aKubernetesClusterIsDeployed() error {
 	b := cra.ClusterIsDeployed()
 
 	if b == nil || !*b {
@@ -47,77 +48,45 @@ func (p *probState) aKubernetesClusterIsDeployed() error {
 	return nil
 }
 
-func (p *probState) aUserAttemptsToDeployAContainerFrom(auth string, registry string) error {
+// TEST STEPS:
+
+// CIS-6.1.3
+// Minimize cluster access to read-only
+func (p *probeState) iAmAuthorisedToPullFromAContainerRegistry() error {
+	pd, err := cra.SetupContainerAccessTestPod(utils.StringPtr("docker.io"))
+
+	return probe.ProcessPodCreationResult(&p.state, pd, kubernetes.PSPContainerAllowedImages, err)
+}
+
+func (p *probeState) iAttemptToPushToTheContainerRegistryUsingTheClusterIdentity() error {
+	return godog.ErrPending
+}
+
+func (p *probeState) thePushRequestIsRejectedDueToAuthorization() error {
+	return godog.ErrPending
+}
+
+// CIS-6.1.4
+// Ensure only authorised container registries are allowed
+func (p *probeState) aUserAttemptsToDeployAContainerFrom(auth string, registry string) error {
 
 	pd, err := cra.SetupContainerAccessTestPod(&registry)
 
-	if err != nil {
-		//check for partial creation, if we've got a pod, hold onto it's name so we can delete
-		//(this could happen with imagepullerr etc)
-		if pd != nil {
-			p.podName = pd.GetObjectMeta().GetName()
-		}
-
-		//check for expected error
-		if e, ok := err.(*kubernetes.PodCreationError); ok {
-			p.creationError = e
-			return nil
-		}
-		//unexpected error
-		return features.LogAndReturnError("error attempting to create POD: %v", err)
-	}
-
-	if pd == nil {
-		// this is valid if the registry should be denied
-		return nil
-	}
-
-	//hold on to pod name
-	p.podName = pd.GetObjectMeta().GetName()
-
-	//we're good ...
-	return nil
+	return probe.ProcessPodCreationResult(&p.state, pd, kubernetes.PSPContainerAllowedImages, err)
 }
 
-func (p *probState) theDeploymentAttemptIs(res string) error {
-	if res == "denied" {
-		//expect pod creation error to be non-null (i.e. creation was prevented)
-		if p.creationError == nil {
-			//it's a fail:
-			return features.LogAndReturnError("pod %v was created - test failed", p.podName)
-		}
-		//should also check code:
-		_, exists := p.creationError.ReasonCodes[kubernetes.PSPContainerAllowedImages]
-		if !exists {
-			//also a fail:
-			return features.LogAndReturnError("pod not was created but failure reasons (%v) did not contain expected (%v)- test failed",
-				p.creationError.ReasonCodes, kubernetes.PSPContainerAllowedImages)
-		}
-
-		//we're good
-		return nil
-	}
-
-	if res == "allowed" {
-		// then expect the pod name to be present
-		if p.podName == "" {
-			//it's a fail:
-			return features.LogAndReturnError("pod was not created - test failed: %v", p.creationError)
-		}
-	}
-
-	//else we're good ...
-	return nil
+func (p *probeState) theDeploymentAttemptIs(res string) error {
+	return probe.AssertResult(&p.state, res, "")
 }
 
-func (p *probState) setup() {
+func (p *probeState) setup() {
 	//just make sure this is reset
-	p.podName = ""
-	p.creationError = nil
+	p.state.PodName = ""
+	p.state.CreationError = nil
 }
 
-func (p *probState) tearDown() {
-	cra.TeardownContainerAccessTestPod(&p.podName)
+func (p *probeState) tearDown() {
+	cra.TeardownContainerAccessTestPod(&p.state.PodName)
 }
 
 //TestSuiteInitialize ...
@@ -133,14 +102,22 @@ func TestSuiteInitialize(ctx *godog.TestSuiteContext) {
 
 //ScenarioInitialize ...
 func ScenarioInitialize(ctx *godog.ScenarioContext) {
-	ps := probState{}
+	ps := probeState{}
 
 	ctx.BeforeScenario(func(s *godog.Scenario) {
 		ps.setup()
 		features.LogScenarioStart(s)
 	})
 
+	//common
 	ctx.Step(`^a Kubernetes cluster is deployed$`, ps.aKubernetesClusterIsDeployed)
+
+	//CIS-6.1.3
+	ctx.Step(`^I am authorised to pull from a container registry$`, ps.iAmAuthorisedToPullFromAContainerRegistry)
+	ctx.Step(`^I attempt to push to the container registry using the cluster identity$`, ps.iAttemptToPushToTheContainerRegistryUsingTheClusterIdentity)
+	ctx.Step(`^the push request is rejected due to authorization$`, ps.thePushRequestIsRejectedDueToAuthorization)
+
+	//CIS-6.1.4
 	ctx.Step(`^a user attempts to deploy a container from "([^"]*)" registry "([^"]*)"$`, ps.aUserAttemptsToDeployAContainerFrom)
 	ctx.Step(`^the deployment attempt is "([^"]*)"$`, ps.theDeploymentAttemptIs)
 
