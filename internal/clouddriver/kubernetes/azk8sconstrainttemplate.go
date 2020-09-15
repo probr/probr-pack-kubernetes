@@ -146,7 +146,7 @@ func (az *AzK8sConstraintTemplate) hasConstraint(cst string) (*bool, error) {
 func (az *AzK8sConstraintTemplate) getConstraints() (*map[string]interface{}, error) {
 	if az.azConstraints == nil {
 		//get "k8sazure" constraints:
-		c, err := az.k.GetConstraintTemplates(utils.StringPtr(azK8sPrefix))
+		c, err := az.k.GetConstraintTemplates(azK8sPrefix)
 
 		if err != nil {
 			return nil, err

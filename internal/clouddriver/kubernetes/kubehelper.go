@@ -3,6 +3,7 @@ package kubernetes
 import (
 	"bytes"
 	"context"
+	"encoding/json"
 	"fmt"
 	"log"
 	"math/rand"
@@ -96,14 +97,15 @@ type Kubernetes interface {
 	GetPods(ns string) (*apiv1.PodList, error)
 	CreatePod(pname *string, ns *string, cname *string, image *string, w bool, sc *apiv1.SecurityContext) (*apiv1.Pod, error)
 	CreatePodFromObject(p *apiv1.Pod, pname *string, ns *string, w bool) (*apiv1.Pod, error)
-	CreatePodFromYaml(y []byte, pname *string, ns *string, image *string, w bool) (*apiv1.Pod, error)
+	CreatePodFromYaml(y []byte, pname *string, ns *string, image *string, aadpodidbinding *string, w bool) (*apiv1.Pod, error)
 	GetPodObject(pname string, ns string, cname string, image string, sc *apiv1.SecurityContext) *apiv1.Pod
 	ExecCommand(cmd, ns, pn *string) *CmdExecutionResult
 	DeletePod(pname *string, ns *string, w bool) error
 	DeleteNamespace(ns *string) error
 	CreateConfigMap(n *string, ns *string) (*apiv1.ConfigMap, error)
 	DeleteConfigMap(n *string, ns *string) error
-	GetConstraintTemplates(prefix *string) (*map[string]interface{}, error)
+	GetConstraintTemplates(prefix string) (*map[string]interface{}, error)
+	GetRawResourcesByGrp(g string) (*K8SJSON, error)
 }
 
 var instance *Kube
@@ -237,7 +239,7 @@ func (k *Kube) CreatePod(pname *string, ns *string, cname *string, image *string
 }
 
 // CreatePodFromYaml ...
-func (k *Kube) CreatePodFromYaml(y []byte, pname *string, ns *string, image *string, w bool) (*apiv1.Pod, error) {
+func (k *Kube) CreatePodFromYaml(y []byte, pname *string, ns *string, image *string, aadpodidbinding *string, w bool) (*apiv1.Pod, error) {
 
 	decode := scheme.Codecs.UniversalDeserializer().Decode
 
@@ -248,8 +250,14 @@ func (k *Kube) CreatePodFromYaml(y []byte, pname *string, ns *string, image *str
 	p.SetName(*pname)
 	//also update the image (which could have been supplied via the env)
 	//(only expecting one container, but loop in case of many)
-	for _, c := range p.Spec.Containers {
-		c.Image = *image
+	if image != nil {
+		for _, c := range p.Spec.Containers {
+			c.Image = *image
+		}
+	}	
+
+	if aadpodidbinding != nil {
+		p.Labels["aadpodidbinding"] = *aadpodidbinding
 	}
 
 	return k.CreatePodFromObject(p, pname, ns, w)
@@ -587,7 +595,16 @@ func (k *Kube) DeleteNamespace(ns *string) error {
 }
 
 //GetConstraintTemplates returns the constraint templates associated with the active cluster.
-func (k *Kube) GetConstraintTemplates(prefix *string) (*map[string]interface{}, error) {
+func (k *Kube) GetConstraintTemplates(prefix string) (*map[string]interface{}, error) {
+	return k.getAPIResourcesByGrp("constraints", prefix)
+}
+
+//GetIdentityBindings returns the identity bindings associated with the active cluster.
+func (k *Kube) GetIdentityBindings(prefix string) (*map[string]interface{}, error) {
+	return k.getAPIResourcesByGrp("aadpodidentity", prefix)
+}
+
+func (k *Kube) getAPIResourcesByGrp(grp string, nPrefix string) (*map[string]interface{}, error) {
 	c, err := k.GetClient()
 	if err != nil {
 		return nil, err
@@ -604,26 +621,76 @@ func (k *Kube) GetConstraintTemplates(prefix *string) (*map[string]interface{}, 
 		if ar == nil {
 			continue
 		}
+		g := ar.GroupVersion
+		log.Printf("[INFO] API Resource Group %v", g)
+		if len(grp) > 0 && !strings.HasPrefix(g, grp) {
+			continue
+		}
+
 		for _, a := range ar.APIResources {
-			for _, cat := range a.Categories {
-				if cat == "constraint" {
-					log.Printf("[INFO] CONSTRAINT Resource - Name: %v Category: %v Kind: %v", a.Name, cat, a.Kind)
-					//skip if it doesn't pass the prefix filter (if one has been supplied):
-					if prefix != nil && !strings.HasPrefix(a.Name, *prefix) {
-						continue
-					}
-					//treat it like a set ...
-					_, exists := con[a.Name]
-					if !exists {
-						con[a.Name] = nil
-					}
-				}
+			log.Printf("[DEBUG] API Resource %+v", a)
+			log.Printf("[INFO] API Resource - Group: %v Name: %v Kind: %v", g, a.Name, a.Kind)
+
+			//skip if it doesn't pass the prefix filter (if one has been supplied):
+			if len(nPrefix) > 0 && !strings.HasPrefix(a.Name, nPrefix) {
+				continue
+			}
+			//treat it like a set ...
+			_, exists := con[a.Name]
+			if !exists {
+				con[a.Name] = a
 			}
 		}
 	}
 
 	return &con, nil
+}
 
+//K8SJSONItem encapsulates items returned from a raw/rest call to the Kubernetes API
+type K8SJSONItem struct {
+	Kind     string
+	Metadata map[string]string
+}
+
+//K8SJSON encapsulates the response from a raw/rest call to the Kubernetes API
+type K8SJSON struct {
+	APIVersion string
+	Items      []K8SJSONItem
+}
+
+//GetRawResourcesByGrp makes a 'raw' REST call to k8s to get the resources specified by the
+//supplied group string, e.g. "apis/aadpodidentity.k8s.io/v1/azureidentitybindings".  This
+//is required to support resources that are not supported by typed API calls (e.g. "pods").
+//TODO: there may be a better way to do this, but can't find it atm
+func (k *Kube) GetRawResourcesByGrp(g string) (*K8SJSON, error) {
+	c, err := k.GetClient()
+	if err != nil {
+		return nil, err
+	}
+
+	r := c.RESTClient().Get().AbsPath(g)
+	log.Printf("[DEBUG] REST request: %+v", r)
+
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	res := r.Do(ctx)
+	log.Printf("[DEBUG] RAW Result: %+v", res)
+
+	if res.Error() != nil {
+		return nil, res.Error()
+	}
+
+	b, _ := res.Raw()
+	bs := string(b)
+	log.Printf("[DEBUG] STRING result: %v", bs)
+
+	j := K8SJSON{}
+	json.Unmarshal(b, &j)
+
+	log.Printf("[DEBUG] JSON result: %+v", j)
+
+	return &j, nil
 }
 
 func isAlreadyExists(err error) bool {

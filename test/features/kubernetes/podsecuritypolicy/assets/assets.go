@@ -98,7 +98,7 @@ func assetsYamlPspAzpHostportApprovedYaml() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "assets/yaml/psp-azp-hostport-approved.yaml", size: 582, mode: os.FileMode(438), modTime: time.Unix(1597863384, 0)}
+	info := bindataFileInfo{name: "assets/yaml/psp-azp-hostport-approved.yaml", size: 582, mode: os.FileMode(438), modTime: time.Unix(1599580688, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

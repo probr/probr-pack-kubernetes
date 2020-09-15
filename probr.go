@@ -11,6 +11,7 @@ import (
 	_ "gitlab.com/citihub/probr/test/features/clouddriver"                        //needed to run init on TestHandlers
 	_ "gitlab.com/citihub/probr/test/features/kubernetes/containerregistryaccess" //needed to run init on TestHandlers
 	_ "gitlab.com/citihub/probr/test/features/kubernetes/general"                 //needed to run init on TestHandlers
+	_ "gitlab.com/citihub/probr/test/features/kubernetes/iam"                     //needed to run init on TestHandlers
 	_ "gitlab.com/citihub/probr/test/features/kubernetes/internetaccess"          //needed to run init on TestHandlers
 	_ "gitlab.com/citihub/probr/test/features/kubernetes/podsecuritypolicy"       //needed to run init on TestHandlers
 )
@@ -36,6 +37,7 @@ func RunAllTests() (int, *coreengine.TestStore, error) {
 	addTest(tm, "pod_security_policy", coreengine.Kubernetes, coreengine.PodSecurityPolicies)
 	addTest(tm, "account_manager", coreengine.CloudDriver, coreengine.General)
 	addTest(tm, "general", coreengine.Kubernetes, coreengine.General)
+	addTest(tm, "iam_control", coreengine.Kubernetes, coreengine.IAM)
 
 	s, err := tm.ExecAllTests() // Executes all added (queued) tests
 	return s, tm, err

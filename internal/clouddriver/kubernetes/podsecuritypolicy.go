@@ -39,6 +39,7 @@ const (
 	NetCat
 	Unshare
 	Ls
+	CatAzJSON
 )
 
 func (c PSPTestCommand) String() string {
@@ -51,7 +52,8 @@ func (c PSPTestCommand) String() string {
 		"ip link add dummy0 type dummy",
 		"nc -l 1234",
 		"unshare",
-		"ls"}[c]
+		"ls",
+		"cat /etc/kubernetes/azure.json"}[c]
 }
 
 // PSPVerificationProbe ...
@@ -557,7 +559,7 @@ func (psp *PSP) CreatePodFromYaml(y []byte) (*apiv1.Pod, error) {
 	pname := GenerateUniquePodName(psp.testPodName)
 
 	return psp.k.CreatePodFromYaml(y, &pname, utils.StringPtr(psp.testNamespace),
-		utils.StringPtr(psp.testImage), true)
+		utils.StringPtr(psp.testImage), nil, true)
 }
 
 // ExecPSPTestCmd ...
