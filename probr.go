@@ -22,24 +22,13 @@ func addTest(tm *coreengine.TestStore, n string, g coreengine.Group, c coreengin
 
 	td := coreengine.TestDescriptor{Group: g, Category: c, Name: n}
 
-	uuid1 := uuid.New().String()
-	sat := coreengine.Pending
-
-	test := coreengine.Test{
-		UUID:           &uuid1,
-		TestDescriptor: &td,
-		Status:         &sat,
-	}
-
 	//add - don't worry about the rtn uuid
-	tm.AddTest(&test)
+	tm.AddTest(td)
 }
 
-// RunAllTests ...
+// RunAllTests MUST run after SetIOPaths
 func RunAllTests() (int, *coreengine.TestStore, error) {
-	// MUST run after SetIOPaths
-	// get the test mgr
-	tm := coreengine.NewTestManager()
+	tm := coreengine.NewTestManager() // get the test mgr
 
 	//add some tests and add them to the TM - we need to tidy this up!
 	addTest(tm, "container_registry_access", coreengine.Kubernetes, coreengine.ContainerRegistryAccess)
@@ -48,8 +37,7 @@ func RunAllTests() (int, *coreengine.TestStore, error) {
 	addTest(tm, "account_manager", coreengine.CloudDriver, coreengine.General)
 	addTest(tm, "general", coreengine.Kubernetes, coreengine.General)
 
-	//exec 'em all (for now!)
-	s, err := tm.ExecAllTests()
+	s, err := tm.ExecAllTests() // Executes all added (queued) tests
 	return s, tm, err
 }
 
@@ -71,11 +59,13 @@ func GetAllTestResults(ts *coreengine.TestStore) (map[string]string, error) {
 //ReadTestResults ...
 func ReadTestResults(ts *coreengine.TestStore, id uuid.UUID) (string, string, error) {
 	t, err := ts.GetTest(&id)
+	test := (*t)[0]
+	ts.AuditLog.Audit(id.String(), "status", test.Status.String())
 	if err != nil {
 		return "", "", err
 	}
-	r := (*t)[0].Results
-	n := (*t)[0].TestDescriptor.Name
+	r := test.Results
+	n := test.TestDescriptor.Name
 	if r != nil {
 		b := r.Bytes()
 		return string(b), n, nil

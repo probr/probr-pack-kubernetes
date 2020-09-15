@@ -13,7 +13,7 @@ type State struct {
 	ExpectedReason *kubernetes.PodCreationErrorReason
 }
 
-// ProcessPodCreationResult is a convenince function to process the result of a pod creation attempt. 
+// ProcessPodCreationResult is a convenince function to process the result of a pod creation attempt.
 // It records state information on the supplied state structure.
 func ProcessPodCreationResult(s *State, pd *apiv1.Pod, expected kubernetes.PodCreationErrorReason, err error) error {
 
@@ -54,7 +54,7 @@ func ProcessPodCreationResult(s *State, pd *apiv1.Pod, expected kubernetes.PodCr
 	return nil
 }
 
-// AssertResult evaluate the state in the context of the expected condition, e.g. if expected is "fail", 
+// AssertResult evaluate the state in the context of the expected condition, e.g. if expected is "fail",
 // then the expecation is that a creation error will be present.
 func AssertResult(s *State, res, msg string) error {
 

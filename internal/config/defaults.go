@@ -8,7 +8,9 @@ import (
 // getEnvOrDefaults will set value from os.Getenv and default to the specified value
 func getEnvOrDefaults(e *ConfigVars) {
 	e.GetKubeConfigPath(getDefaultKubeConfigPath()) // KUBE_CONFIG
+	e.GetKubeContext()                              // KUBE_CONTEXT
 	e.GetOutputType("IO")                           // OUTPUT_TYPE
+	e.GetProbrTags()                                // PROBR_TAGS
 
 	e.GetImageRepository() // IMAGE_REPOSITORY
 	e.GetCurlImage()       // CURL_IMAGE

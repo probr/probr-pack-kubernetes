@@ -52,12 +52,12 @@ func TestTestRunner(t *testing.T) {
 	td := coreengine.TestDescriptor{Group: grp, Category: cat, Name: name}
 
 	//specific terms for *this* test
-	uuid1 := uuid.New().String()
+	uid := uuid.New().String()
 	sat1 := coreengine.Pending
 
 	//construct the test to run
 	test1 := coreengine.Test{
-		UUID:           &uuid1,
+		UUID:           uid,
 		TestDescriptor: &td,
 		Status:         &sat1,
 	}
@@ -104,7 +104,7 @@ func TestTestRunner(t *testing.T) {
 
 	//construct the test to run
 	test2 := coreengine.Test{
-		UUID:           &uuid2,
+		UUID:           uuid2,
 		TestDescriptor: &td2,
 		Status:         &sat2,
 	}
@@ -133,12 +133,12 @@ func TestTestRunnerInMem(t *testing.T) {
 	td := coreengine.TestDescriptor{Group: grp, Category: cat, Name: name}
 
 	//specific terms for *this* test
-	uuid1 := uuid.New().String()
+	uid := uuid.New().String()
 	sat1 := coreengine.Pending
 
 	//construct the test to run
 	test1 := coreengine.Test{
-		UUID:           &uuid1,
+		UUID:           uid,
 		TestDescriptor: &td,
 		Status:         &sat1,
 	}

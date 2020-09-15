@@ -8,14 +8,16 @@ import (
 )
 
 // ConfigVars contains all possible config vars. May be set by .yml, env, or defaults.
+// NOTE: Env and Defaults are ONLY available if corresponding logic is added to defaults.go and getters.go
 type ConfigVars struct {
 	KubeConfigPath string `yaml:"kubeConfig"`
+	KubeContext    string `yaml:"kubeContext"`
 	OutputType     string `yaml:"outputType"`
 	Images         struct {
 		Repository string `yaml:"repository"`
 		Curl       string `yaml:"curl"`
 		BusyBox    string `yaml:"busyBox"`
-	} `yaml:"Images"`
+	} `yaml:"images"`
 	Azure struct {
 		SubscriptionID  string `yaml:"subscriptionID"`
 		ClientID        string `yaml:"clientID"`
@@ -25,7 +27,7 @@ type ConfigVars struct {
 	} `yaml:"azure"`
 	Tests struct {
 		Tags string `yaml:"tags"`
-	} `yaml:"Tests"`
+	} `yaml:"tests"`
 }
 
 //Vars ...
