@@ -75,22 +75,31 @@ func (e *ConfigVars) GetAzureLocationDefault() {
 }
 
 // GetImageRepository ...
-func (e *ConfigVars) GetImageRepository() {
+func (e *ConfigVars) GetImageRepository(s string) {
 	if e.Images.Repository == "" {
 		e.Images.Repository = os.Getenv("IMAGE_REPOSITORY")
+	}
+	if e.Images.Repository == "" {
+		e.Images.Repository = s // default is specified in caller: config/defaults.go
 	}
 }
 
 // GetCurlImage ...
-func (e *ConfigVars) GetCurlImage() {
+func (e *ConfigVars) GetCurlImage(s string) {
 	if e.Images.Curl == "" {
 		e.Images.Curl = os.Getenv("CURL_IMAGE")
+	}
+	if e.Images.Curl == "" {
+		e.Images.Curl = s // default is specified in caller: config/defaults.go
 	}
 }
 
 // GetBusyBoxImage ...
-func (e *ConfigVars) GetBusyBoxImage() {
+func (e *ConfigVars) GetBusyBoxImage(s string) {
 	if e.Images.BusyBox == "" {
 		e.Images.BusyBox = os.Getenv("BUSYBOX_IMAGE")
+	}
+	if e.Images.BusyBox == "" {
+		e.Images.BusyBox = s // default is specified in caller: config/defaults.go
 	}
 }
