@@ -21,6 +21,8 @@ func getEnvOrDefaults(e *ConfigVars) {
 	e.GetAzureClientSecret()    // AZURE_CLIENT_SECRET
 	e.GetAzureTenantID()        // AZURE_TENANT_ID
 	e.GetAzureLocationDefault() // AZURE_LOCATION_DEFAULT
+	
+	e.GetSystemClusterRoles([]string{"system:", "aks", "cluster-admin","policy-agent"})
 }
 
 func getDefaultKubeConfigPath() string {
