@@ -5,6 +5,18 @@ Feature: General Cluster Security Configurations
   I want to ensure that Kubernetes clusters have general security configurations in place
   So that no general cluster vulnerabilities can be exploited 
 
+  #TODO: should probably move 5.1.3 into the IAM section??
+  @CIS-5.1.3
+  Scenario Outline: Minimise wildcards in Roles and Cluster Roles
+    Given a Kubernetes cluster is deployed
+    When I inspect the "<rolelevel>" that are configured
+    Then I should only find wildcards in known and authorised configurations
+
+    Examples:
+      | rolelevel      |
+      | Roles          |
+      | Cluster Roles  |
+
   @CIS-5.6.3
   Scenario: Ensure Security Contexts are enforced
     Given a Kubernetes cluster is deployed

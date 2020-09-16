@@ -84,10 +84,44 @@ func TestConfigMap(t *testing.T) {
 	}
 }
 
-func TestGetConstraintTemplate(t *testing.T) {	
+func TestGetConstraintTemplate(t *testing.T) {
 	con, err := kubernetes.GetKubeInstance().GetConstraintTemplates(utils.StringPtr("k8sazure"))
 
 	log.Printf("[NOTICE] constraints: %v", con)
+
+	handleResult(nil, err)
+}
+
+func TestGetClusterRoles(t *testing.T) {
+	crl, err := kubernetes.GetKubeInstance().GetClusterRoles()
+
+	log.Printf("[NOTICE] cluster roles: %v", crl)
+
+	handleResult(nil, err)
+}
+
+func TestGetClusterRolesByResource(t *testing.T) {
+
+	crl, err := kubernetes.GetKubeInstance().GetClusterRolesByResource("*")
+
+	log.Printf("[NOTICE] cluster roles with '*' resource")
+
+	for _, cr := range *crl {
+		log.Printf("[NOTICE] role name: %v role labels: %v", cr.Name, cr.Labels)
+	}
+
+	handleResult(nil, err)
+}
+
+func TestGetRolesByResource(t *testing.T) {
+
+	rl, err := kubernetes.GetKubeInstance().GetRolesByResource("*")
+
+	log.Printf("[NOTICE] roles with '*' resource")
+	
+	for _, r := range *rl {
+		log.Printf("[NOTICE] role name: %v role labels: %v", r.Name, r.Labels)
+	}
 
 	handleResult(nil, err)
 }

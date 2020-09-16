@@ -2,6 +2,7 @@ package config
 
 import (
 	"os"
+	"strings"
 )
 
 // GetKubeConfigPath ...
@@ -101,5 +102,17 @@ func (e *ConfigVars) GetBusyBoxImage(s string) {
 	}
 	if e.Images.BusyBox == "" {
 		e.Images.BusyBox = s // default is specified in caller: config/defaults.go
+	}
+}
+
+// GetSystemClusterRoles ...
+func (e *ConfigVars) GetSystemClusterRoles(s []string) {
+	//in this case we always want to take the defaults
+	//then append anything from the env
+	e.SystemClusterRoles = s // default is specified in caller: config/defaults.go
+
+	t := os.Getenv("SYSTEM_CLUSTER_ROLES") //comma separated
+	if len(t) > 0 {		
+		e.SystemClusterRoles = append(e.SystemClusterRoles, strings.Split(t, ",")...)
 	}
 }

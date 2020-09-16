@@ -15,7 +15,8 @@ import (
 )
 
 type probeState struct {
-	state probe.State
+	state            probe.State
+	hasWildcardRoles bool
 }
 
 func init() {
@@ -41,6 +42,39 @@ func (p *probeState) aKubernetesClusterIsDeployed() error {
 	}
 
 	//else we're good ...
+	return nil
+}
+
+//@CIS-5.1.3
+func (p *probeState) iInspectTheThatAreConfigured(roleLevel string) error {
+	var e error
+
+	if roleLevel == "Cluster Roles" {
+		l, err := kubernetes.GetKubeInstance().GetClusterRolesByResource("*")
+		e = err
+		p.hasWildcardRoles = len(*l) > 0
+
+	} else if roleLevel == "Roles" {
+		l, err := kubernetes.GetKubeInstance().GetRolesByResource("*")
+		e = err
+		p.hasWildcardRoles = len(*l) > 0
+	}
+
+	if e != nil {
+		return features.LogAndReturnError("error raised when retrieving roles for rolelevel %v: %v", roleLevel, e)
+	}
+
+	return nil
+}
+
+func (p *probeState) iShouldOnlyFindWildcardsInKnownAndAuthorisedConfigurations() error {
+	//we strip out system/known entries in the cluster roles & roles call
+
+	if p.hasWildcardRoles {
+		return features.LogAndReturnError("roles exist with wildcarded resources")
+	}
+
+	//good if get to here
 	return nil
 }
 
@@ -117,6 +151,10 @@ func ScenarioInitialize(ctx *godog.ScenarioContext) {
 
 	//general
 	ctx.Step(`^a Kubernetes cluster is deployed$`, ps.aKubernetesClusterIsDeployed)
+
+	//@CIS-5.1.3
+	ctx.Step(`^I inspect the "([^"]*)" that are configured$`, ps.iInspectTheThatAreConfigured)
+	ctx.Step(`^I should only find wildcards in known and authorised configurations$`, ps.iShouldOnlyFindWildcardsInKnownAndAuthorisedConfigurations)
 
 	//@CIS-5.6.3
 	ctx.Step(`^I attempt to create a deployment which does not have a Security Context$`, ps.iAttemptToCreateADeploymentWhichDoesNotHaveASecurityContext)

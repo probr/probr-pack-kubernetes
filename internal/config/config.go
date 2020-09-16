@@ -27,7 +27,8 @@ type ConfigVars struct {
 	} `yaml:"azure"`
 	Tests struct {
 		Tags string `yaml:"tags"`
-	} `yaml:"tests"`
+	} `yaml:"tests"`	
+	SystemClusterRoles []string `yaml:"systemClusterRoles"`
 }
 
 //Vars ...
