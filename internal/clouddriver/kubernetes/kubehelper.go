@@ -16,6 +16,7 @@ import (
 
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/kubernetes/scheme"
@@ -25,6 +26,7 @@ import (
 	executil "k8s.io/client-go/util/exec"
 
 	apiv1 "k8s.io/api/core/v1"
+	rbacv1 "k8s.io/api/rbac/v1"
 
 	//needed for authentication against the various GCPs
 	_ "k8s.io/client-go/plugin/pkg/client/auth"
@@ -105,7 +107,9 @@ type Kubernetes interface {
 	CreateConfigMap(n *string, ns *string) (*apiv1.ConfigMap, error)
 	DeleteConfigMap(n *string, ns *string) error
 	GetConstraintTemplates(prefix string) (*map[string]interface{}, error)
-	GetRawResourcesByGrp(g string) (*K8SJSON, error)
+	GetRawResourcesByGrp(g string) (*K8SJSON, error)	
+	GetClusterRolesByResource(r string) (*[]rbacv1.ClusterRole, error)
+	GetClusterRoles() (*rbacv1.ClusterRoleList, error)
 }
 
 var instance *Kube
@@ -691,6 +695,124 @@ func (k *Kube) GetRawResourcesByGrp(g string) (*K8SJSON, error) {
 	log.Printf("[DEBUG] JSON result: %+v", j)
 
 	return &j, nil
+}
+
+//GetClusterRolesByResource ...
+func (k *Kube) GetClusterRolesByResource(r string) (*[]rbacv1.ClusterRole, error){
+	var crs []rbacv1.ClusterRole
+
+	crl, err := k.GetClusterRoles()
+	if err != nil {
+		return &crs, err
+	}	
+
+	for _, cr := range crl.Items {
+		log.Printf("[DEBUG] ClusterRole: %+v", cr)
+		if k.meetsResourceFilter(r, &cr.ObjectMeta, &cr.Rules) {
+			//add to results 		
+			log.Printf("[INFO] ClusterRole meets resource filter (%v): %+v", r, cr)
+			crs = append(crs, cr)								
+		}		
+	}
+
+	return &crs, nil
+}
+
+//GetRolesByResource ...
+func (k *Kube) GetRolesByResource(r string) (*[]rbacv1.Role, error){
+	var ros []rbacv1.Role
+
+	rl, err := k.GetRoles()
+	if err != nil {
+		return &ros, err
+	}
+	
+	for _, ro := range rl.Items {
+		log.Printf("[DEBUG] Role: %+v", ro)
+		if k.meetsResourceFilter(r, &ro.ObjectMeta, &ro.Rules) {
+			//add to results
+			log.Printf("[INFO] Role meets resource filter (%v): %+v", r, ro) 		
+			ros = append(ros, ro)								
+		}		
+	}
+
+	return &ros, nil
+}
+
+func (k *Kube) meetsResourceFilter(f string, m *v1.ObjectMeta, p *[]rbacv1.PolicyRule) bool {
+
+	//skip system/known roles
+	if k.skipSystemRole(m) {
+		return false
+	}
+
+	for _, ru := range *p {
+		log.Printf("[DEBUG] PolicyRule: %+v", ru)
+		var b bool
+		
+		for _, res := range ru.Resources {
+			if strings.HasPrefix(res, f) {
+				log.Printf("[DEBUG] PolicyRule meets filter %v", f)
+				//meets filter 
+				//can also break out of the rules loop as 
+				//we want to add full role to results if one rule 
+				//passes filter
+				b = true
+				break
+			}
+		}
+		if b {
+			return true
+		}
+	}
+	return false
+}
+
+func (k *Kube) skipSystemRole(m *v1.ObjectMeta) bool {
+	//first check for known system namespaces:
+	if strings.HasPrefix(m.Namespace, "kube") || strings.HasPrefix(m.Namespace,"gatekeeper") {
+		return true
+	}
+		
+	//next, check to see if the role name is on the list of system roles	
+	for _, r := range config.Vars.SystemClusterRoles {
+		//use a prefix check:
+		if strings.HasPrefix(m.Name, r) {
+			return true
+		}
+	}
+
+	return false
+}
+
+//GetClusterRoles ...
+func (k *Kube) GetClusterRoles() (*rbacv1.ClusterRoleList, error) {
+	c, err := k.GetClient()
+	if err != nil {
+		// return nil, err
+	}
+
+	cr := c.RbacV1().ClusterRoles()
+
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	return cr.List(ctx, metav1.ListOptions{ LabelSelector: "gatekeeper.sh/system!=yes"})
+}
+
+//GetRoles ...
+func (k *Kube) GetRoles() (*rbacv1.RoleList, error) {
+	c, err := k.GetClient()
+	if err != nil {
+		// return nil, err
+	}
+
+	r := c.RbacV1().Roles("")
+
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	return r.List(ctx, metav1.ListOptions{ LabelSelector: "gatekeeper.sh/system!=yes"})
 }
 
 func isAlreadyExists(err error) bool {

@@ -2,6 +2,7 @@ package config
 
 import (
 	"os"
+	"strings"
 )
 
 // GetKubeConfigPath ...
@@ -75,22 +76,43 @@ func (e *ConfigVars) GetAzureLocationDefault() {
 }
 
 // GetImageRepository ...
-func (e *ConfigVars) GetImageRepository() {
+func (e *ConfigVars) GetImageRepository(s string) {
 	if e.Images.Repository == "" {
 		e.Images.Repository = os.Getenv("IMAGE_REPOSITORY")
+	}
+	if e.Images.Repository == "" {
+		e.Images.Repository = s // default is specified in caller: config/defaults.go
 	}
 }
 
 // GetCurlImage ...
-func (e *ConfigVars) GetCurlImage() {
+func (e *ConfigVars) GetCurlImage(s string) {
 	if e.Images.Curl == "" {
 		e.Images.Curl = os.Getenv("CURL_IMAGE")
+	}
+	if e.Images.Curl == "" {
+		e.Images.Curl = s // default is specified in caller: config/defaults.go
 	}
 }
 
 // GetBusyBoxImage ...
-func (e *ConfigVars) GetBusyBoxImage() {
+func (e *ConfigVars) GetBusyBoxImage(s string) {
 	if e.Images.BusyBox == "" {
 		e.Images.BusyBox = os.Getenv("BUSYBOX_IMAGE")
+	}
+	if e.Images.BusyBox == "" {
+		e.Images.BusyBox = s // default is specified in caller: config/defaults.go
+	}
+}
+
+// GetSystemClusterRoles ...
+func (e *ConfigVars) GetSystemClusterRoles(s []string) {
+	//in this case we always want to take the defaults
+	//then append anything from the env
+	e.SystemClusterRoles = s // default is specified in caller: config/defaults.go
+
+	t := os.Getenv("SYSTEM_CLUSTER_ROLES") //comma separated
+	if len(t) > 0 {		
+		e.SystemClusterRoles = append(e.SystemClusterRoles, strings.Split(t, ",")...)
 	}
 }

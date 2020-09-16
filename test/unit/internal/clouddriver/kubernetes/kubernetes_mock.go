@@ -5,6 +5,7 @@ import (
 	"gitlab.com/citihub/probr/internal/clouddriver/kubernetes"
 	apiv1 "k8s.io/api/core/v1"
 	k8s "k8s.io/client-go/kubernetes"
+	rbacv1 "k8s.io/api/rbac/v1"
 )
 
 type kubeMock struct {
@@ -84,3 +85,11 @@ func (m *kubeMock) GetRawResourcesByGrp(g string) (*kubernetes.K8SJSON, error) {
 	return a.Get(0).(*kubernetes.K8SJSON), a.Error(1)
 }
 
+func (m *kubeMock) GetClusterRolesByResource(r string) (*[]rbacv1.ClusterRole, error) {
+	a := m.Called()
+	return a.Get(0).(*[]rbacv1.ClusterRole), a.Error(1)
+}
+func (m *kubeMock) GetClusterRoles() (*rbacv1.ClusterRoleList, error){
+	a := m.Called()
+	return a.Get(0).(*rbacv1.ClusterRoleList), a.Error(1)
+}

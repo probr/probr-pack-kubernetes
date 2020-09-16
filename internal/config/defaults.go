@@ -12,15 +12,17 @@ func getEnvOrDefaults(e *ConfigVars) {
 	e.GetOutputType("IO")                           // OUTPUT_TYPE
 	e.GetProbrTags()                                // PROBR_TAGS
 
-	e.GetImageRepository() // IMAGE_REPOSITORY
-	e.GetCurlImage()       // CURL_IMAGE
-	e.GetBusyBoxImage()    // BUSYBOX_IMAGE
+	e.GetImageRepository("docker.io") // IMAGE_REPOSITORY
+	e.GetCurlImage("curl")       // CURL_IMAGE
+	e.GetBusyBoxImage("busybox")    // BUSYBOX_IMAGE
 
 	e.GetAzureSubscriptionID()  // AZURE_SUBSCRIPTION_ID
 	e.GetAzureClientID()        // AZURE_CLIENT_ID
 	e.GetAzureClientSecret()    // AZURE_CLIENT_SECRET
 	e.GetAzureTenantID()        // AZURE_TENANT_ID
 	e.GetAzureLocationDefault() // AZURE_LOCATION_DEFAULT
+	
+	e.GetSystemClusterRoles([]string{"system:", "aks", "cluster-admin","policy-agent"})
 }
 
 func getDefaultKubeConfigPath() string {

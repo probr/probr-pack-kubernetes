@@ -94,10 +94,10 @@ func TestGetConstraintTemplate(t *testing.T) {
 	handleResult(nil, err)
 }
 
-func TestGetIdentityBindings(t *testing.T) {
-	con, err := kubernetes.GetKubeInstance().GetIdentityBindings("")
+func TestGetClusterRoles(t *testing.T) {
+	crl, err := kubernetes.GetKubeInstance().GetClusterRoles()
 
-	log.Printf("[NOTICE] identity bindings: %v", con)
+	log.Printf("[NOTICE] cluster roles: %v", crl)
 
 	handleResult(nil, err)
 }
