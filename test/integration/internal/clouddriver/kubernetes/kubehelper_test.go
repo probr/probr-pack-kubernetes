@@ -102,6 +102,32 @@ func TestGetClusterRoles(t *testing.T) {
 	handleResult(nil, err)
 }
 
+func TestGetClusterRolesByResource(t *testing.T) {
+
+	crl, err := kubernetes.GetKubeInstance().GetClusterRolesByResource("*")
+
+	log.Printf("[NOTICE] cluster roles with '*' resource")
+
+	for _, cr := range *crl {
+		log.Printf("[NOTICE] role name: %v role labels: %v", cr.Name, cr.Labels)
+	}
+
+	handleResult(nil, err)
+}
+
+func TestGetRolesByResource(t *testing.T) {
+
+	rl, err := kubernetes.GetKubeInstance().GetRolesByResource("*")
+
+	log.Printf("[NOTICE] roles with '*' resource")
+	
+	for _, r := range *rl {
+		log.Printf("[NOTICE] role name: %v role labels: %v", r.Name, r.Labels)
+	}
+
+	handleResult(nil, err)
+}
+
 func TestGetRawResourcesByGrp(t *testing.T) {
 	j, err := kubernetes.GetKubeInstance().GetRawResourcesByGrp("apis/aadpodidentity.k8s.io/v1/azureidentitybindings")
 
