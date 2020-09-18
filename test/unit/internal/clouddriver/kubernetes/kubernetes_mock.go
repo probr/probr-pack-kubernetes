@@ -46,7 +46,7 @@ func (m *kubeMock) CreatePodFromObject(p *apiv1.Pod, pname *string, ns *string, 
 	//This time, return the pod we've been given, so ignore what's been supplied on the mock call:
 	return p, a.Error(1)
 }
-func (m *kubeMock) CreatePodFromYaml(y []byte, pname *string, ns *string, image *string, w bool) (*apiv1.Pod, error) {
+func (m *kubeMock) CreatePodFromYaml(y []byte, pname *string, ns *string, image *string, identityBinding *string, w bool) (*apiv1.Pod, error) {
 	po := m.Called().Get(0).(*apiv1.Pod)
 	e := m.Called().Error(1)
 	return po, e
@@ -76,10 +76,15 @@ func (m *kubeMock) DeleteConfigMap(n *string, ns *string) error {
 	e := m.Called().Error(0)
 	return e
 }
-func (m *kubeMock) GetConstraintTemplates(prefix *string) (*map[string]interface{}, error) {
+func (m *kubeMock) GetConstraintTemplates(prefix string) (*map[string]interface{}, error) {
 	a := m.Called()
 	return a.Get(0).(*map[string]interface{}), a.Error(1)
 }
+func (m *kubeMock) GetRawResourcesByGrp(g string) (*kubernetes.K8SJSON, error) {
+	a := m.Called()
+	return a.Get(0).(*kubernetes.K8SJSON), a.Error(1)
+}
+
 func (m *kubeMock) GetClusterRolesByResource(r string) (*[]rbacv1.ClusterRole, error) {
 	a := m.Called()
 	return a.Get(0).(*[]rbacv1.ClusterRole), a.Error(1)

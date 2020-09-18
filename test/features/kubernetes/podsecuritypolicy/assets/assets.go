@@ -98,7 +98,7 @@ func assetsYamlPspAzpHostportApprovedYaml() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "assets/yaml/psp-azp-hostport-approved.yaml", size: 582, mode: os.FileMode(438), modTime: time.Unix(1597863384, 0)}
+	info := bindataFileInfo{name: "assets/yaml/psp-azp-hostport-approved.yaml", size: 582, mode: os.FileMode(438), modTime: time.Unix(1600269942, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -118,7 +118,7 @@ func assetsYamlPspAzpHostportUnapprovedYaml() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "assets/yaml/psp-azp-hostport-unapproved.yaml", size: 643, mode: os.FileMode(438), modTime: time.Unix(1597863427, 0)}
+	info := bindataFileInfo{name: "assets/yaml/psp-azp-hostport-unapproved.yaml", size: 643, mode: os.FileMode(438), modTime: time.Unix(1600269942, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -138,7 +138,7 @@ func assetsYamlPspAzpSeccompApprovedYaml() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "assets/yaml/psp-azp-seccomp-approved.yaml", size: 634, mode: os.FileMode(438), modTime: time.Unix(1598355883, 0)}
+	info := bindataFileInfo{name: "assets/yaml/psp-azp-seccomp-approved.yaml", size: 634, mode: os.FileMode(438), modTime: time.Unix(1600269942, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -158,7 +158,7 @@ func assetsYamlPspAzpSeccompUnapprovedYaml() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "assets/yaml/psp-azp-seccomp-unapproved.yaml", size: 471, mode: os.FileMode(438), modTime: time.Unix(1598290256, 0)}
+	info := bindataFileInfo{name: "assets/yaml/psp-azp-seccomp-unapproved.yaml", size: 471, mode: os.FileMode(438), modTime: time.Unix(1600269942, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -178,7 +178,7 @@ func assetsYamlPspAzpSeccompUndefinedYaml() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "assets/yaml/psp-azp-seccomp-undefined.yaml", size: 457, mode: os.FileMode(438), modTime: time.Unix(1598276904, 0)}
+	info := bindataFileInfo{name: "assets/yaml/psp-azp-seccomp-undefined.yaml", size: 457, mode: os.FileMode(438), modTime: time.Unix(1600269942, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -198,7 +198,7 @@ func assetsYamlPspAzpVolumetypesApprovedYaml() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "assets/yaml/psp-azp-volumetypes-approved.yaml", size: 627, mode: os.FileMode(438), modTime: time.Unix(1598463043, 0)}
+	info := bindataFileInfo{name: "assets/yaml/psp-azp-volumetypes-approved.yaml", size: 627, mode: os.FileMode(438), modTime: time.Unix(1600269942, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -218,7 +218,7 @@ func assetsYamlPspAzpVolumetypesUnapprovedYaml() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "assets/yaml/psp-azp-volumetypes-unapproved.yaml", size: 631, mode: os.FileMode(438), modTime: time.Unix(1598032435, 0)}
+	info := bindataFileInfo{name: "assets/yaml/psp-azp-volumetypes-unapproved.yaml", size: 631, mode: os.FileMode(438), modTime: time.Unix(1600269942, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

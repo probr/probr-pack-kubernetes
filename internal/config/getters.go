@@ -75,6 +75,27 @@ func (e *ConfigVars) GetAzureLocationDefault() {
 	}
 }
 
+// GetDefaultNamespaceAI ...
+func (e *ConfigVars) GetDefaultNamespaceAI(s string) {
+	if e.Azure.AzureIdentity.DefaultNamespaceAI == "" {
+		e.Azure.AzureIdentity.DefaultNamespaceAI = os.Getenv("DEFAULT_NS_AZURE_IDENTITY")
+	}
+	if e.Azure.AzureIdentity.DefaultNamespaceAI == "" {
+		e.Azure.AzureIdentity.DefaultNamespaceAI = s // default is specified in caller: config/defaults.go
+	}
+}
+
+// GetDefaultNamespaceAIB ...
+func (e *ConfigVars) GetDefaultNamespaceAIB(s string) {
+	if e.Azure.AzureIdentity.DefaultNamespaceAIB == "" {
+		e.Azure.AzureIdentity.DefaultNamespaceAIB = os.Getenv("DEFAULT_NS_AZURE_IDENTITY_BINDING")
+	}
+	if e.Azure.AzureIdentity.DefaultNamespaceAIB == "" {
+		e.Azure.AzureIdentity.DefaultNamespaceAIB = s // default is specified in caller: config/defaults.go
+	}
+
+}
+
 // GetImageRepository ...
 func (e *ConfigVars) GetImageRepository(s string) {
 	if e.Images.Repository == "" {
@@ -112,7 +133,7 @@ func (e *ConfigVars) GetSystemClusterRoles(s []string) {
 	e.SystemClusterRoles = s // default is specified in caller: config/defaults.go
 
 	t := os.Getenv("SYSTEM_CLUSTER_ROLES") //comma separated
-	if len(t) > 0 {		
+	if len(t) > 0 {
 		e.SystemClusterRoles = append(e.SystemClusterRoles, strings.Split(t, ",")...)
 	}
 }

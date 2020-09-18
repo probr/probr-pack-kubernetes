@@ -11,6 +11,8 @@ type State struct {
 	PodName        string
 	CreationError  *kubernetes.PodCreationError
 	ExpectedReason *kubernetes.PodCreationErrorReason
+
+	CommandExitCode int
 }
 
 // ProcessPodCreationResult is a convenince function to process the result of a pod creation attempt.

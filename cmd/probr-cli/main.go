@@ -37,9 +37,7 @@ func main() {
 	err := config.Init(v)
 	if err != nil {
 		log.Fatalf("[ERROR] Could not create config from provided filepath: %v", err)
-	}
-	log.Printf("[NOTICE] Probr running with environment: ")
-	log.Printf("[NOTICE] %+v", config.Vars)
+	}	
 	if len(i) > 0 {
 		config.Vars.SetKubeConfigPath(i)
 		log.Printf("[NOTICE] Kube Config has been overridden via command line to: " + i)
@@ -54,6 +52,9 @@ func main() {
 		config.Vars.SetTags(t)
 		log.Printf("[NOTICE] Tags have been added via command line to: " + t)
 	}
+
+	log.Printf("[NOTICE] Probr running with environment: ")
+	log.Printf("[NOTICE] %+v", config.Vars)
 
 	//exec 'em all (for now!)
 	s, ts, err := probr.RunAllTests()

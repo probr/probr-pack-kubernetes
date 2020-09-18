@@ -1,6 +1,7 @@
 package kubernetes_test
 
 import (
+	"fmt"
 	"io/ioutil"
 	"log"
 	"os"
@@ -8,7 +9,8 @@ import (
 
 	"gitlab.com/citihub/probr/internal/clouddriver/kubernetes"
 	_ "gitlab.com/citihub/probr/internal/config"
-	"gitlab.com/citihub/probr/internal/utils"
+	// metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	// "k8s.io/client-go/kubernetes/scheme"
 )
 
 var (
@@ -38,10 +40,10 @@ func TestCreatePod(t *testing.T) {
 
 func TestCreatePodFromYaml(t *testing.T) {
 	//read the yaml:
-	b, _ := ioutil.ReadFile("pod-test.yaml")
+	b, _ := ioutil.ReadFile("assets/pod-test.yaml")
 	//y := string(b)
 
-	_, err := kubernetes.GetKubeInstance().CreatePodFromYaml(b, &testPod, &testNS, &testImage, true)
+	_, err := kubernetes.GetKubeInstance().CreatePodFromYaml(b, &testPod, &testNS, &testImage, nil, true)
 
 	handleResult(nil, err)
 }
@@ -85,7 +87,7 @@ func TestConfigMap(t *testing.T) {
 }
 
 func TestGetConstraintTemplate(t *testing.T) {
-	con, err := kubernetes.GetKubeInstance().GetConstraintTemplates(utils.StringPtr("k8sazure"))
+	con, err := kubernetes.GetKubeInstance().GetConstraintTemplates("k8sazure")
 
 	log.Printf("[NOTICE] constraints: %v", con)
 
@@ -126,10 +128,37 @@ func TestGetRolesByResource(t *testing.T) {
 	handleResult(nil, err)
 }
 
+func TestGetRawResourcesByGrp(t *testing.T) {
+	j, err := kubernetes.GetKubeInstance().GetRawResourcesByGrp("apis/aadpodidentity.k8s.io/v1/azureidentities")
+
+	fmt.Printf("JSON Azure Identities: %v\n", j)
+
+	for _, r := range j.Items {
+		fmt.Printf("Name: %v\n", r.Metadata["name"])
+		fmt.Printf("Namespace: %v\n", r.Metadata["namespace"])
+	}
+	
+
+	handleResult(nil, err)
+
+	j, err = kubernetes.GetKubeInstance().GetRawResourcesByGrp("apis/aadpodidentity.k8s.io/v1/azureidentitybindings")
+
+	fmt.Printf("JSON Azure Identity Bindings: %v\n", j)
+
+	for _, r := range j.Items {
+		fmt.Printf("Name: %v\n", r.Metadata["name"])
+		fmt.Printf("Namespace: %v\n", r.Metadata["namespace"])
+	}
+	
+
+	handleResult(nil, err)
+}
+
 func handleResult(yesNo *bool, err error) {
 	if err != nil {
 		//Log but don't check for this atm, i.e. keep tests running
-		log.Printf("[WARN] Test failed with ERROR: %v\n", err)
+		// log.Printf("[WARN] Test failed with ERROR: %v\n", err)
+		fmt.Printf("Test failed with ERROR: %v\n", err)
 		return
 	}
 

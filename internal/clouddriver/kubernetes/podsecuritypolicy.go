@@ -557,7 +557,7 @@ func (psp *PSP) CreatePodFromYaml(y []byte) (*apiv1.Pod, error) {
 	pname := GenerateUniquePodName(psp.testPodName)
 
 	return psp.k.CreatePodFromYaml(y, &pname, utils.StringPtr(psp.testNamespace),
-		utils.StringPtr(psp.testImage), true)
+		utils.StringPtr(psp.testImage), nil, true)
 }
 
 // ExecPSPTestCmd ...
