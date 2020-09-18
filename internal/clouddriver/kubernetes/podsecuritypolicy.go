@@ -39,7 +39,6 @@ const (
 	NetCat
 	Unshare
 	Ls
-	CatAzJSON
 )
 
 func (c PSPTestCommand) String() string {
@@ -52,8 +51,7 @@ func (c PSPTestCommand) String() string {
 		"ip link add dummy0 type dummy",
 		"nc -l 1234",
 		"unshare",
-		"ls",
-		"cat /etc/kubernetes/azure.json"}[c]
+		"ls"}[c]
 }
 
 // PSPVerificationProbe ...

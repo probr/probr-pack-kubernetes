@@ -88,8 +88,15 @@ type CmdExecutionResult struct {
 	Internal bool
 }
 
-func (e *CmdExecutionResult) Error() string {
-	return fmt.Sprintf("cmd execution error - internal=%t code=%v error=%v", e.Internal, e.Code, e.Err)
+func (e *CmdExecutionResult) String() string {
+	var b strings.Builder
+	b.WriteString(fmt.Sprintf("cmd execution result: code=%v stdout=%v stderr=%v", e.Code, e.Stdout, e.Stderr))
+
+	if e.Err != nil {
+		b.WriteString(fmt.Sprintf(" || error: internal=%t msg=%v", e.Internal, e.Err))
+	}
+	
+	return b.String()
 }
 
 // Kubernetes ...
@@ -261,6 +268,9 @@ func (k *Kube) CreatePodFromYaml(y []byte, pname *string, ns *string, image *str
 	}	
 
 	if aadpodidbinding != nil {
+		if p.Labels == nil {
+			p.Labels = make(map[string]string)
+		}
 		p.Labels["aadpodidbinding"] = *aadpodidbinding
 	}
 
@@ -679,8 +689,6 @@ func (k *Kube) GetRawResourcesByGrp(g string) (*K8SJSON, error) {
 	defer cancel()
 
 	res := r.Do(ctx)
-	log.Printf("[DEBUG] RAW Result: %+v", res)
-
 	if res.Error() != nil {
 		return nil, res.Error()
 	}
@@ -873,7 +881,7 @@ func (k *Kube) waitForPhase(ph apiv1.PodPhase, c *kubernetes.Clientset, ns *stri
 	log.Printf("[NOTICE] *** Waiting for phase %v on pod %v ...", ph, *n)
 
 	for e := range w.ResultChan() {
-		log.Printf("[INFO] Watch Event Type: %v", e.Type)
+		log.Printf("[DEBUG] Watch Event Type: %v", e.Type)
 		p, ok := e.Object.(*apiv1.Pod)
 		if !ok {
 			log.Printf("[WARNING] Unexpected Watch Event Type - skipping")
@@ -886,13 +894,13 @@ func (k *Kube) waitForPhase(ph apiv1.PodPhase, c *kubernetes.Clientset, ns *stri
 			continue
 		}
 		if p.GetName() != *n {
-			log.Printf("[INFO] Event received for pod %v which we're not waiting on. Skipping.", p.GetName())
+			log.Printf("[DEBUG] Event received for pod %v which we're not waiting on. Skipping.", p.GetName())
 			continue
 		}
 
 		log.Printf("[NOTICE] Pod %v Phase: %v", p.GetName(), p.Status.Phase)
 		for _, con := range p.Status.ContainerStatuses {
-			log.Printf("[INFO] Container Status: %+v", con)
+			log.Printf("[DEBUG] Container Status: %+v", con)
 		}
 
 		// don't wait if we're getting errors:
@@ -920,13 +928,13 @@ func (k *Kube) podInErrorState(p *apiv1.Pod) (bool, *PodCreationError) {
 		if p.Status.ContainerStatuses[0].State.Waiting != nil {
 			n := p.GetObjectMeta().GetName()
 			r := p.Status.ContainerStatuses[0].State.Waiting.Reason
-			log.Printf("[INFO] Pod: %v Waiting reason: %v", n, r)
+			log.Printf("[DEBUG] Pod: %v Waiting reason: %v", n, r)
 
 			//TODO: other error states? Also need to tidy up the error creation
 			pe, exists := k.k8statusToPodCreationError[r]
 
 			if exists {
-				log.Printf("[INFO] Giving up waiting on pod %v . Error reason: %v", n, r)
+				log.Printf("[DEBUG] Giving up waiting on pod %v . Error reason: %v", n, r)
 				pcErr := make(map[PodCreationErrorReason]*PodCreationErrorReason, 1)
 
 				pcErr[pe] = &pe
@@ -951,7 +959,7 @@ func waitForDelete(c *kubernetes.Clientset, ns *string, n *string) error {
 	log.Printf("[NOTICE] *** Waiting for DELETE on pod %v ...", *n)
 
 	for e := range w.ResultChan() {
-		log.Printf("[INFO] Watch Event Type: %v", e.Type)
+		log.Printf("[DEBUG] Watch Event Type: %v", e.Type)
 		p, ok := e.Object.(*apiv1.Pod)
 		if !ok {
 			log.Printf("[WARNING] Unexpected Watch Event Type received for pod %v - skipping", p.GetObjectMeta().GetName())

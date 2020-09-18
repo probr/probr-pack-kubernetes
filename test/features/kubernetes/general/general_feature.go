@@ -132,6 +132,10 @@ func (p *probeState) theKubernetesWebUIIsDisabled() error {
 	return nil
 }
 
+func (p *probeState) tearDown() {
+	kubernetes.GetKubeInstance().DeletePod(&p.state.PodName, utils.StringPtr("probr-general-test-ns"), false)		
+}
+
 //TestSuiteInitialize ...
 func TestSuiteInitialize(ctx *godog.TestSuiteContext) {
 
@@ -164,6 +168,7 @@ func ScenarioInitialize(ctx *godog.ScenarioContext) {
 	ctx.Step(`^the Kubernetes Web UI is disabled$`, ps.theKubernetesWebUIIsDisabled)
 
 	ctx.AfterScenario(func(s *godog.Scenario, err error) {
+		ps.tearDown()
 		features.LogScenarioEnd(s)
 	})
 }

@@ -3,11 +3,11 @@ package kubernetes
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"log"
 	"strings"
 
 	"gitlab.com/citihub/probr/internal/config"
-	"gitlab.com/citihub/probr/internal/utils"
 	"k8s.io/client-go/kubernetes/scheme"
 
 	apiv1 "k8s.io/api/core/v1"
@@ -22,20 +22,35 @@ const (
 	defaultIAMTestNamespace = "probr-rbac-test-ns"
 	//NOTE: either the above namespace needs to be added to the exclusion list on the
 	//container registry rule or busybox need to be available in the allowed (probably internal) registry
-	defaultIAMImageRepository = "docker.io"
-	defaultIAMTestImage       = "busybox"
+	defaultIAMImageRepository = "curlimages"
+	defaultIAMTestImage       = "curl"
 	defaultIAMTestContainer   = "iam-test"
 	defaultIAMTestPodName     = "iam-test-pod"
 )
 
+//IAMTestCommand ...
+type IAMTestCommand int
+
+//IAMTestCommand ...
+const (
+	CatAzJSON IAMTestCommand = iota
+	CurlAuthToken
+)
+
+func (c IAMTestCommand) String() string {
+	return [...]string{"cat /etc/kubernetes/azure.json",
+		"curl http://169.254.169.254/metadata/identity/oauth2/token?api-version=2018-02-01&resource=https%3A%2F%2Fmanagement.azure.com%2F -H Metadata:true -s"}[c]
+}
+
 //IdentityAccessManagement encapsulates functionality for querying and probing Identity and Access Management setup
 type IdentityAccessManagement interface {
-	AzureIdentityExists(ns string) (bool, error)
-	AzureIdentityBindingExists(ns string) (bool, error)
+	AzureIdentityExists(useDefaultNS bool) (bool, error)
+	AzureIdentityBindingExists(useDefaultNS bool) (bool, error)
 	CreateAIB(y []byte, ai string, n string, ns string) (bool, error)
-	CreateIAMTestPod(y []byte, identityBinding string) (*apiv1.Pod, error)
-	DeleteIAMTestPod(n string) error
-	ExecuteVerificationCmd(pn string, cmd PSPTestCommand) (*CmdExecutionResult, error)
+	CreateIAMTestPod(y []byte, useDefaultNS bool) (*apiv1.Pod, error)
+	DeleteIAMTestPod(n string, useDefaultNS bool) error
+	ExecuteVerificationCmd(pn string, cmd IAMTestCommand, useDefaultNS bool) (*CmdExecutionResult, error)
+	GetAccessToken(pn string, useDefaultNS bool) (*string, error)
 }
 
 //IAM implements the IdentityAccessManagement interface
@@ -70,21 +85,23 @@ func (i *IAM) setenv() {
 	i.testContainer = defaultIAMTestContainer
 	i.testPodName = defaultIAMTestPodName
 
-	// image repository + busy box from config
+	// image repository + curl from config
 	// but default if not supplied
 	ig := config.Vars.Images.Repository
-	if len(ig) < 1 {
+	//need to fudge for 'curl' as it's registered as curlimages/curl 
+	//on docker, so if we've been given a repository from the config
+	//and it's 'docker.io' then ignore it and set default (curlimages)
+	if len(ig) < 1 || ig == "docker.io" {
 		ig = defaultIAMImageRepository
 	}
-	b := config.Vars.Images.BusyBox
+	b := config.Vars.Images.Curl
 	if len(b) < 1 {
 		b = defaultIAMTestImage
 	}
 
 	i.testImage = ig + "/" + b
-
-	//TODO: possibly externalise this
-	i.testAzureIdentityBinding = "probr-aib"
+	
+	i.testAzureIdentityBinding = "probr-specificns-aib"
 }
 
 //CreateAIB creates an AzureIdentityBinding to the supplied AzureIdentity
@@ -168,19 +185,19 @@ func (i *IAM) createFromYaml(y []byte, pname *string, ns *string, image *string,
 }
 
 //AzureIdentityExists gets the AzureIdentityBindings and filter for namespace (if supplied)
-func (i *IAM) AzureIdentityExists(ns string) (bool, error) {
+func (i *IAM) AzureIdentityExists(useDefaultNS bool) (bool, error) {
 	//need to make a 'raw' call to get the AIBs
 	//the AIB's are in the API group: "apis/aadpodidentity.k8s.io/v1/azureidentity"
 
-	return i.filteredRawResourceGrp("apis/aadpodidentity.k8s.io/v1/azureidentities", "namespace", ns)
+	return i.filteredRawResourceGrp("apis/aadpodidentity.k8s.io/v1/azureidentities", "namespace", *i.getNamespace(useDefaultNS))
 }
 
 //AzureIdentityBindingExists gets the AzureIdentityBindings and filter for namespace (if supplied)
-func (i *IAM) AzureIdentityBindingExists(ns string) (bool, error) {
+func (i *IAM) AzureIdentityBindingExists(useDefaultNS bool) (bool, error) {
 	//need to make a 'raw' call to get the AIBs
 	//the AIB's are in the API group: "apis/aadpodidentity.k8s.io/v1/azureidentitybindings"
 
-	return i.filteredRawResourceGrp("apis/aadpodidentity.k8s.io/v1/azureidentitybindings", "namespace", ns)	
+	return i.filteredRawResourceGrp("apis/aadpodidentity.k8s.io/v1/azureidentitybindings", "namespace", *i.getNamespace(useDefaultNS))
 }
 
 func (i *IAM) filteredRawResourceGrp(g string, k string, f string) (bool, error) {
@@ -202,28 +219,83 @@ func (i *IAM) filteredRawResourceGrp(g string, k string, f string) (bool, error)
 }
 
 //CreateIAMTestPod ...
-func (i *IAM) CreateIAMTestPod(y []byte, identityBinding string) (*apiv1.Pod, error) {
+func (i *IAM) CreateIAMTestPod(y []byte, useDefaultNS bool) (*apiv1.Pod, error) {
 	n := GenerateUniquePodName(i.testPodName)
-
-	//TODO: pass a nil image in for now and take it from the yaml
-	return i.k.CreatePodFromYaml(y, &n, utils.StringPtr(i.testNamespace),
-		nil, &identityBinding, true)	
+		
+	return i.k.CreatePodFromYaml(y, &n, i.getNamespace(useDefaultNS), &i.testImage, 
+		i.getAadPodIDBinding(useDefaultNS), true)
 }
 
 //DeleteIAMTestPod ...
-func (i *IAM) DeleteIAMTestPod(n string) error {
-	return i.k.DeletePod(&n, &i.testNamespace, false) //don't worry about waiting
+func (i *IAM) DeleteIAMTestPod(n string, useDefaultNS bool) error {
+	return i.k.DeletePod(&n, i.getNamespace(useDefaultNS), false) //don't worry about waiting
 }
 
 // ExecuteVerificationCmd ...
-func (i *IAM) ExecuteVerificationCmd(pn string, cmd PSPTestCommand) (*CmdExecutionResult, error) {
+func (i *IAM) ExecuteVerificationCmd(pn string, cmd IAMTestCommand, useDefaultNS bool) (*CmdExecutionResult, error) {
 	c := cmd.String()
-	// ns := i.testNamespace
-	ns := "default"
-	res := i.k.ExecCommand(&c, &ns, &pn)
+	res := i.k.ExecCommand(&c, i.getNamespace(useDefaultNS), &pn)
 
-	log.Printf("[NOTICE] ExecPSPTestCmd: %v stdout: %v exit code: %v (error: %v)", cmd, res.Stdout, res.Code, res.Err)
-	
+	log.Printf("[NOTICE] ExecuteVerificationCmd: %v stdout: %v exit code: %v (error: %v)", cmd, res.Stdout, res.Code, res.Err)
+
 	return res, nil
 
+}
+
+//GetAccessToken ...
+func (i *IAM) GetAccessToken(pn string, useDefaultNS bool) (*string, error) {
+	//curl for the auth token ... need to supply appropiate ns
+	res, err := i.ExecuteVerificationCmd(pn, CurlAuthToken, useDefaultNS)
+	log.Printf("[NOTICE] curl result: %v", res)
+
+	if err != nil {
+		//this is an error from trying to execute the command as opposed to
+		//the command itself returning an error
+		return nil, fmt.Errorf("error raised trying to execute auth token command - %v", err)
+	}
+
+	//try and extract token 
+	var a struct {
+		AccessToken string `json:"access_token,omitempty"`
+	}
+	json.Unmarshal([]byte(res.Stdout), &a)
+
+	log.Printf("[DEBUG] Access Token JSON result: %+v", a)
+	
+	return &a.AccessToken, nil
+}
+
+
+func (i *IAM) getNamespace(useDefaultNS bool) *string {
+	var ns string
+	if useDefaultNS {
+		ns = "default"
+	} else {
+		ns = i.testNamespace
+	}
+
+	return &ns
+}
+
+func (i *IAM) getAadPodIDBinding(useDefaultNS bool) *string {
+	//return the value for the following pod label
+	// labels:
+    // 	aadpodidbinding:
+	//the value in this label should match the selector value in 
+	//the AzureIdentityBinding
+
+	var b string
+	if useDefaultNS {
+		//if the default namespace, we can get the value from the config
+		//this can be specified via config file or env and could vary 
+		//between deployment situations.  If not supplied the default 
+		//will be returned.
+		b = config.Vars.Azure.AzureIdentity.DefaultNamespaceAIB
+	} else {
+		//if not the default namespace, then we are testing a specific 
+		//identity binding set up as part of the probr run.
+		b = i.testAzureIdentityBinding
+	}
+
+	return &b
 }

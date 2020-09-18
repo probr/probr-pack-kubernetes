@@ -24,10 +24,14 @@ type ConfigVars struct {
 		ClientSecret    string `yaml:"clientSecret"`
 		TenantID        string `yaml:"tenantID"`
 		LocationDefault string `yaml:"locationDefault"`
+		AzureIdentity   struct {
+			DefaultNamespaceAI  string `yaml:"defaultNamespaceAI"`
+			DefaultNamespaceAIB string `yaml:"defaultNamespaceAIB"`
+		} `yaml:"azureIdentity"`
 	} `yaml:"azure"`
 	Tests struct {
 		Tags string `yaml:"tags"`
-	} `yaml:"tests"`	
+	} `yaml:"tests"`
 	SystemClusterRoles []string `yaml:"systemClusterRoles"`
 }
 

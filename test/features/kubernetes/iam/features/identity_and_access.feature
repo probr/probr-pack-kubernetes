@@ -9,12 +9,17 @@ Feature: Ensure stringent authentication and authorisation
   #There will be CIS control here, for now, straight into Azure AAD Managed Identity ...
 
   @preventative @AZ-AAD-AI-1.0
-  Scenario: Prevent cross namespace Azure Identities
+  Scenario Outline: Prevent cross namespace Azure Identities
     Given a Kubernetes cluster exists which we can deploy into
     And the default namespace has an AzureIdentityBinding
-    When I create a pod in a non-default namespace assigned with that AzureIdentityBinding
+    When I create a simple pod in "<namespace>" namespace assigned with that AzureIdentityBinding
     Then the pod is deployed successfully
-    But the pod fails to go into Running state due to reason "whatever the error is"
+    But an attempt to obtain an access token from that pod should "<RESULT>"
+
+    Examples: 
+			| namespace     | RESULT  |
+			| a non-default | Fail    |
+			| the default   | Succeed |
 
   @preventative @AZ-AAD-AI-1.1
   Scenario: Prevent cross namespace Azure Identity Bindings
@@ -23,7 +28,7 @@ Feature: Ensure stringent authentication and authorisation
     When I create an AzureIdentityBinding called "probr-aib" in a non-default namespace
     And I deploy a pod assigned with the "probr-aib" AzureIdentityBinding into the same namespace as the "probr-aib" AzureIdentityBinding 
     Then the pod is deployed successfully
-    But the pod fails to go into Running state due to reason "whatever the reason is"
+    But an attempt to obtain an access token from that pod should fail
 
   @preventative @AZ-AAD-AI-1.2
   Scenario: Prevent access to AKS credentials via Azure Identity Components

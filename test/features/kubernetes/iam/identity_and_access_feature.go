@@ -15,7 +15,8 @@ import (
 )
 
 type probeState struct {
-	state probe.State
+	state        probe.State
+	useDefaultNS bool
 }
 
 var iam kubernetes.IdentityAccessManagement
@@ -40,16 +41,16 @@ func init() {
 }
 
 //general/misc helpers:
-func (p *probeState) runAISetupCheck(f func(string) (bool, error), ns string, k string) error {
+func (p *probeState) runAISetupCheck(f func(bool) (bool, error), useDefaultNS bool, k string) error {
 
-	b, err := f(ns)
+	b, err := f(useDefaultNS)
 
 	if err != nil {
-		return features.LogAndReturnError("error raised when checking for %v in namespace %v: %v", k, ns, err)
+		return features.LogAndReturnError("error raised when checking for %v: %v", k, err)
 	}
 
 	if !b {
-		return features.LogAndReturnError("%v does not exist in namespace %v (result: %t)", k, ns, b)
+		return features.LogAndReturnError("%v does not exist (result: %t)", k, b)
 	}
 
 	return nil
@@ -70,16 +71,20 @@ func (p *probeState) aKubernetesClusterExistsWhichWeCanDeployInto() error {
 
 //AZ-AAD-AI-1.0
 func (p *probeState) theDefaultNamespaceHasAnAzureIdentityBinding() error {
-	return p.runAISetupCheck(iam.AzureIdentityBindingExists, "default", "AzureIdentityBinding")
+	return p.runAISetupCheck(iam.AzureIdentityBindingExists, true, "AzureIdentityBinding")
 }
-func (p *probeState) iCreateAPodInANondefaultNamespaceAssignedWithThatAzureIdentityBinding() error {
+func (p *probeState) iCreateASimplePodInNamespaceAssignedWithThatAzureIdentityBinding(namespace string) error {
 
-	y, err := iamassets.Asset("assets/yaml/iam-azi-test-aib.yaml")
+	y, err := iamassets.Asset("assets/yaml/iam-azi-test-aib-curl.yaml")
 	if err != nil {
 		return features.LogAndReturnError("error reading yaml for test: %v", err)
 	}
 
-	pd, err := iam.CreateIAMTestPod(y, "probr-defaultns-aib")
+	if namespace == "the default" {
+		p.useDefaultNS = true
+	}
+
+	pd, err := iam.CreateIAMTestPod(y, p.useDefaultNS)
 	return probe.ProcessPodCreationResult(&p.state, pd, kubernetes.UndefinedPodCreationErrorReason, err)
 }
 
@@ -96,12 +101,37 @@ func (p *probeState) thePodIsDeployedSuccessfully() error {
 
 	return nil
 }
-func (p *probeState) thePodFailsToGoIntoRunningStateDueToReason(arg1 string) error {
-	//want a pod "creation" error, which will be raised if the pod doesn't make it to running state
-	//(our definition of "done"/"created" for a pod is for it to successfully reach running state)
+func (p *probeState) anAttemptToObtainAnAccessTokenFromThatPodShouldFail() error {
+	//reuse the parameterised / scenario outline func
+	return p.anAttemptToObtainAnAccessTokenFromThatPodShould("Fail")
+}
+func (p *probeState) anAttemptToObtainAnAccessTokenFromThatPodShould(expectedresult string) error {
 
-	if p.state.CreationError == nil {
-		return features.LogAndReturnError("pod %v was successfully created.  Test fails.", p.state.PodName)
+	if p.state.CreationError != nil {
+		return features.LogAndReturnError("failed to create pod", p.state.CreationError)
+	}
+
+	//curl for the auth token ... need to supply appropiate ns	
+	res, err := iam.GetAccessToken(p.state.PodName, p.useDefaultNS)
+
+	if err != nil {
+		//this is an error from trying to execute the command as opposed to
+		//the command itself returning an error
+		return features.LogAndReturnError("error raised trying to execute auth token command - %v", err)
+	}
+
+	if expectedresult == "Fail" {
+		if res != nil && len(*res) > 0 {
+			//we got a token .. error
+			return features.LogAndReturnError("token was successfully acquired on pod %v (result: %v)", p.state.PodName, *res)
+		}
+	} else if expectedresult == "Succeed" {
+		if res == nil {
+			//we didn't get a token .. error
+			return features.LogAndReturnError("failed to acquire token on pod %v", p.state.PodName)
+		}
+	} else {
+		return features.LogAndReturnError("unrecognised expected result: %v", expectedresult)
 	}
 
 	//else we're good
@@ -110,19 +140,18 @@ func (p *probeState) thePodFailsToGoIntoRunningStateDueToReason(arg1 string) err
 
 //AZ-AAD-AI-1.1
 func (p *probeState) theDefaultNamespaceHasAnAzureIdentity() error {
-	return p.runAISetupCheck(iam.AzureIdentityExists, "default", "AzureIdentity")
+	return p.runAISetupCheck(iam.AzureIdentityExists, true, "AzureIdentity")
 }
 func (p *probeState) iCreateAnAzureIdentityBindingCalledInANondefaultNamespace(arg1 string) error {
-	//TODO: for now create this outside test.  Need to figure out how to do this progamatically
-	return p.runAISetupCheck(iam.AzureIdentityBindingExists, "probr-rbac-test-ns", "AzureIdentityBinding")	
+	return p.runAISetupCheck(iam.AzureIdentityBindingExists, false, "AzureIdentityBinding")
 }
 func (p *probeState) iDeployAPodAssignedWithTheAzureIdentityBindingIntoTheSameNamespaceAsTheAzureIdentityBinding(arg1, arg2 string) error {
-	y, err := iamassets.Asset("assets/yaml/iam-azi-test-aib.yaml")
+	y, err := iamassets.Asset("assets/yaml/iam-azi-test-aib-curl.yaml")
 	if err != nil {
 		return features.LogAndReturnError("error reading yaml for test: %v", err)
 	}
 
-	pd, err := iam.CreateIAMTestPod(y, "probr-specificns-aib")
+	pd, err := iam.CreateIAMTestPod(y, false)
 	return probe.ProcessPodCreationResult(&p.state, pd, kubernetes.UndefinedPodCreationErrorReason, err)
 }
 
@@ -151,7 +180,7 @@ func (p *probeState) theClusterHasManagedIdentityComponentsDeployed() error {
 func (p *probeState) iExecuteTheCommandAgainstTheMICPod(arg1 string) error {
 
 	c := kubernetes.CatAzJSON
-	res, err := iam.ExecuteVerificationCmd(p.state.PodName, c)
+	res, err := iam.ExecuteVerificationCmd(p.state.PodName, c, true)
 
 	if err != nil {
 		//this is an error from trying to execute the command as opposed to
@@ -188,13 +217,11 @@ func (p *probeState) setup() {
 	//just make sure this is reset
 	p.state.PodName = ""
 	p.state.CreationError = nil
+	p.useDefaultNS = false
 }
 
 func (p *probeState) tearDown() {
-
-	// iam.DeleteIAMTestPod(p.state.PodName) //TODO: skip delete for now (debug purposes)
-	p.state.PodName = ""
-	p.state.CreationError = nil
+	iam.DeleteIAMTestPod(p.state.PodName, p.useDefaultNS)
 }
 
 //TestSuiteInitialize ...
@@ -225,18 +252,30 @@ func ScenarioInitialize(ctx *godog.ScenarioContext) {
 		features.LogScenarioStart(s)
 	})
 
+	//general/all
 	ctx.Step(`^a Kubernetes cluster exists which we can deploy into$`, ps.aKubernetesClusterExistsWhichWeCanDeployInto)
-	ctx.Step(`^I create a pod in a non-default namespace assigned with that AzureIdentityBinding$`, ps.iCreateAPodInANondefaultNamespaceAssignedWithThatAzureIdentityBinding)
+
+	//AZ-AAD-AI-1.0
 	ctx.Step(`^the default namespace has an AzureIdentityBinding$`, ps.theDefaultNamespaceHasAnAzureIdentityBinding)
-	ctx.Step(`^the pod fails to go into Running state due to reason "([^"]*)"$`, ps.thePodFailsToGoIntoRunningStateDueToReason)
+	ctx.Step(`^I create a simple pod in "([^"]*)" namespace assigned with that AzureIdentityBinding$`, ps.iCreateASimplePodInNamespaceAssignedWithThatAzureIdentityBinding)
+
+	//AZ-AAD-AI-1.0, AZ-AAD-AI-1.1
 	ctx.Step(`^the pod is deployed successfully$`, ps.thePodIsDeployedSuccessfully)
 
+	//AZ-AAD-AI-1.0
+	ctx.Step(`^an attempt to obtain an access token from that pod should "([^"]*)"$`, ps.anAttemptToObtainAnAccessTokenFromThatPodShould)
+	//AZ-AAD-AI-1.1 (same as above but just single shot scenario)
+	ctx.Step(`^an attempt to obtain an access token from that pod should fail$`, ps.anAttemptToObtainAnAccessTokenFromThatPodShouldFail)
+
+	//AZ-AAD-AI-1.1
+	ctx.Step(`^the default namespace has an AzureIdentity$`, ps.theDefaultNamespaceHasAnAzureIdentity)
 	ctx.Step(`^I create an AzureIdentityBinding called "([^"]*)" in a non-default namespace$`, ps.iCreateAnAzureIdentityBindingCalledInANondefaultNamespace)
 	ctx.Step(`^I deploy a pod assigned with the "([^"]*)" AzureIdentityBinding into the same namespace as the "([^"]*)" AzureIdentityBinding$`, ps.iDeployAPodAssignedWithTheAzureIdentityBindingIntoTheSameNamespaceAsTheAzureIdentityBinding)
+
+	//AZ-AAD-AI-1.2
 	ctx.Step(`^I execute the command "([^"]*)" against the MIC pod$`, ps.iExecuteTheCommandAgainstTheMICPod)
 	ctx.Step(`^Kubernetes should prevent me from running the command$`, ps.kubernetesShouldPreventMeFromRunningTheCommand)
 	ctx.Step(`^the cluster has managed identity components deployed$`, ps.theClusterHasManagedIdentityComponentsDeployed)
-	ctx.Step(`^the default namespace has an AzureIdentity$`, ps.theDefaultNamespaceHasAnAzureIdentity)
 
 	ctx.AfterScenario(func(s *godog.Scenario, err error) {
 		ps.tearDown()

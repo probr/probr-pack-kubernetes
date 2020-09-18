@@ -129,12 +129,27 @@ func TestGetRolesByResource(t *testing.T) {
 }
 
 func TestGetRawResourcesByGrp(t *testing.T) {
-	j, err := kubernetes.GetKubeInstance().GetRawResourcesByGrp("apis/aadpodidentity.k8s.io/v1/azureidentitybindings")
+	j, err := kubernetes.GetKubeInstance().GetRawResourcesByGrp("apis/aadpodidentity.k8s.io/v1/azureidentities")
 
-	fmt.Printf("JSON: %v\n", j)
+	fmt.Printf("JSON Azure Identities: %v\n", j)
 
-	fmt.Printf("Name: %v\n", j.Items[0].Metadata["name"])
-	fmt.Printf("Namespace: %v\n", j.Items[0].Metadata["namespace"])
+	for _, r := range j.Items {
+		fmt.Printf("Name: %v\n", r.Metadata["name"])
+		fmt.Printf("Namespace: %v\n", r.Metadata["namespace"])
+	}
+	
+
+	handleResult(nil, err)
+
+	j, err = kubernetes.GetKubeInstance().GetRawResourcesByGrp("apis/aadpodidentity.k8s.io/v1/azureidentitybindings")
+
+	fmt.Printf("JSON Azure Identity Bindings: %v\n", j)
+
+	for _, r := range j.Items {
+		fmt.Printf("Name: %v\n", r.Metadata["name"])
+		fmt.Printf("Namespace: %v\n", r.Metadata["namespace"])
+	}
+	
 
 	handleResult(nil, err)
 }
