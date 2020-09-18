@@ -55,6 +55,17 @@ resource "azurerm_kubernetes_cluster" "cluster" {
   }
 }
 
+resource "null_resource" "kubectl" {
+  provisioner "local-exec" {
+    command = "echo '${azurerm_kubernetes_cluster.cluster.kube_config_raw}' > .kubeconfig"
+    interpreter = ["/bin/bash", "-c"]
+  }
+  provisioner "local-exec" {
+    command = "kubectl apply --kubeconfig=${var.kube_config} -f https://raw.githubusercontent.com/Azure/aad-pod-identity/master/deploy/infra/deployment-rbac.yaml"
+    interpreter = ["/bin/bash", "-c"]
+  }
+}
+
 output "client_certificate" {
   value = azurerm_kubernetes_cluster.cluster.kube_config.0.client_certificate
 }
