@@ -1,3 +1,8 @@
+// Package iam provides the implementation required to execute the feature based test cases described in the
+// the 'features' directory.  The 'assets' directory holds any assets required for the test cases.   Assets are 'embedded'
+// via the 'go-bindata.exe' tool which is invoked via the 'go generate' tool.  It is important, therefore, that the 
+//'go:generate' comment is present in order to include this package in the scope of the 'go generate' tool.  This can be 
+// invoked directly on the command line of via the Makefile (e.g. make clean-build).
 package iam
 
 //go:generate go-bindata.exe -pkg $GOPACKAGE -o assets/assets.go assets/yaml
@@ -19,13 +24,21 @@ type probeState struct {
 	useDefaultNS bool
 }
 
+// IdentityAccessManagement is the section of the kubernetes package which provides the kubernetes interactions required to support
+// identity access management probes.
 var iam kubernetes.IdentityAccessManagement
 
-// SetIAM ...
+// SetIAM allows injection of an IdentityAccessManagement helper.
 func SetIAM(i kubernetes.IdentityAccessManagement) {
 	iam = i
 }
 
+// init() registers the feature tests descibed in this package with the test runner (coreengine.TestRunner) via the call
+// to coreengine.TestHandleFunc.  This links the test - described by the TestDescriptor - with the handler to invoke.  In
+// this case, the general test handler is being used (features.GodogTestHandler) and the GodogTest data provides the data
+// require to execute the test.  Specifically, the data includes the Test Suite and Scenario Initializers from this package
+// which will be called from features.GodogTestHandler.  Note: a blank import at probr library level should be done to
+// invoke this function automatically on initial load.
 func init() {
 	td := coreengine.TestDescriptor{Group: coreengine.Kubernetes,
 		Category: coreengine.IAM, Name: "iam_control"}
@@ -224,7 +237,8 @@ func (p *probeState) tearDown() {
 	iam.DeleteIAMTestPod(p.state.PodName, p.useDefaultNS)
 }
 
-//TestSuiteInitialize ...
+// TestSuiteInitialize handles any overall Test Suite initialisation steps.  This is registered with the
+// test handler as part of the init() function.
 func TestSuiteInitialize(ctx *godog.TestSuiteContext) {
 	ctx.BeforeSuite(func() {
 		//check dependancies ...
@@ -242,7 +256,10 @@ func TestSuiteInitialize(ctx *godog.TestSuiteContext) {
 	})
 }
 
-//ScenarioInitialize ...
+// ScenarioInitialize initialises the specific test steps.  This is essentially the creation of the test 
+// which reflects the tests described in the features directory.  There must be a test step registered for
+// each line in the feature files. Note: Godog will output stub steps and implementations if it doesn't find
+// a step / function defined.  See: https://github.com/cucumber/godog#example. 
 func ScenarioInitialize(ctx *godog.ScenarioContext) {
 
 	ps := probeState{}

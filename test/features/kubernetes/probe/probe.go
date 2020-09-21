@@ -1,3 +1,4 @@
+// Package probe holds probe state data as well as convenience functions for use in probe test cases.
 package probe
 
 import (

@@ -1,3 +1,5 @@
+// Package kubernetes_test provides test functions for interacting with the kubernetes cluster.  Note, these are integration tests and require an active kubernetes
+// cluster, etc.
 package kubernetes_test
 
 import (

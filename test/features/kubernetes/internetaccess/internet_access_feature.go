@@ -1,3 +1,5 @@
+// Package internetaccess provides the implementation required to execute the feature based test cases described in the
+// the 'features' directory.
 package internetaccess
 
 import (
@@ -29,10 +31,11 @@ func init() {
 	})
 }
 
-//TODO: revise when interface this bit up ...
+// NetworkAccess is the section of the kubernetes package which provides the kubernetes interactions required to support
+// network access probes.
 var na kubernetes.NetworkAccess
 
-// SetNetworkAccess ...
+// SetNetworkAccess allows injection of a specific NetworkAccess helper.
 func SetNetworkAccess(n kubernetes.NetworkAccess) {
 	na = n
 }
@@ -115,7 +118,8 @@ func (p *probState) scenarioTearDown() {
 
 var ps = probState{}
 
-//TestSuiteInitialize ...
+// TestSuiteInitialize handles any overall Test Suite initialisation steps.  This is registered with the
+// test handler as part of the init() function.
 func TestSuiteInitialize(ctx *godog.TestSuiteContext) {
 	ctx.BeforeSuite(func() {}) //nothing for now
 
@@ -130,7 +134,10 @@ func TestSuiteInitialize(ctx *godog.TestSuiteContext) {
 	}
 }
 
-//ScenarioInitialize ...
+// ScenarioInitialize initialises the specific test steps.  This is essentially the creation of the test 
+// which reflects the tests described in the features directory.  There must be a test step registered for
+// each line in the feature files. Note: Godog will output stub steps and implementations if it doesn't find
+// a step / function defined.  See: https://github.com/cucumber/godog#example. 
 func ScenarioInitialize(ctx *godog.ScenarioContext) {
 	ctx.BeforeScenario(func(s *godog.Scenario) {
 		ps.setup()

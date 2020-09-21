@@ -1,3 +1,5 @@
+// Package kubernetes provides functions for interacting with Kubernetes and
+// is built using the kubernetes client-go (https://github.com/kubernetes/client-go).
 package kubernetes
 
 import (
@@ -32,10 +34,10 @@ import (
 	_ "k8s.io/client-go/plugin/pkg/client/auth"
 )
 
-//PodCreationErrorReason ... TODO: not sure if this is the correct name for this?
+// PodCreationErrorReason provides an CSP agnostic reason for errors encountered when creating pods.
 type PodCreationErrorReason int
 
-//PodCreationErrorReason enum
+// enum values for PodCreationErrorReason
 const (
 	UndefinedPodCreationErrorReason PodCreationErrorReason = iota
 	PSPNoPrivilege
@@ -68,7 +70,10 @@ func (r PodCreationErrorReason) String() string {
 		"podcreation-error: blocked"}[r]
 }
 
-//PodCreationError ...
+// PodCreationError encapsulates the underlying pod creation error along with a map of platform agnostic
+// PodCreationErrorReason codes.  Note that there could be more that one PodCreationErrorReason.  For
+// example a pod may fail due to a 'psp-container-no-privilege' error and 'psp-host-network', in which
+// case there would be two entires in the ReasonCodes map.
 type PodCreationError struct {
 	err         error
 	ReasonCodes map[PodCreationErrorReason]*PodCreationErrorReason
@@ -78,7 +83,8 @@ func (p *PodCreationError) Error() string {
 	return fmt.Sprintf("pod creation error: %v %v", p.ReasonCodes, p.err)
 }
 
-//CmdExecutionResult ...
+// CmdExecutionResult encapsulates the result from an exec call to the kubernetes cluster.  This includes 'stdout',
+// 'stderr', 'exit code' and any error details in the case of a non-zero exit code.
 type CmdExecutionResult struct {
 	Stdout string
 	Stderr string
@@ -95,11 +101,11 @@ func (e *CmdExecutionResult) String() string {
 	if e.Err != nil {
 		b.WriteString(fmt.Sprintf(" || error: internal=%t msg=%v", e.Internal, e.Err))
 	}
-	
+
 	return b.String()
 }
 
-// Kubernetes ...
+// Kubernetes interface defines the methods available to interact with the kubernetes cluster.
 type Kubernetes interface {
 	ClusterIsDeployed() *bool
 	GetClient() (*kubernetes.Clientset, error)
@@ -114,7 +120,7 @@ type Kubernetes interface {
 	CreateConfigMap(n *string, ns *string) (*apiv1.ConfigMap, error)
 	DeleteConfigMap(n *string, ns *string) error
 	GetConstraintTemplates(prefix string) (*map[string]interface{}, error)
-	GetRawResourcesByGrp(g string) (*K8SJSON, error)	
+	GetRawResourcesByGrp(g string) (*K8SJSON, error)
 	GetClusterRolesByResource(r string) (*[]rbacv1.ClusterRole, error)
 	GetClusterRoles() (*rbacv1.ClusterRoleList, error)
 }
@@ -122,7 +128,7 @@ type Kubernetes interface {
 var instance *Kube
 var once sync.Once
 
-// Kube ...
+// Kube provides an implementation of Kubernetes.
 type Kube struct {
 	kubeClient                   *kubernetes.Clientset
 	clientMutex                  sync.Mutex
@@ -131,7 +137,7 @@ type Kube struct {
 	k8statusToPodCreationError map[string]PodCreationErrorReason
 }
 
-// GetKubeInstance ...
+// GetKubeInstance returns a singleton instance of Kube.
 func GetKubeInstance() *Kube {
 	//TODO: revise use of singleton here ...
 	once.Do(func() {
@@ -182,7 +188,8 @@ func GetKubeInstance() *Kube {
 	return instance
 }
 
-// ClusterIsDeployed ...
+// ClusterIsDeployed verifies if a cluster is deployed that can be contacted based on the current
+// kubernetes config and context.
 func (k *Kube) ClusterIsDeployed() *bool {
 	kc, err := k.GetClient()
 	if err != nil {
@@ -198,7 +205,7 @@ func (k *Kube) ClusterIsDeployed() *bool {
 	return &t
 }
 
-//GetPods ...
+//GetPods returns a collection of pods on the target kubernetes cluster.
 func (k *Kube) GetPods(ns string) (*apiv1.PodList, error) {
 	c, err := k.GetClient()
 	if err != nil {
@@ -235,13 +242,8 @@ func getPods(c *kubernetes.Clientset, ns string) (*apiv1.PodList, error) {
 	return pods, nil
 }
 
-// CreatePod creates a pod with the following parameters:
-// pname - pod name
-// ns - namespace
-// cname - container name
-// image - image
-// w - indicates whether or not to wait for the pod to be running
-// sc - security context
+// CreatePod creates a pod with the supplied parameters.  A true value for 'w' indicates that the function
+// should wait (block) until the pod is in a running state.
 func (k *Kube) CreatePod(pname *string, ns *string, cname *string, image *string, w bool, sc *apiv1.SecurityContext) (*apiv1.Pod, error) {
 	//create Pod Objet ...
 	p := k.GetPodObject(*pname, *ns, *cname, *image, sc)
@@ -249,7 +251,8 @@ func (k *Kube) CreatePod(pname *string, ns *string, cname *string, image *string
 	return k.CreatePodFromObject(p, pname, ns, w)
 }
 
-// CreatePodFromYaml ...
+// CreatePodFromYaml creates a pod for the supplied yaml.  A true value for 'w' indicates that the function
+// should wait (block) until the pod is in a running state.
 func (k *Kube) CreatePodFromYaml(y []byte, pname *string, ns *string, image *string, aadpodidbinding *string, w bool) (*apiv1.Pod, error) {
 
 	decode := scheme.Codecs.UniversalDeserializer().Decode
@@ -265,7 +268,7 @@ func (k *Kube) CreatePodFromYaml(y []byte, pname *string, ns *string, image *str
 		for _, c := range p.Spec.Containers {
 			c.Image = *image
 		}
-	}	
+	}
 
 	if aadpodidbinding != nil {
 		if p.Labels == nil {
@@ -277,7 +280,8 @@ func (k *Kube) CreatePodFromYaml(y []byte, pname *string, ns *string, image *str
 	return k.CreatePodFromObject(p, pname, ns, w)
 }
 
-// CreatePodFromObject creates a pod from the supplied pod object in the gievn namespace
+// CreatePodFromObject creates a pod from the supplied pod object with the given pod name and namespace.  A true value for 'w' indicates that the function
+// should wait (block) until the pod is in a running state.
 func (k *Kube) CreatePodFromObject(p *apiv1.Pod, pname *string, ns *string, w bool) (*apiv1.Pod, error) {
 	if p == nil || pname == nil || ns == nil {
 		return nil, fmt.Errorf("one or more of pod (%v), podName (%v) or namespace (%v) is nil - cannot create POD", p, pname, ns)
@@ -334,7 +338,7 @@ func (k *Kube) CreatePodFromObject(p *apiv1.Pod, pname *string, ns *string, w bo
 	return res, nil
 }
 
-// GetPodObject ...
+// GetPodObject constructs a simple pod object using kubernetes API types.
 func (k *Kube) GetPodObject(pname string, ns string, cname string, image string, sc *apiv1.SecurityContext) *apiv1.Pod {
 
 	a := make(map[string]string)
@@ -363,7 +367,6 @@ func (k *Kube) GetPodObject(pname string, ns string, cname string, image string,
 					Command: []string{
 						"sleep",
 						"3600",
-						// "/bin/sh", "-c",
 					},
 					SecurityContext: sc,
 				},
@@ -372,7 +375,7 @@ func (k *Kube) GetPodObject(pname string, ns string, cname string, image string,
 	}
 }
 
-// CreateConfigMap ...
+// CreateConfigMap creates a config map with the supplied name in the given namespace.
 func (k *Kube) CreateConfigMap(n *string, ns *string) (*apiv1.ConfigMap, error) {
 	c, err := k.GetClient()
 	if err != nil {
@@ -416,7 +419,7 @@ func (k *Kube) CreateConfigMap(n *string, ns *string) (*apiv1.ConfigMap, error) 
 	return res, nil
 }
 
-// DeleteConfigMap ...
+// DeleteConfigMap deletes the named config map in the given namespace.
 func (k *Kube) DeleteConfigMap(n *string, ns *string) error {
 	c, err := k.GetClient()
 	if err != nil {
@@ -438,7 +441,7 @@ func (k *Kube) DeleteConfigMap(n *string, ns *string) error {
 	return nil
 }
 
-//GenerateUniquePodName ...
+// GenerateUniquePodName creates a unique pod name based on the format: 'baseName'-'nanosecond time'-'random int'.
 func GenerateUniquePodName(baseName string) string {
 	//take base and add some uniqueness
 	t := time.Now()
@@ -469,7 +472,7 @@ func defaultContainerSecurityContext() *apiv1.SecurityContext {
 	}
 }
 
-//ExecCommand TODO: fix error codes
+// ExecCommand executes the supplied command on the given pod name in the specified namespace.
 func (k *Kube) ExecCommand(cmd, ns, pn *string) (s *CmdExecutionResult) {
 	if cmd == nil {
 		return &CmdExecutionResult{Err: fmt.Errorf("command string is nil - nothing to execute"), Internal: true}
@@ -527,10 +530,8 @@ func (k *Kube) ExecCommand(cmd, ns, pn *string) (s *CmdExecutionResult) {
 	return &CmdExecutionResult{Stdout: stdout.String(), Stderr: stderr.String()}
 }
 
-// DeletePod deletes the pod with the following parameters:
-// pname - pod name
-// ns - namespace
-// w - indicates whether or not to wait on the deletion
+// DeletePod deletes the given pod in the specified namespace.  Passing true for 'w' causes the function to
+// wait for pod deletion (not normally required).
 func (k *Kube) DeletePod(pname *string, ns *string, w bool) error {
 	c, err := k.GetClient()
 	if err != nil {
@@ -557,7 +558,6 @@ func (k *Kube) DeletePod(pname *string, ns *string, w bool) error {
 	return nil
 }
 
-//CreateNamespace ...
 func (k *Kube) createNamespace(ns *string) (*apiv1.Namespace, error) {
 	c, err := k.GetClient()
 	if err != nil {
@@ -588,7 +588,7 @@ func (k *Kube) createNamespace(ns *string) (*apiv1.Namespace, error) {
 	return n, nil
 }
 
-//DeleteNamespace ...
+// DeleteNamespace deletes the supplied namespace.
 func (k *Kube) DeleteNamespace(ns *string) error {
 	c, err := k.GetClient()
 	if err != nil {
@@ -608,12 +608,12 @@ func (k *Kube) DeleteNamespace(ns *string) error {
 	return nil
 }
 
-//GetConstraintTemplates returns the constraint templates associated with the active cluster.
+// GetConstraintTemplates returns the constraint templates associated with the active cluster.
 func (k *Kube) GetConstraintTemplates(prefix string) (*map[string]interface{}, error) {
 	return k.getAPIResourcesByGrp("constraints", prefix)
 }
 
-//GetIdentityBindings returns the identity bindings associated with the active cluster.
+// GetIdentityBindings returns the identity bindings associated with the active cluster.
 func (k *Kube) GetIdentityBindings(prefix string) (*map[string]interface{}, error) {
 	return k.getAPIResourcesByGrp("aadpodidentity", prefix)
 }
@@ -660,22 +660,21 @@ func (k *Kube) getAPIResourcesByGrp(grp string, nPrefix string) (*map[string]int
 	return &con, nil
 }
 
-//K8SJSONItem encapsulates items returned from a raw/rest call to the Kubernetes API
+// K8SJSONItem encapsulates items returned from a raw/rest call to the Kubernetes API
 type K8SJSONItem struct {
 	Kind     string
 	Metadata map[string]string
 }
 
-//K8SJSON encapsulates the response from a raw/rest call to the Kubernetes API
+// K8SJSON encapsulates the response from a raw/rest call to the Kubernetes API
 type K8SJSON struct {
 	APIVersion string
 	Items      []K8SJSONItem
 }
 
-//GetRawResourcesByGrp makes a 'raw' REST call to k8s to get the resources specified by the
-//supplied group string, e.g. "apis/aadpodidentity.k8s.io/v1/azureidentitybindings".  This
-//is required to support resources that are not supported by typed API calls (e.g. "pods").
-//TODO: there may be a better way to do this, but can't find it atm
+// GetRawResourcesByGrp makes a 'raw' REST call to k8s to get the resources specified by the
+// supplied group string, e.g. "apis/aadpodidentity.k8s.io/v1/azureidentitybindings".  This
+// is required to support resources that are not supported by typed API calls (e.g. "pods").
 func (k *Kube) GetRawResourcesByGrp(g string) (*K8SJSON, error) {
 	c, err := k.GetClient()
 	if err != nil {
@@ -705,43 +704,45 @@ func (k *Kube) GetRawResourcesByGrp(g string) (*K8SJSON, error) {
 	return &j, nil
 }
 
-//GetClusterRolesByResource ...
-func (k *Kube) GetClusterRolesByResource(r string) (*[]rbacv1.ClusterRole, error){
+// GetClusterRolesByResource returns a collection of cluster roles filtered by
+// the supplied resouce type.
+func (k *Kube) GetClusterRolesByResource(r string) (*[]rbacv1.ClusterRole, error) {
 	var crs []rbacv1.ClusterRole
 
 	crl, err := k.GetClusterRoles()
 	if err != nil {
 		return &crs, err
-	}	
+	}
 
 	for _, cr := range crl.Items {
 		log.Printf("[DEBUG] ClusterRole: %+v", cr)
 		if k.meetsResourceFilter(r, &cr.ObjectMeta, &cr.Rules) {
-			//add to results 		
+			//add to results
 			log.Printf("[INFO] ClusterRole meets resource filter (%v): %+v", r, cr)
-			crs = append(crs, cr)								
-		}		
+			crs = append(crs, cr)
+		}
 	}
 
 	return &crs, nil
 }
 
-//GetRolesByResource ...
-func (k *Kube) GetRolesByResource(r string) (*[]rbacv1.Role, error){
+// GetRolesByResource returns a collection of roles filtered by
+// the supplied resouce type.
+func (k *Kube) GetRolesByResource(r string) (*[]rbacv1.Role, error) {
 	var ros []rbacv1.Role
 
 	rl, err := k.GetRoles()
 	if err != nil {
 		return &ros, err
 	}
-	
+
 	for _, ro := range rl.Items {
 		log.Printf("[DEBUG] Role: %+v", ro)
 		if k.meetsResourceFilter(r, &ro.ObjectMeta, &ro.Rules) {
 			//add to results
-			log.Printf("[INFO] Role meets resource filter (%v): %+v", r, ro) 		
-			ros = append(ros, ro)								
-		}		
+			log.Printf("[INFO] Role meets resource filter (%v): %+v", r, ro)
+			ros = append(ros, ro)
+		}
 	}
 
 	return &ros, nil
@@ -757,13 +758,13 @@ func (k *Kube) meetsResourceFilter(f string, m *v1.ObjectMeta, p *[]rbacv1.Polic
 	for _, ru := range *p {
 		log.Printf("[DEBUG] PolicyRule: %+v", ru)
 		var b bool
-		
+
 		for _, res := range ru.Resources {
 			if strings.HasPrefix(res, f) {
 				log.Printf("[DEBUG] PolicyRule meets filter %v", f)
-				//meets filter 
-				//can also break out of the rules loop as 
-				//we want to add full role to results if one rule 
+				//meets filter
+				//can also break out of the rules loop as
+				//we want to add full role to results if one rule
 				//passes filter
 				b = true
 				break
@@ -778,11 +779,11 @@ func (k *Kube) meetsResourceFilter(f string, m *v1.ObjectMeta, p *[]rbacv1.Polic
 
 func (k *Kube) skipSystemRole(m *v1.ObjectMeta) bool {
 	//first check for known system namespaces:
-	if strings.HasPrefix(m.Namespace, "kube") || strings.HasPrefix(m.Namespace,"gatekeeper") {
+	if strings.HasPrefix(m.Namespace, "kube") || strings.HasPrefix(m.Namespace, "gatekeeper") {
 		return true
 	}
-		
-	//next, check to see if the role name is on the list of system roles	
+
+	//next, check to see if the role name is on the list of system roles
 	for _, r := range config.Vars.SystemClusterRoles {
 		//use a prefix check:
 		if strings.HasPrefix(m.Name, r) {
@@ -793,7 +794,7 @@ func (k *Kube) skipSystemRole(m *v1.ObjectMeta) bool {
 	return false
 }
 
-//GetClusterRoles ...
+// GetClusterRoles retrives all cluster roles associated with the active cluster.
 func (k *Kube) GetClusterRoles() (*rbacv1.ClusterRoleList, error) {
 	c, err := k.GetClient()
 	if err != nil {
@@ -805,10 +806,10 @@ func (k *Kube) GetClusterRoles() (*rbacv1.ClusterRoleList, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	return cr.List(ctx, metav1.ListOptions{ LabelSelector: "gatekeeper.sh/system!=yes"})
+	return cr.List(ctx, metav1.ListOptions{LabelSelector: "gatekeeper.sh/system!=yes"})
 }
 
-//GetRoles ...
+//GetRoles retrives all roles associated with the active cluster.
 func (k *Kube) GetRoles() (*rbacv1.RoleList, error) {
 	c, err := k.GetClient()
 	if err != nil {
@@ -820,7 +821,7 @@ func (k *Kube) GetRoles() (*rbacv1.RoleList, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	return r.List(ctx, metav1.ListOptions{ LabelSelector: "gatekeeper.sh/system!=yes"})
+	return r.List(ctx, metav1.ListOptions{LabelSelector: "gatekeeper.sh/system!=yes"})
 }
 
 func isAlreadyExists(err error) bool {

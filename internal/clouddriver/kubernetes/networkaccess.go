@@ -18,7 +18,7 @@ const (
 	defaultNATestPodName     = "na-test-pod"
 )
 
-// NetworkAccess ...
+// NetworkAccess defines functionality for supporting Network Access tests.
 type NetworkAccess interface {
 	ClusterIsDeployed() *bool
 	SetupNetworkAccessTestPod() (*apiv1.Pod, error)
@@ -26,7 +26,7 @@ type NetworkAccess interface {
 	AccessURL(pn *string, url *string) (int, error)
 }
 
-// NA ...
+// NA implements NetworkAccess.
 type NA struct {
 	k Kubernetes
 
@@ -36,7 +36,7 @@ type NA struct {
 	testPodName   string
 }
 
-// NewNA ...
+// NewNA creates a new instance of NA with the supplied kubernetes instance.
 func NewNA(k Kubernetes) *NA {
 	n := &NA{}
 	n.k = k
@@ -45,7 +45,7 @@ func NewNA(k Kubernetes) *NA {
 	return n
 }
 
-// NewDefaultNA ...
+// NewDefaultNA creates a new instance of NA using the default kubernetes instance.
 func NewDefaultNA() *NA {
 	n := &NA{}
 	n.k = GetKubeInstance()
@@ -75,19 +75,19 @@ func (n *NA) setup() {
 	n.testImage = i + "/" + b
 }
 
-// ClusterIsDeployed ...
+// ClusterIsDeployed verifies if a suitable cluster is deployed.
 func (n *NA) ClusterIsDeployed() *bool {
 	return n.k.ClusterIsDeployed()
 }
 
-//SetupNetworkAccessTestPod creates a pod with characteristics required for testing network access.
+// SetupNetworkAccessTestPod creates a pod with characteristics required for testing network access.
 func (n *NA) SetupNetworkAccessTestPod() (*apiv1.Pod, error) {
 	pname, ns, cname, image := GenerateUniquePodName(n.testPodName), n.testNamespace, n.testContainer, n.testImage
 	//let caller handle result:
 	return n.k.CreatePod(&pname, &ns, &cname, &image, true, nil)
 }
 
-//TeardownNetworkAccessTestPod ...
+// TeardownNetworkAccessTestPod deletes the test pod with the given name.
 func (n *NA) TeardownNetworkAccessTestPod(p *string) error {
 	_, exists := os.LookupEnv("DONT_DELETE")
 	if !exists {
@@ -99,7 +99,7 @@ func (n *NA) TeardownNetworkAccessTestPod(p *string) error {
 	return nil
 }
 
-//AccessURL calls the supplied URL and returns the http code
+// AccessURL calls the supplied URL and returns the http code
 func (n *NA) AccessURL(pn *string, url *string) (int, error) {
 
 	//create a curl command to access the supplied url

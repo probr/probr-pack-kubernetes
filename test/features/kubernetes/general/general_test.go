@@ -9,8 +9,9 @@ import (
 	"github.com/cucumber/godog/colors"
 )
 
-//this is the "TEST" impl  and will get called when godog or go test is run from the cmd line
-//all we do here is set the cmd line godog arg and call to the "feature" implementation
+// This is the "test" implementation of the associated "_feature" file and allows execution
+// of the godog test from the command line using regular "go test" syntax. This is useful
+// for exercising specific test cases directly.
 
 var (
 	opts = godog.Options{Output: colors.Colored(os.Stdout)}
