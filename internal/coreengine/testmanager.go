@@ -7,7 +7,6 @@ import (
 	"bytes"
 	"errors"
 	"log"
-	"strconv"
 	"sync"
 
 	"github.com/google/uuid"
@@ -177,7 +176,6 @@ func (ts *TestStore) ExecAllTests() (int, error) {
 
 	for uuid := range ts.Tests {
 		st, err := ts.ExecTest(&uuid)
-		ts.AuditLog.Audit(uuid.String(), "status", "Exited: "+strconv.Itoa(st))
 		if err != nil {
 			//log but continue with remaining tests
 			log.Printf("[ERROR] error executing test: %v", err)
