@@ -53,4 +53,4 @@ An example of how to a vars file is as follows:
 probr --varsFile=./config-dev.yml
 ```
 
-**IMPORTANT:** Do not forget to encrypt your config file if it contains secrets.
+**IMPORTANT:** Remember to encrypt your config file if it contains secrets.
