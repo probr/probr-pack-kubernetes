@@ -1,3 +1,6 @@
+// Package coreengine contains the types and functions responsible for managing tests and test execution.  This is the primary 
+// entry point to the core of the application and should be utilised by the probr library to create, execute and report 
+// on tests.
 package coreengine
 
 import (
@@ -11,10 +14,10 @@ import (
 	"gitlab.com/citihub/probr/internal/output"
 )
 
-//TestStatus ..
+// TestStatus type describes the status of the test, e.g. Pending, Running, CompleteSuccess, CompleteFail and Error
 type TestStatus int
 
-//TestStatus enum ...
+//TestStatus enumeration for the TestStatus type.
 const (
 	Pending TestStatus = iota
 	Running
@@ -27,10 +30,10 @@ func (s TestStatus) String() string {
 	return [...]string{"Pending", "Running", "CompleteSuccess", "CompleteFail", "Error"}[s]
 }
 
-//Group ... TODO: not sure if this is the correct name for this?
+// Group type describes the group to which the test belongs, e.g. kubernetes, clouddriver, coreengine, etc.
 type Group int
 
-//Group enum
+// Group type enumeration
 const (
 	Kubernetes Group = iota
 	CloudDriver
@@ -41,10 +44,10 @@ func (g Group) String() string {
 	return [...]string{"kubernetes", "clouddriver", "coreengine"}[g]
 }
 
-//Category ...
+// Category type describes the category to with the test belongs, e.g. PodSecurity, Network, etc.
 type Category int
 
-//Category enum
+// Category type enumeration.
 const (
 	RBAC Category = iota
 	PodSecurityPolicies
@@ -65,7 +68,7 @@ func (c Category) String() string {
 		"Key Mgmt", "Authentication", "Storage", "InternetAccess"}[c]
 }
 
-//Test - structure to hold test data
+// Test encapsulates the data required to support test execution.
 type Test struct {
 	UUID           string          `json:"uuid,omitempty"`
 	TestDescriptor *TestDescriptor `json:"test_descriptor,omitempty"`
@@ -75,24 +78,15 @@ type Test struct {
 	Results *bytes.Buffer
 }
 
-//TestDescriptor - struct to hold description of test, name, category, strictness?? etc.
+// TestDescriptor describes the specific test case and includes name, category and group.
 type TestDescriptor struct {
 	Group    Group    `json:"group,omitempty"`
 	Category Category `json:"category,omitempty"`
 	Name     string   `json:"name,omitempty"`
 }
 
-//TestStore - holds the current test suite.
-//TODO: still not sure about the structure.
-//Below is:
-// [uuid] -> pointer to array of pointers to tests
-// this implies that we'd be setting a test run up with multiple "sub" test runs,
-// with each run being identified by a uuid which is mapped to the array of tests
-// I think this could be too complicated, and it's just a simple uuid -> test,
-// i.e. the "test run" is a map of multiple entries, each uuid simply pointing to one
-// test, i.e.
-// [uuid] -> pointer to test
-// (done ... simples :-) )
+// TestStore maintains a collection of tests to be run and their status.  FailedTests is an explicit
+// collection of failed tests.
 type TestStore struct {
 	Tests       map[uuid.UUID]*[]*Test
 	FailedTests map[TestStatus]*[]*Test
@@ -100,18 +94,17 @@ type TestStore struct {
 	AuditLog    *output.AuditLog
 }
 
-//GetAvailableTests - return the universe of available tests
+// GetAvailableTests return the collection of available tests.
 func GetAvailableTests() *[]TestDescriptor {
-
-	//not sure if this is needed
-	//TODO: get this from the TestRunner handler store - basically it's the collection of
+	//TODO: to implement
+	//get this from the TestRunner handler store - basically it's the collection of
 	//tests that have registered a handler ..
 
 	// return &p
 	return nil
 }
 
-//NewTestManager - create a new test manager, backed by TestStore
+// NewTestManager creates a new test manager, backed by TestStore
 func NewTestManager() *TestStore {
 	return &TestStore{
 		Tests:    make(map[uuid.UUID]*[]*Test),
@@ -119,7 +112,7 @@ func NewTestManager() *TestStore {
 	}
 }
 
-//AddTest ...
+// AddTest adds a test, described by the TestDescriptor, to the TestStore.
 func (ts *TestStore) AddTest(td TestDescriptor) *uuid.UUID {
 	ts.Lock.Lock()
 	defer ts.Lock.Unlock()
@@ -143,7 +136,7 @@ func (ts *TestStore) AddTest(td TestDescriptor) *uuid.UUID {
 	return &uid
 }
 
-//GetTest by UUID ...
+// GetTest returns the test identified by the given UUID.
 func (ts *TestStore) GetTest(uuid *uuid.UUID) (*[]*Test, error) {
 	ts.Lock.Lock()
 	defer ts.Lock.Unlock()
@@ -159,7 +152,7 @@ func (ts *TestStore) GetTest(uuid *uuid.UUID) (*[]*Test, error) {
 
 //GetTest by TestDescriptor ... TODO
 
-//ExecTest by UUID in this case, but could be name, category, etc.  Probably need an ExecTests as well ...
+// ExecTest executes the test identified by the supplied UUID.
 func (ts *TestStore) ExecTest(uuid *uuid.UUID) (int, error) {
 	t, err := ts.GetTest(uuid)
 
@@ -177,7 +170,7 @@ func (ts *TestStore) ExecTest(uuid *uuid.UUID) (int, error) {
 
 //ExecTest by TestDescriptor, etc ... TODO.  In this case there may be more than one so we should set up for concurrency
 
-//ExecAllTests ...
+// ExecAllTests executes all tests that are present in the TestStore.
 func (ts *TestStore) ExecAllTests() (int, error) {
 	status := 0
 	var err error

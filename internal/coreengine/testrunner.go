@@ -8,15 +8,17 @@ import (
 	"github.com/cucumber/godog"
 )
 
-//TestRunner ...
+// TestRunner describes the interface that should be implemented to support the execution of tests.
 type TestRunner interface {
 	RunTest(t *Test) error
 }
 
-//TestHandlerFunc ...
+// TestHandlerFunc describes a callback that should be implemented by test cases in order for TestRunner
+// to be able to execute the test case.
 type TestHandlerFunc func(t *GodogTest) (int, *bytes.Buffer, error)
 
-//GodogTest ...
+// GodogTest encapsulates the specific data that GoDog feature based tests require in order to run.   This
+// structure will be passed to the test handler callback.
 type GodogTest struct {
 	TestDescriptor       *TestDescriptor
 	TestSuiteInitializer func(*godog.TestSuiteContext)
@@ -24,7 +26,8 @@ type GodogTest struct {
 	FeaturePath          *string
 }
 
-//GoDogTestTuple ...
+// GoDogTestTuple holds the tuple of data required when excuting the test case, namely the function to call as
+// denoted by Handler and the data to pass to the function, as denoted by Data.
 type GoDogTestTuple struct {
 	Handler TestHandlerFunc
 	Data    *GodogTest
@@ -35,7 +38,10 @@ var (
 	handlersMux sync.RWMutex
 )
 
-//TestHandleFunc - adds the TestHandlerFunc to the handler map, keyed on the TestDescriptor
+// TestHandleFunc adds the TestHandlerFunc to the handler map, keyed on the TestDescriptor, and is effectively 
+// a register of the test cases.  This is the mechanism which links the test case handler to the TestRunner, 
+// therefore it is essential that the test case register itself with the TestRunner by calling this function 
+// supplying a description of the test and the GoDogTestTuple.  See pod_security_feature.init() for an example.
 func TestHandleFunc(td TestDescriptor, gd *GoDogTestTuple) {
 	handlersMux.Lock()
 	defer handlersMux.Unlock()
@@ -43,11 +49,13 @@ func TestHandleFunc(td TestDescriptor, gd *GoDogTestTuple) {
 	handlers[td] = gd
 }
 
-//RunTest TODO: remove TestStore?
+// RunTest runs the test case described by the supplied Test.  It looks in it's test register (the handlers global
+// variable) for an entry with the same TestDescriptor as the supplied test.  If found, it uses the 
+// function and data held in the GoDogTestTuple to execute the test: it calls the handler function with the 
+// GodogTest data structure.
 func (ts *TestStore) RunTest(t *Test) (int, error) {
 	ts.AuditLog.Audit(t.UUID, "status", "running")
-
-	//TODO: error codes!
+	
 	if t == nil {
 		return 2, fmt.Errorf("test is nil - cannot run test")
 	}

@@ -1,6 +1,6 @@
 package kubernetes
 
-// SecurityPolicyProvider ...
+// SecurityPolicyProvider defines a set of methods for interograting the security policies set on the kubernetes cluster.
 type SecurityPolicyProvider interface {
 	HasSecurityPolicies() (*bool, error)
 	HasPrivilegedAccessRestriction() (*bool, error)

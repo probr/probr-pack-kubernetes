@@ -14,7 +14,7 @@ const rootDirName = "probr"
 
 var outputDir *string
 
-//GetRootDir ...
+// GetRootDir gets the root directory of the probr executable.
 func GetRootDir() (string, error) {
 	//TODO: fix this!! think it's a tad dodgy!
 	pwd, _ := os.Getwd()
@@ -41,13 +41,13 @@ func GetRootDir() (string, error) {
 	return s[0], nil
 }
 
-//SetOutputDirectory ...
+// SetOutputDirectory allows specification of the output directory for the test output json files.
 func SetOutputDirectory(d *string) {
 	outputDir = d
 }
 
-//GetOutputPath gets the output path for the test based on the output directory
-//plus the test name supplied
+// GetOutputPath gets the output path for the test based on the output directory
+// plus the test name supplied
 func GetOutputPath(t *string) (*os.File, error) {
 	outPath, err := getOutputDirectory()
 	if err != nil {

@@ -6,27 +6,26 @@ import (
 	apiv1 "k8s.io/api/core/v1"
 )
 
-const (
-	//TODO: default to these values for MVP - need to expose in future
+const (	
 	caNamespace   = "probr-container-access-test-ns"
 	caTestImage   = "/busybox:latest"
 	caContainer   = "container-access-test"
 	caPodNameBase = "ca-test"
 )
 
-// ContainerRegistryAccess ...
+// ContainerRegistryAccess interface defines the methods to support container registry access tests.
 type ContainerRegistryAccess interface {
 	ClusterIsDeployed() *bool
 	SetupContainerAccessTestPod(r *string) (*apiv1.Pod, error)
 	TeardownContainerAccessTestPod(p *string) error
 }
 
-// CRA ...
+// CRA implements the ContainerRegistryAccess interface.
 type CRA struct {
 	k Kubernetes
 }
 
-// NewCRA ...
+// NewCRA creates a new CRA with the supplied kubernetes instance.
 func NewCRA(k Kubernetes) *CRA {
 	c := &CRA{}
 	c.k = k
@@ -34,7 +33,7 @@ func NewCRA(k Kubernetes) *CRA {
 	return c
 }
 
-// NewDefaultCRA ...
+// NewDefaultCRA creates a new CRA using the default kubernetes instance.
 func NewDefaultCRA() *CRA {
 	c := &CRA{}
 	c.k = GetKubeInstance()
@@ -42,7 +41,7 @@ func NewDefaultCRA() *CRA {
 	return c
 }
 
-// ClusterIsDeployed ...
+// ClusterIsDeployed verifies if a cluster is deployed. 
 func (c *CRA) ClusterIsDeployed() *bool {
 	return c.k.ClusterIsDeployed()
 }
@@ -57,7 +56,7 @@ func (c *CRA) SetupContainerAccessTestPod(r *string) (*apiv1.Pod, error) {
 	return c.k.CreatePod(&pname, &ns, &cname, &i, true, nil)
 }
 
-//TeardownContainerAccessTestPod ...
+//TeardownContainerAccessTestPod deletes the supplied test pod in the container registry access namespace.
 func (c *CRA) TeardownContainerAccessTestPod(p *string) error {
 	ns := caNamespace
 	err := c.k.DeletePod(p, &ns, false) //don't worry about waiting

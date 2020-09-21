@@ -16,19 +16,18 @@ import (
 	"gitlab.com/citihub/probr/internal/coreengine"
 )
 
-//this is the "TEST HANDLER" impl  and will get called when probr is invoked from the CLI or API
-//all we do here is set the godog args based on what has been supplied (e.g. output path)
-//and call to the "feature" implementation (i.e the same impl when godog / go test is invoked)
-
-//GodogTestHandler ...
+// GodogTestHandler is a general implmentation of coreengine.TestHandlerFunc.  Based on the 
+// output type, the test will either be executed using an in-memory or file output.  In 
+// both cases, the handler uses the data supplied in GodogTest to call the underlying 
+// GoDog test suite.
 func GodogTestHandler(gd *coreengine.GodogTest) (int, *bytes.Buffer, error) {
 	if config.Vars.OutputType == "INMEM" {
-		return InMemGodogTestHandler(gd)
+		return inMemGodogTestHandler(gd)
 	}
-	return ToFileGodogTestHandler(gd)
+	return toFileGodogTestHandler(gd)
 }
 
-func ToFileGodogTestHandler(gd *coreengine.GodogTest) (int, *bytes.Buffer, error) {
+func toFileGodogTestHandler(gd *coreengine.GodogTest) (int, *bytes.Buffer, error) {
 	o, err := GetOutputPath(&gd.TestDescriptor.Name)
 	if err != nil {
 		return -1, nil, err
@@ -53,7 +52,7 @@ func ToFileGodogTestHandler(gd *coreengine.GodogTest) (int, *bytes.Buffer, error
 	return status, nil, err
 }
 
-func InMemGodogTestHandler(gd *coreengine.GodogTest) (int, *bytes.Buffer, error) {
+func inMemGodogTestHandler(gd *coreengine.GodogTest) (int, *bytes.Buffer, error) {
 	var t []byte
 	o := bytes.NewBuffer(t)
 	status, err := runTestSuite(o, gd)

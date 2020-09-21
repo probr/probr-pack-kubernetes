@@ -10,6 +10,10 @@ import (
 	"github.com/cucumber/godog/colors"
 )
 
+// This is the "test" implementation of the associated "_feature" file and allows execution
+// of the godog test from the command line using regular "go test" syntax. This is useful
+// for exercising specific test cases directly.
+
 var (
 	opts            = godog.Options{Output: colors.Colored(os.Stdout)}
 	integrationTest = flag.Bool("integrationTest", false, "run integration tests")

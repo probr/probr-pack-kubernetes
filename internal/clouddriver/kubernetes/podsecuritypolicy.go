@@ -15,19 +15,19 @@ import (
 	"k8s.io/api/policy/v1beta1"
 )
 
-//PrivilegedAccess ...
+// PrivilegedAccess type enumerating Privileged Access
 type PrivilegedAccess int
 
-//PrivilegedAccess enum
+// PrivilegedAccess enum
 const (
 	WithPrivilegedAccess PrivilegedAccess = iota
 	WithoutPrivilegedAccess
 )
 
-//PSPTestCommand ...
+// PSPTestCommand type enumerating the commands that can be used to test pods for compliance with Pod Security Policies
 type PSPTestCommand int
 
-//PSPTestCommand ...
+// enumn supporting PSPTestCommand type
 const (
 	Chroot PSPTestCommand = iota
 	EnterHostPIDNS
@@ -54,7 +54,7 @@ func (c PSPTestCommand) String() string {
 		"ls"}[c]
 }
 
-// PSPVerificationProbe ...
+// PSPVerificationProbe encapsulates the command and expected result to be used in a Pod Security Policy probe.
 type PSPVerificationProbe struct {
 	Cmd              PSPTestCommand
 	ExpectedExitCode int
@@ -71,7 +71,7 @@ const (
 	defaultPSPTestPodName     = "psp-test-pod"
 )
 
-// PodSecurityPolicy ...
+// PodSecurityPolicy interface defines a set of methods to support the testing of Pod Security Policies.
 type PodSecurityPolicy interface {
 	ClusterIsDeployed() *bool
 	ClusterHasPSP() (*bool, error)
@@ -97,7 +97,7 @@ type PodSecurityPolicy interface {
 	DeleteConfigMap() error
 }
 
-// PSP ...
+// PSP implements PodSecurityPolicy.
 type PSP struct {
 	k                       Kubernetes
 	securityPolicyProviders *[]SecurityPolicyProvider
@@ -108,7 +108,7 @@ type PSP struct {
 	testPodName   string
 }
 
-// NewPSP ...
+// NewPSP creates a new PSP using the supplied kubernetes instance and collection of SecurityPolicyProviders.
 func NewPSP(k Kubernetes, sp *[]SecurityPolicyProvider) *PSP {
 	p := &PSP{}
 	p.k = k
@@ -118,7 +118,7 @@ func NewPSP(k Kubernetes, sp *[]SecurityPolicyProvider) *PSP {
 	return p
 }
 
-// NewDefaultPSP ...
+// NewDefaultPSP creates a new PSP using the default kubernetes instance and the pre-defined SecurityPolicyProviders.
 func NewDefaultPSP() *PSP {
 	p := &PSP{}
 	p.k = GetKubeInstance()
@@ -154,12 +154,12 @@ func (psp *PSP) setenv() {
 	psp.testImage = i + "/" + b
 }
 
-// ClusterIsDeployed ...
+// ClusterIsDeployed verifies that a suitable kubernetes cluster is deployed.
 func (psp *PSP) ClusterIsDeployed() *bool {
 	return psp.k.ClusterIsDeployed()
 }
 
-//ClusterHasPSP determines if the cluster has any Pod Security Policies set.
+// ClusterHasPSP determines if the cluster has any SecurityPolicyProvider's set.
 func (psp *PSP) ClusterHasPSP() (*bool, error) {
 	var err error
 	var ret, success bool
@@ -184,7 +184,7 @@ func (psp *PSP) ClusterHasPSP() (*bool, error) {
 	return &ret, err
 }
 
-//PrivilegedAccessIsRestricted looks for a PodSecurityPolicy with 'Privileged' set to false (ie. NOT privileged).
+// PrivilegedAccessIsRestricted looks for a SecurityPolicyProvider with 'Privileged' set to false (ie. NOT privileged).
 func (psp *PSP) PrivilegedAccessIsRestricted() (*bool, error) {
 	var err error
 	var ret, success bool
@@ -202,7 +202,7 @@ func (psp *PSP) PrivilegedAccessIsRestricted() (*bool, error) {
 	return logAndReturn("PrivilegedAccessIsRestricted", success, ret, err)
 }
 
-//HostPIDIsRestricted looks for a PodSecurityPolicy with 'HostPID' set to false (i.e. NO Access to HostPID ).
+// HostPIDIsRestricted looks for a SecurityPolicyProvider with 'HostPID' set to false (i.e. NO Access to HostPID ).
 func (psp *PSP) HostPIDIsRestricted() (*bool, error) {
 	var err error
 	var ret, success bool
@@ -220,7 +220,7 @@ func (psp *PSP) HostPIDIsRestricted() (*bool, error) {
 	return logAndReturn("HostPIDIsRestricted", success, ret, err)
 }
 
-//HostIPCIsRestricted looks for a PodSecurityPolicy with 'HostIPC' set to false (i.e. NO Access to HostIPC ).
+// HostIPCIsRestricted looks for a SecurityPolicyProvider with 'HostIPC' set to false (i.e. NO Access to HostIPC ).
 func (psp *PSP) HostIPCIsRestricted() (*bool, error) {
 	var err error
 	var ret, success bool
@@ -238,7 +238,7 @@ func (psp *PSP) HostIPCIsRestricted() (*bool, error) {
 	return logAndReturn("HostIPCIsRestricted", success, ret, err)
 }
 
-//HostNetworkIsRestricted looks for a PodSecurityPolicy with 'HostIPC' set to false (i.e. NO Access to HostIPC ).
+// HostNetworkIsRestricted looks for a SecurityPolicyProvider with 'HostIPC' set to false (i.e. NO Access to HostIPC ).
 func (psp *PSP) HostNetworkIsRestricted() (*bool, error) {
 	var err error
 	var ret, success bool
@@ -256,7 +256,7 @@ func (psp *PSP) HostNetworkIsRestricted() (*bool, error) {
 	return logAndReturn("HostNetworkIsRestricted", success, ret, err)
 }
 
-//PrivilegedEscalationIsRestricted looks for a PodSecurityPolicy with 'Privileged' set to false (ie. NOT privileged).
+// PrivilegedEscalationIsRestricted looks for a SecurityPolicyProvider with 'Privileged' set to false (ie. NOT privileged).
 func (psp *PSP) PrivilegedEscalationIsRestricted() (*bool, error) {
 	var err error
 	var ret, success bool
@@ -274,7 +274,7 @@ func (psp *PSP) PrivilegedEscalationIsRestricted() (*bool, error) {
 	return logAndReturn("PrivilegedEscalationIsRestricted", success, ret, err)
 }
 
-// RootUserIsRestricted ...
+// RootUserIsRestricted looks for a SecurityPolicyProvider which prevents root user access.
 func (psp *PSP) RootUserIsRestricted() (*bool, error) {
 	var err error
 	var ret, success bool
@@ -292,7 +292,7 @@ func (psp *PSP) RootUserIsRestricted() (*bool, error) {
 	return logAndReturn("RootUserIsRestricted", success, ret, err)
 }
 
-//NETRawIsRestricted looks for a PodSecurityPolicy with 'Privileged' set to false (ie. NOT privileged).
+// NETRawIsRestricted looks for a SecurityPolicyProvider where the NET_RAW capability is restricted.
 func (psp *PSP) NETRawIsRestricted() (*bool, error) {
 	var err error
 	var ret, success bool
@@ -310,7 +310,7 @@ func (psp *PSP) NETRawIsRestricted() (*bool, error) {
 	return logAndReturn("NETRawIsRestricted", success, ret, err)
 }
 
-//AllowedCapabilitiesAreRestricted looks for a PodSecurityPolicy with 'Privileged' set to false (ie. NOT privileged).
+// AllowedCapabilitiesAreRestricted looks for a SecurityPolicyProvider where allowed capabilities are restricted.
 func (psp *PSP) AllowedCapabilitiesAreRestricted() (*bool, error) {
 	var err error
 	var ret, success bool
@@ -328,7 +328,7 @@ func (psp *PSP) AllowedCapabilitiesAreRestricted() (*bool, error) {
 	return logAndReturn("AllowedCapabilitiesAreRestricted", success, ret, err)
 }
 
-//AssignedCapabilitiesAreRestricted looks for a PodSecurityPolicy with 'Privileged' set to false (ie. NOT privileged).
+// AssignedCapabilitiesAreRestricted looks for a SecurityPolicyProvider where assigned capabilities are restricted.
 func (psp *PSP) AssignedCapabilitiesAreRestricted() (*bool, error) {
 	var err error
 	var ret, success bool
@@ -346,7 +346,7 @@ func (psp *PSP) AssignedCapabilitiesAreRestricted() (*bool, error) {
 	return logAndReturn("AssignedCapabilitiesAreRestricted", success, ret, err)
 }
 
-// HostPortsAreRestricted ...
+// HostPortsAreRestricted looks for a SecurityPolicyProvider which has a HostPort restriction.
 func (psp *PSP) HostPortsAreRestricted() (*bool, error) {
 	var err error
 	var ret, success bool
@@ -364,7 +364,7 @@ func (psp *PSP) HostPortsAreRestricted() (*bool, error) {
 	return logAndReturn("HostPortsAreRestricted", success, ret, err)
 }
 
-// VolumeTypesAreRestricted ...
+// VolumeTypesAreRestricted looks for a SecurityPolicyProvider which has a VolumeType restriction.
 func (psp *PSP) VolumeTypesAreRestricted() (*bool, error) {
 	var err error
 	var ret, success bool
@@ -382,7 +382,7 @@ func (psp *PSP) VolumeTypesAreRestricted() (*bool, error) {
 	return logAndReturn("VolumeTypesAreRestricted", success, ret, err)
 }
 
-// SeccompProfilesAreRestricted ...
+// SeccompProfilesAreRestricted looks for a SecurityPolicyProvider which restricts seccomp profiles.
 func (psp *PSP) SeccompProfilesAreRestricted() (*bool, error) {
 	var err error
 	var ret, success bool
@@ -525,7 +525,7 @@ func (psp *PSP) CreatePODSettingAttributes(hostPID *bool, hostIPC *bool, hostNet
 	return psp.k.CreatePodFromObject(po, &pname, &ns, true)
 }
 
-//CreatePODSettingCapabilities ...
+// CreatePODSettingCapabilities creates a pod with the supplied capabilities.
 func (psp *PSP) CreatePODSettingCapabilities(c *[]string) (*apiv1.Pod, error) {
 	pname, ns, cname, image := GenerateUniquePodName(psp.testPodName), psp.testNamespace, psp.testContainer, psp.testImage
 
@@ -552,7 +552,7 @@ func (psp *PSP) CreatePODSettingCapabilities(c *[]string) (*apiv1.Pod, error) {
 	return psp.k.CreatePodFromObject(po, &pname, &ns, true)
 }
 
-// CreatePodFromYaml ...
+// CreatePodFromYaml creates a pod from the supplied yaml.
 func (psp *PSP) CreatePodFromYaml(y []byte) (*apiv1.Pod, error) {
 	pname := GenerateUniquePodName(psp.testPodName)
 
@@ -560,7 +560,7 @@ func (psp *PSP) CreatePodFromYaml(y []byte) (*apiv1.Pod, error) {
 		utils.StringPtr(psp.testImage), nil, true)
 }
 
-// ExecPSPTestCmd ...
+// ExecPSPTestCmd executes the given PSPTestCommand against the supplied pod name.
 func (psp *PSP) ExecPSPTestCmd(pName *string, cmd PSPTestCommand) (*CmdExecutionResult, error) {
 	var pn string
 	//if we've not been given a pod name, assume one needs to be created:
@@ -588,7 +588,7 @@ func (psp *PSP) ExecPSPTestCmd(pName *string, cmd PSPTestCommand) (*CmdExecution
 	return res, nil
 }
 
-// CreateConfigMap ...
+// CreateConfigMap creates a config map to support PSP testing.
 func (psp *PSP) CreateConfigMap() error {
 	//set up anything that may be required for testing
 	//1. config map
@@ -601,26 +601,26 @@ func (psp *PSP) CreateConfigMap() error {
 	return err
 }
 
-// DeleteConfigMap ...
+// DeleteConfigMap deletes the config map supporting the PSP testing.
 func (psp *PSP) DeleteConfigMap() error {
 	return psp.k.DeleteConfigMap(utils.StringPtr("test-config-map"), &psp.testNamespace)
 }
 
-//TeardownPodSecurityTest ...
+// TeardownPodSecurityTest deletes the given pod name in the PSP test namespace.
 func (psp *PSP) TeardownPodSecurityTest(p *string) error {
 	ns := psp.testNamespace
 	err := psp.k.DeletePod(p, &ns, false) //don't worry about waiting
 	return err
 }
 
-// KubePodSecurityPolicyProvider ...
+// KubePodSecurityPolicyProvider implements SecurityPolicyProvider and looks for kubernetes PodSecurityPolices.
 type KubePodSecurityPolicyProvider struct {
 	k        Kubernetes
 	psps     *v1beta1.PodSecurityPolicyList
 	pspMutex sync.Mutex
 }
 
-// NewKubePodSecurityPolicyProvider ...
+// NewKubePodSecurityPolicyProvider creates a new KubePodSecurityPolicyProvider with the supplied kubernetes instance.
 func NewKubePodSecurityPolicyProvider(k Kubernetes) *KubePodSecurityPolicyProvider {
 	return &KubePodSecurityPolicyProvider{k: k}
 }
@@ -640,7 +640,7 @@ func (p *KubePodSecurityPolicyProvider) getPolicies() (*v1beta1.PodSecurityPolic
 	return p.psps, nil
 }
 
-// HasSecurityPolicies ...
+// HasSecurityPolicies provides the KubePodSecurityPolicyProvider implementation of SecurityPolicyProvider.
 func (p *KubePodSecurityPolicyProvider) HasSecurityPolicies() (*bool, error) {
 	psps, err := p.getPolicies()
 	if err != nil {
@@ -651,7 +651,7 @@ func (p *KubePodSecurityPolicyProvider) HasSecurityPolicies() (*bool, error) {
 	return &b, nil
 }
 
-// HasPrivilegedAccessRestriction ...
+// HasPrivilegedAccessRestriction provides the KubePodSecurityPolicyProvider implementation of SecurityPolicyProvider.
 func (p *KubePodSecurityPolicyProvider) HasPrivilegedAccessRestriction() (*bool, error) {
 	psps, err := p.getPolicies()
 	if err != nil {
@@ -671,7 +671,7 @@ func (p *KubePodSecurityPolicyProvider) HasPrivilegedAccessRestriction() (*bool,
 	return &res, nil
 }
 
-// HasHostPIDRestriction ...
+// HasHostPIDRestriction provides the KubePodSecurityPolicyProvider implementation of SecurityPolicyProvider.
 func (p *KubePodSecurityPolicyProvider) HasHostPIDRestriction() (*bool, error) {
 	psps, err := p.getPolicies()
 	if err != nil {
@@ -691,7 +691,7 @@ func (p *KubePodSecurityPolicyProvider) HasHostPIDRestriction() (*bool, error) {
 	return &res, nil
 }
 
-// HasHostIPCRestriction ...
+// HasHostIPCRestriction provides the KubePodSecurityPolicyProvider implementation of SecurityPolicyProvider.
 func (p *KubePodSecurityPolicyProvider) HasHostIPCRestriction() (*bool, error) {
 	psps, err := p.getPolicies()
 	if err != nil {
@@ -711,7 +711,7 @@ func (p *KubePodSecurityPolicyProvider) HasHostIPCRestriction() (*bool, error) {
 	return &res, nil
 }
 
-// HasHostNetworkRestriction ...
+// HasHostNetworkRestriction provides the KubePodSecurityPolicyProvider implementation of SecurityPolicyProvider.
 func (p *KubePodSecurityPolicyProvider) HasHostNetworkRestriction() (*bool, error) {
 	psps, err := p.getPolicies()
 	if err != nil {
@@ -731,7 +731,7 @@ func (p *KubePodSecurityPolicyProvider) HasHostNetworkRestriction() (*bool, erro
 	return &res, nil
 }
 
-// HasAllowPrivilegeEscalationRestriction ...
+// HasAllowPrivilegeEscalationRestriction provides the KubePodSecurityPolicyProvider implementation of SecurityPolicyProvider.
 func (p *KubePodSecurityPolicyProvider) HasAllowPrivilegeEscalationRestriction() (*bool, error) {
 	psps, err := p.getPolicies()
 	if err != nil {
@@ -751,7 +751,7 @@ func (p *KubePodSecurityPolicyProvider) HasAllowPrivilegeEscalationRestriction()
 	return &res, nil
 }
 
-// HasRootUserRestriction ...
+// HasRootUserRestriction provides the KubePodSecurityPolicyProvider implementation of SecurityPolicyProvider.
 func (p *KubePodSecurityPolicyProvider) HasRootUserRestriction() (*bool, error) {
 	psps, err := p.getPolicies()
 	if err != nil {
@@ -771,7 +771,7 @@ func (p *KubePodSecurityPolicyProvider) HasRootUserRestriction() (*bool, error) 
 	return &res, nil
 }
 
-// HasNETRAWRestriction ...
+// HasNETRAWRestriction provides the KubePodSecurityPolicyProvider implementation of SecurityPolicyProvider.
 func (p *KubePodSecurityPolicyProvider) HasNETRAWRestriction() (*bool, error) {
 	psps, err := p.getPolicies()
 	if err != nil {
@@ -793,7 +793,7 @@ func (p *KubePodSecurityPolicyProvider) HasNETRAWRestriction() (*bool, error) {
 	return &res, nil
 }
 
-// HasAllowedCapabilitiesRestriction ...
+// HasAllowedCapabilitiesRestriction provides the KubePodSecurityPolicyProvider implementation of SecurityPolicyProvider.
 func (p *KubePodSecurityPolicyProvider) HasAllowedCapabilitiesRestriction() (*bool, error) {
 	psps, err := p.getPolicies()
 	if err != nil {
@@ -813,7 +813,7 @@ func (p *KubePodSecurityPolicyProvider) HasAllowedCapabilitiesRestriction() (*bo
 	return &res, nil
 }
 
-// HasAssignedCapabilitiesRestriction ...
+// HasAssignedCapabilitiesRestriction provides the KubePodSecurityPolicyProvider implementation of SecurityPolicyProvider.
 func (p *KubePodSecurityPolicyProvider) HasAssignedCapabilitiesRestriction() (*bool, error) {
 	//TODO: review - doesn't appear to be a PSP to enforce this
 	b := false
@@ -821,7 +821,7 @@ func (p *KubePodSecurityPolicyProvider) HasAssignedCapabilitiesRestriction() (*b
 	return &b, nil
 }
 
-// HasHostPortRestriction ...
+// HasHostPortRestriction provides the KubePodSecurityPolicyProvider implementation of SecurityPolicyProvider.
 func (p *KubePodSecurityPolicyProvider) HasHostPortRestriction() (*bool, error) {
 	//TODO: review this. From one view, this is always true as ports are locked down by
 	//default and only opened via the hostport range on a PSP.  Which ports are allowed
@@ -834,7 +834,7 @@ func (p *KubePodSecurityPolicyProvider) HasHostPortRestriction() (*bool, error) 
 	return &b, nil
 }
 
-// HasVolumeTypeRestriction ...
+// HasVolumeTypeRestriction provides the KubePodSecurityPolicyProvider implementation of SecurityPolicyProvider.
 func (p *KubePodSecurityPolicyProvider) HasVolumeTypeRestriction() (*bool, error) {
 	psps, err := p.getPolicies()
 	if err != nil {
@@ -867,7 +867,7 @@ func (p *KubePodSecurityPolicyProvider) HasVolumeTypeRestriction() (*bool, error
 	return &res, nil
 }
 
-// HasSeccompProfileRestriction ...
+// HasSeccompProfileRestriction provides the KubePodSecurityPolicyProvider implementation of SecurityPolicyProvider.
 func (p *KubePodSecurityPolicyProvider) HasSeccompProfileRestriction() (*bool, error) {
 	psps, err := p.getPolicies()
 	if err != nil {

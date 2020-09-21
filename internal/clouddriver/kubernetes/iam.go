@@ -28,10 +28,10 @@ const (
 	defaultIAMTestPodName     = "iam-test-pod"
 )
 
-//IAMTestCommand ...
+// IAMTestCommand defines commands for use in testing IAM 
 type IAMTestCommand int
 
-//IAMTestCommand ...
+// enum supporting IAMTestCommand
 const (
 	CatAzJSON IAMTestCommand = iota
 	CurlAuthToken
@@ -42,7 +42,7 @@ func (c IAMTestCommand) String() string {
 		"curl http://169.254.169.254/metadata/identity/oauth2/token?api-version=2018-02-01&resource=https%3A%2F%2Fmanagement.azure.com%2F -H Metadata:true -s"}[c]
 }
 
-//IdentityAccessManagement encapsulates functionality for querying and probing Identity and Access Management setup
+// IdentityAccessManagement encapsulates functionality for querying and probing Identity and Access Management setup.
 type IdentityAccessManagement interface {
 	AzureIdentityExists(useDefaultNS bool) (bool, error)
 	AzureIdentityBindingExists(useDefaultNS bool) (bool, error)
@@ -53,7 +53,7 @@ type IdentityAccessManagement interface {
 	GetAccessToken(pn string, useDefaultNS bool) (*string, error)
 }
 
-//IAM implements the IdentityAccessManagement interface
+// IAM implements the IdentityAccessManagement interface.
 type IAM struct {
 	k Kubernetes
 
@@ -65,12 +65,12 @@ type IAM struct {
 	testAzureIdentityBinding string
 }
 
-// IAMVerification ...
+// IAMVerification provides an IAM specific type wrapper extending PSPVerificationProbe.
 type IAMVerification struct {
 	PSPVerificationProbe
 }
 
-// NewDefaultIAM ...
+// NewDefaultIAM creates a new IAM instance using the default kubernetes provider.
 func NewDefaultIAM() *IAM {
 	i := &IAM{}
 	i.k = GetKubeInstance()
@@ -184,7 +184,7 @@ func (i *IAM) createFromYaml(y []byte, pname *string, ns *string, image *string,
 	return nil, nil
 }
 
-//AzureIdentityExists gets the AzureIdentityBindings and filter for namespace (if supplied)
+// AzureIdentityExists gets the AzureIdentityBindings and filter for namespace (if supplied)
 func (i *IAM) AzureIdentityExists(useDefaultNS bool) (bool, error) {
 	//need to make a 'raw' call to get the AIBs
 	//the AIB's are in the API group: "apis/aadpodidentity.k8s.io/v1/azureidentity"
@@ -192,7 +192,7 @@ func (i *IAM) AzureIdentityExists(useDefaultNS bool) (bool, error) {
 	return i.filteredRawResourceGrp("apis/aadpodidentity.k8s.io/v1/azureidentities", "namespace", *i.getNamespace(useDefaultNS))
 }
 
-//AzureIdentityBindingExists gets the AzureIdentityBindings and filter for namespace (if supplied)
+// AzureIdentityBindingExists gets the AzureIdentityBindings and filter for namespace (if supplied)
 func (i *IAM) AzureIdentityBindingExists(useDefaultNS bool) (bool, error) {
 	//need to make a 'raw' call to get the AIBs
 	//the AIB's are in the API group: "apis/aadpodidentity.k8s.io/v1/azureidentitybindings"
@@ -218,7 +218,7 @@ func (i *IAM) filteredRawResourceGrp(g string, k string, f string) (bool, error)
 	return false, nil
 }
 
-//CreateIAMTestPod ...
+// CreateIAMTestPod creates a pod configured for IAM test cases.
 func (i *IAM) CreateIAMTestPod(y []byte, useDefaultNS bool) (*apiv1.Pod, error) {
 	n := GenerateUniquePodName(i.testPodName)
 		
@@ -226,12 +226,12 @@ func (i *IAM) CreateIAMTestPod(y []byte, useDefaultNS bool) (*apiv1.Pod, error) 
 		i.getAadPodIDBinding(useDefaultNS), true)
 }
 
-//DeleteIAMTestPod ...
+// DeleteIAMTestPod deletes the IAM test pod with the supplied name.
 func (i *IAM) DeleteIAMTestPod(n string, useDefaultNS bool) error {
 	return i.k.DeletePod(&n, i.getNamespace(useDefaultNS), false) //don't worry about waiting
 }
 
-// ExecuteVerificationCmd ...
+// ExecuteVerificationCmd executes a verification command against the supplied pod name.
 func (i *IAM) ExecuteVerificationCmd(pn string, cmd IAMTestCommand, useDefaultNS bool) (*CmdExecutionResult, error) {
 	c := cmd.String()
 	res := i.k.ExecCommand(&c, i.getNamespace(useDefaultNS), &pn)
@@ -242,7 +242,7 @@ func (i *IAM) ExecuteVerificationCmd(pn string, cmd IAMTestCommand, useDefaultNS
 
 }
 
-//GetAccessToken ...
+// GetAccessToken attempts to retrieve an access token by executing a curl command requesting a token for the Azure Resource Manager.
 func (i *IAM) GetAccessToken(pn string, useDefaultNS bool) (*string, error) {
 	//curl for the auth token ... need to supply appropiate ns
 	res, err := i.ExecuteVerificationCmd(pn, CurlAuthToken, useDefaultNS)

@@ -1,3 +1,4 @@
+// Package utils provides general utility methods.  The '*Ptr' functions were borrowed/inspired by the kubernetes go-client.
 package utils
 
 
