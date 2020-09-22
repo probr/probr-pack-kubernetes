@@ -32,7 +32,7 @@ func SetPodSecurityPolicy(p kubernetes.PodSecurityPolicy) {
 }
 
 // init() registers the feature tests descibed in this package with the test runner (coreengine.TestRunner) via the call
-// to coreengine.TestHandleFunc.  This links the test - described by the TestDescriptor - with the handler to invoke.  In
+// to coreengine.AddTestHandler.  This links the test - described by the TestDescriptor - with the handler to invoke.  In
 // this case, the general test handler is being used (features.GodogTestHandler) and the GodogTest data provides the data
 // require to execute the test.  Specifically, the data includes the Test Suite and Scenario Initializers from this package
 // which will be called from features.GodogTestHandler.  Note: a blank import at probr library level should be done to
@@ -41,7 +41,7 @@ func init() {
 	td := coreengine.TestDescriptor{Group: coreengine.Kubernetes,
 		Category: coreengine.PodSecurityPolicies, Name: "pod_security_policy"}
 
-	coreengine.TestHandleFunc(td, &coreengine.GoDogTestTuple{
+	coreengine.AddTestHandler(td, &coreengine.GoDogTestTuple{
 		Handler: features.GodogTestHandler,
 		Data: &coreengine.GodogTest{
 			TestDescriptor:       &td,

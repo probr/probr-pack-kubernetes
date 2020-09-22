@@ -1,7 +1,7 @@
 // Package iam provides the implementation required to execute the feature based test cases described in the
 // the 'features' directory.  The 'assets' directory holds any assets required for the test cases.   Assets are 'embedded'
-// via the 'go-bindata.exe' tool which is invoked via the 'go generate' tool.  It is important, therefore, that the 
-//'go:generate' comment is present in order to include this package in the scope of the 'go generate' tool.  This can be 
+// via the 'go-bindata.exe' tool which is invoked via the 'go generate' tool.  It is important, therefore, that the
+//'go:generate' comment is present in order to include this package in the scope of the 'go generate' tool.  This can be
 // invoked directly on the command line of via the Makefile (e.g. make clean-build).
 package iam
 
@@ -34,7 +34,7 @@ func SetIAM(i kubernetes.IdentityAccessManagement) {
 }
 
 // init() registers the feature tests descibed in this package with the test runner (coreengine.TestRunner) via the call
-// to coreengine.TestHandleFunc.  This links the test - described by the TestDescriptor - with the handler to invoke.  In
+// to coreengine.AddTestHandler.  This links the test - described by the TestDescriptor - with the handler to invoke.  In
 // this case, the general test handler is being used (features.GodogTestHandler) and the GodogTest data provides the data
 // require to execute the test.  Specifically, the data includes the Test Suite and Scenario Initializers from this package
 // which will be called from features.GodogTestHandler.  Note: a blank import at probr library level should be done to
@@ -43,7 +43,7 @@ func init() {
 	td := coreengine.TestDescriptor{Group: coreengine.Kubernetes,
 		Category: coreengine.IAM, Name: "iam_control"}
 
-	coreengine.TestHandleFunc(td, &coreengine.GoDogTestTuple{
+	coreengine.AddTestHandler(td, &coreengine.GoDogTestTuple{
 		Handler: features.GodogTestHandler,
 		Data: &coreengine.GodogTest{
 			TestDescriptor:       &td,
@@ -124,7 +124,7 @@ func (p *probeState) anAttemptToObtainAnAccessTokenFromThatPodShould(expectedres
 		return features.LogAndReturnError("failed to create pod", p.state.CreationError)
 	}
 
-	//curl for the auth token ... need to supply appropiate ns	
+	//curl for the auth token ... need to supply appropiate ns
 	res, err := iam.GetAccessToken(p.state.PodName, p.useDefaultNS)
 
 	if err != nil {
@@ -256,10 +256,10 @@ func TestSuiteInitialize(ctx *godog.TestSuiteContext) {
 	})
 }
 
-// ScenarioInitialize initialises the specific test steps.  This is essentially the creation of the test 
+// ScenarioInitialize initialises the specific test steps.  This is essentially the creation of the test
 // which reflects the tests described in the features directory.  There must be a test step registered for
 // each line in the feature files. Note: Godog will output stub steps and implementations if it doesn't find
-// a step / function defined.  See: https://github.com/cucumber/godog#example. 
+// a step / function defined.  See: https://github.com/cucumber/godog#example.
 func ScenarioInitialize(ctx *godog.ScenarioContext) {
 
 	ps := probeState{}
