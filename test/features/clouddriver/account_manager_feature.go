@@ -15,7 +15,7 @@ func init() {
 
 	fp := filepath.Join("test", "features", "clouddriver", "features")
 
-	coreengine.TestHandleFunc(td, &coreengine.GoDogTestTuple{
+	coreengine.AddTestHandler(td, &coreengine.GoDogTestTuple{
 		Handler: features.GodogTestHandler,
 		Data: &coreengine.GodogTest{
 			TestDescriptor:       &td,

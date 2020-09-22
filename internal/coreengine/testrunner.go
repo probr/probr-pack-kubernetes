@@ -38,11 +38,11 @@ var (
 	handlersMux sync.RWMutex
 )
 
-// TestHandleFunc adds the TestHandlerFunc to the handler map, keyed on the TestDescriptor, and is effectively 
-// a register of the test cases.  This is the mechanism which links the test case handler to the TestRunner, 
-// therefore it is essential that the test case register itself with the TestRunner by calling this function 
+// AddTestHandler adds the TestHandlerFunc to the handler map, keyed on the TestDescriptor, and is effectively
+// a register of the test cases.  This is the mechanism which links the test case handler to the TestRunner,
+// therefore it is essential that the test case register itself with the TestRunner by calling this function
 // supplying a description of the test and the GoDogTestTuple.  See pod_security_feature.init() for an example.
-func TestHandleFunc(td TestDescriptor, gd *GoDogTestTuple) {
+func AddTestHandler(td TestDescriptor, gd *GoDogTestTuple) {
 	handlersMux.Lock()
 	defer handlersMux.Unlock()
 
@@ -50,12 +50,12 @@ func TestHandleFunc(td TestDescriptor, gd *GoDogTestTuple) {
 }
 
 // RunTest runs the test case described by the supplied Test.  It looks in it's test register (the handlers global
-// variable) for an entry with the same TestDescriptor as the supplied test.  If found, it uses the 
-// function and data held in the GoDogTestTuple to execute the test: it calls the handler function with the 
+// variable) for an entry with the same TestDescriptor as the supplied test.  If found, it uses the
+// function and data held in the GoDogTestTuple to execute the test: it calls the handler function with the
 // GodogTest data structure.
 func (ts *TestStore) RunTest(t *Test) (int, error) {
 	ts.AuditLog.Audit(t.UUID, "status", "running")
-	
+
 	if t == nil {
 		return 2, fmt.Errorf("test is nil - cannot run test")
 	}
@@ -75,7 +75,7 @@ func (ts *TestStore) RunTest(t *Test) (int, error) {
 		return 4, fmt.Errorf("no test handler available for %v - cannot run test", *t.TestDescriptor)
 	}
 
-	s, o, err := g.Handler(g.Data)
+	s, o, err := g.Handler(g.Data) // Currently the only handler type is features.GodogTestHandler, but this can be extended
 
 	if s == 0 {
 		// success

@@ -21,7 +21,7 @@ func init() {
 	td := coreengine.TestDescriptor{Group: coreengine.Kubernetes,
 		Category: coreengine.InternetAccess, Name: "internet_access"}
 
-	coreengine.TestHandleFunc(td, &coreengine.GoDogTestTuple{
+	coreengine.AddTestHandler(td, &coreengine.GoDogTestTuple{
 		Handler: features.GodogTestHandler,
 		Data: &coreengine.GodogTest{
 			TestDescriptor:       &td,
