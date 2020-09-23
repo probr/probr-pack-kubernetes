@@ -22,6 +22,16 @@ func (e *ConfigVars) GetKubeContext() {
 	}
 }
 
+// GetAuditEnabled
+func (e *ConfigVars) GetAuditEnabled(d string) {
+	if e.AuditEnabled == "" {
+		e.AuditEnabled = os.Getenv("AUDIT_ENABLED")
+	}
+	if e.AuditEnabled == "" {
+		e.AuditEnabled = d // default is specified in caller: config/defaults.go
+	}
+}
+
 // GetProbrTags ...
 func (e *ConfigVars) GetProbrTags() {
 	if e.Tests.Tags == "" {
@@ -36,6 +46,16 @@ func (e *ConfigVars) GetOutputType(s string) {
 	}
 	if e.OutputType == "" {
 		e.OutputType = s // default is specified in caller: config/defaults.go
+	}
+}
+
+// GetOutputDir ...
+func (e *ConfigVars) GetOutputDir(s string) {
+	if e.OutputDir == "" {
+		e.OutputDir = os.Getenv("OUTPUT_DIR")
+	}
+	if e.OutputType == "" {
+		e.OutputDir = s // default is specified in caller: config/defaults.go
 	}
 }
 

@@ -13,6 +13,8 @@ type ConfigVars struct {
 	KubeConfigPath string `yaml:"kubeConfig"`
 	KubeContext    string `yaml:"kubeContext"`
 	OutputType     string `yaml:"outputType"`
+	OutputDir      string `yaml:"outputDir"`
+	AuditEnabled   string `yaml:"auditEnabled"`
 	Images         struct {
 		Repository string `yaml:"repository"`
 		Curl       string `yaml:"curl"`
@@ -43,7 +45,7 @@ func init() {
 	Init("")
 }
 
-// Init will override Vars when it is used
+// Init will override config.Vars with the content retrieved from a filepath
 func Init(configPath string) error {
 	config, err := NewConfig(configPath)
 	if err != nil {
@@ -54,7 +56,7 @@ func Init(configPath string) error {
 	return nil
 }
 
-// NewConfig can be used multiple times, if the need arises
+// NewConfig overrides the current config.Vars values
 func NewConfig(c string) (ConfigVars, error) {
 	// Create config structure
 	config := ConfigVars{}

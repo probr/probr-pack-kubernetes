@@ -1,7 +1,23 @@
 package output
 
+import (
+	"encoding/json"
+	"log"
+
+	"gitlab.com/citihub/probr/internal/config"
+)
+
 type AuditLog struct {
 	Events map[string]map[string]string
+}
+
+func (o *AuditLog) PrintAudit() {
+	if config.Vars.AuditEnabled == "true" {
+		audit, _ := json.MarshalIndent(o.Events, "", "  ")
+		log.Printf("[NOTICE] %s", audit)
+	} else {
+		log.Printf("[NOTICE] Audit Log suppressed by configuration variable AuditLogEnabled.")
+	}
 }
 
 // Audit accepts a test name with a key and value to insert to the logs for that test. Overwrites existing keys.

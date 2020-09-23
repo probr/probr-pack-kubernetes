@@ -20,7 +20,7 @@ The following elements are required to get started with Probr:
 ### Get the executable
 
 - **Option 1** - Download the latest Probr package by clicking the corresponding asset on our [release page](https://github.com/citihub/probr/releases).
-- **Option 2** - You may build the edge version of Probr by using `go build cmd/probr-cli/main.go` from the source code. This may also be necessary if an executable compatible with your system is not available in on the release page.
+- **Option 2** - You may build the edge version of Probr by using `go build cmd/probr-cli/*.go` from the source code. This may also be necessary if an executable compatible with your system is not available in on the release page.
 
 *Note: The usage docs refer to the executable as `probr` but on the release page it will have the version number in its name. You can use that name for execution, or simply change the package's name after you download it.*
 
