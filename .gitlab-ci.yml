@@ -36,7 +36,7 @@ build_executable:
     - go_lint
   image: golang:1.14
   script:
-    - go build -o probr cmd/probr-cli/main.go
+    - go build -o probr cmd/probr-cli/*.go
 
 
 # TEST ##
