@@ -8,7 +8,8 @@ import (
 	"gitlab.com/citihub/probr"
 	"gitlab.com/citihub/probr/internal/clouddriver/kubernetes"
 
-	"gitlab.com/citihub/probr/internal/config" //needed for logging
+	"gitlab.com/citihub/probr/internal/config"
+	"gitlab.com/citihub/probr/internal/output"
 )
 
 var (
@@ -40,5 +41,6 @@ func main() {
 	if config.Vars.OutputType == "IO" && (out == nil || len(out) == 0) {
 		log.Printf("[ERROR] Test results not written to file, possibly due to permissions on the specified output directory: %s", config.Vars.OutputDir)
 	}
+	output.AuditLog.PrintAudit()
 	os.Exit(s)
 }

@@ -6,7 +6,7 @@ import (
 
 	"github.com/google/uuid"
 
-	_ "gitlab.com/citihub/probr/internal/config" //needed for logging
+	"gitlab.com/citihub/probr/internal/output"
 	"gitlab.com/citihub/probr/test/features"
 	_ "gitlab.com/citihub/probr/test/features/clouddriver"                        //needed to run init on TestHandlers
 	_ "gitlab.com/citihub/probr/test/features/kubernetes/containerregistryaccess" //needed to run init on TestHandlers
@@ -62,7 +62,7 @@ func GetAllTestResults(ts *coreengine.TestStore) (map[string]string, error) {
 func ReadTestResults(ts *coreengine.TestStore, id uuid.UUID) (string, string, error) {
 	t, err := ts.GetTest(&id)
 	test := (*t)[0]
-	ts.AuditLog.Audit(id.String(), "status", test.Status.String())
+	output.AuditLog.Audit(id.String(), "status", test.Status.String())
 	if err != nil {
 		return "", "", err
 	}

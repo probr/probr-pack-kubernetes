@@ -7,11 +7,13 @@ import (
 	"gitlab.com/citihub/probr/internal/config"
 )
 
-type AuditLog struct {
+type ALog struct {
 	Events map[string]map[string]string
 }
 
-func (o *AuditLog) PrintAudit() {
+var AuditLog ALog
+
+func (o *ALog) PrintAudit() {
 	if config.Vars.AuditEnabled == "true" {
 		audit, _ := json.MarshalIndent(o.Events, "", "  ")
 		log.Printf("[NOTICE] %s", audit)
@@ -21,7 +23,7 @@ func (o *AuditLog) PrintAudit() {
 }
 
 // Audit accepts a test name with a key and value to insert to the logs for that test. Overwrites existing keys.
-func (o *AuditLog) Audit(n string, k string, v string) {
+func (o *ALog) Audit(n string, k string, v string) {
 	if o.Events == nil {
 		o.Events = make(map[string]map[string]string)
 	}
@@ -31,7 +33,7 @@ func (o *AuditLog) Audit(n string, k string, v string) {
 }
 
 // GetEventLog initializes or returns existing log for the provided test name
-func (o *AuditLog) GetEventLog(n string) map[string]string {
+func (o *ALog) GetEventLog(n string) map[string]string {
 	if o.Events[n] == nil {
 		o.Events[n] = make(map[string]string)
 	}

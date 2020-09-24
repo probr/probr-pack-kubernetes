@@ -8,10 +8,11 @@ These logs are designed to be one-per-event. Each test may have multiple events,
 
 ### Usage
 
-A new AuditLog context should be created each time `probr` is run:
+A new AuditLog context is created each time `probr` is run:
 
 ```
-o := new(output.AuditLog)
+# internal/output/audit.go
+var AuditLog ALog
 ```
 
 Adding entries to the EventLogs requires the name of the test and a key-value pair to be inserted:

@@ -1,4 +1,4 @@
-kubeConfig: .kube/config1
+kubeConfig:
 outputType: INMEM
 tests:
     tags: "@CIS-5.2.1,@CIS-6.1.3,@CIS-6.10"

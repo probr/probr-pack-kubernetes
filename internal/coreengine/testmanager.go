@@ -1,5 +1,5 @@
-// Package coreengine contains the types and functions responsible for managing tests and test execution.  This is the primary 
-// entry point to the core of the application and should be utilised by the probr library to create, execute and report 
+// Package coreengine contains the types and functions responsible for managing tests and test execution.  This is the primary
+// entry point to the core of the application and should be utilised by the probr library to create, execute and report
 // on tests.
 package coreengine
 
@@ -90,7 +90,6 @@ type TestStore struct {
 	Tests       map[uuid.UUID]*[]*Test
 	FailedTests map[TestStatus]*[]*Test
 	Lock        sync.RWMutex
-	AuditLog    *output.AuditLog
 }
 
 // GetAvailableTests return the collection of available tests.
@@ -106,8 +105,7 @@ func GetAvailableTests() *[]TestDescriptor {
 // NewTestManager creates a new test manager, backed by TestStore
 func NewTestManager() *TestStore {
 	return &TestStore{
-		Tests:    make(map[uuid.UUID]*[]*Test),
-		AuditLog: new(output.AuditLog),
+		Tests: make(map[uuid.UUID]*[]*Test),
 	}
 }
 
@@ -129,8 +127,8 @@ func (ts *TestStore) AddTest(td TestDescriptor) *uuid.UUID {
 	a := []*Test{&t}
 	ts.Tests[uid] = &a
 
-	ts.AuditLog.Audit(u, "status", t.Status.String())
-	ts.AuditLog.Audit(u, "descriptor", t.TestDescriptor.Name)
+	output.AuditLog.Audit(u, "status", t.Status.String())
+	output.AuditLog.Audit(u, "descriptor", t.TestDescriptor.Name)
 
 	return &uid
 }
