@@ -55,17 +55,17 @@ func AddTestHandler(td TestDescriptor, gd *GoDogTestTuple) {
 // function and data held in the GoDogTestTuple to execute the test: it calls the handler function with the
 // GodogTest data structure.
 func (ts *TestStore) RunTest(t *Test) (int, error) {
-	output.AuditLog.Audit(t.UUID, "status", "Running")
+	output.AuditLog.Audit(t.TestDescriptor.Name, "status", "Running")
 
 	if t == nil {
-		output.AuditLog.Audit(t.UUID, "status", "Internal Error - Test not found")
+		output.AuditLog.Audit(t.TestDescriptor.Name, "status", "Internal Error - Test not found")
 		return 2, fmt.Errorf("test is nil - cannot run test")
 	}
 
 	if t.TestDescriptor == nil {
 		//update status
 		*t.Status = Error
-		output.AuditLog.Audit(t.UUID, "status", "Internal Error - Test descriptor not found")
+		output.AuditLog.Audit(t.TestDescriptor.Name, "status", "Internal Error - Test descriptor not found")
 		return 3, fmt.Errorf("test descriptor is nil - cannot run test")
 	}
 
@@ -75,7 +75,7 @@ func (ts *TestStore) RunTest(t *Test) (int, error) {
 	if !exists {
 		//update status
 		*t.Status = Error
-		output.AuditLog.Audit(t.UUID, "status", "Internal Error - No handler available for test")
+		output.AuditLog.Audit(t.TestDescriptor.Name, "status", "Internal Error - No handler available for test")
 		return 4, fmt.Errorf("no test handler available for %v - cannot run test", *t.TestDescriptor)
 	}
 
@@ -83,11 +83,11 @@ func (ts *TestStore) RunTest(t *Test) (int, error) {
 
 	if s == 0 {
 		// success
-		output.AuditLog.Audit(t.UUID, "status", "Completed - Passed")
+		output.AuditLog.Audit(t.TestDescriptor.Name, "status", "Completed - Passed")
 		*t.Status = CompleteSuccess
 	} else {
 		// fail
-		output.AuditLog.Audit(t.UUID, "status", "Completed - Failed")
+		output.AuditLog.Audit(t.TestDescriptor.Name, "status", "Completed - Failed")
 		*t.Status = CompleteFail
 
 		//TODO: this could be adjusted based on test strictness ...

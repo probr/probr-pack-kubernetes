@@ -9,7 +9,6 @@ import (
 	"log"
 	"sync"
 
-	"github.com/google/uuid"
 	"gitlab.com/citihub/probr/internal/output"
 )
 
@@ -69,7 +68,6 @@ func (c Category) String() string {
 
 // Test encapsulates the data required to support test execution.
 type Test struct {
-	UUID           string          `json:"uuid,omitempty"`
 	TestDescriptor *TestDescriptor `json:"test_descriptor,omitempty"`
 
 	Status *TestStatus `json:"status,omitempty"`
@@ -87,8 +85,8 @@ type TestDescriptor struct {
 // TestStore maintains a collection of tests to be run and their status.  FailedTests is an explicit
 // collection of failed tests.
 type TestStore struct {
-	Tests       map[uuid.UUID]*[]*Test
-	FailedTests map[TestStatus]*[]*Test
+	Tests       map[string]*Test
+	FailedTests map[TestStatus]*Test
 	Lock        sync.RWMutex
 }
 
@@ -105,59 +103,56 @@ func GetAvailableTests() *[]TestDescriptor {
 // NewTestManager creates a new test manager, backed by TestStore
 func NewTestManager() *TestStore {
 	return &TestStore{
-		Tests: make(map[uuid.UUID]*[]*Test),
+		Tests: make(map[string]*Test),
 	}
 }
 
 // AddTest adds a test, described by the TestDescriptor, to the TestStore.
-func (ts *TestStore) AddTest(td TestDescriptor) *uuid.UUID {
+func (ts *TestStore) AddTest(td TestDescriptor) string {
 	ts.Lock.Lock()
 	defer ts.Lock.Unlock()
 
 	//add the test
 
-	uid := uuid.New()
-	u := uid.String()
 	s := Pending
 	t := Test{
 		TestDescriptor: &td,
 		Status:         &s,
-		UUID:           u,
 	}
-	a := []*Test{&t}
-	ts.Tests[uid] = &a
+	ts.Tests[td.Name] = &t
 
-	output.AuditLog.Audit(u, "status", t.Status.String())
-	output.AuditLog.Audit(u, "descriptor", t.TestDescriptor.Name)
+	output.AuditLog.Audit(td.Name, "status", t.Status.String())
+	output.AuditLog.Audit(td.Name, "group", td.Group.String())
+	output.AuditLog.Audit(td.Name, "category", td.Category.String())
 
-	return &uid
+	return td.Name
 }
 
-// GetTest returns the test identified by the given UUID.
-func (ts *TestStore) GetTest(uuid *uuid.UUID) (*[]*Test, error) {
+// GetTest returns the test identified by the given name.
+func (ts *TestStore) GetTest(name string) (*Test, error) {
 	ts.Lock.Lock()
 	defer ts.Lock.Unlock()
 
 	//get the test from the store
-	t, exists := ts.Tests[*uuid]
+	t, exists := ts.Tests[name]
 
 	if !exists {
-		return nil, errors.New("test with uuid " + (*uuid).String() + " not found")
+		return nil, errors.New("test with name '" + name + "' not found")
 	}
 	return t, nil
 }
 
 //GetTest by TestDescriptor ... TODO
 
-// ExecTest executes the test identified by the supplied UUID.
-func (ts *TestStore) ExecTest(uuid *uuid.UUID) (int, error) {
-	t, err := ts.GetTest(uuid)
+// ExecTest executes the test identified by the specified name.
+func (ts *TestStore) ExecTest(name string) (int, error) {
+	t, err := ts.GetTest(name)
 
 	if err != nil {
 		return 1, err
 	}
 
-	st, err := ts.RunTest((*t)[0])
+	st, err := ts.RunTest(t)
 
 	//TODO: manage store
 	//move to FAILURE / SUCCESS as approriate ...
@@ -172,8 +167,8 @@ func (ts *TestStore) ExecAllTests() (int, error) {
 	status := 0
 	var err error
 
-	for uuid := range ts.Tests {
-		st, err := ts.ExecTest(&uuid)
+	for name := range ts.Tests {
+		st, err := ts.ExecTest(name)
 		if err != nil {
 			//log but continue with remaining tests
 			log.Printf("[ERROR] error executing test: %v", err)
