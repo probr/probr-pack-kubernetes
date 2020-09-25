@@ -6,6 +6,7 @@ import (
 	"log"
 	"strings"
 
+	"gitlab.com/citihub/probr/internal/audit"
 	"gitlab.com/citihub/probr/test/features"
 	"gitlab.com/citihub/probr/test/features/kubernetes/probe"
 
@@ -21,6 +22,8 @@ type probeState struct {
 	hasWildcardRoles bool
 }
 
+const NAME = "general"
+
 // init() registers the feature tests descibed in this package with the test runner (coreengine.TestRunner) via the call
 // to coreengine.AddTestHandler.  This links the test - described by the TestDescriptor - with the handler to invoke.  In
 // this case, the general test handler is being used (features.GodogTestHandler) and the GodogTest data provides the data
@@ -29,7 +32,7 @@ type probeState struct {
 // invoke this function automatically on initial load.
 func init() {
 	td := coreengine.TestDescriptor{Group: coreengine.Kubernetes,
-		Category: coreengine.General, Name: "general"}
+		Category: coreengine.General, Name: NAME}
 
 	coreengine.AddTestHandler(td, &coreengine.GoDogTestTuple{
 		Handler: features.GodogTestHandler,
@@ -88,6 +91,7 @@ func (p *probeState) iShouldOnlyFindWildcardsInKnownAndAuthorisedConfigurations(
 
 //@CIS-5.6.3
 func (p *probeState) iAttemptToCreateADeploymentWhichDoesNotHaveASecurityContext() error {
+	e := audit.AuditLog.GetEventLog(NAME)
 
 	b := "probr-general"
 	n := kubernetes.GenerateUniquePodName(b)
@@ -96,7 +100,7 @@ func (p *probeState) iAttemptToCreateADeploymentWhichDoesNotHaveASecurityContext
 	//create pod with nil security context
 	pd, err := kubernetes.GetKubeInstance().CreatePod(&n, utils.StringPtr("probr-general-test-ns"), &b, &i, true, nil)
 
-	return probe.ProcessPodCreationResult(&p.state, pd, kubernetes.UndefinedPodCreationErrorReason, err)
+	return probe.ProcessPodCreationResult(&p.state, pd, kubernetes.UndefinedPodCreationErrorReason, e, err)
 }
 
 func (p *probeState) theDeploymentIsRejected() error {
@@ -141,7 +145,7 @@ func (p *probeState) theKubernetesWebUIIsDisabled() error {
 }
 
 func (p *probeState) tearDown() {
-	kubernetes.GetKubeInstance().DeletePod(&p.state.PodName, utils.StringPtr("probr-general-test-ns"), false)		
+	kubernetes.GetKubeInstance().DeletePod(&p.state.PodName, utils.StringPtr("probr-general-test-ns"), false)
 }
 
 // TestSuiteInitialize handles any overall Test Suite initialisation steps.  This is registered with the
@@ -154,10 +158,10 @@ func TestSuiteInitialize(ctx *godog.TestSuiteContext) {
 
 }
 
-// ScenarioInitialize initialises the specific test steps.  This is essentially the creation of the test 
+// ScenarioInitialize initialises the specific test steps.  This is essentially the creation of the test
 // which reflects the tests described in the features directory.  There must be a test step registered for
 // each line in the feature files. Note: Godog will output stub steps and implementations if it doesn't find
-// a step / function defined.  See: https://github.com/cucumber/godog#example. 
+// a step / function defined.  See: https://github.com/cucumber/godog#example.
 func ScenarioInitialize(ctx *godog.ScenarioContext) {
 	ps := probeState{}
 

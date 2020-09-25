@@ -2,6 +2,7 @@
 package probe
 
 import (
+	"gitlab.com/citihub/probr/internal/audit"
 	"gitlab.com/citihub/probr/internal/clouddriver/kubernetes"
 	"gitlab.com/citihub/probr/test/features"
 	apiv1 "k8s.io/api/core/v1"
@@ -9,24 +10,24 @@ import (
 
 // State captures useful state data for use in tests.
 type State struct {
-	PodName        string
-	CreationError  *kubernetes.PodCreationError
-	ExpectedReason *kubernetes.PodCreationErrorReason
-
+	PodName         string
+	CreationError   *kubernetes.PodCreationError
+	ExpectedReason  *kubernetes.PodCreationErrorReason
 	CommandExitCode int
 }
 
 // ProcessPodCreationResult is a convenince function to process the result of a pod creation attempt.
 // It records state information on the supplied state structure.
-func ProcessPodCreationResult(s *State, pd *apiv1.Pod, expected kubernetes.PodCreationErrorReason, err error) error {
+func ProcessPodCreationResult(s *State, pd *apiv1.Pod, expected kubernetes.PodCreationErrorReason, e *audit.Event, err error) error {
 
 	//first check for errors:
 	if err != nil {
 		//check if we've got a partial pod creation
-		//e.g. pod was created but did't get to "running" state
+		//e.g. pod was created but didn't get to "running" state
 		//in this case we need to hold onto the name so it can be deleted
 		if pd != nil {
 			s.PodName = pd.GetObjectMeta().GetName()
+			e.LogPodCreated()
 		}
 
 		//check for known error type

@@ -15,15 +15,13 @@ A new AuditLog context is created each time `probr` is run:
 var AuditLog ALog
 ```
 
-Adding entries to the EventLogs requires the name of the test and a key-value pair to be inserted:
-
-Currently `Audit()` only accepts strings for each of these arguments. 
+Adding entries to the an Event's meta data requires the name of the test and a key-value pair to be inserted:
 
 ```
 n := "name-of-the-current-test"
 k = "pods_created"
 v = "1"
-o.Audit(n, k, v)
+o.AuditMeta(n, k, v)
 ```
 
 Events and logs may be introspected:

@@ -1,7 +1,7 @@
 // Package podsecuritypolicy provides the implementation required to execute the feature based test cases described in the
 // the 'features' directory.  The 'assets' directory holds any assets required for the test cases.   Assets are 'embedded'
-// via the 'go-bindata.exe' tool which is invoked via the 'go generate' tool.  It is important, therefore, that the 
-//'go:generate' comment is present in order to include this package in the scope of the 'go generate' tool.  This can be 
+// via the 'go-bindata.exe' tool which is invoked via the 'go generate' tool.  It is important, therefore, that the
+//'go:generate' comment is present in order to include this package in the scope of the 'go generate' tool.  This can be
 // invoked directly on the command line of via the Makefile (e.g. make clean-build).
 package podsecuritypolicy
 
@@ -11,6 +11,7 @@ import (
 	"log"
 
 	"github.com/cucumber/godog"
+	"gitlab.com/citihub/probr/internal/audit"
 	"gitlab.com/citihub/probr/internal/clouddriver/kubernetes"
 	"gitlab.com/citihub/probr/internal/coreengine"
 	"gitlab.com/citihub/probr/test/features"
@@ -21,6 +22,8 @@ import (
 type probeState struct {
 	state probe.State
 }
+
+const NAME = "pod_security_policy"
 
 // PodSecurityPolicy is the section of the kubernetes package which provides the kubernetes interactions required to support
 // pod security policy probes.
@@ -39,7 +42,7 @@ func SetPodSecurityPolicy(p kubernetes.PodSecurityPolicy) {
 // invoke this function automatically on initial load.
 func init() {
 	td := coreengine.TestDescriptor{Group: coreengine.Kubernetes,
-		Category: coreengine.PodSecurityPolicies, Name: "pod_security_policy"}
+		Category: coreengine.PodSecurityPolicies, Name: NAME}
 
 	coreengine.AddTestHandler(td, &coreengine.GoDogTestTuple{
 		Handler: features.GodogTestHandler,
@@ -146,6 +149,7 @@ func (p *probeState) runVerificationTest(c kubernetes.PSPVerificationProbe) erro
 // CIS-5.2.1
 // privileged access
 func (p *probeState) privilegedAccessRequestIsMarkedForTheKubernetesDeployment(privilegedAccessRequested string) error {
+	e := audit.AuditLog.GetEventLog(NAME)
 
 	var pa bool
 	if privilegedAccessRequested == "True" {
@@ -156,7 +160,7 @@ func (p *probeState) privilegedAccessRequestIsMarkedForTheKubernetesDeployment(p
 
 	pd, err := psp.CreatePODSettingSecurityContext(&pa, nil, nil)
 
-	return probe.ProcessPodCreationResult(&p.state, pd, kubernetes.PSPNoPrivilege, err)
+	return probe.ProcessPodCreationResult(&p.state, pd, kubernetes.PSPNoPrivilege, e, err)
 }
 
 func (p *probeState) someControlExistsToPreventPrivilegedAccessForKubernetesDeploymentsToAnActiveKubernetesCluster() error {
@@ -172,6 +176,7 @@ func (p *probeState) iShouldNotBeAbleToPerformACommandThatRequiresPrivilegedAcce
 // CIS-5.2.2
 // hostPID
 func (p *probeState) hostPIDRequestIsMarkedForTheKubernetesDeployment(hostPIDRequested string) error {
+	e := audit.AuditLog.GetEventLog(NAME)
 
 	var hostPID bool
 	if hostPIDRequested == "True" {
@@ -182,7 +187,7 @@ func (p *probeState) hostPIDRequestIsMarkedForTheKubernetesDeployment(hostPIDReq
 
 	pd, err := psp.CreatePODSettingAttributes(&hostPID, nil, nil)
 
-	return probe.ProcessPodCreationResult(&p.state, pd, kubernetes.PSPHostNamespace, err)
+	return probe.ProcessPodCreationResult(&p.state, pd, kubernetes.PSPHostNamespace, e, err)
 }
 
 func (p *probeState) someSystemExistsToPreventAKubernetesContainerFromRunningUsingTheHostPIDOnTheActiveKubernetesCluster() error {
@@ -197,6 +202,7 @@ func (p *probeState) iShouldNotBeAbleToPerformACommandThatProvidesAccessToTheHos
 
 //CIS-5.2.3
 func (p *probeState) hostIPCRequestIsMarkedForTheKubernetesDeployment(hostIPCRequested string) error {
+	e := audit.AuditLog.GetEventLog(NAME)
 
 	var hostIPC bool
 	if hostIPCRequested == "True" {
@@ -207,7 +213,7 @@ func (p *probeState) hostIPCRequestIsMarkedForTheKubernetesDeployment(hostIPCReq
 
 	pd, err := psp.CreatePODSettingAttributes(nil, &hostIPC, nil)
 
-	return probe.ProcessPodCreationResult(&p.state, pd, kubernetes.PSPHostNamespace, err)
+	return probe.ProcessPodCreationResult(&p.state, pd, kubernetes.PSPHostNamespace, e, err)
 }
 
 func (p *probeState) someSystemExistsToPreventAKubernetesDeploymentFromRunningUsingTheHostIPCInAnExistingKubernetesCluster() error {
@@ -222,6 +228,7 @@ func (p *probeState) iShouldNotBeAbleToPerformACommandThatProvidesAccessToTheHos
 
 //CIS-5.2.4
 func (p *probeState) hostNetworkRequestIsMarkedForTheKubernetesDeployment(hostNetworkRequested string) error {
+	e := audit.AuditLog.GetEventLog(NAME)
 
 	var hostNetwork bool
 	if hostNetworkRequested == "True" {
@@ -232,7 +239,7 @@ func (p *probeState) hostNetworkRequestIsMarkedForTheKubernetesDeployment(hostNe
 
 	pd, err := psp.CreatePODSettingAttributes(nil, nil, &hostNetwork)
 
-	return probe.ProcessPodCreationResult(&p.state, pd, kubernetes.PSPHostNetwork, err)
+	return probe.ProcessPodCreationResult(&p.state, pd, kubernetes.PSPHostNetwork, e, err)
 }
 func (p *probeState) someSystemExistsToPreventAKubernetesDeploymentFromRunningUsingTheHostNetworkInAnExistingKubernetesCluster() error {
 
@@ -245,6 +252,7 @@ func (p *probeState) iShouldNotBeAbleToPerformACommandThatProvidesAccessToTheHos
 
 //CIS-5.2.5
 func (p *probeState) privilegedEscalationIsMarkedForTheKubernetesDeployment(privilegedEscalationRequested string) error {
+	e := audit.AuditLog.GetEventLog(NAME)
 
 	var pa bool
 	if privilegedEscalationRequested == "True" {
@@ -255,7 +263,7 @@ func (p *probeState) privilegedEscalationIsMarkedForTheKubernetesDeployment(priv
 
 	pd, err := psp.CreatePODSettingSecurityContext(nil, &pa, nil)
 
-	return probe.ProcessPodCreationResult(&p.state, pd, kubernetes.PSPNoPrivilegeEscalation, err)
+	return probe.ProcessPodCreationResult(&p.state, pd, kubernetes.PSPNoPrivilegeEscalation, e, err)
 }
 func (p *probeState) someSystemExistsToPreventAKubernetesDeploymentFromRunningUsingTheAllowPrivilegeEscalationInAnExistingKubernetesCluster() error {
 
@@ -266,6 +274,7 @@ func (p *probeState) someSystemExistsToPreventAKubernetesDeploymentFromRunningUs
 
 //CIS-5.2.6
 func (p *probeState) theUserRequestedIsForTheKubernetesDeployment(requestedUser string) error {
+	e := audit.AuditLog.GetEventLog(NAME)
 
 	var runAsUser int64
 	if requestedUser == "Root" {
@@ -275,7 +284,7 @@ func (p *probeState) theUserRequestedIsForTheKubernetesDeployment(requestedUser 
 	}
 
 	pd, err := psp.CreatePODSettingSecurityContext(nil, nil, &runAsUser)
-	return probe.ProcessPodCreationResult(&p.state, pd, kubernetes.PSPAllowedUsersGroups, err)
+	return probe.ProcessPodCreationResult(&p.state, pd, kubernetes.PSPAllowedUsersGroups, e, err)
 }
 func (p *probeState) someSystemExistsToPreventAKubernetesDeploymentFromRunningAsTheRootUserInAnExistingKubernetesCluster() error {
 
@@ -288,6 +297,7 @@ func (p *probeState) theKubernetesDeploymentShouldRunWithANonrootUID() error {
 
 //CIS-5.2.7
 func (p *probeState) nETRAWIsMarkedForTheKubernetesDeployment(netRawRequested string) error {
+	e := audit.AuditLog.GetEventLog(NAME)
 
 	var c []string
 	if netRawRequested == "True" {
@@ -296,7 +306,7 @@ func (p *probeState) nETRAWIsMarkedForTheKubernetesDeployment(netRawRequested st
 	}
 
 	pd, err := psp.CreatePODSettingCapabilities(&c)
-	return probe.ProcessPodCreationResult(&p.state, pd, kubernetes.PSPAllowedCapabilities, err)
+	return probe.ProcessPodCreationResult(&p.state, pd, kubernetes.PSPAllowedCapabilities, e, err)
 }
 func (p *probeState) someSystemExistsToPreventAKubernetesDeploymentFromRunningWithNETRAWCapabilityInAnExistingKubernetesCluster() error {
 
@@ -309,6 +319,7 @@ func (p *probeState) iShouldNotBeAbleToPerformACommandThatRequiresNETRAWCapabili
 
 //CIS-5.2.8
 func (p *probeState) additionalCapabilitiesForTheKubernetesDeployment(addCapabilities string) error {
+	e := audit.AuditLog.GetEventLog(NAME)
 
 	var c []string
 	if addCapabilities == "ARE" {
@@ -318,7 +329,7 @@ func (p *probeState) additionalCapabilitiesForTheKubernetesDeployment(addCapabil
 	}
 
 	pd, err := psp.CreatePODSettingCapabilities(&c)
-	return probe.ProcessPodCreationResult(&p.state, pd, kubernetes.PSPAllowedCapabilities, err)
+	return probe.ProcessPodCreationResult(&p.state, pd, kubernetes.PSPAllowedCapabilities, e, err)
 }
 func (p *probeState) someSystemExistsToPreventKubernetesDeploymentsWithCapabilitiesBeyondTheDefaultSetFromBeingDeployedToAnExistingKubernetesCluster() error {
 
@@ -331,6 +342,7 @@ func (p *probeState) iShouldNotBeAbleToPerformACommandThatRequiresCapabilitiesOu
 
 //CIS-5.2.9
 func (p *probeState) assignedCapabilitiesForTheKubernetesDeployment(assignCapabilities string) error {
+	e := audit.AuditLog.GetEventLog(NAME)
 
 	var c []string
 	if assignCapabilities == "ARE" {
@@ -341,7 +353,7 @@ func (p *probeState) assignedCapabilitiesForTheKubernetesDeployment(assignCapabi
 	}
 
 	pd, err := psp.CreatePODSettingCapabilities(&c)
-	return probe.ProcessPodCreationResult(&p.state, pd, kubernetes.PSPAllowedCapabilities, err)
+	return probe.ProcessPodCreationResult(&p.state, pd, kubernetes.PSPAllowedCapabilities, e, err)
 }
 func (p *probeState) someSystemExistsToPreventKubernetesDeploymentsWithAssignedCapabilitiesFromBeingDeployedToAnExistingKubernetesCluster() error {
 
@@ -355,6 +367,7 @@ func (p *probeState) iShouldNotBeAbleToPerformACommandThatRequiresAnyCapabilitie
 
 //AZ Policy - port range
 func (p *probeState) anPortRangeIsRequestedForTheKubernetesDeployment(portRange string) error {
+	e := audit.AuditLog.GetEventLog(NAME)
 
 	var y []byte
 	var err error
@@ -372,7 +385,7 @@ func (p *probeState) anPortRangeIsRequestedForTheKubernetesDeployment(portRange 
 	//create from yaml
 	pd, err := psp.CreatePodFromYaml(y)
 
-	return probe.ProcessPodCreationResult(&p.state, pd, kubernetes.PSPAllowedPortRange, err)
+	return probe.ProcessPodCreationResult(&p.state, pd, kubernetes.PSPAllowedPortRange, e, err)
 }
 
 func (p *probeState) someSystemExistsToPreventKubernetesDeploymentsWithUnapprovedPortRangeFromBeingDeployedToAnExistingKubernetesCluster() error {
@@ -387,6 +400,7 @@ func (p *probeState) iShouldNotBeAbleToPerformACommandThatAccessAnUnapprovedPort
 
 //AZ Policy - volume type
 func (p *probeState) anVolumeTypeIsRequestedForTheKubernetesDeployment(volumeType string) error {
+	e := audit.AuditLog.GetEventLog(NAME)
 
 	var y []byte
 	var err error
@@ -404,7 +418,7 @@ func (p *probeState) anVolumeTypeIsRequestedForTheKubernetesDeployment(volumeTyp
 	//create from yaml
 	pd, err := psp.CreatePodFromYaml(y)
 
-	return probe.ProcessPodCreationResult(&p.state, pd, kubernetes.PSPAllowedVolumeTypes, err)
+	return probe.ProcessPodCreationResult(&p.state, pd, kubernetes.PSPAllowedVolumeTypes, e, err)
 }
 
 func (p *probeState) someSystemExistsToPreventKubernetesDeploymentsWithUnapprovedVolumeTypesFromBeingDeployedToAnExistingKubernetesCluster() error {
@@ -420,6 +434,7 @@ func (p *probeState) iShouldNotBeAbleToPerformACommandThatAccessesAnUnapprovedVo
 
 //AZ Policy - seccomp profile
 func (p *probeState) anSeccompProfileIsRequestedForTheKubernetesDeployment(seccompProfile string) error {
+	e := audit.AuditLog.GetEventLog(NAME)
 
 	var y []byte
 	var err error
@@ -439,7 +454,7 @@ func (p *probeState) anSeccompProfileIsRequestedForTheKubernetesDeployment(secco
 	//create from yaml
 	pd, err := psp.CreatePodFromYaml(y)
 
-	return probe.ProcessPodCreationResult(&p.state, pd, kubernetes.PSPSeccompProfile, err)
+	return probe.ProcessPodCreationResult(&p.state, pd, kubernetes.PSPSeccompProfile, e, err)
 }
 func (p *probeState) someSystemExistsToPreventKubernetesDeploymentsWithoutApprovedSeccompProfilesFromBeingDeployedToAnExistingKubernetesCluster() error {
 
@@ -481,10 +496,10 @@ func TestSuiteInitialize(ctx *godog.TestSuiteContext) {
 	})
 }
 
-// ScenarioInitialize initialises the specific test steps.  This is essentially the creation of the test 
+// ScenarioInitialize initialises the specific test steps.  This is essentially the creation of the test
 // which reflects the tests described in the features directory.  There must be a test step registered for
 // each line in the feature files. Note: Godog will output stub steps and implementations if it doesn't find
-// a step / function defined.  See: https://github.com/cucumber/godog#example. 
+// a step / function defined.  See: https://github.com/cucumber/godog#example.
 func ScenarioInitialize(ctx *godog.ScenarioContext) {
 	ps := probeState{}
 

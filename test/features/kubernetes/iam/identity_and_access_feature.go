@@ -11,6 +11,7 @@ import (
 	"strings"
 
 	"github.com/cucumber/godog"
+	"gitlab.com/citihub/probr/internal/audit"
 	"gitlab.com/citihub/probr/internal/clouddriver/kubernetes"
 	"gitlab.com/citihub/probr/internal/coreengine"
 	"gitlab.com/citihub/probr/test/features"
@@ -23,6 +24,8 @@ type probeState struct {
 	state        probe.State
 	useDefaultNS bool
 }
+
+const NAME = "iam_control"
 
 // IdentityAccessManagement is the section of the kubernetes package which provides the kubernetes interactions required to support
 // identity access management probes.
@@ -41,7 +44,7 @@ func SetIAM(i kubernetes.IdentityAccessManagement) {
 // invoke this function automatically on initial load.
 func init() {
 	td := coreengine.TestDescriptor{Group: coreengine.Kubernetes,
-		Category: coreengine.IAM, Name: "iam_control"}
+		Category: coreengine.IAM, Name: NAME}
 
 	coreengine.AddTestHandler(td, &coreengine.GoDogTestTuple{
 		Handler: features.GodogTestHandler,
@@ -87,6 +90,7 @@ func (p *probeState) theDefaultNamespaceHasAnAzureIdentityBinding() error {
 	return p.runAISetupCheck(iam.AzureIdentityBindingExists, true, "AzureIdentityBinding")
 }
 func (p *probeState) iCreateASimplePodInNamespaceAssignedWithThatAzureIdentityBinding(namespace string) error {
+	e := audit.AuditLog.GetEventLog(NAME)
 
 	y, err := iamassets.Asset("assets/yaml/iam-azi-test-aib-curl.yaml")
 	if err != nil {
@@ -98,7 +102,7 @@ func (p *probeState) iCreateASimplePodInNamespaceAssignedWithThatAzureIdentityBi
 	}
 
 	pd, err := iam.CreateIAMTestPod(y, p.useDefaultNS)
-	return probe.ProcessPodCreationResult(&p.state, pd, kubernetes.UndefinedPodCreationErrorReason, err)
+	return probe.ProcessPodCreationResult(&p.state, pd, kubernetes.UndefinedPodCreationErrorReason, e, err)
 }
 
 //AZ-AAD-AI-1.0, AZ-AAD-AI-1.1
@@ -159,13 +163,15 @@ func (p *probeState) iCreateAnAzureIdentityBindingCalledInANondefaultNamespace(a
 	return p.runAISetupCheck(iam.AzureIdentityBindingExists, false, "AzureIdentityBinding")
 }
 func (p *probeState) iDeployAPodAssignedWithTheAzureIdentityBindingIntoTheSameNamespaceAsTheAzureIdentityBinding(arg1, arg2 string) error {
+	e := audit.AuditLog.GetEventLog(NAME)
+
 	y, err := iamassets.Asset("assets/yaml/iam-azi-test-aib-curl.yaml")
 	if err != nil {
 		return features.LogAndReturnError("error reading yaml for test: %v", err)
 	}
 
 	pd, err := iam.CreateIAMTestPod(y, false)
-	return probe.ProcessPodCreationResult(&p.state, pd, kubernetes.UndefinedPodCreationErrorReason, err)
+	return probe.ProcessPodCreationResult(&p.state, pd, kubernetes.UndefinedPodCreationErrorReason, e, err)
 }
 
 //AZ-AAD-AI-1.2

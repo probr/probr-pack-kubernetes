@@ -1,10 +1,9 @@
 package probr
 
 import (
+	"gitlab.com/citihub/probr/internal/audit"
 	"gitlab.com/citihub/probr/internal/clouddriver/kubernetes"
 	"gitlab.com/citihub/probr/internal/coreengine"
-
-	"gitlab.com/citihub/probr/internal/output"
 	"gitlab.com/citihub/probr/test/features"
 	_ "gitlab.com/citihub/probr/test/features/clouddriver"                        //needed to run init on TestHandlers
 	_ "gitlab.com/citihub/probr/test/features/kubernetes/containerregistryaccess" //needed to run init on TestHandlers
@@ -61,7 +60,7 @@ func GetAllTestResults(ts *coreengine.TestStore) (map[string]string, error) {
 func ReadTestResults(ts *coreengine.TestStore, name string) (string, string, error) {
 	t, err := ts.GetTest(name)
 	test := t
-	output.AuditLog.Audit(name, "status", test.Status.String())
+	audit.AuditLog.AuditMeta(name, "status", test.Status.String())
 	if err != nil {
 		return "", "", err
 	}
