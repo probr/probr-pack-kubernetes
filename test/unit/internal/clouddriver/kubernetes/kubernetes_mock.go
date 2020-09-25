@@ -4,8 +4,8 @@ import (
 	"github.com/stretchr/testify/mock"
 	"gitlab.com/citihub/probr/internal/clouddriver/kubernetes"
 	apiv1 "k8s.io/api/core/v1"
-	k8s "k8s.io/client-go/kubernetes"
 	rbacv1 "k8s.io/api/rbac/v1"
+	k8s "k8s.io/client-go/kubernetes"
 )
 
 type kubeMock struct {
@@ -59,9 +59,9 @@ func (m *kubeMock) ExecCommand(cmd, ns, pn *string) *kubernetes.CmdExecutionResu
 	a := m.Called()
 	return a.Get(0).(*kubernetes.CmdExecutionResult)
 }
-func (m *kubeMock) DeletePod(pname *string, ns *string, w bool) error {
-	e := m.Called().Error(0)
-	return e
+func (m *kubeMock) DeletePod(pname *string, ns *string, w bool, e string) error {
+	x := m.Called().Error(0)
+	return x
 }
 func (m *kubeMock) DeleteNamespace(ns *string) error {
 	e := m.Called().Error(0)
@@ -89,7 +89,7 @@ func (m *kubeMock) GetClusterRolesByResource(r string) (*[]rbacv1.ClusterRole, e
 	a := m.Called()
 	return a.Get(0).(*[]rbacv1.ClusterRole), a.Error(1)
 }
-func (m *kubeMock) GetClusterRoles() (*rbacv1.ClusterRoleList, error){
+func (m *kubeMock) GetClusterRoles() (*rbacv1.ClusterRoleList, error) {
 	a := m.Called()
 	return a.Get(0).(*rbacv1.ClusterRoleList), a.Error(1)
 }

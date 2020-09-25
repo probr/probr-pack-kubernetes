@@ -474,7 +474,7 @@ func (p *probeState) setup() {
 
 func (p *probeState) tearDown() {
 
-	psp.TeardownPodSecurityTest(&p.state.PodName)
+	psp.TeardownPodSecurityTest(&p.state.PodName, NAME)
 	p.state.PodName = ""
 	p.state.CreationError = nil
 }

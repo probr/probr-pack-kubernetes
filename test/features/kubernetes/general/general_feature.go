@@ -145,7 +145,7 @@ func (p *probeState) theKubernetesWebUIIsDisabled() error {
 }
 
 func (p *probeState) tearDown() {
-	kubernetes.GetKubeInstance().DeletePod(&p.state.PodName, utils.StringPtr("probr-general-test-ns"), false)
+	kubernetes.GetKubeInstance().DeletePod(&p.state.PodName, utils.StringPtr("probr-general-test-ns"), false, NAME)
 }
 
 // TestSuiteInitialize handles any overall Test Suite initialisation steps.  This is registered with the

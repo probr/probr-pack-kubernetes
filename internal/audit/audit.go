@@ -4,14 +4,13 @@ import (
 	"encoding/json"
 	"log"
 
-	"gitlab.com/citihub/probr/internal/clouddriver/kubernetes"
 	"gitlab.com/citihub/probr/internal/config"
 )
 
 type probeState struct {
 	PodName         string
-	CreationError   *kubernetes.PodCreationError
-	ExpectedReason  *kubernetes.PodCreationErrorReason
+	CreationError   *interface{}
+	ExpectedReason  *interface{}
 	CommandExitCode int
 }
 

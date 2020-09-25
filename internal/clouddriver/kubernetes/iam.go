@@ -28,7 +28,7 @@ const (
 	defaultIAMTestPodName     = "iam-test-pod"
 )
 
-// IAMTestCommand defines commands for use in testing IAM 
+// IAMTestCommand defines commands for use in testing IAM
 type IAMTestCommand int
 
 // enum supporting IAMTestCommand
@@ -48,7 +48,7 @@ type IdentityAccessManagement interface {
 	AzureIdentityBindingExists(useDefaultNS bool) (bool, error)
 	CreateAIB(y []byte, ai string, n string, ns string) (bool, error)
 	CreateIAMTestPod(y []byte, useDefaultNS bool) (*apiv1.Pod, error)
-	DeleteIAMTestPod(n string, useDefaultNS bool) error
+	DeleteIAMTestPod(n string, useDefaultNS bool, e string) error
 	ExecuteVerificationCmd(pn string, cmd IAMTestCommand, useDefaultNS bool) (*CmdExecutionResult, error)
 	GetAccessToken(pn string, useDefaultNS bool) (*string, error)
 }
@@ -88,7 +88,7 @@ func (i *IAM) setenv() {
 	// image repository + curl from config
 	// but default if not supplied
 	ig := config.Vars.Images.Repository
-	//need to fudge for 'curl' as it's registered as curlimages/curl 
+	//need to fudge for 'curl' as it's registered as curlimages/curl
 	//on docker, so if we've been given a repository from the config
 	//and it's 'docker.io' then ignore it and set default (curlimages)
 	if len(ig) < 1 || ig == "docker.io" {
@@ -100,7 +100,7 @@ func (i *IAM) setenv() {
 	}
 
 	i.testImage = ig + "/" + b
-	
+
 	i.testAzureIdentityBinding = "probr-specificns-aib"
 }
 
@@ -221,14 +221,14 @@ func (i *IAM) filteredRawResourceGrp(g string, k string, f string) (bool, error)
 // CreateIAMTestPod creates a pod configured for IAM test cases.
 func (i *IAM) CreateIAMTestPod(y []byte, useDefaultNS bool) (*apiv1.Pod, error) {
 	n := GenerateUniquePodName(i.testPodName)
-		
-	return i.k.CreatePodFromYaml(y, &n, i.getNamespace(useDefaultNS), &i.testImage, 
+
+	return i.k.CreatePodFromYaml(y, &n, i.getNamespace(useDefaultNS), &i.testImage,
 		i.getAadPodIDBinding(useDefaultNS), true)
 }
 
 // DeleteIAMTestPod deletes the IAM test pod with the supplied name.
-func (i *IAM) DeleteIAMTestPod(n string, useDefaultNS bool) error {
-	return i.k.DeletePod(&n, i.getNamespace(useDefaultNS), false) //don't worry about waiting
+func (i *IAM) DeleteIAMTestPod(n string, useDefaultNS bool, e string) error {
+	return i.k.DeletePod(&n, i.getNamespace(useDefaultNS), false, e) //don't worry about waiting
 }
 
 // ExecuteVerificationCmd executes a verification command against the supplied pod name.
@@ -254,17 +254,16 @@ func (i *IAM) GetAccessToken(pn string, useDefaultNS bool) (*string, error) {
 		return nil, fmt.Errorf("error raised trying to execute auth token command - %v", err)
 	}
 
-	//try and extract token 
+	//try and extract token
 	var a struct {
 		AccessToken string `json:"access_token,omitempty"`
 	}
 	json.Unmarshal([]byte(res.Stdout), &a)
 
 	log.Printf("[DEBUG] Access Token JSON result: %+v", a)
-	
+
 	return &a.AccessToken, nil
 }
-
 
 func (i *IAM) getNamespace(useDefaultNS bool) *string {
 	var ns string
@@ -280,19 +279,19 @@ func (i *IAM) getNamespace(useDefaultNS bool) *string {
 func (i *IAM) getAadPodIDBinding(useDefaultNS bool) *string {
 	//return the value for the following pod label
 	// labels:
-    // 	aadpodidbinding:
-	//the value in this label should match the selector value in 
+	// 	aadpodidbinding:
+	//the value in this label should match the selector value in
 	//the AzureIdentityBinding
 
 	var b string
 	if useDefaultNS {
 		//if the default namespace, we can get the value from the config
-		//this can be specified via config file or env and could vary 
-		//between deployment situations.  If not supplied the default 
+		//this can be specified via config file or env and could vary
+		//between deployment situations.  If not supplied the default
 		//will be returned.
 		b = config.Vars.Azure.AzureIdentity.DefaultNamespaceAIB
 	} else {
-		//if not the default namespace, then we are testing a specific 
+		//if not the default namespace, then we are testing a specific
 		//identity binding set up as part of the probr run.
 		b = i.testAzureIdentityBinding
 	}

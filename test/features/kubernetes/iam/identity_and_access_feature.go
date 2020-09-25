@@ -240,7 +240,7 @@ func (p *probeState) setup() {
 }
 
 func (p *probeState) tearDown() {
-	iam.DeleteIAMTestPod(p.state.PodName, p.useDefaultNS)
+	iam.DeleteIAMTestPod(p.state.PodName, p.useDefaultNS, NAME)
 }
 
 // TestSuiteInitialize handles any overall Test Suite initialisation steps.  This is registered with the

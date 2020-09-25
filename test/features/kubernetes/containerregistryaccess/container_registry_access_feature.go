@@ -102,7 +102,7 @@ func (p *probeState) setup() {
 }
 
 func (p *probeState) tearDown() {
-	cra.TeardownContainerAccessTestPod(&p.state.PodName)
+	cra.TeardownContainerAccessTestPod(&p.state.PodName, NAME)
 }
 
 // TestSuiteInitialize handles any overall Test Suite initialisation steps.  This is registered with the

@@ -17,9 +17,11 @@ type probState struct {
 	httpStatusCode int
 }
 
+const NAME = "internet_access"
+
 func init() {
 	td := coreengine.TestDescriptor{Group: coreengine.Kubernetes,
-		Category: coreengine.InternetAccess, Name: "internet_access"}
+		Category: coreengine.InternetAccess, Name: NAME}
 
 	coreengine.AddTestHandler(td, &coreengine.GoDogTestTuple{
 		Handler: features.GodogTestHandler,
@@ -108,7 +110,7 @@ func (p *probState) setup() {
 }
 
 func (p *probState) tearDown() {
-	na.TeardownNetworkAccessTestPod(&p.podName)
+	na.TeardownNetworkAccessTestPod(&p.podName, NAME)
 }
 
 func (p *probState) scenarioTearDown() {
@@ -134,10 +136,10 @@ func TestSuiteInitialize(ctx *godog.TestSuiteContext) {
 	}
 }
 
-// ScenarioInitialize initialises the specific test steps.  This is essentially the creation of the test 
+// ScenarioInitialize initialises the specific test steps.  This is essentially the creation of the test
 // which reflects the tests described in the features directory.  There must be a test step registered for
 // each line in the feature files. Note: Godog will output stub steps and implementations if it doesn't find
-// a step / function defined.  See: https://github.com/cucumber/godog#example. 
+// a step / function defined.  See: https://github.com/cucumber/godog#example.
 func ScenarioInitialize(ctx *godog.ScenarioContext) {
 	ctx.BeforeScenario(func(s *godog.Scenario) {
 		ps.setup()
