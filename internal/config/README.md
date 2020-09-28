@@ -2,6 +2,30 @@
 
 Internal code to manage config, including Cloud Driver parameters and Test Packs
 
+## Log Filter
+
+Probr Log Levels:
+- **ERROR** - Behavior that is a result of a definite misconfiguration or code failure
+- **WARN** - Behavior that is likely due to a misconfiguration, but is not fatal
+- **NOTICE** - (1) User config information to prevent confusion, or (2) behavior that could result from a misconfiguration but also may be intentional
+- **INFO** - Non-verbose information that doesn't fit the above criteria
+- **DEBUG** - Any potentially helpful information that doesn't fit the above criteria
+
+Multi-line logs should be formatted prior to `log.Printf(...)`. By using this command multiple times, each line will get a separate timestamp and will appear to be separate entries.
+
+For example, `Results: ` could be read as if an empty string was being output.
+
+However, by misusing `log.Printf` we may cause a similar appearance:
+
+```
+log.Printf("[NOTICE] Results:")
+log.Printf("[NOTICE] %s", myVar)
+// Prints:
+// 2020/09/28 11:18:01 [NOTICE] Results:
+// 2020/09/28 11:18:01 [NOTICE] {"some": "information"}
+```
+
+
 ## Available Config Vars
 
 The struct `config.Vars` uses the `Config` struct presented below.
