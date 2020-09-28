@@ -8,20 +8,19 @@ These logs are designed to be one-per-event. Each test may have multiple events,
 
 ### Usage
 
-A new AuditLog context is created each time `probr` is run:
+A new AuditLog context is created each time `probr` is run, and is readily accessible anywhere in the code:
 
 ```
-# internal/output/audit.go
-var AuditLog ALog
+
 ```
 
 Adding entries to the an Event's meta data requires the name of the test and a key-value pair to be inserted:
 
 ```
 n := "name-of-the-current-test"
-k = "pods_created"
-v = "1"
-o.AuditMeta(n, k, v)
+k = "arbitrary_key_name"
+v = "string_value"
+audit.AuditLog.AuditMeta(n, k, v)
 ```
 
 Events and logs may be introspected:
@@ -31,9 +30,41 @@ r := o.Events["name-of-the-current-test"]["pods_created"]
 fmt.Println(r) // "1"
 ```
 
-Logs may be formatted to JSON for user-friendly output:
+Logs may be formatted to JSON:
 
 ```
-logs, _ := json.Marshal(o)
-fmt.Println(logs) // {"Events":{"name-of-the-current-test":{"pods_created":"1"}}}
+json.MarshalIndent(audit.AuditLog.Events, "", "  ")
+```
+
+Here is an example of what the logs may contain:
+
+```
+{
+  "account_manager": {
+    "Meta": {
+      "category": "General",
+      "group": "clouddriver",
+      "status": "CompleteSuccess"
+    },
+    "PodsCreated": 0,
+    "PodsDestroyed": 0,
+    "Tests": null
+  },
+  "container_registry_access": {
+    "Meta": {
+      "category": "Container Registry Access",
+      "group": "kubernetes",
+      "status": "CompleteFail"
+    },
+    "PodsCreated": 1,
+    "PodsDestroyed": 1,
+    "Tests": null
+  }
+}
+```
+
+A method exists to print the audit to the command line under a NOTICE loglevel:
+
+```
+audit.AuditLog.PrintAudit()
 ```

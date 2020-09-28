@@ -531,10 +531,10 @@ func (k *Kube) ExecCommand(cmd, ns, pn *string) (s *CmdExecutionResult) {
 	return &CmdExecutionResult{Stdout: stdout.String(), Stderr: stderr.String()}
 }
 
-// DeletePod deletes the given pod in the specified namespace.  Passing true for 'w' causes the function to
-// wait for pod deletion (not normally required).
-func (k *Kube) DeletePod(pname *string, ns *string, w bool, e string) error {
-	l := audit.AuditLog.GetEventLog(e)
+// DeletePod deletes the given pod in the specified namespace.
+// Passing true for 'wait' causes the function to wait for pod deletion (not normally required).
+func (k *Kube) DeletePod(pname *string, ns *string, wait bool, event string) error {
+	l := audit.AuditLog.GetEventLog(event)
 	c, err := k.GetClient()
 	if err != nil {
 		return err
@@ -550,8 +550,7 @@ func (k *Kube) DeletePod(pname *string, ns *string, w bool, e string) error {
 		return err
 	}
 
-	if w {
-		//wait:
+	if wait {
 		waitForDelete(c, ns, pname)
 	}
 	l.LogPodDestroyed()
