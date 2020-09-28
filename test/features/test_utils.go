@@ -91,22 +91,22 @@ func LogAndReturnError(e string, v ...interface{}) error {
 	return fmt.Errorf(s)
 }
 
-// LogScenarioStart logs the name and tags associtated with the supplied scenario. 
-func LogScenarioStart(s *godog.Scenario) {	
+// LogScenarioStart logs the name and tags associtated with the supplied scenario.
+func LogScenarioStart(s *godog.Scenario) {
 	log.Print(scenarioString(true, s))
 }
 
-// LogScenarioEnd logs the name and tags associtated with the supplied scenario. 
-func LogScenarioEnd(s *godog.Scenario) {	
+// LogScenarioEnd logs the name and tags associtated with the supplied scenario.
+func LogScenarioEnd(s *godog.Scenario) {
 	log.Print(scenarioString(false, s))
 }
 
 func scenarioString(st bool, s *godog.Scenario) string {
 	var b strings.Builder
 	if st {
-		b.WriteString("[NOTICE] >>> Scenario Start: ")
+		b.WriteString("[INFO] >>> Scenario Start: ")
 	} else {
-		b.WriteString("[NOTICE] <<< Scenario End: ")
+		b.WriteString("[INFO] <<< Scenario End: ")
 	}
 
 	b.WriteString(s.Name)

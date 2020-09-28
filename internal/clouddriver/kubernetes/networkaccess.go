@@ -108,7 +108,7 @@ func (n *NA) AccessURL(pn *string, url *string) (int, error) {
 	res := n.k.ExecCommand(&cmd, &ns, pn)
 	httpCode := res.Stdout
 
-	log.Printf("[NOTICE] URL: %v HTTP Code: %v Exit Code: %v (error: %v)", *url, httpCode, res.Code, res.Err)
+	log.Printf("[INFO] URL: %v HTTP Code: %v Exit Code: %v (error: %v)", *url, httpCode, res.Code, res.Err)
 
 	if res.Err != nil && !res.Internal {
 		//error which is not internal (so external!)

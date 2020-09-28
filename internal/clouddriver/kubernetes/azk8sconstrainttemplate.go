@@ -151,11 +151,11 @@ func (az *AzK8sConstraintTemplate) getConstraints() (*map[string]interface{}, er
 		if err != nil {
 			return nil, err
 		}
-		
+
 		//otherwise set it
 		az.azConstraints = c
 
-		log.Printf("[NOTICE] Azure Contraints (%d): %v ", len(*az.azConstraints), az.azConstraints)
+		log.Printf("[INFO] Azure Contraints (%d): %v ", len(*az.azConstraints), az.azConstraints)
 	}
 
 	return az.azConstraints, nil

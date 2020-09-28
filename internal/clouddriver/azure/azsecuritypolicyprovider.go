@@ -18,7 +18,7 @@ type azPolicy struct {
 	uuid        *string
 }
 
-//AZSecurityPolicyProvider queries the policies applied on the supplied subscription and resource group.  This may be deprecated in favour 
+//AZSecurityPolicyProvider queries the policies applied on the supplied subscription and resource group.  This may be deprecated in favour
 //of azk8sconstrainttemplate which queries the kubernetes cluster directly.
 //TODO: decide if this should be kept.
 type AZSecurityPolicyProvider struct {
@@ -193,7 +193,7 @@ func (p *AZSecurityPolicyProvider) getPolicies() (*map[string]*azPolicy, error) 
 		azp.displayName = r.AssignmentProperties.DisplayName //display name == 'name'
 		azp.scope = r.AssignmentProperties.Scope
 
-		log.Printf("[NOTICE] azPolicy %v %v %v", *azp.uuid, *azp.displayName, *azp.scope)
+		log.Printf("[DEBUG] azPolicy %v %v %v", *azp.uuid, *azp.displayName, *azp.scope)
 
 		//look up the "type" based on the uuid of the policy
 		t, exists := azPolicyUUIDToProbrPolicy[*azp.uuid]

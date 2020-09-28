@@ -440,7 +440,7 @@ func makeSecurityPolicyCall(f func() (*bool, error), b *bool, s *bool, e *error)
 //r - bool: overall result
 //e - error
 func logAndReturn(t string, s bool, r bool, e error) (*bool, error) {
-	log.Printf("[NOTICE] Security Policy check: %q.  Overall result: %t. (error: %v)", t, r, e)
+	log.Printf("[INFO] Security Policy check: %q.  Overall result: %t. (error: %v)", t, r, e)
 
 	//if we 've had a success, ignore the error ...
 	if s {
@@ -582,7 +582,7 @@ func (psp *PSP) ExecPSPTestCmd(pName *string, cmd PSPTestCommand) (*CmdExecution
 	ns := psp.testNamespace
 	res := psp.k.ExecCommand(&c, &ns, &pn)
 
-	log.Printf("[NOTICE] ExecPSPTestCmd: %v stdout: %v exit code: %v (error: %v)", cmd, res.Stdout, res.Code, res.Err)
+	log.Printf("[INFO] ExecPSPTestCmd: %v stdout: %v exit code: %v (error: %v)", cmd, res.Stdout, res.Code, res.Err)
 
 	return res, nil
 }
