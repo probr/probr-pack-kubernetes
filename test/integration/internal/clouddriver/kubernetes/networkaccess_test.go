@@ -4,8 +4,8 @@ import (
 	"log"
 	"testing"
 
-	"gitlab.com/citihub/probr/internal/clouddriver/kubernetes"
 	"github.com/stretchr/testify/assert"
+	"gitlab.com/citihub/probr/internal/clouddriver/kubernetes"
 )
 
 //TODO: this will be revised when the unit/integration tests are refactored to be properly mocked
@@ -31,5 +31,5 @@ func TestIsURLAccessible(t *testing.T) {
 	n := p.GetObjectMeta().GetName()
 	code, err := na.AccessURL(&n, &url)
 
-	log.Printf("[NOTICE] URL: %v Result: %v Error: %v", url, code, err)
+	log.Printf("[INFO] URL: %v Result: %v Error: %v", url, code, err)
 }

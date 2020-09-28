@@ -59,8 +59,7 @@ func varsFileHandler(v *string) {
 // outputDirHandler
 func outputDirHandler(v *string) {
 	if len(*v) > 0 {
-		config.Vars.OutputDir = *v
-		log.Printf("[NOTICE] Output Directory has been overridden via command line to: %s", *v)
+		log.Printf("[NOTICE] Output Directory has been overridden via command line")
 	}
 }
 
@@ -84,9 +83,7 @@ func tagsHandler(v *string) {
 		config.Vars.Tests.Tags = *v
 		log.Printf("[NOTICE] Tags have been added via command line.")
 	}
-	if len(config.Vars.KubeConfigPath) > 0 {
-		log.Printf("[NOTICE] Tags specified: %s", *v)
-	} else {
+	if len(config.Vars.Tests.Tags) == 0 {
 		log.Printf("[NOTICE] No tags specified. All probes will be run.")
 	}
 }
@@ -96,9 +93,7 @@ func kubeConfigHandler(v *string) {
 		config.Vars.KubeConfigPath = *v
 		log.Printf("[NOTICE] Kube Config has been overridden via command line")
 	}
-	if len(config.Vars.KubeConfigPath) > 0 {
-		log.Printf("[NOTICE] Kube Config Path: %s", config.Vars.KubeConfigPath)
-	} else {
+	if len(config.Vars.KubeConfigPath) == 0 {
 		log.Printf("[NOTICE] No kubeconfig path specified. Falling back to default paths.")
 	}
 }

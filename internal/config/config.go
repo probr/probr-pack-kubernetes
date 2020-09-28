@@ -1,7 +1,9 @@
 package config
 
 import (
+	"encoding/json"
 	"fmt"
+	"log"
 	"os"
 
 	"gopkg.in/yaml.v2"
@@ -95,4 +97,9 @@ func ValidateConfigPath(path string) error {
 		return fmt.Errorf("'%s' is a directory, not a normal file", path)
 	}
 	return nil
+}
+
+func LogConfigState() {
+	s, _ := json.MarshalIndent(Vars, "", "  ")
+	log.Printf("[NOTICE] Config State: %s", s)
 }

@@ -234,10 +234,10 @@ func getPods(c *kubernetes.Clientset, ns string) (*apiv1.PodList, error) {
 		return nil, fmt.Errorf("pod list returned nil")
 	}
 
-	log.Printf("[NOTICE] There are %d pods in the cluster\n", len(pods.Items))
+	log.Printf("[INFO] There are %d pods in the cluster\n", len(pods.Items))
 
 	for i := 0; i < len(pods.Items); i++ {
-		log.Printf("[INFO] Pod: %v %v\n", pods.Items[i].GetNamespace(), pods.Items[i].GetName())
+		log.Printf("[DEBUG] Pod: %v %v\n", pods.Items[i].GetNamespace(), pods.Items[i].GetName())
 	}
 
 	return pods, nil
@@ -288,7 +288,7 @@ func (k *Kube) CreatePodFromObject(p *apiv1.Pod, pname *string, ns *string, w bo
 		return nil, fmt.Errorf("one or more of pod (%v), podName (%v) or namespace (%v) is nil - cannot create POD", p, pname, ns)
 	}
 
-	log.Printf("[NOTICE] Creating pod %v in namespace %v", *pname, *ns)
+	log.Printf("[INFO] Creating pod %v in namespace %v", *pname, *ns)
 	log.Printf("[DEBUG] Pod details: %+v", *p)
 
 	c, err := k.GetClient()
@@ -324,7 +324,7 @@ func (k *Kube) CreatePodFromObject(p *apiv1.Pod, pname *string, ns *string, w bo
 		return nil, err
 	}
 
-	log.Printf("[NOTICE] POD %q creation started.", res.GetObjectMeta().GetName())
+	log.Printf("[INFO] POD %q creation started.", res.GetObjectMeta().GetName())
 
 	if w {
 		//wait:
@@ -334,7 +334,7 @@ func (k *Kube) CreatePodFromObject(p *apiv1.Pod, pname *string, ns *string, w bo
 		}
 	}
 
-	log.Printf("[NOTICE] POD %q creation completed. Pod is up and running.", res.GetObjectMeta().GetName())
+	log.Printf("[INFO] POD %q creation completed. Pod is up and running.", res.GetObjectMeta().GetName())
 
 	return res, nil
 }
@@ -415,7 +415,7 @@ func (k *Kube) CreateConfigMap(n *string, ns *string) (*apiv1.ConfigMap, error) 
 		return nil, err
 	}
 
-	log.Printf("[NOTICE] ConfigMap %q created.", res.GetObjectMeta().GetName())
+	log.Printf("[INFO] ConfigMap %q created.", res.GetObjectMeta().GetName())
 
 	return res, nil
 }
@@ -437,7 +437,7 @@ func (k *Kube) DeleteConfigMap(n *string, ns *string) error {
 		return err
 	}
 
-	log.Printf("[NOTICE] ConfigMap %v deleted.", *n)
+	log.Printf("[INFO] ConfigMap %v deleted.", *n)
 
 	return nil
 }
@@ -554,7 +554,7 @@ func (k *Kube) DeletePod(pname *string, ns *string, wait bool, event string) err
 	}
 	l := audit.AuditLog.GetEventLog(event)
 	l.LogPodDestroyed()
-	log.Printf("[NOTICE] POD %v deleted.", *pname)
+	log.Printf("[INFO] POD %v deleted.", *pname)
 
 	return nil
 }
@@ -584,7 +584,7 @@ func (k *Kube) createNamespace(ns *string) (*apiv1.Namespace, error) {
 		return nil, err
 	}
 
-	log.Printf("[NOTICE] Namespace %q created.", n.GetObjectMeta().GetName())
+	log.Printf("[INFO] Namespace %q created.", n.GetObjectMeta().GetName())
 
 	return n, nil
 }
@@ -604,7 +604,7 @@ func (k *Kube) DeleteNamespace(ns *string) error {
 		return err
 	}
 
-	log.Printf("[NOTICE] Namespace %v deleted.", *ns)
+	log.Printf("[INFO] Namespace %v deleted.", *ns)
 
 	return nil
 }
@@ -637,14 +637,14 @@ func (k *Kube) getAPIResourcesByGrp(grp string, nPrefix string) (*map[string]int
 			continue
 		}
 		g := ar.GroupVersion
-		log.Printf("[INFO] API Resource Group %v", g)
+		log.Printf("[DEBUG] API Resource Group %v", g)
 		if len(grp) > 0 && !strings.HasPrefix(g, grp) {
 			continue
 		}
 
 		for _, a := range ar.APIResources {
 			log.Printf("[DEBUG] API Resource %+v", a)
-			log.Printf("[INFO] API Resource - Group: %v Name: %v Kind: %v", g, a.Name, a.Kind)
+			log.Printf("[DEBUG] API Resource - Group: %v Name: %v Kind: %v", g, a.Name, a.Kind)
 
 			//skip if it doesn't pass the prefix filter (if one has been supplied):
 			if len(nPrefix) > 0 && !strings.HasPrefix(a.Name, nPrefix) {
@@ -880,16 +880,16 @@ func (k *Kube) waitForPhase(ph apiv1.PodPhase, c *kubernetes.Clientset, ns *stri
 		return err
 	}
 
-	log.Printf("[NOTICE] *** Waiting for phase %v on pod %v ...", ph, *n)
+	log.Printf("[INFO] *** Waiting for phase %v on pod %v ...", ph, *n)
 
 	for e := range w.ResultChan() {
 		log.Printf("[DEBUG] Watch Event Type: %v", e.Type)
 		p, ok := e.Object.(*apiv1.Pod)
 		if !ok {
-			log.Printf("[WARNING] Unexpected Watch Event Type - skipping")
+			log.Printf("[WARN] Unexpected Watch Event Type - skipping")
 			//check for timeout
 			if ctx.Err() != nil {
-				log.Printf("[WARNING] Context error received while waiting on pod %v. Error: %v", *n, ctx.Err())
+				log.Printf("[WARN] Context error received while waiting on pod %v. Error: %v", *n, ctx.Err())
 				return ctx.Err()
 			}
 			// break
@@ -900,7 +900,7 @@ func (k *Kube) waitForPhase(ph apiv1.PodPhase, c *kubernetes.Clientset, ns *stri
 			continue
 		}
 
-		log.Printf("[NOTICE] Pod %v Phase: %v", p.GetName(), p.Status.Phase)
+		log.Printf("[INFO] Pod %v Phase: %v", p.GetName(), p.Status.Phase)
 		for _, con := range p.Status.ContainerStatuses {
 			log.Printf("[DEBUG] Container Status: %+v", con)
 		}
@@ -918,7 +918,7 @@ func (k *Kube) waitForPhase(ph apiv1.PodPhase, c *kubernetes.Clientset, ns *stri
 
 	}
 
-	log.Printf("[NOTICE] *** Completed waiting for phase %v on pod %v", ph, *n)
+	log.Printf("[INFO] *** Completed waiting for phase %v on pod %v", ph, *n)
 
 	return nil
 }
@@ -958,26 +958,26 @@ func waitForDelete(c *kubernetes.Clientset, ns *string, n *string) error {
 		return err
 	}
 
-	log.Printf("[NOTICE] *** Waiting for DELETE on pod %v ...", *n)
+	log.Printf("[INFO] *** Waiting for DELETE on pod %v ...", *n)
 
 	for e := range w.ResultChan() {
 		log.Printf("[DEBUG] Watch Event Type: %v", e.Type)
 		p, ok := e.Object.(*apiv1.Pod)
 		if !ok {
-			log.Printf("[WARNING] Unexpected Watch Event Type received for pod %v - skipping", p.GetObjectMeta().GetName())
+			log.Printf("[WARN] Unexpected Watch Event Type received for pod %v - skipping", p.GetObjectMeta().GetName())
 			break
 		}
 		log.Printf("[INFO] Watch Container phase: %v", p.Status.Phase)
 		log.Printf("[DEBUG] Watch Container status: %+v", p.Status.ContainerStatuses)
 
 		if e.Type == "DELETED" {
-			log.Printf("[NOTICE] DELETED event received for pod %v", p.GetObjectMeta().GetName())
+			log.Printf("[INFO] DELETED event received for pod %v", p.GetObjectMeta().GetName())
 			break
 		}
 
 	}
 
-	log.Printf("[NOTICE] *** Completeed waiting for DELETE on pod %v", *n)
+	log.Printf("[INFO] *** Completed waiting for DELETE on pod %v", *n)
 
 	return nil
 }
