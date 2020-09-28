@@ -20,9 +20,7 @@ var kube = kubernetes.GetKubeInstance()
 
 func main() {
 	handleFlags()
-
-	log.Printf("[NOTICE] Probr running with environment: ")
-	log.Printf("[NOTICE] %+v", config.Vars)
+	config.LogConfigState()
 
 	//exec 'em all (for now!)
 	s, ts, err := probr.RunAllTests()
