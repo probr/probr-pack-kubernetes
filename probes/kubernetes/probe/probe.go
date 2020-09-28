@@ -4,7 +4,7 @@ package probe
 import (
 	"gitlab.com/citihub/probr/internal/audit"
 	"gitlab.com/citihub/probr/internal/clouddriver/kubernetes"
-	"gitlab.com/citihub/probr/test/features"
+	"gitlab.com/citihub/probr/probes"
 	apiv1 "k8s.io/api/core/v1"
 )
 
@@ -40,7 +40,7 @@ func ProcessPodCreationResult(s *State, pd *apiv1.Pod, expected kubernetes.PodCr
 		}
 		//unexpected error
 		//in this case something unexpected has happened, return an error to cucumber
-		return features.LogAndReturnError("error attempting to create POD: %v", err)
+		return probes.LogAndReturnError("error attempting to create POD: %v", err)
 	}
 
 	//No errors: pod creation may or may not have been expected.  This will be determined
@@ -66,13 +66,13 @@ func AssertResult(s *State, res, msg string) error {
 		//expect pod creation error to be non-null
 		if s.CreationError == nil {
 			//it's a fail:
-			return features.LogAndReturnError("pod %v was created - test failed", s.PodName)
+			return probes.LogAndReturnError("pod %v was created - test failed", s.PodName)
 		}
 		//should also check code:
 		_, exists := s.CreationError.ReasonCodes[*s.ExpectedReason]
 		if !exists {
 			//also a fail:
-			return features.LogAndReturnError("pod not was created but failure reasons (%v) did not contain expected (%v)- test failed",
+			return probes.LogAndReturnError("pod not was created but failure reasons (%v) did not contain expected (%v)- test failed",
 				s.CreationError.ReasonCodes, s.ExpectedReason)
 		}
 
@@ -84,7 +84,7 @@ func AssertResult(s *State, res, msg string) error {
 		// then expect the pod creation error to be nil
 		if s.CreationError != nil {
 			//it's a fail:
-			return features.LogAndReturnError("pod was not created - test failed: %v", s.CreationError)
+			return probes.LogAndReturnError("pod was not created - test failed: %v", s.CreationError)
 		}
 
 		//else we're good ...
@@ -92,6 +92,6 @@ func AssertResult(s *State, res, msg string) error {
 	}
 
 	// we've been given a result that we don't know about ...
-	return features.LogAndReturnError("desired result %v is not recognised", res)
+	return probes.LogAndReturnError("desired result %v is not recognised", res)
 
 }

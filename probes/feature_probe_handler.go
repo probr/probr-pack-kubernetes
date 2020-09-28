@@ -1,4 +1,4 @@
-package features
+package probes
 
 import (
 	"bytes"
@@ -16,9 +16,9 @@ import (
 	"gitlab.com/citihub/probr/internal/coreengine"
 )
 
-// GodogTestHandler is a general implmentation of coreengine.TestHandlerFunc.  Based on the 
-// output type, the test will either be executed using an in-memory or file output.  In 
-// both cases, the handler uses the data supplied in GodogTest to call the underlying 
+// GodogTestHandler is a general implmentation of coreengine.TestHandlerFunc.  Based on the
+// output type, the test will either be executed using an in-memory or file output.  In
+// both cases, the handler uses the data supplied in GodogTest to call the underlying
 // GoDog test suite.
 func GodogTestHandler(gd *coreengine.GodogTest) (int, *bytes.Buffer, error) {
 	if config.Vars.OutputType == "INMEM" {
@@ -35,10 +35,10 @@ func toFileGodogTestHandler(gd *coreengine.GodogTest) (int, *bytes.Buffer, error
 	status, err := runTestSuite(o, gd)
 
 	//TODO - review!
-	//FUDGE! If the tests are skipped due to tags, then an empty file may 
+	//FUDGE! If the tests are skipped due to tags, then an empty file may
 	//be left lingering.  This will have a non-zero size as we've actually
 	//had to create the file prior to the test run (see line 31).  If it's
-	//less than 4 bytes, it's fairly certain that this will indeed be empty 
+	//less than 4 bytes, it's fairly certain that this will indeed be empty
 	//and can be removed.
 	i, err := o.Stat()
 	s := i.Size()
@@ -99,7 +99,7 @@ func getFeaturesPath(gd *coreengine.GodogTest) (string, error) {
 	var g = gd.TestDescriptor.Group.String()
 	var c = gd.TestDescriptor.Category.String()
 
-	return filepath.Join(r, "test", "features",
+	return filepath.Join(r, "probes",
 		strings.ReplaceAll(strings.ToLower(g), " ", ""),
 		strings.ReplaceAll(strings.ToLower(c), " ", ""), "features"), nil
 

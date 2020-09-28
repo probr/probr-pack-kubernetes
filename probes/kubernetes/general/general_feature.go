@@ -7,8 +7,8 @@ import (
 	"strings"
 
 	"gitlab.com/citihub/probr/internal/audit"
-	"gitlab.com/citihub/probr/test/features"
-	"gitlab.com/citihub/probr/test/features/kubernetes/probe"
+	"gitlab.com/citihub/probr/probes"
+	"gitlab.com/citihub/probr/probes/kubernetes/probe"
 
 	"github.com/cucumber/godog"
 	"gitlab.com/citihub/probr/internal/clouddriver/kubernetes"
@@ -26,16 +26,16 @@ const NAME = "general"
 
 // init() registers the feature tests descibed in this package with the test runner (coreengine.TestRunner) via the call
 // to coreengine.AddTestHandler.  This links the test - described by the TestDescriptor - with the handler to invoke.  In
-// this case, the general test handler is being used (features.GodogTestHandler) and the GodogTest data provides the data
+// this case, the general test handler is being used (probes.GodogTestHandler) and the GodogTest data provides the data
 // require to execute the test.  Specifically, the data includes the Test Suite and Scenario Initializers from this package
-// which will be called from features.GodogTestHandler.  Note: a blank import at probr library level should be done to
+// which will be called from probes.GodogTestHandler.  Note: a blank import at probr library level should be done to
 // invoke this function automatically on initial load.
 func init() {
 	td := coreengine.TestDescriptor{Group: coreengine.Kubernetes,
 		Category: coreengine.General, Name: NAME}
 
 	coreengine.AddTestHandler(td, &coreengine.GoDogTestTuple{
-		Handler: features.GodogTestHandler,
+		Handler: probes.GodogTestHandler,
 		Data: &coreengine.GodogTest{
 			TestDescriptor:       &td,
 			TestSuiteInitializer: TestSuiteInitialize,
@@ -72,7 +72,7 @@ func (p *probeState) iInspectTheThatAreConfigured(roleLevel string) error {
 	}
 
 	if e != nil {
-		return features.LogAndReturnError("error raised when retrieving roles for rolelevel %v: %v", roleLevel, e)
+		return probes.LogAndReturnError("error raised when retrieving roles for rolelevel %v: %v", roleLevel, e)
 	}
 
 	return nil
@@ -82,7 +82,7 @@ func (p *probeState) iShouldOnlyFindWildcardsInKnownAndAuthorisedConfigurations(
 	//we strip out system/known entries in the cluster roles & roles call
 
 	if p.hasWildcardRoles {
-		return features.LogAndReturnError("roles exist with wildcarded resources")
+		return probes.LogAndReturnError("roles exist with wildcarded resources")
 	}
 
 	//good if get to here
@@ -106,7 +106,7 @@ func (p *probeState) iAttemptToCreateADeploymentWhichDoesNotHaveASecurityContext
 func (p *probeState) theDeploymentIsRejected() error {
 	//looking for a non-nil creation error
 	if p.state.CreationError == nil {
-		return features.LogAndReturnError("pod %v was created successfully. Test fail.", p.state.PodName)
+		return probes.LogAndReturnError("pod %v was created successfully. Test fail.", p.state.PodName)
 	}
 
 	//nil creation error so test pass
@@ -129,14 +129,14 @@ func (p *probeState) theKubernetesWebUIIsDisabled() error {
 	pl, err := kubernetes.GetKubeInstance().GetPods("kube-system")
 
 	if err != nil {
-		return features.LogAndReturnError("error raised when trying to retrieve pods %v", err)
+		return probes.LogAndReturnError("error raised when trying to retrieve pods %v", err)
 	}
 
 	//a "pass" is the abscence of a "kubernetes-dashboard" pod
 	//if one is found, it's a fail ...
 	for _, p := range pl.Items {
 		if strings.HasPrefix(p.Name, "kubernetes-dashboard") {
-			return features.LogAndReturnError("kubernetes-dashboard pod found (%v) - test fail", p.Name)
+			return probes.LogAndReturnError("kubernetes-dashboard pod found (%v) - test fail", p.Name)
 		}
 	}
 
@@ -166,7 +166,7 @@ func ScenarioInitialize(ctx *godog.ScenarioContext) {
 	ps := probeState{}
 
 	ctx.BeforeScenario(func(s *godog.Scenario) {
-		features.LogScenarioStart(s)
+		probes.LogScenarioStart(s)
 	})
 
 	//general
@@ -185,6 +185,6 @@ func ScenarioInitialize(ctx *godog.ScenarioContext) {
 
 	ctx.AfterScenario(func(s *godog.Scenario, err error) {
 		ps.tearDown()
-		features.LogScenarioEnd(s)
+		probes.LogScenarioEnd(s)
 	})
 }

@@ -10,9 +10,9 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	"gitlab.com/citihub/probr/internal/coreengine"
-	_ "gitlab.com/citihub/probr/test/features/clouddriver"                  //needed to run init on TestHandlers
-	_ "gitlab.com/citihub/probr/test/features/kubernetes/internetaccess"    //needed to run init on TestHandlers
-	_ "gitlab.com/citihub/probr/test/features/kubernetes/podsecuritypolicy" //needed to run init on TestHandlers
+	_ "gitlab.com/citihub/probr/probes/clouddriver"                  //needed to run init on TestHandlers
+	_ "gitlab.com/citihub/probr/probes/kubernetes/internetaccess"    //needed to run init on TestHandlers
+	_ "gitlab.com/citihub/probr/probes/kubernetes/podsecuritypolicy" //needed to run init on TestHandlers
 )
 
 //TODO: this will be removed when it's been properly changed to a unit test

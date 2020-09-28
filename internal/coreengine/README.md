@@ -35,13 +35,13 @@ The test tuple here contains a `TestHandlerFunc` which is a generic function tha
 type TestHandlerFunc func(t *GodogTest) (int, *bytes.Buffer, error)
 ```
 
-*Note: The use of a generic here allows for any type of handler to be specified by the logic for a particular feature. In `probr-0.1.x` the only test handler is `features.GodogTestHandler`.*
+*Note: The use of a generic here allows for any type of handler to be specified by the logic for a particular feature. In `probr-0.1.x` the only test handler is `probes.GodogTestHandler`.*
 
 An example usage for `GoDogTestTuple` is as follows:
 
 ```
 coreengine.GoDogTestTuple{
-    Handler: features.GodogTestHandler,
+    Handler: probes.GodogTestHandler,
     Data: &GODOGTESTOBJ,
 }
 ```
@@ -63,10 +63,10 @@ Here is an example where all of the above logic is brought together to add a new
 td := coreengine.TestDescriptor{Group: coreengine.CloudDriver,
     Category: coreengine.General, Name: "account_manager"}
 
-fp := filepath.Join("test", "features", "clouddriver", "features")
+fp := filepath.Join("probes", "clouddriver", "features")
 
 coreengine.AddTestHandler(td, &coreengine.GoDogTestTuple{
-    Handler: features.GodogTestHandler,
+    Handler: probes.GodogTestHandler,
     Data: &coreengine.GodogTest{
         TestDescriptor:       &td,
         TestSuiteInitializer: TestSuiteInitialize,

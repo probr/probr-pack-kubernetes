@@ -3,13 +3,13 @@ package probr
 import (
 	"gitlab.com/citihub/probr/internal/clouddriver/kubernetes"
 	"gitlab.com/citihub/probr/internal/coreengine"
-	"gitlab.com/citihub/probr/test/features"
-	_ "gitlab.com/citihub/probr/test/features/clouddriver"                        //needed to run init on TestHandlers
-	_ "gitlab.com/citihub/probr/test/features/kubernetes/containerregistryaccess" //needed to run init on TestHandlers
-	_ "gitlab.com/citihub/probr/test/features/kubernetes/general"                 //needed to run init on TestHandlers
-	_ "gitlab.com/citihub/probr/test/features/kubernetes/iam"                     //needed to run init on TestHandlers
-	_ "gitlab.com/citihub/probr/test/features/kubernetes/internetaccess"          //needed to run init on TestHandlers
-	_ "gitlab.com/citihub/probr/test/features/kubernetes/podsecuritypolicy"       //needed to run init on TestHandlers
+	"gitlab.com/citihub/probr/probes"
+	_ "gitlab.com/citihub/probr/probes/clouddriver"                        //needed to run init on TestHandlers
+	_ "gitlab.com/citihub/probr/probes/kubernetes/containerregistryaccess" //needed to run init on TestHandlers
+	_ "gitlab.com/citihub/probr/probes/kubernetes/general"                 //needed to run init on TestHandlers
+	_ "gitlab.com/citihub/probr/probes/kubernetes/iam"                     //needed to run init on TestHandlers
+	_ "gitlab.com/citihub/probr/probes/kubernetes/internetaccess"          //needed to run init on TestHandlers
+	_ "gitlab.com/citihub/probr/probes/kubernetes/podsecuritypolicy"       //needed to run init on TestHandlers
 )
 
 //TODO: revise when interface this bit up ...
@@ -73,5 +73,5 @@ func ReadTestResults(ts *coreengine.TestStore, name string) (string, string, err
 
 // SetIOPaths ...
 func SetIOPaths(i string, o string) {
-	features.SetOutputDirectory(&o)
+	probes.SetOutputDirectory(&o)
 }

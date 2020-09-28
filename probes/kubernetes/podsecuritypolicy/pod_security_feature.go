@@ -14,9 +14,9 @@ import (
 	"gitlab.com/citihub/probr/internal/audit"
 	"gitlab.com/citihub/probr/internal/clouddriver/kubernetes"
 	"gitlab.com/citihub/probr/internal/coreengine"
-	"gitlab.com/citihub/probr/test/features"
-	podsecuritypolicy "gitlab.com/citihub/probr/test/features/kubernetes/podsecuritypolicy/assets"
-	"gitlab.com/citihub/probr/test/features/kubernetes/probe"
+	"gitlab.com/citihub/probr/probes"
+	podsecuritypolicy "gitlab.com/citihub/probr/probes/kubernetes/podsecuritypolicy/assets"
+	"gitlab.com/citihub/probr/probes/kubernetes/probe"
 )
 
 type probeState struct {
@@ -36,16 +36,16 @@ func SetPodSecurityPolicy(p kubernetes.PodSecurityPolicy) {
 
 // init() registers the feature tests descibed in this package with the test runner (coreengine.TestRunner) via the call
 // to coreengine.AddTestHandler.  This links the test - described by the TestDescriptor - with the handler to invoke.  In
-// this case, the general test handler is being used (features.GodogTestHandler) and the GodogTest data provides the data
+// this case, the general test handler is being used (probes.GodogTestHandler) and the GodogTest data provides the data
 // require to execute the test.  Specifically, the data includes the Test Suite and Scenario Initializers from this package
-// which will be called from features.GodogTestHandler.  Note: a blank import at probr library level should be done to
+// which will be called from probes.GodogTestHandler.  Note: a blank import at probr library level should be done to
 // invoke this function automatically on initial load.
 func init() {
 	td := coreengine.TestDescriptor{Group: coreengine.Kubernetes,
 		Category: coreengine.PodSecurityPolicies, Name: NAME}
 
 	coreengine.AddTestHandler(td, &coreengine.GoDogTestTuple{
-		Handler: features.GodogTestHandler,
+		Handler: probes.GodogTestHandler,
 		Data: &coreengine.GodogTest{
 			TestDescriptor:       &td,
 			TestSuiteInitializer: TestSuiteInitialize,
@@ -93,14 +93,14 @@ func (p *probeState) runControlTest(cf func() (*bool, error), c string) error {
 	yesNo, err := cf()
 
 	if err != nil {
-		return features.LogAndReturnError("error determining Pod Security Policy: %v error: %v", c, err)
+		return probes.LogAndReturnError("error determining Pod Security Policy: %v error: %v", c, err)
 	}
 	if yesNo == nil {
-		return features.LogAndReturnError("result of %v is nil despite no error being raised from the call", c)
+		return probes.LogAndReturnError("result of %v is nil despite no error being raised from the call", c)
 	}
 
 	if !*yesNo {
-		return features.LogAndReturnError("%v is NOT restricted (result: %t)", c, *yesNo)
+		return probes.LogAndReturnError("%v is NOT restricted (result: %t)", c, *yesNo)
 	}
 
 	return nil
@@ -116,15 +116,15 @@ func (p *probeState) runVerificationTest(c kubernetes.PSPVerificationProbe) erro
 		if err != nil {
 			//this is an error from trying to execute the command as opposed to
 			//the command itself returning an error
-			return features.LogAndReturnError("error raised trying to execute verification command (%v) - %v", c.Cmd, err)
+			return probes.LogAndReturnError("error raised trying to execute verification command (%v) - %v", c.Cmd, err)
 		}
 		if res == nil {
-			return features.LogAndReturnError("<nil> result received when trying to execute verification command (%v)", c.Cmd)
+			return probes.LogAndReturnError("<nil> result received when trying to execute verification command (%v)", c.Cmd)
 		}
 		if res.Err != nil && res.Internal {
 			//we have an error which was raised before reaching the cluster (i.e. it's "internal")
 			//this indicates that the command was not successfully executed
-			return features.LogAndReturnError("error raised trying to execute verification command (%v)", c.Cmd)
+			return probes.LogAndReturnError("error raised trying to execute verification command (%v)", c.Cmd)
 		}
 
 		//we've managed to execution against the cluster.  This may have failed due to pod security, but this
@@ -135,7 +135,7 @@ func (p *probeState) runVerificationTest(c kubernetes.PSPVerificationProbe) erro
 			return nil
 		}
 		//else it's a fail:
-		return features.LogAndReturnError("exit code %d from verification commnad %q did not match expected %d",
+		return probes.LogAndReturnError("exit code %d from verification commnad %q did not match expected %d",
 			res.Code, c.Cmd, c.ExpectedExitCode)
 	}
 
@@ -505,7 +505,7 @@ func ScenarioInitialize(ctx *godog.ScenarioContext) {
 
 	ctx.BeforeScenario(func(s *godog.Scenario) {
 		ps.setup()
-		features.LogScenarioStart(s)
+		probes.LogScenarioStart(s)
 	})
 
 	ctx.Step(`^a Kubernetes cluster exists which we can deploy into$`, ps.aKubernetesClusterExistsWhichWeCanDeployInto)
@@ -577,7 +577,7 @@ func ScenarioInitialize(ctx *godog.ScenarioContext) {
 
 	ctx.AfterScenario(func(s *godog.Scenario, err error) {
 		ps.tearDown()
-		features.LogScenarioEnd(s)
+		probes.LogScenarioEnd(s)
 	})
 
 }
