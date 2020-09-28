@@ -2,37 +2,51 @@ package audit
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
+	"strings"
 
 	"gitlab.com/citihub/probr/internal/config"
 )
-
-type probeState struct {
-	PodName         string
-	CreationError   *interface{}
-	ExpectedReason  *interface{}
-	CommandExitCode int
-}
 
 type Event struct {
 	Meta          map[string]string
 	PodsCreated   int
 	PodsDestroyed int
-	Tests         map[string]probeState
 }
 
 type AuditLogStruct struct {
-	Events map[string]*Event
+	Status       string
+	ProbesPassed int
+	ProbesFailed int
+	Events       map[string]*Event
 }
 
 var AuditLog AuditLogStruct
 
+// PrintAudit will print the current Events object state, formatted to JSON, if AuditEnabled is not "false"
 func (o *AuditLogStruct) PrintAudit() {
 	if config.Vars.AuditEnabled == "false" {
 		log.Printf("[NOTICE] Audit Log suppressed by configuration AuditEnabled=false.")
 	} else {
-		audit, _ := json.MarshalIndent(o.Events, "", "  ")
+		audit, _ := json.MarshalIndent(o, "", "  ")
 		log.Printf("[NOTICE] %s", audit)
+	}
+}
+
+// SetProbrStatus evaluates the current AuditLogStruct state to set ProbesPassed, ProbesFailed, and Status
+func (o *AuditLogStruct) SetProbrStatus() {
+	for _, v := range o.Events {
+		if strings.Contains(v.Meta["status"], "Passed") {
+			o.ProbesPassed = o.ProbesPassed + 1
+		} else if strings.Contains(v.Meta["status"], "Failed") {
+			o.ProbesFailed = o.ProbesFailed + 1
+		}
+	}
+	if o.ProbesPassed > 0 && o.ProbesFailed == 0 {
+		o.Status = "Completed - All Tests Passed"
+	} else {
+		o.Status = fmt.Sprintf("Completed - %v of %v Probes Failed", o.ProbesFailed, len(o.Events))
 	}
 }
 
@@ -49,11 +63,6 @@ func (o *AuditLogStruct) GetEventLog(n string) *Event {
 	return o.Events[n]
 }
 
-// Writes or updates given probe state
-func (o *Event) AuditProbeState(n string, p probeState) {
-	o.Tests[n] = p
-}
-
 func (o *Event) LogPodCreated() {
 	o.PodsCreated = o.PodsCreated + 1
 }
@@ -66,6 +75,7 @@ func (o *Event) LogPodDestroyed() {
 func (o *AuditLogStruct) logInit(n string) {
 	if o.Events == nil {
 		o.Events = make(map[string]*Event)
+		o.Status = "Running"
 	}
 	if o.Events[n] == nil {
 		o.Events[n] = &Event{
