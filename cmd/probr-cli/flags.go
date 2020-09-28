@@ -8,11 +8,11 @@ import (
 	"gitlab.com/citihub/probr/internal/config"
 )
 
-type flagHandlerFunc func(v string)
+type flagHandlerFunc func(v *string)
 
 type Flag struct {
 	Handler flagHandlerFunc
-	Value   string
+	Value   *string
 }
 
 var flags []Flag
@@ -38,55 +38,67 @@ func handleFlags() {
 func createFlag(n string, d string, t string, h flagHandlerFunc) {
 	f := Flag{
 		Handler: h,
-		Value:   "",
+		Value:   new(string),
 	}
-	flag.StringVar(&f.Value, n, d, t)
+	flag.StringVar(f.Value, n, d, t)
 	flags = append(flags, f)
 }
 
 // varsFileHandler initializes configuration with varsFile overriding env vars & defaults
-func varsFileHandler(v string) {
-	err := config.Init(v)
+func varsFileHandler(v *string) {
+	err := config.Init(*v)
 	if err != nil {
-		log.Fatalf("[ERROR] Could not create config from provided filepath: %v", v)
+		log.Fatalf("[ERROR] Could not create config from provided filepath: %v", *v)
+	} else if len(*v) > 0 {
+		log.Printf("[NOTICE] Config read from file '%s', but may still be overridden by CLI flags.", *v)
 	} else {
-		log.Printf("[NOTICE] Config read from file %s, but may still be overridden by CLI flags.", v)
+		log.Printf("[NOTICE] No configuration variables file specified. Using environment variabls and defaults only.")
 	}
 }
 
 // outputDirHandler
-func outputDirHandler(v string) {
-	if len(v) > 0 {
-		config.Vars.OutputDir = v
-		log.Printf("[NOTICE] Output Directory has been overridden via command line to: " + v)
+func outputDirHandler(v *string) {
+	if len(*v) > 0 {
+		config.Vars.OutputDir = *v
+		log.Printf("[NOTICE] Output Directory has been overridden via command line to: %s", *v)
 	}
 }
 
 // outputTypeHandler validates provided value and sets output accordingly
-func outputTypeHandler(v string) {
-	if v != "" {
-		if v == "IO" {
+func outputTypeHandler(v *string) {
+	if *v != "" {
+		if *v == "IO" {
 			probr.SetIOPaths("", config.Vars.OutputDir)
-			log.Printf("[NOTICE] Probr results will be written to files in the specified output directory: %v", v)
-		} else if v == "INMEM" {
+			log.Printf("[NOTICE] Probr results will be written to files in the specified output directory: %v", *v)
+		} else if *v == "INMEM" {
 			log.Printf("[NOTICE] Output type specified as INMEM: Results will not be handled by the CLI. Refer to the Audit Log for a results summary.")
 		} else {
-			log.Fatalf("[ERROR] Unknown output type specified: %s. Please use 'IO' or 'INMEM'", v)
+			log.Fatalf("[ERROR] Unknown output type specified: %s. Please use 'IO' or 'INMEM'", *v)
 		}
-		config.Vars.OutputType = v
+		config.Vars.OutputType = *v
 	}
 }
 
-func tagsHandler(v string) {
-	if len(v) > 0 {
-		config.Vars.Tests.Tags = v
-		log.Printf("[NOTICE] Tags have been added via command line to: %v", v)
+func tagsHandler(v *string) {
+	if len(*v) > 0 {
+		config.Vars.Tests.Tags = *v
+		log.Printf("[NOTICE] Tags have been added via command line.")
+	}
+	if len(config.Vars.KubeConfigPath) > 0 {
+		log.Printf("[NOTICE] Tags specified: %s", *v)
+	} else {
+		log.Printf("[NOTICE] No tags specified. All probes will be run.")
 	}
 }
 
-func kubeConfigHandler(v string) {
-	if len(v) > 0 {
-		config.Vars.KubeConfigPath = v
-		log.Printf("[NOTICE] Kube Config has been overridden via command line to: " + v)
+func kubeConfigHandler(v *string) {
+	if len(*v) > 0 {
+		config.Vars.KubeConfigPath = *v
+		log.Printf("[NOTICE] Kube Config has been overridden via command line")
+	}
+	if len(config.Vars.KubeConfigPath) > 0 {
+		log.Printf("[NOTICE] Kube Config Path: %s", config.Vars.KubeConfigPath)
+	} else {
+		log.Printf("[NOTICE] No kubeconfig path specified. Falling back to default paths.")
 	}
 }

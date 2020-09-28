@@ -14,6 +14,7 @@ import (
 	"sync"
 	"time"
 
+	"gitlab.com/citihub/probr/internal/audit"
 	"gitlab.com/citihub/probr/internal/config"
 
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -115,7 +116,7 @@ type Kubernetes interface {
 	CreatePodFromYaml(y []byte, pname *string, ns *string, image *string, aadpodidbinding *string, w bool) (*apiv1.Pod, error)
 	GetPodObject(pname string, ns string, cname string, image string, sc *apiv1.SecurityContext) *apiv1.Pod
 	ExecCommand(cmd, ns, pn *string) *CmdExecutionResult
-	DeletePod(pname *string, ns *string, w bool) error
+	DeletePod(pname *string, ns *string, w bool, e string) error
 	DeleteNamespace(ns *string) error
 	CreateConfigMap(n *string, ns *string) (*apiv1.ConfigMap, error)
 	DeleteConfigMap(n *string, ns *string) error
@@ -530,9 +531,9 @@ func (k *Kube) ExecCommand(cmd, ns, pn *string) (s *CmdExecutionResult) {
 	return &CmdExecutionResult{Stdout: stdout.String(), Stderr: stderr.String()}
 }
 
-// DeletePod deletes the given pod in the specified namespace.  Passing true for 'w' causes the function to
-// wait for pod deletion (not normally required).
-func (k *Kube) DeletePod(pname *string, ns *string, w bool) error {
+// DeletePod deletes the given pod in the specified namespace.
+// Passing true for 'wait' causes the function to wait for pod deletion (not normally required).
+func (k *Kube) DeletePod(pname *string, ns *string, wait bool, event string) error {
 	c, err := k.GetClient()
 	if err != nil {
 		return err
@@ -548,11 +549,11 @@ func (k *Kube) DeletePod(pname *string, ns *string, w bool) error {
 		return err
 	}
 
-	if w {
-		//wait:
+	if wait {
 		waitForDelete(c, ns, pname)
 	}
-
+	l := audit.AuditLog.GetEventLog(event)
+	l.LogPodDestroyed()
 	log.Printf("[NOTICE] POD %v deleted.", *pname)
 
 	return nil

@@ -6,6 +6,8 @@ import (
 	"log"
 
 	"github.com/cucumber/godog"
+
+	"gitlab.com/citihub/probr/internal/audit"
 	"gitlab.com/citihub/probr/internal/clouddriver/kubernetes"
 	"gitlab.com/citihub/probr/internal/coreengine"
 	"gitlab.com/citihub/probr/internal/utils"
@@ -17,6 +19,8 @@ type probeState struct {
 	state probe.State
 }
 
+const NAME = "container_registry_access"
+
 // init() registers the feature tests descibed in this package with the test runner (coreengine.TestRunner) via the call
 // to coreengine.AddTestHandler.  This links the test - described by the TestDescriptor - with the handler to invoke.  In
 // this case, the general test handler is being used (features.GodogTestHandler) and the GodogTest data provides the data
@@ -25,7 +29,7 @@ type probeState struct {
 // invoke this function automatically on initial load.
 func init() {
 	td := coreengine.TestDescriptor{Group: coreengine.Kubernetes,
-		Category: coreengine.ContainerRegistryAccess, Name: "container_registry_access"}
+		Category: coreengine.ContainerRegistryAccess, Name: NAME}
 
 	coreengine.AddTestHandler(td, &coreengine.GoDogTestTuple{
 		Handler: features.GodogTestHandler,
@@ -62,9 +66,11 @@ func (p *probeState) aKubernetesClusterIsDeployed() error {
 // CIS-6.1.3
 // Minimize cluster access to read-only
 func (p *probeState) iAmAuthorisedToPullFromAContainerRegistry() error {
+	e := audit.AuditLog.GetEventLog(NAME)
+
 	pd, err := cra.SetupContainerAccessTestPod(utils.StringPtr("docker.io"))
 
-	return probe.ProcessPodCreationResult(&p.state, pd, kubernetes.PSPContainerAllowedImages, err)
+	return probe.ProcessPodCreationResult(&p.state, pd, kubernetes.PSPContainerAllowedImages, e, err)
 }
 
 func (p *probeState) iAttemptToPushToTheContainerRegistryUsingTheClusterIdentity() error {
@@ -78,10 +84,11 @@ func (p *probeState) thePushRequestIsRejectedDueToAuthorization() error {
 // CIS-6.1.4
 // Ensure only authorised container registries are allowed
 func (p *probeState) aUserAttemptsToDeployAContainerFrom(auth string, registry string) error {
+	e := audit.AuditLog.GetEventLog(NAME)
 
 	pd, err := cra.SetupContainerAccessTestPod(&registry)
 
-	return probe.ProcessPodCreationResult(&p.state, pd, kubernetes.PSPContainerAllowedImages, err)
+	return probe.ProcessPodCreationResult(&p.state, pd, kubernetes.PSPContainerAllowedImages, e, err)
 }
 
 func (p *probeState) theDeploymentAttemptIs(res string) error {
@@ -95,7 +102,7 @@ func (p *probeState) setup() {
 }
 
 func (p *probeState) tearDown() {
-	cra.TeardownContainerAccessTestPod(&p.state.PodName)
+	cra.TeardownContainerAccessTestPod(&p.state.PodName, NAME)
 }
 
 // TestSuiteInitialize handles any overall Test Suite initialisation steps.  This is registered with the
@@ -110,10 +117,10 @@ func TestSuiteInitialize(ctx *godog.TestSuiteContext) {
 	}
 }
 
-// ScenarioInitialize initialises the specific test steps.  This is essentially the creation of the test 
+// ScenarioInitialize initialises the specific test steps.  This is essentially the creation of the test
 // which reflects the tests described in the features directory.  There must be a test step registered for
 // each line in the feature files. Note: Godog will output stub steps and implementations if it doesn't find
-// a step / function defined.  See: https://github.com/cucumber/godog#example. 
+// a step / function defined.  See: https://github.com/cucumber/godog#example.
 func ScenarioInitialize(ctx *godog.ScenarioContext) {
 	ps := probeState{}
 

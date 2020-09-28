@@ -8,7 +8,6 @@ Each probe is a `Test` object:
 
 ```
 type Test struct {
-	UUID           string          `json:"uuid,omitempty"`
 	TestDescriptor *TestDescriptor `json:"test_descriptor,omitempty"`
 
 	Status *TestStatus `json:"status,omitempty"`

@@ -92,7 +92,7 @@ type PodSecurityPolicy interface {
 	CreatePODSettingCapabilities(c *[]string) (*apiv1.Pod, error)
 	CreatePodFromYaml(y []byte) (*apiv1.Pod, error)
 	ExecPSPTestCmd(pName *string, cmd PSPTestCommand) (*CmdExecutionResult, error)
-	TeardownPodSecurityTest(p *string) error
+	TeardownPodSecurityTest(p *string, e string) error
 	CreateConfigMap() error
 	DeleteConfigMap() error
 }
@@ -584,7 +584,6 @@ func (psp *PSP) ExecPSPTestCmd(pName *string, cmd PSPTestCommand) (*CmdExecution
 
 	log.Printf("[NOTICE] ExecPSPTestCmd: %v stdout: %v exit code: %v (error: %v)", cmd, res.Stdout, res.Code, res.Err)
 
-	
 	return res, nil
 }
 
@@ -607,9 +606,9 @@ func (psp *PSP) DeleteConfigMap() error {
 }
 
 // TeardownPodSecurityTest deletes the given pod name in the PSP test namespace.
-func (psp *PSP) TeardownPodSecurityTest(p *string) error {
+func (psp *PSP) TeardownPodSecurityTest(p *string, e string) error {
 	ns := psp.testNamespace
-	err := psp.k.DeletePod(p, &ns, false) //don't worry about waiting
+	err := psp.k.DeletePod(p, &ns, false, e) //don't worry about waiting
 	return err
 }
 

@@ -46,9 +46,6 @@ func TestExecAllTests(t *testing.T) {
 }
 
 func addTest(tm *coreengine.TestStore, testname string, grp coreengine.Group, cat coreengine.Category) {
-
 	td := coreengine.TestDescriptor{Group: grp, Category: cat, Name: testname}
-
-	tm.AddTest(td) // add - don't worry about the rtn uuid
-
+	tm.AddTest(td)
 }

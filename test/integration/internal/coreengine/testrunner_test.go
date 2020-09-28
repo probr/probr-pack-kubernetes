@@ -7,7 +7,6 @@ import (
 	"os"
 	"testing"
 
-	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 
 	"gitlab.com/citihub/probr/internal/config"
@@ -52,12 +51,10 @@ func TestTestRunner(t *testing.T) {
 	td := coreengine.TestDescriptor{Group: grp, Category: cat, Name: name}
 
 	//specific terms for *this* test
-	uid := uuid.New().String()
 	sat1 := coreengine.Pending
 
 	//construct the test to run
 	test1 := coreengine.Test{
-		UUID:           uid,
 		TestDescriptor: &td,
 		Status:         &sat1,
 	}
@@ -99,12 +96,10 @@ func TestTestRunner(t *testing.T) {
 	td2 := coreengine.TestDescriptor{Category: cat2, Name: name2}
 
 	//specific terms for *this* test
-	uuid2 := uuid.New().String()
 	sat2 := coreengine.Pending
 
 	//construct the test to run
 	test2 := coreengine.Test{
-		UUID:           uuid2,
 		TestDescriptor: &td2,
 		Status:         &sat2,
 	}
@@ -133,12 +128,10 @@ func TestTestRunnerInMem(t *testing.T) {
 	td := coreengine.TestDescriptor{Group: grp, Category: cat, Name: name}
 
 	//specific terms for *this* test
-	uid := uuid.New().String()
 	sat1 := coreengine.Pending
 
 	//construct the test to run
 	test1 := coreengine.Test{
-		UUID:           uid,
 		TestDescriptor: &td,
 		Status:         &sat1,
 	}

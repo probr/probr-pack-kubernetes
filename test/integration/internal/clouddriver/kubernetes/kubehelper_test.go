@@ -64,7 +64,7 @@ func TestExecCmd(t *testing.T) {
 }
 
 func TestDeletePod(t *testing.T) {
-	err := kubernetes.GetKubeInstance().DeletePod(&testPod, &testNS, true)
+	err := kubernetes.GetKubeInstance().DeletePod(&testPod, &testNS, true, "")
 
 	handleResult(nil, err)
 }
@@ -122,7 +122,7 @@ func TestGetRolesByResource(t *testing.T) {
 	rl, err := kubernetes.GetKubeInstance().GetRolesByResource("*")
 
 	log.Printf("[NOTICE] roles with '*' resource")
-	
+
 	for _, r := range *rl {
 		log.Printf("[NOTICE] role name: %v role labels: %v", r.Name, r.Labels)
 	}
@@ -139,7 +139,6 @@ func TestGetRawResourcesByGrp(t *testing.T) {
 		fmt.Printf("Name: %v\n", r.Metadata["name"])
 		fmt.Printf("Namespace: %v\n", r.Metadata["namespace"])
 	}
-	
 
 	handleResult(nil, err)
 
@@ -151,7 +150,6 @@ func TestGetRawResourcesByGrp(t *testing.T) {
 		fmt.Printf("Name: %v\n", r.Metadata["name"])
 		fmt.Printf("Namespace: %v\n", r.Metadata["namespace"])
 	}
-	
 
 	handleResult(nil, err)
 }

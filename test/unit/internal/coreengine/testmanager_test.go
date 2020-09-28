@@ -3,7 +3,6 @@ package coreengine_test
 import (
 	"testing"
 
-	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"gitlab.com/citihub/probr/internal/coreengine"
 )
@@ -41,11 +40,9 @@ func TestAddGetTest(t *testing.T) {
 	name := "account_manager"
 	td := coreengine.TestDescriptor{Group: grp, Category: cat, Name: name}
 
-	uid := uuid.New().String()
 	sat1 := coreengine.Pending
 
 	test1 := coreengine.Test{
-		UUID:           uid,
 		TestDescriptor: &td,
 		Status:         &sat1,
 	}
@@ -64,15 +61,9 @@ func TestAddGetTest(t *testing.T) {
 
 	assert.Nil(t, err)
 	assert.NotNil(t, rtntest)
-	assert.Equal(t, 1, len(*rtntest))
-
-	assert.Equal(t, test1.UUID, (*rtntest)[0].UUID, "test UUID %v is NOT the same as the returned test UUID %V", test1.UUID, (*rtntest)[0].UUID)
-
 }
 
 func addTest(tm *coreengine.TestStore, testname string, grp coreengine.Group, cat coreengine.Category) {
-
 	td := coreengine.TestDescriptor{Group: grp, Category: cat, Name: testname}
-	tm.AddTest(td) // add - don't worry about the rtn uuid
-
+	tm.AddTest(td)
 }

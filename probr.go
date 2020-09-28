@@ -3,10 +3,6 @@ package probr
 import (
 	"gitlab.com/citihub/probr/internal/clouddriver/kubernetes"
 	"gitlab.com/citihub/probr/internal/coreengine"
-
-	"github.com/google/uuid"
-
-	_ "gitlab.com/citihub/probr/internal/config" //needed for logging
 	"gitlab.com/citihub/probr/test/features"
 	_ "gitlab.com/citihub/probr/test/features/clouddriver"                        //needed to run init on TestHandlers
 	_ "gitlab.com/citihub/probr/test/features/kubernetes/containerregistryaccess" //needed to run init on TestHandlers
@@ -20,10 +16,11 @@ import (
 var kube = kubernetes.GetKubeInstance()
 
 func addTest(tm *coreengine.TestStore, n string, g coreengine.Group, c coreengine.Category) {
-
-	td := coreengine.TestDescriptor{Group: g, Category: c, Name: n}
-
-	//add - don't worry about the rtn uuid
+	td := coreengine.TestDescriptor{
+		Group:    g,
+		Category: c,
+		Name:     n,
+	}
 	tm.AddTest(td)
 }
 
@@ -46,8 +43,8 @@ func RunAllTests() (int, *coreengine.TestStore, error) {
 //GetAllTestResults ...
 func GetAllTestResults(ts *coreengine.TestStore) (map[string]string, error) {
 	out := make(map[string]string)
-	for id := range ts.Tests {
-		r, n, err := ReadTestResults(ts, id)
+	for name := range ts.Tests {
+		r, n, err := ReadTestResults(ts, name)
 		if err != nil {
 			return nil, err
 		}
@@ -59,10 +56,9 @@ func GetAllTestResults(ts *coreengine.TestStore) (map[string]string, error) {
 }
 
 //ReadTestResults ...
-func ReadTestResults(ts *coreengine.TestStore, id uuid.UUID) (string, string, error) {
-	t, err := ts.GetTest(&id)
-	test := (*t)[0]
-	ts.AuditLog.Audit(id.String(), "status", test.Status.String())
+func ReadTestResults(ts *coreengine.TestStore, name string) (string, string, error) {
+	t, err := ts.GetTest(name)
+	test := t
 	if err != nil {
 		return "", "", err
 	}

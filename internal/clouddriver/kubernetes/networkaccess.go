@@ -22,7 +22,7 @@ const (
 type NetworkAccess interface {
 	ClusterIsDeployed() *bool
 	SetupNetworkAccessTestPod() (*apiv1.Pod, error)
-	TeardownNetworkAccessTestPod(p *string) error
+	TeardownNetworkAccessTestPod(p *string, e string) error
 	AccessURL(pn *string, url *string) (int, error)
 }
 
@@ -88,11 +88,11 @@ func (n *NA) SetupNetworkAccessTestPod() (*apiv1.Pod, error) {
 }
 
 // TeardownNetworkAccessTestPod deletes the test pod with the given name.
-func (n *NA) TeardownNetworkAccessTestPod(p *string) error {
+func (n *NA) TeardownNetworkAccessTestPod(p *string, e string) error {
 	_, exists := os.LookupEnv("DONT_DELETE")
 	if !exists {
 		ns := n.testNamespace
-		err := n.k.DeletePod(p, &ns, false) //don't worry about waiting
+		err := n.k.DeletePod(p, &ns, false, e) //don't worry about waiting
 		return err
 	}
 
@@ -113,7 +113,7 @@ func (n *NA) AccessURL(pn *string, url *string) (int, error) {
 	if res.Err != nil && !res.Internal {
 		//error which is not internal (so external!)
 		//this means code is from the execution of the command on the cluster
-	
+
 		//Check the exit code.  If it's '6' (Couldn't resolve host.)
 		//then we want to nil out the error and return the code as this
 		//is an expected condition if access is inhibited
@@ -124,6 +124,6 @@ func (n *NA) AccessURL(pn *string, url *string) (int, error) {
 		return res.Code, res.Err
 	}
 
-	//no errors, so just return code	
+	//no errors, so just return code
 	return strconv.Atoi(httpCode)
 }
