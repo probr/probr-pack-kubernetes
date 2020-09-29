@@ -247,3 +247,4 @@ node_modules
 testoutput
 probr
 static-content/
+.kube/
