@@ -1,5 +1,6 @@
 # Probr
-### Your Zero Trust Compliance Toolbox
+
+**Your Zero Trust Compliance Toolbox**
 
 Probr is intended to provide flexible "probing" of your cloud provider and Kubernetes cluster to ensure that the _result_ of your security controls have properly taken effect.
 
@@ -70,3 +71,10 @@ probr --varsFile=./config-dev.yml
 ```
 
 **IMPORTANT:** Remember to encrypt your config file if it contains secrets.
+
+
+## Development & Contributing
+
+Please see the [contributing docs](contributing) for information on how to develop and contribute to this repository as either a maintainer or open source contributor (the same rules apply for both).
+
+[contributing] : https://github.com/citihub/probr/blob/master/CONTRIBUTING.md

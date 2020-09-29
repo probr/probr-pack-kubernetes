@@ -2,7 +2,7 @@
 
 Internal code to manage config, including Cloud Driver parameters and Test Packs
 
-## Log Filter
+## Log Filter Guidelines
 
 Probr Log Levels:
 - **ERROR** - Behavior that is a result of a definite misconfiguration or code failure

@@ -8,11 +8,7 @@ These logs are designed to be one-per-event. Each test may have multiple events,
 
 ### Usage
 
-A new AuditLog context is created each time `probr` is run, and is readily accessible anywhere in the code:
-
-```
-
-```
+A new AuditLog context is created each time `probr` is run, and is readily accessible anywhere in the code via `audit.AuditLog`.
 
 Adding entries to the an Event's meta data requires the name of the test and a key-value pair to be inserted:
 
@@ -48,7 +44,6 @@ Here is an example of what the logs may contain:
     },
     "PodsCreated": 0,
     "PodsDestroyed": 0,
-    "Tests": null
   },
   "container_registry_access": {
     "Meta": {
@@ -58,7 +53,6 @@ Here is an example of what the logs may contain:
     },
     "PodsCreated": 1,
     "PodsDestroyed": 1,
-    "Tests": null
   }
 }
 ```
