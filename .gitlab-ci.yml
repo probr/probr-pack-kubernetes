@@ -53,7 +53,7 @@ unit_tests:
     - export KUBE_CONFIG=$TEST_KUBE_CONFIG
     - export LOGLEVEL=INFO
   script:
-    - cd $CI_PROJECT_DIR/test/unit
+    - cd $CI_PROJECT_DIR/internal/test/unit
     - go test -v ./...
 
 test_run:
