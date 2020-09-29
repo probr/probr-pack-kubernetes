@@ -7,12 +7,12 @@ import (
 
 	"github.com/cucumber/godog"
 
-	"gitlab.com/citihub/probr/internal/audit"
-	"gitlab.com/citihub/probr/internal/clouddriver/kubernetes"
-	"gitlab.com/citihub/probr/internal/coreengine"
-	"gitlab.com/citihub/probr/internal/utils"
-	"gitlab.com/citihub/probr/probes"
-	"gitlab.com/citihub/probr/probes/kubernetes/probe"
+	"github.com/citihub/probr/internal/audit"
+	"github.com/citihub/probr/internal/clouddriver/kubernetes"
+	"github.com/citihub/probr/internal/coreengine"
+	"github.com/citihub/probr/internal/utils"
+	"github.com/citihub/probr/probes"
+	"github.com/citihub/probr/probes/kubernetes/probe"
 )
 
 type probeState struct {

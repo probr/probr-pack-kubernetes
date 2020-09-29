@@ -6,7 +6,7 @@ import (
 	"log"
 	"strings"
 
-	"gitlab.com/citihub/probr/internal/config"
+	"github.com/citihub/probr/internal/config"
 )
 
 type Event struct {

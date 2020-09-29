@@ -4,7 +4,7 @@ import (
 	"io/ioutil"
 	"testing"
 
-	"gitlab.com/citihub/probr/internal/clouddriver/kubernetes"
+	"github.com/citihub/probr/internal/clouddriver/kubernetes"
 )
 
 func TestAzureIdentityBindingExists(t *testing.T) {

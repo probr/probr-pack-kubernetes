@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"gitlab.com/citihub/probr/internal/clouddriver/kubernetes"
+	"github.com/citihub/probr/internal/clouddriver/kubernetes"
 )
 
 //TODO: this will be revised when the unit/integration tests are refactored to be properly mocked

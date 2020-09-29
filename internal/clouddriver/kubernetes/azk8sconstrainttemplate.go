@@ -3,7 +3,7 @@ package kubernetes
 import (
 	"log"
 
-	"gitlab.com/citihub/probr/internal/utils"
+	"github.com/citihub/probr/internal/utils"
 )
 
 //AzK8sConstraintTemplate captures the Azure specific constraint templates that are the result of applying

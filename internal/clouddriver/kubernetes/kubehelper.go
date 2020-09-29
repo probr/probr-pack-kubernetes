@@ -14,8 +14,8 @@ import (
 	"sync"
 	"time"
 
-	"gitlab.com/citihub/probr/internal/audit"
-	"gitlab.com/citihub/probr/internal/config"
+	"github.com/citihub/probr/internal/audit"
+	"github.com/citihub/probr/internal/config"
 
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"

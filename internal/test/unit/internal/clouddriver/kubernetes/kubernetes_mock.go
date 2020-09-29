@@ -2,7 +2,7 @@ package kubernetesunit
 
 import (
 	"github.com/stretchr/testify/mock"
-	"gitlab.com/citihub/probr/internal/clouddriver/kubernetes"
+	"github.com/citihub/probr/internal/clouddriver/kubernetes"
 	apiv1 "k8s.io/api/core/v1"
 	rbacv1 "k8s.io/api/rbac/v1"
 	k8s "k8s.io/client-go/kubernetes"

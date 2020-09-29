@@ -1,4 +1,4 @@
-module gitlab.com/citihub/probr
+module github.com/citihub/probr
 
 go 1.14
 

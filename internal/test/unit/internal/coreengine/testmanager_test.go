@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"gitlab.com/citihub/probr/internal/coreengine"
+	"github.com/citihub/probr/internal/coreengine"
 )
 
 func TestTestStatus(t *testing.T) {

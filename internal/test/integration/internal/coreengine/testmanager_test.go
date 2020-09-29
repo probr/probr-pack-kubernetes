@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"gitlab.com/citihub/probr/internal/coreengine"
+	"github.com/citihub/probr/internal/coreengine"
 )
 
 // Test manager integration tests, so actually calling out to Kube ...

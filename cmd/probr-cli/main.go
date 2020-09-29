@@ -5,10 +5,10 @@ import (
 	"log"
 	"os"
 
-	"gitlab.com/citihub/probr"
-	"gitlab.com/citihub/probr/internal/audit"
-	"gitlab.com/citihub/probr/internal/clouddriver/kubernetes"
-	"gitlab.com/citihub/probr/internal/config"
+	"github.com/citihub/probr"
+	"github.com/citihub/probr/internal/audit"
+	"github.com/citihub/probr/internal/clouddriver/kubernetes"
+	"github.com/citihub/probr/internal/config"
 )
 
 var (

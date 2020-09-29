@@ -7,8 +7,8 @@ import (
 	"sync"
 	"time"
 
-	"gitlab.com/citihub/probr/internal/config"
-	"gitlab.com/citihub/probr/internal/utils"
+	"github.com/citihub/probr/internal/config"
+	"github.com/citihub/probr/internal/utils"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	apiv1 "k8s.io/api/core/v1"

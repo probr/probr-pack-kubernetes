@@ -5,7 +5,7 @@ import (
 	"os"
 	"strconv"
 
-	"gitlab.com/citihub/probr/internal/config"
+	"github.com/citihub/probr/internal/config"
 	apiv1 "k8s.io/api/core/v1"
 )
 

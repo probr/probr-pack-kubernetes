@@ -6,7 +6,7 @@ import (
 	"sync"
 
 	"github.com/cucumber/godog"
-	"gitlab.com/citihub/probr/internal/audit"
+	"github.com/citihub/probr/internal/audit"
 )
 
 // TestRunner describes the interface that should be implemented to support the execution of tests.

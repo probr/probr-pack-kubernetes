@@ -9,7 +9,7 @@ import (
 	"log"
 	"sync"
 
-	"gitlab.com/citihub/probr/internal/audit"
+	"github.com/citihub/probr/internal/audit"
 )
 
 // TestStatus type describes the status of the test, e.g. Pending, Running, CompleteSuccess, CompleteFail and Error

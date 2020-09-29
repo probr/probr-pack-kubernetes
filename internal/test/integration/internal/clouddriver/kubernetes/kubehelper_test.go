@@ -9,8 +9,8 @@ import (
 	"os"
 	"testing"
 
-	"gitlab.com/citihub/probr/internal/clouddriver/kubernetes"
-	_ "gitlab.com/citihub/probr/internal/config"
+	"github.com/citihub/probr/internal/clouddriver/kubernetes"
+	_ "github.com/citihub/probr/internal/config"
 	// metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	// "k8s.io/client-go/kubernetes/scheme"
 )

@@ -12,8 +12,8 @@ import (
 	"github.com/cucumber/godog"
 	"github.com/cucumber/godog/colors"
 
-	"gitlab.com/citihub/probr/internal/config"
-	"gitlab.com/citihub/probr/internal/coreengine"
+	"github.com/citihub/probr/internal/config"
+	"github.com/citihub/probr/internal/coreengine"
 )
 
 // GodogTestHandler is a general implmentation of coreengine.TestHandlerFunc.  Based on the

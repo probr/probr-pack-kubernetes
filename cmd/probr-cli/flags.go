@@ -4,8 +4,8 @@ import (
 	"flag"
 	"log"
 
-	"gitlab.com/citihub/probr"
-	"gitlab.com/citihub/probr/internal/config"
+	"github.com/citihub/probr"
+	"github.com/citihub/probr/internal/config"
 )
 
 type flagHandlerFunc func(v *string)

@@ -5,7 +5,7 @@ import (
 	"log"
 	"time"
 
-	"gitlab.com/citihub/probr/internal/config"
+	"github.com/citihub/probr/internal/config"
 
 	"github.com/Azure/azure-sdk-for-go/profiles/latest/resources/mgmt/policy"
 	"github.com/Azure/go-autorest/autorest/azure/auth"

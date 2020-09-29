@@ -5,11 +5,11 @@ package internetaccess
 import (
 	"log"
 
-	"gitlab.com/citihub/probr/probes"
+	"github.com/citihub/probr/probes"
 
 	"github.com/cucumber/godog"
-	"gitlab.com/citihub/probr/internal/clouddriver/kubernetes"
-	"gitlab.com/citihub/probr/internal/coreengine"
+	"github.com/citihub/probr/internal/clouddriver/kubernetes"
+	"github.com/citihub/probr/internal/coreengine"
 )
 
 type probState struct {
