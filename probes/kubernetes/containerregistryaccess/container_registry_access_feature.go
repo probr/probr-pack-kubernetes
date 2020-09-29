@@ -11,8 +11,8 @@ import (
 	"gitlab.com/citihub/probr/internal/clouddriver/kubernetes"
 	"gitlab.com/citihub/probr/internal/coreengine"
 	"gitlab.com/citihub/probr/internal/utils"
-	"gitlab.com/citihub/probr/test/features"
-	"gitlab.com/citihub/probr/test/features/kubernetes/probe"
+	"gitlab.com/citihub/probr/probes"
+	"gitlab.com/citihub/probr/probes/kubernetes/probe"
 )
 
 type probeState struct {
@@ -23,16 +23,16 @@ const NAME = "container_registry_access"
 
 // init() registers the feature tests descibed in this package with the test runner (coreengine.TestRunner) via the call
 // to coreengine.AddTestHandler.  This links the test - described by the TestDescriptor - with the handler to invoke.  In
-// this case, the general test handler is being used (features.GodogTestHandler) and the GodogTest data provides the data
+// this case, the general test handler is being used (probes.GodogTestHandler) and the GodogTest data provides the data
 // require to execute the test.  Specifically, the data includes the Test Suite and Scenario Initializers from this package
-// which will be called from features.GodogTestHandler.  Note: a blank import at probr library level should be done to
+// which will be called from probes.GodogTestHandler.  Note: a blank import at probr library level should be done to
 // invoke this function automatically on initial load.
 func init() {
 	td := coreengine.TestDescriptor{Group: coreengine.Kubernetes,
 		Category: coreengine.ContainerRegistryAccess, Name: NAME}
 
 	coreengine.AddTestHandler(td, &coreengine.GoDogTestTuple{
-		Handler: features.GodogTestHandler,
+		Handler: probes.GodogTestHandler,
 		Data: &coreengine.GodogTest{
 			TestDescriptor:       &td,
 			TestSuiteInitializer: TestSuiteInitialize,
@@ -126,7 +126,7 @@ func ScenarioInitialize(ctx *godog.ScenarioContext) {
 
 	ctx.BeforeScenario(func(s *godog.Scenario) {
 		ps.setup()
-		features.LogScenarioStart(s)
+		probes.LogScenarioStart(s)
 	})
 
 	//common
@@ -143,6 +143,6 @@ func ScenarioInitialize(ctx *godog.ScenarioContext) {
 
 	ctx.AfterScenario(func(s *godog.Scenario, err error) {
 		ps.tearDown()
-		features.LogScenarioEnd(s)
+		probes.LogScenarioEnd(s)
 	})
 }

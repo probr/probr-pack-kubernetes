@@ -5,7 +5,7 @@ package internetaccess
 import (
 	"log"
 
-	"gitlab.com/citihub/probr/test/features"
+	"gitlab.com/citihub/probr/probes"
 
 	"github.com/cucumber/godog"
 	"gitlab.com/citihub/probr/internal/clouddriver/kubernetes"
@@ -24,7 +24,7 @@ func init() {
 		Category: coreengine.InternetAccess, Name: NAME}
 
 	coreengine.AddTestHandler(td, &coreengine.GoDogTestTuple{
-		Handler: features.GodogTestHandler,
+		Handler: probes.GodogTestHandler,
 		Data: &coreengine.GodogTest{
 			TestDescriptor:       &td,
 			TestSuiteInitializer: TestSuiteInitialize,
@@ -69,7 +69,7 @@ func (p *probState) aPodIsDeployedInTheCluster() error {
 	}
 
 	if pod == nil {
-		return features.LogAndReturnError("POD is nil")
+		return probes.LogAndReturnError("POD is nil")
 	}
 
 	//hold on to the pod name
@@ -83,7 +83,7 @@ func (p *probState) aProcessInsideThePodEstablishesADirectHTTPSConnectionTo(url 
 	code, err := na.AccessURL(&p.podName, &url)
 
 	if err != nil {
-		features.LogAndReturnError("[ERROR] Error raised when attempting to access URL: %v", err)
+		probes.LogAndReturnError("[ERROR] Error raised when attempting to access URL: %v", err)
 		return err
 	}
 
@@ -98,7 +98,7 @@ func (p *probState) accessIs(accessResult string) error {
 		//then the result should be anything other than 200
 		if p.httpStatusCode == 200 {
 			//it's a fail:
-			return features.LogAndReturnError("got HTTP Status Code %v - failed", p.httpStatusCode)
+			return probes.LogAndReturnError("got HTTP Status Code %v - failed", p.httpStatusCode)
 		}
 	}
 	//otherwise good
@@ -143,7 +143,7 @@ func TestSuiteInitialize(ctx *godog.TestSuiteContext) {
 func ScenarioInitialize(ctx *godog.ScenarioContext) {
 	ctx.BeforeScenario(func(s *godog.Scenario) {
 		ps.setup()
-		features.LogScenarioStart(s)
+		probes.LogScenarioStart(s)
 	})
 
 	ctx.Step(`^a Kubernetes cluster is deployed$`, ps.aKubernetesClusterIsDeployed)
@@ -153,6 +153,6 @@ func ScenarioInitialize(ctx *godog.ScenarioContext) {
 
 	ctx.AfterScenario(func(s *godog.Scenario, err error) {
 		ps.scenarioTearDown()
-		features.LogScenarioEnd(s)
+		probes.LogScenarioEnd(s)
 	})
 }

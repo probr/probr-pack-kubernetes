@@ -79,7 +79,7 @@ func (ts *TestStore) RunTest(t *Test) (int, error) {
 		return 4, fmt.Errorf("no test handler available for %v - cannot run test", *t.TestDescriptor)
 	}
 
-	s, o, err := g.Handler(g.Data) // Currently the only handler type is features.GodogTestHandler, but this can be extended
+	s, o, err := g.Handler(g.Data) // Currently the only handler type is probes.GodogTestHandler, but this can be extended
 
 	if s == 0 {
 		// success
