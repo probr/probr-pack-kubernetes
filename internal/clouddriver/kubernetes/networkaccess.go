@@ -62,11 +62,15 @@ func (n *NA) setup() {
 	n.testPodName = defaultNATestPodName
 
 	// image repository + curl from config
-	// but default if not supplied
+	// but default if not supplied	
 	i := config.Vars.Images.Repository
-	if len(i) < 1 {
+	//need to fudge for 'curl' as it's registered as curlimages/curl
+	//on docker, so if we've been given a repository from the config
+	//and it's 'docker.io' then ignore it and set default (curlimages)
+	if len(i) < 1 || i == "docker.io" {
 		i = defaultNAImageRepository
 	}
+	
 	b := config.Vars.Images.Curl
 	if len(b) < 1 {
 		b = defaultNATestImage
