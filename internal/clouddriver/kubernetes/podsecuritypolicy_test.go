@@ -1,25 +1,24 @@
-package kubernetesunit
+package kubernetes
 
 import (
 	"fmt"
 	"reflect"
 	"testing"
 
+	"github.com/citihub/probr/internal/utils"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
-	"github.com/citihub/probr/internal/clouddriver/kubernetes"
-	"github.com/citihub/probr/internal/utils"
 	apiv1 "k8s.io/api/core/v1"
 )
 
 func TestPSPTestCommand(t *testing.T) {
-	assert.Equal(t, "chroot .", kubernetes.Chroot.String())
-	assert.Equal(t, "nsenter -t 1 -p ps", kubernetes.EnterHostPIDNS.String())
-	assert.Equal(t, "nsenter -t 1 -i ps", kubernetes.EnterHostIPCNS.String())
-	assert.Equal(t, "nsenter -t 1 -n ps", kubernetes.EnterHostNetworkNS.String())
-	assert.Equal(t, "id -u > 0 ", kubernetes.VerifyNonRootUID.String())
-	assert.Equal(t, "ping google.com", kubernetes.NetRawTest.String())
-	assert.Equal(t, "ip link add dummy0 type dummy", kubernetes.SpecialCapTest.String())
+	assert.Equal(t, "chroot .", Chroot.String())
+	assert.Equal(t, "nsenter -t 1 -p ps", EnterHostPIDNS.String())
+	assert.Equal(t, "nsenter -t 1 -i ps", EnterHostIPCNS.String())
+	assert.Equal(t, "nsenter -t 1 -n ps", EnterHostNetworkNS.String())
+	assert.Equal(t, "id -u > 0 ", VerifyNonRootUID.String())
+	assert.Equal(t, "ping google.com", NetRawTest.String())
+	assert.Equal(t, "ip link add dummy0 type dummy", SpecialCapTest.String())
 
 }
 
@@ -82,7 +81,7 @@ func runTest(t *testing.T, mockMethod string, testMethod string) {
 	tmp := &securityProviderMock{}
 	tmp.On(mockMethod).Return(true, nil)
 
-	psp := kubernetes.NewPSP(nil, &[]kubernetes.SecurityPolicyProvider{tmp})
+	psp := NewPSP(nil, &[]SecurityPolicyProvider{tmp})
 
 	b, _ := reflectiveCall(psp, testMethod)
 	assert.True(t, *b)
@@ -94,7 +93,7 @@ func runTest(t *testing.T, mockMethod string, testMethod string) {
 	fmp.On(mockMethod).Return(false, nil)
 
 	//need a different PSP with the false provider
-	psp = kubernetes.NewPSP(nil, &[]kubernetes.SecurityPolicyProvider{fmp})
+	psp = NewPSP(nil, &[]SecurityPolicyProvider{fmp})
 
 	b, _ = reflectiveCall(psp, testMethod)
 	assert.False(t, *b)
@@ -103,7 +102,7 @@ func runTest(t *testing.T, mockMethod string, testMethod string) {
 
 	//add both true & false providers:
 	//true first ...
-	psp = kubernetes.NewPSP(nil, &[]kubernetes.SecurityPolicyProvider{tmp, fmp})
+	psp = NewPSP(nil, &[]SecurityPolicyProvider{tmp, fmp})
 
 	b, _ = reflectiveCall(psp, testMethod)
 	assert.True(t, *b)                        //expect this to be true ...
@@ -113,7 +112,7 @@ func runTest(t *testing.T, mockMethod string, testMethod string) {
 	fmp.AssertExpectations(t)
 
 	//switch order of true/false (so false first)
-	psp = kubernetes.NewPSP(nil, &[]kubernetes.SecurityPolicyProvider{fmp, tmp})
+	psp = NewPSP(nil, &[]SecurityPolicyProvider{fmp, tmp})
 	b, _ = reflectiveCall(psp, testMethod)
 	assert.True(t, *b)                        //expect this to be true ...
 	tmp.AssertNumberOfCalls(t, mockMethod, 3) //expect another call to true (three in total now)
@@ -122,7 +121,7 @@ func runTest(t *testing.T, mockMethod string, testMethod string) {
 	fmp.AssertExpectations(t)
 
 	//add nil provider in the first slot ...
-	psp = kubernetes.NewPSP(nil, &[]kubernetes.SecurityPolicyProvider{nil, tmp})
+	psp = NewPSP(nil, &[]SecurityPolicyProvider{nil, tmp})
 	b, _ = reflectiveCall(psp, testMethod)
 	assert.True(t, *b)                        //should still get an overall true result...
 	tmp.AssertNumberOfCalls(t, mockMethod, 4) //true up to four
@@ -134,10 +133,10 @@ func runTest(t *testing.T, mockMethod string, testMethod string) {
 	emp := &securityProviderMock{}
 	emp.On(mockMethod).Return(false, fmt.Errorf("SPM ERROR"))
 
-	psp = kubernetes.NewPSP(nil, &[]kubernetes.SecurityPolicyProvider{emp})
+	psp = NewPSP(nil, &[]SecurityPolicyProvider{emp})
 	b, err := reflectiveCall(psp, testMethod)
-	assert.False(t, *b)                        //overall should be false...
-	assert.NotNil(t, err)						// and we should have an error in this case
+	assert.False(t, *b)                       //overall should be false...
+	assert.NotNil(t, err)                     // and we should have an error in this case
 	tmp.AssertNumberOfCalls(t, mockMethod, 4) //no call to true (so same as above)
 	tmp.AssertExpectations(t)
 	fmp.AssertNumberOfCalls(t, mockMethod, 2) //no call to false (so same as above)
@@ -146,10 +145,10 @@ func runTest(t *testing.T, mockMethod string, testMethod string) {
 	emp.AssertExpectations(t)
 
 	//now, add a true provider to the second slot
-	psp = kubernetes.NewPSP(nil, &[]kubernetes.SecurityPolicyProvider{emp, tmp})
+	psp = NewPSP(nil, &[]SecurityPolicyProvider{emp, tmp})
 	b, err = reflectiveCall(psp, testMethod)
 	assert.True(t, *b)                        //in this case, should still get an overall true result...
-	assert.Nil(t, err)						// and error should be nil (as we've had at least one success)	
+	assert.Nil(t, err)                        // and error should be nil (as we've had at least one success)
 	tmp.AssertNumberOfCalls(t, mockMethod, 5) //true up to five
 	tmp.AssertExpectations(t)
 	fmp.AssertNumberOfCalls(t, mockMethod, 2) //no call to false (so as above)
@@ -159,7 +158,7 @@ func runTest(t *testing.T, mockMethod string, testMethod string) {
 
 }
 
-func reflectiveCall(p *kubernetes.PSP, tm string) (*bool, error) {
+func reflectiveCall(p *PSP, tm string) (*bool, error) {
 
 	fmt.Printf("Reflectively calling %v on %T\n", tm, p)
 
@@ -185,18 +184,18 @@ func reflectiveCall(p *kubernetes.PSP, tm string) (*bool, error) {
 	if er, ok := e.(error); ok {
 		err = er
 	}
-	
+
 	return ret, err
 }
 
 //TODO: this feel rough - we need access to some 'kube' functions, but want to short circuit any external calls
 //should move these more general functions out to a utility/helper
-var k = kubernetes.GetKubeInstance()
+var k = GetKubeInstance()
 
 func TestCreatePODSettingSecurityContext(t *testing.T) {
 	//need a mock kube
 	mk := &kubeMock{}
-	psp := kubernetes.NewPSP(mk, nil)
+	psp := NewPSP(mk, nil)
 
 	//set up the mock
 	sc := apiv1.SecurityContext{
@@ -253,7 +252,7 @@ func TestCreatePODSettingSecurityContext(t *testing.T) {
 func TestCreatePODSettingAttributes(t *testing.T) {
 	//need a mock kube
 	mk := &kubeMock{}
-	psp := kubernetes.NewPSP(mk, nil)
+	psp := NewPSP(mk, nil)
 
 	//set up the mock
 	po := k.GetPodObject("n", "ns", "c", "i", nil)
@@ -327,7 +326,7 @@ func TestCreatePODSettingAttributes(t *testing.T) {
 func TestCreatePODSettingCapabilities(t *testing.T) {
 	//need a mock kube
 	mk := &kubeMock{}
-	psp := kubernetes.NewPSP(mk, nil)
+	psp := NewPSP(mk, nil)
 
 	//set up the mock
 	po := k.GetPodObject("n", "ns", "c", "i", nil)
@@ -380,7 +379,7 @@ type securityProviderMock struct {
 	mock.Mock
 }
 
-func (m *securityProviderMock) HasSecurityPolicies() (*bool, error) {	 
+func (m *securityProviderMock) HasSecurityPolicies() (*bool, error) {
 	return m.returnArgs(m.Called())
 }
 func (m *securityProviderMock) HasPrivilegedAccessRestriction() (*bool, error) {
@@ -419,7 +418,7 @@ func (m *securityProviderMock) HasVolumeTypeRestriction() (*bool, error) {
 func (m *securityProviderMock) HasSeccompProfileRestriction() (*bool, error) {
 	return m.returnArgs(m.Called())
 }
-func (m *securityProviderMock) returnArgs(a mock.Arguments) (*bool, error) {	
+func (m *securityProviderMock) returnArgs(a mock.Arguments) (*bool, error) {
 	b := a.Bool(0)
 	e := a.Error(1)
 	return &b, e

@@ -1,10 +1,10 @@
-package unit
+package utils
 
 import (
 	"testing"
 
-	"github.com/stretchr/testify/assert"
 	"github.com/citihub/probr/probes"
+	"github.com/stretchr/testify/assert"
 )
 
 func Test_LogAndReturnError(t *testing.T) {

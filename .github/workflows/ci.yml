@@ -1,15 +1,16 @@
 on:
-
   pull_request:
     branches: 
-      - master
-
+      - main
+    paths-ignore:
+      - "**/*.md"
+  
 jobs:
   test:
     strategy:
       matrix:
         platform: [ubuntu-latest, macos-latest, windows-latest]
-    runs-on: ${{ matrix.platform }}
+    runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
     - uses: actions/setup-go@v2
@@ -29,8 +30,8 @@ jobs:
 
     - name: Unit tests
       run: |
-            cd test/unit
+            cd internal
             go test ./...
 
     - name: Build
-      run: go build -o probr cmd/probr-cli/main.go
+      run: go build -o probr ./cmd/probr-cli/*.go

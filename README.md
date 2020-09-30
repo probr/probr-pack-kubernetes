@@ -6,7 +6,7 @@ Probr is intended to provide flexible "probing" of your cloud provider and Kuber
 
 Instead of reading configurations or scanning to validate that specific policies are in place, Probr attempts to perform specific tasks that should or shouldn't be able to occur from specific roles.
 
-Probr may be used by **security professionals** to audit or demonstrate the need for specific policies and remidiation, or Probr may be used by **engineering teams** to display that necessary regulations are being met.
+Probr may be used by **security professionals** to audit or demonstrate the need for specific policies and remediation, or Probr may be used by **engineering teams** to display that necessary regulations are being met.
 
 ## Quickstart Guide
 

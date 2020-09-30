@@ -1,8 +1,7 @@
-package kubernetesunit
+package kubernetes
 
 import (
 	"github.com/stretchr/testify/mock"
-	"github.com/citihub/probr/internal/clouddriver/kubernetes"
 	apiv1 "k8s.io/api/core/v1"
 	rbacv1 "k8s.io/api/rbac/v1"
 	k8s "k8s.io/client-go/kubernetes"
@@ -55,9 +54,9 @@ func (m *kubeMock) GetPodObject(pname string, ns string, cname string, image str
 	p := m.Called().Get(0).(*apiv1.Pod)
 	return p
 }
-func (m *kubeMock) ExecCommand(cmd, ns, pn *string) *kubernetes.CmdExecutionResult {
+func (m *kubeMock) ExecCommand(cmd, ns, pn *string) *CmdExecutionResult {
 	a := m.Called()
-	return a.Get(0).(*kubernetes.CmdExecutionResult)
+	return a.Get(0).(*CmdExecutionResult)
 }
 func (m *kubeMock) DeletePod(pname *string, ns *string, w bool, e string) error {
 	x := m.Called().Error(0)
@@ -80,9 +79,9 @@ func (m *kubeMock) GetConstraintTemplates(prefix string) (*map[string]interface{
 	a := m.Called()
 	return a.Get(0).(*map[string]interface{}), a.Error(1)
 }
-func (m *kubeMock) GetRawResourcesByGrp(g string) (*kubernetes.K8SJSON, error) {
+func (m *kubeMock) GetRawResourcesByGrp(g string) (*K8SJSON, error) {
 	a := m.Called()
-	return a.Get(0).(*kubernetes.K8SJSON), a.Error(1)
+	return a.Get(0).(*K8SJSON), a.Error(1)
 }
 
 func (m *kubeMock) GetClusterRolesByResource(r string) (*[]rbacv1.ClusterRole, error) {
