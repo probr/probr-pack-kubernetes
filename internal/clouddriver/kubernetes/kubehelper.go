@@ -552,8 +552,7 @@ func (k *Kube) DeletePod(pname *string, ns *string, wait bool, event string) err
 	if wait {
 		waitForDelete(c, ns, pname)
 	}
-	l := audit.AuditLog.GetEventLog(event)
-	l.CountPodDestroyed()
+	audit.AuditLog.GetEventLog(event).CountPodDestroyed()
 	log.Printf("[INFO] POD %v deleted.", *pname)
 
 	return nil
