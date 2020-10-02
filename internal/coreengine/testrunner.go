@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/cucumber/godog"
 	"github.com/citihub/probr/internal/audit"
+	"github.com/cucumber/godog"
 )
 
 // TestRunner describes the interface that should be implemented to support the execution of tests.
@@ -80,14 +80,12 @@ func (ts *TestStore) RunTest(t *Test) (int, error) {
 	}
 
 	s, o, err := g.Handler(g.Data) // Currently the only handler type is probes.GodogTestHandler, but this can be extended
-
+	audit.AuditLog.AuditComplete(t.TestDescriptor.Name, s)
 	if s == 0 {
 		// success
-		audit.AuditLog.AuditMeta(t.TestDescriptor.Name, "status", "Completed - Passed")
 		*t.Status = CompleteSuccess
 	} else {
 		// fail
-		audit.AuditLog.AuditMeta(t.TestDescriptor.Name, "status", "Completed - Failed")
 		*t.Status = CompleteFail
 
 		//TODO: this could be adjusted based on test strictness ...

@@ -1,5 +1,5 @@
-// Package containerregistryaccess provides the implementation required to execute the feature based test cases described in the
-// the 'features' directory.
+// Package containerregistryaccess provides the implementation required to execute the
+// feature based test cases described in the the 'events' directory.
 package containerregistryaccess
 
 import (
@@ -16,10 +16,14 @@ import (
 )
 
 type probeState struct {
+	name  string
+	event *audit.Event
 	state probe.State
 }
 
-const NAME = "container_registry_access"
+const (
+	NAME = "container_registry_access"
+)
 
 // init() registers the feature tests descibed in this package with the test runner (coreengine.TestRunner) via the call
 // to coreengine.AddTestHandler.  This links the test - described by the TestDescriptor - with the handler to invoke.  In
@@ -57,7 +61,7 @@ func (p *probeState) aKubernetesClusterIsDeployed() error {
 		log.Fatalf("[ERROR] Kubernetes cluster is not deployed")
 	}
 
-	//else we're good ...
+	p.event.AuditProbe(p.name, nil) // If not fatal, success
 	return nil
 }
 
@@ -66,17 +70,20 @@ func (p *probeState) aKubernetesClusterIsDeployed() error {
 // CIS-6.1.3
 // Minimize cluster access to read-only
 func (p *probeState) iAmAuthorisedToPullFromAContainerRegistry() error {
-	e := audit.AuditLog.GetEventLog(NAME)
-
 	pd, err := cra.SetupContainerAccessTestPod(utils.StringPtr("docker.io"))
 
-	return probe.ProcessPodCreationResult(&p.state, pd, kubernetes.PSPContainerAllowedImages, e, err)
+	e := p.event
+	s := probe.ProcessPodCreationResult(&p.state, pd, kubernetes.PSPContainerAllowedImages, e, err)
+	e.AuditProbe(p.name, s)
+	return s
 }
 
+// PENDING IMPLEMENTATION
 func (p *probeState) iAttemptToPushToTheContainerRegistryUsingTheClusterIdentity() error {
 	return godog.ErrPending
 }
 
+// PENDING IMPLEMENTATION
 func (p *probeState) thePushRequestIsRejectedDueToAuthorization() error {
 	return godog.ErrPending
 }
@@ -84,15 +91,18 @@ func (p *probeState) thePushRequestIsRejectedDueToAuthorization() error {
 // CIS-6.1.4
 // Ensure only authorised container registries are allowed
 func (p *probeState) aUserAttemptsToDeployAContainerFrom(auth string, registry string) error {
-	e := audit.AuditLog.GetEventLog(NAME)
-
 	pd, err := cra.SetupContainerAccessTestPod(&registry)
 
-	return probe.ProcessPodCreationResult(&p.state, pd, kubernetes.PSPContainerAllowedImages, e, err)
+	e := p.event
+	s := probe.ProcessPodCreationResult(&p.state, pd, kubernetes.PSPContainerAllowedImages, e, err)
+	e.AuditProbe(p.name, s)
+	return s
 }
 
 func (p *probeState) theDeploymentAttemptIs(res string) error {
-	return probe.AssertResult(&p.state, res, "")
+	s := probe.AssertResult(&p.state, res, "")
+	p.event.AuditProbe(p.name, s)
+	return s
 }
 
 func (p *probeState) setup() {
@@ -118,7 +128,7 @@ func TestSuiteInitialize(ctx *godog.TestSuiteContext) {
 }
 
 // ScenarioInitialize initialises the specific test steps.  This is essentially the creation of the test
-// which reflects the tests described in the features directory.  There must be a test step registered for
+// which reflects the tests described in the events directory.  There must be a test step registered for
 // each line in the feature files. Note: Godog will output stub steps and implementations if it doesn't find
 // a step / function defined.  See: https://github.com/cucumber/godog#example.
 func ScenarioInitialize(ctx *godog.ScenarioContext) {
@@ -126,6 +136,8 @@ func ScenarioInitialize(ctx *godog.ScenarioContext) {
 
 	ctx.BeforeScenario(func(s *godog.Scenario) {
 		ps.setup()
+		ps.name = s.Name
+		ps.event = audit.AuditLog.GetEventLog(NAME)
 		probes.LogScenarioStart(s)
 	})
 

@@ -4,16 +4,16 @@ import (
 	"log"
 	"path/filepath"
 
-	"github.com/cucumber/godog"
 	"github.com/citihub/probr/internal/coreengine"
 	"github.com/citihub/probr/probes"
+	"github.com/cucumber/godog"
 )
 
 func init() {
 	td := coreengine.TestDescriptor{Group: coreengine.CloudDriver,
 		Category: coreengine.General, Name: "account_manager"}
 
-	fp := filepath.Join("probes", "clouddriver", "features")
+	fp := filepath.Join("probes", "clouddriver", "events")
 
 	coreengine.AddTestHandler(td, &coreengine.GoDogTestTuple{
 		Handler: probes.GodogTestHandler,

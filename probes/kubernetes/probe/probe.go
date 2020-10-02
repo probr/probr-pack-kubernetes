@@ -27,7 +27,8 @@ func ProcessPodCreationResult(s *State, pd *apiv1.Pod, expected kubernetes.PodCr
 		//in this case we need to hold onto the name so it can be deleted
 		if pd != nil {
 			s.PodName = pd.GetObjectMeta().GetName()
-			e.LogPodCreated()
+			e.CountPodCreated()
+			audit.AuditLog.AuditPodName(s.PodName)
 		}
 
 		//check for known error type
@@ -53,6 +54,8 @@ func ProcessPodCreationResult(s *State, pd *apiv1.Pod, expected kubernetes.PodCr
 	//if we've got this far, a pod was successfully created which could be
 	//valid for some tests
 	s.PodName = pd.GetObjectMeta().GetName()
+	e.CountPodCreated()
+	audit.AuditLog.AuditPodName(s.PodName)
 
 	//we're good
 	return nil

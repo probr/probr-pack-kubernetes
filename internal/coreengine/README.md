@@ -63,7 +63,7 @@ Here is an example where all of the above logic is brought together to add a new
 td := coreengine.TestDescriptor{Group: coreengine.CloudDriver,
     Category: coreengine.General, Name: "account_manager"}
 
-fp := filepath.Join("probes", "clouddriver", "features")
+fp := filepath.Join("probes", "clouddriver", "events")
 
 coreengine.AddTestHandler(td, &coreengine.GoDogTestTuple{
     Handler: probes.GodogTestHandler,
