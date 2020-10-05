@@ -14,7 +14,7 @@ var logLevel string
 // init configures the log filter (provided by hashicorp/logutils) with a suitable level (using environment variable GODOG_LOGLEVEL).
 func init() {
 	//look for a log level env setting.  Start with GODOG
-	level, b := os.LookupEnv("GODOG_LOGLEVEL")	
+	level, b := os.LookupEnv("GODOG_LOGLEVEL")
 	if !b {
 		//also look for standard LOGLEVEL
 		level, b = os.LookupEnv("LOGLEVEL")

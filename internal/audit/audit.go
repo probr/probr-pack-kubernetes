@@ -46,13 +46,14 @@ func (a *AuditLogStruct) AuditMeta(name string, key string, value string) {
 }
 
 // EventComplete takes an event name and status then updates the audit & event meta information
-func (a *AuditLogStruct) EventComplete(name string, status int) {
+func (a *AuditLogStruct) EventComplete(name string) {
 	e := a.GetEventLog(name)
+	e.CountFailures()
 	if len(e.Probes) < 1 {
 		e.Meta["status"] = "Skipped"
 		a.EventsSkipped = a.EventsSkipped + 1
-	} else if status == 0 {
-		e.Meta["status"] = "Event Passed"
+	} else if e.ProbesFailed < 1 {
+		e.Meta["status"] = "Success"
 		a.EventsPassed = a.EventsPassed + 1
 	} else {
 		e.Meta["status"] = "Failed"

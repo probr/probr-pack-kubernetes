@@ -45,11 +45,11 @@ Many audits will be made directly to events. In order to do so, the event must f
 
 **AuditLog.EventComplete**
 
-After an event has finished running every probe, we should audit the final status of the event.
+After an event has finished running every probe, we should audit the final outcome of the event.
 
 ```
 s, o, err := g.Handler(g.Data)
-audit.AuditLog.EventComplete(t.TestDescriptor.Name, s)
+audit.AuditLog.EventComplete(t.TestDescriptor.Name)
 ```
 
 **AuditLog.SetProbrStatus**

@@ -6,7 +6,8 @@ import (
 )
 
 type Probe struct {
-	Steps map[string]string
+	Status string
+	Steps  map[string]string
 }
 
 type Event struct {
@@ -50,5 +51,14 @@ func (e *Event) AuditProbe(name string, err error) {
 		e.Probes[name].Steps[step] = "Passed"
 	} else {
 		e.Probes[name].Steps[step] = "Failed"
+		e.Probes[name].Status = "Failed"
+	}
+}
+
+func (e *Event) CountFailures() {
+	for _, v := range e.Probes {
+		if v.Status == "Failed" {
+			e.ProbesFailed = e.ProbesFailed + 1
+		}
 	}
 }
