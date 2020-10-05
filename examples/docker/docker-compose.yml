@@ -3,6 +3,6 @@ services:
         probr:
             build: .
             volumes:
-                - ./.kube:/probr/.kube
+                - $HOME/.kube:/root/.kube
                 - ./static-content:/probr/testoutput
 
