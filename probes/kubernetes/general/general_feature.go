@@ -6,7 +6,7 @@ import (
 	"log"
 	"strings"
 
-	"github.com/citihub/probr/internal/audit"
+	"github.com/citihub/probr/internal/summary"
 	"github.com/citihub/probr/probes"
 	"github.com/citihub/probr/probes/kubernetes/probe"
 
@@ -19,7 +19,7 @@ import (
 
 type probeState struct {
 	name             string
-	event            *audit.Event
+	event            *summary.Event
 	state            probe.State
 	hasWildcardRoles bool
 }
@@ -53,7 +53,7 @@ func (p *probeState) aKubernetesClusterIsDeployed() error {
 	if b == nil || !*b {
 		log.Fatalf("[ERROR] Kubernetes cluster is not deployed")
 	}
-	p.event.AuditProbe(p.name, nil) // If not fatal, success
+	p.event.LogProbe(p.name, nil) // If not fatal, success
 	return nil
 }
 
@@ -73,7 +73,7 @@ func (p *probeState) iInspectTheThatAreConfigured(roleLevel string) error {
 	if err != nil {
 		err = probes.LogAndReturnError("error raised when retrieving roles for rolelevel %v: %v", roleLevel, err)
 	}
-	p.event.AuditProbe(p.name, err)
+	p.event.LogProbe(p.name, err)
 	return err
 }
 
@@ -83,7 +83,7 @@ func (p *probeState) iShouldOnlyFindWildcardsInKnownAndAuthorisedConfigurations(
 	if p.hasWildcardRoles {
 		err = probes.LogAndReturnError("roles exist with wildcarded resources")
 	}
-	p.event.AuditProbe(p.name, err)
+	p.event.LogProbe(p.name, err)
 	return err
 }
 
@@ -98,7 +98,7 @@ func (p *probeState) iAttemptToCreateADeploymentWhichDoesNotHaveASecurityContext
 
 	e := p.event
 	s := probe.ProcessPodCreationResult(&p.state, pd, kubernetes.UndefinedPodCreationErrorReason, e, err)
-	e.AuditProbe(p.name, s)
+	e.LogProbe(p.name, s)
 	return s
 }
 
@@ -108,7 +108,7 @@ func (p *probeState) theDeploymentIsRejected() error {
 	if p.state.CreationError == nil {
 		err = probes.LogAndReturnError("pod %v was created successfully. Test fail.", p.state.PodName)
 	}
-	p.event.AuditProbe(p.name, err)
+	p.event.LogProbe(p.name, err)
 	return err
 }
 
@@ -139,7 +139,7 @@ func (p *probeState) theKubernetesWebUIIsDisabled() error {
 			break
 		}
 	}
-	p.event.AuditProbe(p.name, err)
+	p.event.LogProbe(p.name, err)
 	return err
 }
 
@@ -166,7 +166,7 @@ func ScenarioInitialize(ctx *godog.ScenarioContext) {
 
 	ctx.BeforeScenario(func(s *godog.Scenario) {
 		ps.name = s.Name
-		ps.event = audit.AuditLog.GetEventLog(NAME)
+		ps.event = summary.State.GetEventLog(NAME)
 		probes.LogScenarioStart(s)
 	})
 

@@ -16,7 +16,7 @@ type ConfigVars struct {
 	KubeContext    string `yaml:"kubeContext"`
 	OutputType     string `yaml:"outputType"`
 	OutputDir      string `yaml:"outputDir"`
-	AuditEnabled   string `yaml:"auditEnabled"`
+	SummaryEnabled string `yaml:"summaryEnabled"`
 	Images         struct {
 		Repository string `yaml:"repository"`
 		Curl       string `yaml:"curl"`

@@ -11,7 +11,7 @@ func getEnvOrDefaults(e *ConfigVars) {
 	e.GetKubeContext()                              // KUBE_CONTEXT
 	e.GetOutputType("IO")                           // OUTPUT_TYPE
 	e.GetOutputDir("./testoutput")                  // OUTPUT_DIR
-	e.GetAuditEnabled("true")                       // AUDIT_ENABLED
+	e.GetSummaryEnabled("true")                     // SUMMARY_ENABLED
 	e.GetProbrTags()                                // PROBR_TAGS
 
 	e.GetImageRepository("docker.io") // IMAGE_REPOSITORY

@@ -14,8 +14,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/citihub/probr/internal/audit"
 	"github.com/citihub/probr/internal/config"
+	"github.com/citihub/probr/internal/summary"
 
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -552,7 +552,7 @@ func (k *Kube) DeletePod(pname *string, ns *string, wait bool, event string) err
 	if wait {
 		waitForDelete(c, ns, pname)
 	}
-	audit.AuditLog.GetEventLog(event).CountPodDestroyed()
+	summary.State.GetEventLog(event).CountPodDestroyed()
 	log.Printf("[INFO] POD %v deleted.", *pname)
 
 	return nil

@@ -10,9 +10,9 @@ package iam
 import (
 	"strings"
 
-	"github.com/citihub/probr/internal/audit"
 	"github.com/citihub/probr/internal/clouddriver/kubernetes"
 	"github.com/citihub/probr/internal/coreengine"
+	"github.com/citihub/probr/internal/summary"
 	"github.com/citihub/probr/probes"
 	"github.com/citihub/probr/probes/kubernetes/probe"
 	"github.com/cucumber/godog"
@@ -22,7 +22,7 @@ import (
 
 type probeState struct {
 	name         string
-	event        *audit.Event
+	event        *summary.Event
 	state        probe.State
 	useDefaultNS bool
 }
@@ -82,14 +82,14 @@ func (p *probeState) aKubernetesClusterExistsWhichWeCanDeployInto() error {
 	if b == nil || !*b {
 		err = probes.LogAndReturnError("kubernetes cluster is NOT deployed")
 	}
-	p.event.AuditProbe(p.name, err)
+	p.event.LogProbe(p.name, err)
 	return err
 }
 
 //AZ-AAD-AI-1.0
 func (p *probeState) theDefaultNamespaceHasAnAzureIdentityBinding() error {
 	err := p.runAISetupCheck(iam.AzureIdentityBindingExists, true, "AzureIdentityBinding")
-	p.event.AuditProbe(p.name, err)
+	p.event.LogProbe(p.name, err)
 	return err
 
 }
@@ -105,7 +105,7 @@ func (p *probeState) iCreateASimplePodInNamespaceAssignedWithThatAzureIdentityBi
 		pd, err := iam.CreateIAMTestPod(y, p.useDefaultNS)
 		err = probe.ProcessPodCreationResult(&p.state, pd, kubernetes.UndefinedPodCreationErrorReason, p.event, err)
 	}
-	p.event.AuditProbe(p.name, err)
+	p.event.LogProbe(p.name, err)
 	return err
 
 }
@@ -121,14 +121,14 @@ func (p *probeState) thePodIsDeployedSuccessfully() error {
 	if p.state.PodName == "" {
 		err = probes.LogAndReturnError("pod was not deployed successfully - creation error: %v", p.state.CreationError)
 	}
-	p.event.AuditProbe(p.name, err)
+	p.event.LogProbe(p.name, err)
 	return err
 }
 
 func (p *probeState) anAttemptToObtainAnAccessTokenFromThatPodShouldFail() error {
 	//reuse the parameterised / scenario outline func
 	err := p.anAttemptToObtainAnAccessTokenFromThatPodShould("Fail")
-	p.event.AuditProbe(p.name, err)
+	p.event.LogProbe(p.name, err)
 	return err
 }
 
@@ -160,21 +160,21 @@ func (p *probeState) anAttemptToObtainAnAccessTokenFromThatPodShould(expectedres
 			}
 		}
 	}
-	p.event.AuditProbe(p.name, err)
+	p.event.LogProbe(p.name, err)
 	return err
 }
 
 //AZ-AAD-AI-1.1
 func (p *probeState) theDefaultNamespaceHasAnAzureIdentity() error {
 	err := p.runAISetupCheck(iam.AzureIdentityExists, true, "AzureIdentity")
-	p.event.AuditProbe(p.name, err)
+	p.event.LogProbe(p.name, err)
 	return err
 
 }
 
 func (p *probeState) iCreateAnAzureIdentityBindingCalledInANondefaultNamespace(arg1 string) error {
 	err := p.runAISetupCheck(iam.AzureIdentityBindingExists, false, "AzureIdentityBinding")
-	p.event.AuditProbe(p.name, err)
+	p.event.LogProbe(p.name, err)
 	return err
 }
 
@@ -187,7 +187,7 @@ func (p *probeState) iDeployAPodAssignedWithTheAzureIdentityBindingIntoTheSameNa
 		pd, err := iam.CreateIAMTestPod(y, false)
 		err = probe.ProcessPodCreationResult(&p.state, pd, kubernetes.UndefinedPodCreationErrorReason, p.event, err)
 	}
-	p.event.AuditProbe(p.name, err)
+	p.event.LogProbe(p.name, err)
 	return err
 }
 
@@ -212,7 +212,7 @@ func (p *probeState) theClusterHasManagedIdentityComponentsDeployed() error {
 			err = probes.LogAndReturnError("no MIC pods found - test fail")
 		}
 	}
-	p.event.AuditProbe(p.name, err)
+	p.event.LogProbe(p.name, err)
 	return err
 }
 
@@ -237,7 +237,7 @@ func (p *probeState) iExecuteTheCommandAgainstTheMICPod(arg1 string) error {
 		p.state.CommandExitCode = res.Code
 	}
 
-	p.event.AuditProbe(p.name, err)
+	p.event.LogProbe(p.name, err)
 	return err
 }
 
@@ -247,7 +247,7 @@ func (p *probeState) kubernetesShouldPreventMeFromRunningTheCommand() error {
 		//bad! don't want the command to succeed
 		err = probes.LogAndReturnError("verification command was not blocked - test fail")
 	}
-	p.event.AuditProbe(p.name, err)
+	p.event.LogProbe(p.name, err)
 	return err
 }
 
@@ -294,7 +294,7 @@ func ScenarioInitialize(ctx *godog.ScenarioContext) {
 	ctx.BeforeScenario(func(s *godog.Scenario) {
 		ps.setup()
 		ps.name = s.Name
-		ps.event = audit.AuditLog.GetEventLog(NAME)
+		ps.event = summary.State.GetEventLog(NAME)
 		probes.LogScenarioStart(s)
 	})
 

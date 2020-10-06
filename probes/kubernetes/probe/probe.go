@@ -2,8 +2,8 @@
 package probe
 
 import (
-	"github.com/citihub/probr/internal/audit"
 	"github.com/citihub/probr/internal/clouddriver/kubernetes"
+	"github.com/citihub/probr/internal/summary"
 	"github.com/citihub/probr/probes"
 	apiv1 "k8s.io/api/core/v1"
 )
@@ -18,7 +18,7 @@ type State struct {
 
 // ProcessPodCreationResult is a convenince function to process the result of a pod creation attempt.
 // It records state information on the supplied state structure.
-func ProcessPodCreationResult(s *State, pd *apiv1.Pod, expected kubernetes.PodCreationErrorReason, e *audit.Event, err error) error {
+func ProcessPodCreationResult(s *State, pd *apiv1.Pod, expected kubernetes.PodCreationErrorReason, e *summary.Event, err error) error {
 
 	//first check for errors:
 	if err != nil {
@@ -28,7 +28,7 @@ func ProcessPodCreationResult(s *State, pd *apiv1.Pod, expected kubernetes.PodCr
 		if pd != nil {
 			s.PodName = pd.GetObjectMeta().GetName()
 			e.CountPodCreated()
-			audit.AuditLog.AuditPodName(s.PodName)
+			summary.State.LogPodName(s.PodName)
 		}
 
 		//check for known error type
@@ -55,7 +55,7 @@ func ProcessPodCreationResult(s *State, pd *apiv1.Pod, expected kubernetes.PodCr
 	//valid for some tests
 	s.PodName = pd.GetObjectMeta().GetName()
 	e.CountPodCreated()
-	audit.AuditLog.AuditPodName(s.PodName)
+	summary.State.LogPodName(s.PodName)
 
 	//we're good
 	return nil

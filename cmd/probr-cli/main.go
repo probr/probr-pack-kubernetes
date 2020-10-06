@@ -6,9 +6,9 @@ import (
 	"os"
 
 	"github.com/citihub/probr"
-	"github.com/citihub/probr/internal/audit"
 	"github.com/citihub/probr/internal/clouddriver/kubernetes"
 	"github.com/citihub/probr/internal/config"
+	"github.com/citihub/probr/internal/summary"
 )
 
 var (
@@ -29,7 +29,7 @@ func main() {
 		os.Exit(2) // Error code 1 is reserved for probe test failures, and should not fail in CI
 	}
 	log.Printf("[NOTICE] Overall test completion status: %v", s)
-	audit.AuditLog.SetProbrStatus()
+	summary.State.SetProbrStatus()
 
 	if config.Vars.OutputType == "IO" {
 		out, err := probr.GetAllTestResults(ts)
@@ -41,6 +41,6 @@ func main() {
 			log.Printf("[ERROR] Test results not written to file, possibly due to permissions on the specified output directory: %s", config.Vars.OutputDir)
 		}
 	}
-	audit.AuditLog.PrintAudit()
+	summary.State.PrintSummary()
 	os.Exit(s)
 }

@@ -22,13 +22,13 @@ func (e *ConfigVars) GetKubeContext() {
 	}
 }
 
-// GetAuditEnabled
-func (e *ConfigVars) GetAuditEnabled(d string) {
-	if e.AuditEnabled == "" {
-		e.AuditEnabled = os.Getenv("AUDIT_ENABLED")
+// GetSummaryEnabled
+func (e *ConfigVars) GetSummaryEnabled(d string) {
+	if e.SummaryEnabled == "" {
+		e.SummaryEnabled = os.Getenv("AUDIT_ENABLED")
 	}
-	if e.AuditEnabled == "" {
-		e.AuditEnabled = d // default is specified in caller: config/defaults.go
+	if e.SummaryEnabled == "" {
+		e.SummaryEnabled = d // default is specified in caller: config/defaults.go
 	}
 }
 

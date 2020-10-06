@@ -7,9 +7,9 @@ import (
 
 	"github.com/cucumber/godog"
 
-	"github.com/citihub/probr/internal/audit"
 	"github.com/citihub/probr/internal/clouddriver/kubernetes"
 	"github.com/citihub/probr/internal/coreengine"
+	"github.com/citihub/probr/internal/summary"
 	"github.com/citihub/probr/internal/utils"
 	"github.com/citihub/probr/probes"
 	"github.com/citihub/probr/probes/kubernetes/probe"
@@ -17,7 +17,7 @@ import (
 
 type probeState struct {
 	name  string
-	event *audit.Event
+	event *summary.Event
 	state probe.State
 }
 
@@ -61,7 +61,7 @@ func (p *probeState) aKubernetesClusterIsDeployed() error {
 		log.Fatalf("[ERROR] Kubernetes cluster is not deployed")
 	}
 
-	p.event.AuditProbe(p.name, nil) // If not fatal, success
+	p.event.LogProbe(p.name, nil) // If not fatal, success
 	return nil
 }
 
@@ -74,7 +74,7 @@ func (p *probeState) iAmAuthorisedToPullFromAContainerRegistry() error {
 
 	e := p.event
 	s := probe.ProcessPodCreationResult(&p.state, pd, kubernetes.PSPContainerAllowedImages, e, err)
-	e.AuditProbe(p.name, s)
+	e.LogProbe(p.name, s)
 	return s
 }
 
@@ -95,13 +95,13 @@ func (p *probeState) aUserAttemptsToDeployAContainerFrom(auth string, registry s
 
 	e := p.event
 	s := probe.ProcessPodCreationResult(&p.state, pd, kubernetes.PSPContainerAllowedImages, e, err)
-	e.AuditProbe(p.name, s)
+	e.LogProbe(p.name, s)
 	return s
 }
 
 func (p *probeState) theDeploymentAttemptIs(res string) error {
 	s := probe.AssertResult(&p.state, res, "")
-	p.event.AuditProbe(p.name, s)
+	p.event.LogProbe(p.name, s)
 	return s
 }
 
@@ -137,7 +137,7 @@ func ScenarioInitialize(ctx *godog.ScenarioContext) {
 	ctx.BeforeScenario(func(s *godog.Scenario) {
 		ps.setup()
 		ps.name = s.Name
-		ps.event = audit.AuditLog.GetEventLog(NAME)
+		ps.event = summary.State.GetEventLog(NAME)
 		probes.LogScenarioStart(s)
 	})
 

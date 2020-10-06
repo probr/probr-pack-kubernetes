@@ -7,15 +7,15 @@ import (
 
 	"github.com/citihub/probr/probes"
 
-	"github.com/citihub/probr/internal/audit"
 	"github.com/citihub/probr/internal/clouddriver/kubernetes"
 	"github.com/citihub/probr/internal/coreengine"
+	"github.com/citihub/probr/internal/summary"
 	"github.com/cucumber/godog"
 )
 
 type probState struct {
 	name           string
-	event          *audit.Event
+	event          *summary.Event
 	podName        string
 	httpStatusCode int
 }
@@ -53,7 +53,7 @@ func (p *probState) aKubernetesClusterIsDeployed() error {
 		log.Fatalf("[ERROR] Kubernetes cluster is not deployed")
 	}
 
-	p.event.AuditProbe(p.name, nil) // If not fatal, success
+	p.event.LogProbe(p.name, nil) // If not fatal, success
 	return nil
 }
 
@@ -73,7 +73,7 @@ func (p *probState) aPodIsDeployedInTheCluster() error {
 		//hold on to the pod name
 		p.podName = pod.GetObjectMeta().GetName()
 	}
-	p.event.AuditProbe(p.name, err)
+	p.event.LogProbe(p.name, err)
 	return err
 }
 
@@ -87,7 +87,7 @@ func (p *probState) aProcessInsideThePodEstablishesADirectHTTPSConnectionTo(url 
 
 	//hold on to the code
 	p.httpStatusCode = code
-	p.event.AuditProbe(p.name, err)
+	p.event.LogProbe(p.name, err)
 	return err
 }
 
@@ -100,7 +100,7 @@ func (p *probState) accessIs(accessResult string) error {
 			err = probes.LogAndReturnError("got HTTP Status Code %v - failed", p.httpStatusCode)
 		}
 	}
-	p.event.AuditProbe(p.name, err)
+	p.event.LogProbe(p.name, err)
 	return err
 }
 
@@ -143,7 +143,7 @@ func ScenarioInitialize(ctx *godog.ScenarioContext) {
 	ctx.BeforeScenario(func(s *godog.Scenario) {
 		ps.setup()
 		ps.name = s.Name
-		ps.event = audit.AuditLog.GetEventLog(NAME)
+		ps.event = summary.State.GetEventLog(NAME)
 		probes.LogScenarioStart(s)
 	})
 

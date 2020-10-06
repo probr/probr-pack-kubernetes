@@ -1,6 +1,6 @@
 # Probr
 
-**Your Zero Trust Compliance Toolbox**
+### Your Zero Trust Compliance Toolbox
 
 Probr is intended to provide flexible "probing" of your cloud provider and Kubernetes cluster to ensure that the _result_ of your security controls have properly taken effect.
 

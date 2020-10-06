@@ -9,7 +9,7 @@ import (
 	"log"
 	"sync"
 
-	"github.com/citihub/probr/internal/audit"
+	"github.com/citihub/probr/internal/summary"
 )
 
 // TestStatus type describes the status of the test, e.g. Pending, Running, CompleteSuccess, CompleteFail and Error
@@ -121,9 +121,9 @@ func (ts *TestStore) AddTest(td TestDescriptor) string {
 	}
 	ts.Tests[td.Name] = &t
 
-	audit.AuditLog.AuditMeta(td.Name, "status", t.Status.String())
-	audit.AuditLog.AuditMeta(td.Name, "group", td.Group.String())
-	audit.AuditLog.AuditMeta(td.Name, "category", td.Category.String())
+	summary.State.LogEventMeta(td.Name, "status", t.Status.String())
+	summary.State.LogEventMeta(td.Name, "group", td.Group.String())
+	summary.State.LogEventMeta(td.Name, "category", td.Category.String())
 
 	return td.Name
 }

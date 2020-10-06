@@ -1,4 +1,4 @@
-package audit
+package summary
 
 import (
 	"encoding/json"
@@ -8,7 +8,7 @@ import (
 	"github.com/citihub/probr/internal/config"
 )
 
-type AuditLogStruct struct {
+type SummaryStateStruct struct {
 	Status        string
 	EventsPassed  int
 	EventsFailed  int
@@ -17,20 +17,20 @@ type AuditLogStruct struct {
 	Events        map[string]*Event
 }
 
-var AuditLog AuditLogStruct
+var State SummaryStateStruct
 
-// PrintAudit will print the current Events object state, formatted to JSON, if AuditEnabled is not "false"
-func (a *AuditLogStruct) PrintAudit() {
-	if config.Vars.AuditEnabled == "false" {
-		log.Printf("[NOTICE] Audit Log suppressed by configuration AuditEnabled=false.")
+// PrintSummary will print the current Events object state, formatted to JSON, if SummaryEnabled is not "false"
+func (a *SummaryStateStruct) PrintSummary() {
+	if config.Vars.SummaryEnabled == "false" {
+		log.Printf("[NOTICE] Summary Log suppressed by configuration SummaryEnabled=false.")
 	} else {
-		audit, _ := json.MarshalIndent(a, "", "  ")
-		fmt.Printf("%s", audit) // Audit output should not be handled by log levels
+		summary, _ := json.MarshalIndent(a, "", "  ")
+		fmt.Printf("%s", summary) // Summary output should not be handled by log levels
 	}
 }
 
-// SetProbrStatus evaluates the current AuditLogStruct state to set the Status
-func (a *AuditLogStruct) SetProbrStatus() {
+// SetProbrStatus evaluates the current SummaryStateStruct state to set the Status
+func (a *SummaryStateStruct) SetProbrStatus() {
 	if a.EventsPassed > 0 && a.EventsFailed == 0 {
 		a.Status = "Complete - All Events Completed Successfully"
 	} else {
@@ -38,15 +38,15 @@ func (a *AuditLogStruct) SetProbrStatus() {
 	}
 }
 
-// AuditMeta accepts a test name with a key and value to insert to the meta logs for that test. Overwrites key if already present.
-func (a *AuditLogStruct) AuditMeta(name string, key string, value string) {
+// LogEventMeta accepts a test name with a key and value to insert to the meta logs for that test. Overwrites key if already present.
+func (a *SummaryStateStruct) LogEventMeta(name string, key string, value string) {
 	e := a.GetEventLog(name)
 	e.Meta[key] = value
 	a.Events[name] = e
 }
 
-// EventComplete takes an event name and status then updates the audit & event meta information
-func (a *AuditLogStruct) EventComplete(name string) {
+// EventComplete takes an event name and status then updates the summary & event meta information
+func (a *SummaryStateStruct) EventComplete(name string) {
 	e := a.GetEventLog(name)
 	e.CountFailures()
 	if len(e.Probes) < 1 {
@@ -62,17 +62,17 @@ func (a *AuditLogStruct) EventComplete(name string) {
 }
 
 // GetEventLog initializes or returns existing log event for the provided test name
-func (a *AuditLogStruct) GetEventLog(n string) *Event {
+func (a *SummaryStateStruct) GetEventLog(n string) *Event {
 	a.logInit(n)
 	return a.Events[n]
 }
 
-func (a *AuditLogStruct) AuditPodName(n string) {
+func (a *SummaryStateStruct) LogPodName(n string) {
 	a.PodNames = append(a.PodNames, n)
 }
 
 // GetEventLog initializes log event if it doesn't already exist
-func (a *AuditLogStruct) logInit(n string) {
+func (a *SummaryStateStruct) logInit(n string) {
 	if a.Events == nil {
 		a.Events = make(map[string]*Event)
 		a.Status = "Running"

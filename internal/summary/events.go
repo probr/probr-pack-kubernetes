@@ -1,4 +1,4 @@
-package audit
+package summary
 
 import (
 	"runtime"
@@ -28,8 +28,8 @@ func (e *Event) CountPodDestroyed() {
 	e.PodsDestroyed = e.PodsDestroyed + 1
 }
 
-// AuditProbe
-func (e *Event) AuditProbe(name string, err error) {
+// LogProbe
+func (e *Event) LogProbe(name string, err error) {
 	// get most recent caller function name as probe step
 	f := make([]uintptr, 1)
 	runtime.Callers(2, f)                      // add full caller path to empty object
@@ -46,7 +46,7 @@ func (e *Event) AuditProbe(name string, err error) {
 		e.Probes[name].Steps = make(map[string]string)
 	}
 
-	// Now do the actual probe audit
+	// Now do the actual probe summary
 	if err == nil {
 		e.Probes[name].Steps[step] = "Passed"
 	} else {

@@ -70,7 +70,7 @@ func outputTypeHandler(v *string) {
 			probr.SetIOPaths("", config.Vars.OutputDir)
 			log.Printf("[NOTICE] Probr results will be written to files in the specified output directory: %v", *v)
 		} else if *v == "INMEM" {
-			log.Printf("[NOTICE] Output type specified as INMEM: Results will not be handled by the CLI. Refer to the Audit Log for a results summary.")
+			log.Printf("[NOTICE] Output type specified as INMEM: Results will not be handled by the CLI. Refer to the Summary Log for a results summary.")
 		} else {
 			log.Fatalf("[ERROR] Unknown output type specified: %s. Please use 'IO' or 'INMEM'", *v)
 		}

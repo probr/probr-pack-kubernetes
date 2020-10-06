@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/citihub/probr/internal/audit"
+	"github.com/citihub/probr/internal/summary"
 	"github.com/cucumber/godog"
 )
 
@@ -55,17 +55,17 @@ func AddTestHandler(td TestDescriptor, gd *GoDogTestTuple) {
 // function and data held in the GoDogTestTuple to execute the test: it calls the handler function with the
 // GodogTest data structure.
 func (ts *TestStore) RunTest(t *Test) (int, error) {
-	audit.AuditLog.AuditMeta(t.TestDescriptor.Name, "status", "Running")
+	summary.State.LogEventMeta(t.TestDescriptor.Name, "status", "Running")
 
 	if t == nil {
-		audit.AuditLog.AuditMeta(t.TestDescriptor.Name, "status", "Internal Error - Test not found")
+		summary.State.LogEventMeta(t.TestDescriptor.Name, "status", "Internal Error - Test not found")
 		return 2, fmt.Errorf("test is nil - cannot run test")
 	}
 
 	if t.TestDescriptor == nil {
 		//update status
 		*t.Status = Error
-		audit.AuditLog.AuditMeta(t.TestDescriptor.Name, "status", "Internal Error - Test descriptor not found")
+		summary.State.LogEventMeta(t.TestDescriptor.Name, "status", "Internal Error - Test descriptor not found")
 		return 3, fmt.Errorf("test descriptor is nil - cannot run test")
 	}
 
@@ -75,12 +75,12 @@ func (ts *TestStore) RunTest(t *Test) (int, error) {
 	if !exists {
 		//update status
 		*t.Status = Error
-		audit.AuditLog.AuditMeta(t.TestDescriptor.Name, "status", "Internal Error - No handler available for test")
+		summary.State.LogEventMeta(t.TestDescriptor.Name, "status", "Internal Error - No handler available for test")
 		return 4, fmt.Errorf("no test handler available for %v - cannot run test", *t.TestDescriptor)
 	}
 
 	s, o, err := g.Handler(g.Data) // Currently the only handler type is probes.GodogTestHandler, but this can be extended
-	audit.AuditLog.EventComplete(t.TestDescriptor.Name)
+	summary.State.EventComplete(t.TestDescriptor.Name)
 	if s == 0 {
 		// success
 		*t.Status = CompleteSuccess
