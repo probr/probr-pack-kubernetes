@@ -1,4 +1,5 @@
 @kubernetes
+@internet_access
 @csp.azure
 @CCO:CHC2-SVD030
 Feature: Egress control of a kubernetes cluster

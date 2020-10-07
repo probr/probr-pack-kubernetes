@@ -65,8 +65,7 @@ func runTestSuite(o io.Writer, gd *coreengine.GodogTest) (int, error) {
 		return -2, err
 	}
 
-	tags := config.Vars.Tests.Tags
-
+	tags := config.Vars.GetTags()
 	opts := godog.Options{
 		Format: "cucumber",
 		Output: colors.Colored(o),

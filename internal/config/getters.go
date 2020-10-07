@@ -25,7 +25,7 @@ func (e *ConfigVars) GetKubeContext() {
 // GetSummaryEnabled
 func (e *ConfigVars) GetSummaryEnabled(d string) {
 	if e.SummaryEnabled == "" {
-		e.SummaryEnabled = os.Getenv("AUDIT_ENABLED")
+		e.SummaryEnabled = os.Getenv("PROBR_SUMMARY_ENABLED")
 	}
 	if e.SummaryEnabled == "" {
 		e.SummaryEnabled = d // default is specified in caller: config/defaults.go
@@ -34,8 +34,8 @@ func (e *ConfigVars) GetSummaryEnabled(d string) {
 
 // GetProbrTags ...
 func (e *ConfigVars) GetProbrTags() {
-	if e.Tests.Tags == "" {
-		e.Tests.Tags = os.Getenv("PROBR_TAGS")
+	if e.Tags == "" {
+		e.Tags = os.Getenv("PROBR_TAGS")
 	}
 }
 

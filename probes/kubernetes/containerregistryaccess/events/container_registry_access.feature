@@ -1,4 +1,5 @@
 @kubernetes
+@container_registry_access
 @CIS-6.1
 Feature: Protect image container registries
   As a Security Auditor

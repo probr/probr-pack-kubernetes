@@ -9,6 +9,7 @@ import (
 	"log"
 	"sync"
 
+	"github.com/citihub/probr/internal/config"
 	"github.com/citihub/probr/internal/summary"
 )
 
@@ -22,10 +23,11 @@ const (
 	CompleteSuccess
 	CompleteFail
 	Error
+	Excluded
 )
 
 func (s TestStatus) String() string {
-	return [...]string{"Pending", "Running", "CompleteSuccess", "CompleteFail", "Error"}[s]
+	return [...]string{"Pending", "Running", "CompleteSuccess", "CompleteFail", "Error", "Excluded"}[s]
 }
 
 // Group type describes the group to which the test belongs, e.g. kubernetes, clouddriver, coreengine, etc.
@@ -112,9 +114,14 @@ func (ts *TestStore) AddTest(td TestDescriptor) string {
 	ts.Lock.Lock()
 	defer ts.Lock.Unlock()
 
-	//add the test
+	var s TestStatus
+	if td.isExcluded() {
+		s = Excluded
+	} else {
+		s = Pending
+	}
 
-	s := Pending
+	//add the test
 	t := Test{
 		TestDescriptor: &td,
 		Status:         &s,
@@ -151,13 +158,12 @@ func (ts *TestStore) ExecTest(name string) (int, error) {
 	if err != nil {
 		return 1, err
 	}
-
-	st, err := ts.RunTest(t)
-
+	if t.Status.String() != Excluded.String() {
+		return ts.RunTest(t)
+	}
 	//TODO: manage store
 	//move to FAILURE / SUCCESS as approriate ...
-
-	return st, err
+	return 0, nil
 }
 
 //ExecTest by TestDescriptor, etc ... TODO.  In this case there may be more than one so we should set up for concurrency
@@ -169,6 +175,7 @@ func (ts *TestStore) ExecAllTests() (int, error) {
 
 	for name := range ts.Tests {
 		st, err := ts.ExecTest(name)
+		summary.State.EventComplete(name)
 		if err != nil {
 			//log but continue with remaining tests
 			log.Printf("[ERROR] error executing test: %v", err)
@@ -178,4 +185,23 @@ func (ts *TestStore) ExecAllTests() (int, error) {
 		}
 	}
 	return status, err
+}
+
+func (td *TestDescriptor) isExcluded() bool {
+	v := []string{td.Name, td.Group.String(), td.Category.String()}
+	for _, r := range v {
+		if tagIsExcluded(r) {
+			return true
+		}
+	}
+	return false
+}
+
+func tagIsExcluded(e string) bool {
+	for _, t := range config.Vars.TagExclusions {
+		if t == e {
+			return true
+		}
+	}
+	return false
 }

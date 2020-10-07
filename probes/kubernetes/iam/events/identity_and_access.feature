@@ -1,4 +1,5 @@
 @kubernetes
+@iam_control
 @CIS-6.8
 @AZ-AAD-AI
 Feature: Ensure stringent authentication and authorisation

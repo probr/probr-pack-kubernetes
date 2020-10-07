@@ -15,6 +15,7 @@ type SummaryStateStruct struct {
 	EventsSkipped int
 	PodNames      []string
 	Events        map[string]*Event
+	EventTags     []config.Event
 }
 
 var State SummaryStateStruct
@@ -36,6 +37,9 @@ func (a *SummaryStateStruct) SetProbrStatus() {
 	} else {
 		a.Status = fmt.Sprintf("Complete - %v of %v Events Failed", a.EventsFailed, (len(a.Events) - a.EventsSkipped))
 	}
+	if config.Vars.Events != nil {
+		a.EventTags = config.Vars.Events
+	}
 }
 
 // LogEventMeta accepts a test name with a key and value to insert to the meta logs for that test. Overwrites key if already present.
@@ -49,8 +53,10 @@ func (a *SummaryStateStruct) LogEventMeta(name string, key string, value string)
 func (a *SummaryStateStruct) EventComplete(name string) {
 	e := a.GetEventLog(name)
 	e.CountFailures()
-	if len(e.Probes) < 1 {
-		e.Meta["status"] = "Skipped"
+	if e.Meta["status"] == "Excluded" {
+		a.EventsSkipped = a.EventsSkipped + 1
+	} else if len(e.Probes) < 1 {
+		e.Meta["status"] = "No Probes Executed"
 		a.EventsSkipped = a.EventsSkipped + 1
 	} else if e.ProbesFailed < 1 {
 		e.Meta["status"] = "Success"

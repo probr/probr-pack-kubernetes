@@ -1,8 +1,6 @@
-kubeConfig:
+kubeConfig: .kubeconfig
 outputType: INMEM
 summaryEnabled: true
-tests:
-    tags: "@CIS-5.2.1,@CIS-6.1.3,@CIS-6.10"
 images:
     repository:
     curl:
@@ -13,3 +11,27 @@ azure:
     clientSecret:
     tenantID:
     locationDefault:
+events: # this entire object can be left out if all tests are to be run
+  - name: account_manager
+    excluded: "false"
+    justification: "demo"
+
+  - name: container_registry_access
+    excluded: "false"
+    justification: "demo"
+
+  - name: general
+    excluded: "false"
+    justification: "demo"
+
+  - name: iam_control
+    excluded: "true"
+    justification: "demo"
+
+  - name: internet_access
+    excluded: "true"
+    justification: "demo"
+
+  - name: pod_security_policy
+    excluded: "true"
+    justification: "demo"

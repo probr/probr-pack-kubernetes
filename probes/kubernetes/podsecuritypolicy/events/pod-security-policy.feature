@@ -1,4 +1,5 @@
-@kubernetes 
+@kubernetes
+@pod_security_policy
 @CIS-5.2
 Feature: Maximise security through Pod Security Policies
 

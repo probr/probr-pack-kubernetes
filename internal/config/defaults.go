@@ -12,7 +12,6 @@ func getEnvOrDefaults(e *ConfigVars) {
 	e.GetOutputType("IO")                           // OUTPUT_TYPE
 	e.GetOutputDir("./testoutput")                  // OUTPUT_DIR
 	e.GetSummaryEnabled("true")                     // SUMMARY_ENABLED
-	e.GetProbrTags()                                // PROBR_TAGS
 
 	e.GetImageRepository("docker.io") // IMAGE_REPOSITORY
 	e.GetCurlImage("curl")            // CURL_IMAGE

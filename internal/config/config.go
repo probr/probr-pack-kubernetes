@@ -5,13 +5,14 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strings"
 
 	"gopkg.in/yaml.v2"
 )
 
-// ConfigVars contains all possible config vars. May be set by .yml, env, or defaults.
-// NOTE: Env and Defaults are ONLY available if corresponding logic is added to defaults.go and getters.go
+// ConfigVars contains all possible config vars
 type ConfigVars struct {
+	// NOTE: Env and Defaults are ONLY available if corresponding logic is added to defaults.go and getters.go
 	KubeConfigPath string `yaml:"kubeConfig"`
 	KubeContext    string `yaml:"kubeContext"`
 	OutputType     string `yaml:"outputType"`
@@ -33,14 +34,35 @@ type ConfigVars struct {
 			DefaultNamespaceAIB string `yaml:"defaultNamespaceAIB"`
 		} `yaml:"azureIdentity"`
 	} `yaml:"azure"`
-	Tests struct {
-		Tags string `yaml:"tags"`
-	} `yaml:"tests"`
+	Events             []Event  `yaml:"events"`
 	SystemClusterRoles []string `yaml:"systemClusterRoles"`
+	Tags               string   `yaml:"tags"`
+	TagExclusions      []string // not from yaml
 }
 
-//Vars ...
+type Event struct {
+	Name          string `yaml:"name"`
+	Excluded      string `yaml:"excluded"`
+	Justification string `yaml:"justification"`
+}
+
+// Vars is a singleton instance of ConfigVars
 var Vars ConfigVars
+
+// GetTags parses Tags with TagExclusions
+func (c *ConfigVars) GetTags() string {
+	for _, v := range c.Events {
+		if v.Excluded == "true" {
+			if v.Justification == "" {
+				log.Fatalf("[ERROR] A justification must be provided for the tag exclusion '%s'", v.Name)
+			}
+			r := "@" + v.Name + ","
+			c.Tags = strings.Replace(c.Tags, r, "", -1)       // Remove exclusion from tags
+			c.TagExclusions = append(c.TagExclusions, v.Name) // Add exclusion to list
+		}
+	}
+	return c.Tags
+}
 
 func init() {
 	//create a defaulted config
@@ -63,7 +85,7 @@ func NewConfig(c string) (ConfigVars, error) {
 	// Create config structure
 	config := ConfigVars{}
 	if c == "" {
-		return config, nil
+		return config, nil // No file path provided, return empty config
 	}
 	err := ValidateConfigPath(c)
 	if err != nil {
@@ -83,7 +105,6 @@ func NewConfig(c string) (ConfigVars, error) {
 	if err := d.Decode(&config); err != nil {
 		return config, err
 	}
-
 	return config, nil
 }
 

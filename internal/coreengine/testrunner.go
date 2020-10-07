@@ -80,7 +80,6 @@ func (ts *TestStore) RunTest(t *Test) (int, error) {
 	}
 
 	s, o, err := g.Handler(g.Data) // Currently the only handler type is probes.GodogTestHandler, but this can be extended
-	summary.State.EventComplete(t.TestDescriptor.Name)
 	if s == 0 {
 		// success
 		*t.Status = CompleteSuccess

@@ -80,10 +80,10 @@ func outputTypeHandler(v *string) {
 
 func tagsHandler(v *string) {
 	if len(*v) > 0 {
-		config.Vars.Tests.Tags = *v
+		config.Vars.Tags = *v
 		log.Printf("[NOTICE] Tags have been added via command line.")
 	}
-	if len(config.Vars.Tests.Tags) == 0 {
+	if len(config.Vars.GetTags()) == 0 {
 		log.Printf("[NOTICE] No tags specified. All probes will be run.")
 	}
 }
