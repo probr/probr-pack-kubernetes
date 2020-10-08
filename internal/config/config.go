@@ -41,8 +41,15 @@ type ConfigVars struct {
 }
 
 type Event struct {
+	Name          string  `yaml:"name"`
+	Excluded      bool    `yaml:"excluded"`
+	Justification string  `yaml:"justification"`
+	Probes        []Probe `yaml:"probes"`
+}
+
+type Probe struct {
 	Name          string `yaml:"name"`
-	Excluded      string `yaml:"excluded"`
+	Excluded      bool   `yaml:"excluded"`
 	Justification string `yaml:"justification"`
 }
 
@@ -50,18 +57,35 @@ type Event struct {
 var Vars ConfigVars
 
 // GetTags parses Tags with TagExclusions
-func (c *ConfigVars) GetTags() string {
-	for _, v := range c.Events {
-		if v.Excluded == "true" {
-			if v.Justification == "" {
-				log.Fatalf("[ERROR] A justification must be provided for the tag exclusion '%s'", v.Name)
-			}
-			r := "@" + v.Name + ","
-			c.Tags = strings.Replace(c.Tags, r, "", -1)       // Remove exclusion from tags
-			c.TagExclusions = append(c.TagExclusions, v.Name) // Add exclusion to list
+func (ctx *ConfigVars) GetTags() string {
+	for _, v := range ctx.Events {
+		if v.Excluded {
+			ctx.HandleExclusion(v.Name, v.Justification)
+		} else {
+			ctx.HandleProbeExclusions(&v)
 		}
 	}
-	return c.Tags
+	return ctx.Tags
+}
+
+func (ctx *ConfigVars) HandleExclusion(name, justification string) {
+	if name == "" {
+		return
+	}
+	if justification == "" {
+		log.Fatalf("[ERROR] A justification must be provided for the tag exclusion '%s'", name)
+	}
+	r := "@" + name + ","
+	ctx.Tags = strings.Replace(ctx.Tags, r, "", -1)     // Remove exclusion from tags
+	ctx.TagExclusions = append(ctx.TagExclusions, name) // Add exclusion to list
+}
+
+func (ctx *ConfigVars) HandleProbeExclusions(e *Event) {
+	for _, v := range e.Probes {
+		if v.Excluded {
+			ctx.HandleExclusion(v.Name, v.Justification)
+		}
+	}
 }
 
 func init() {

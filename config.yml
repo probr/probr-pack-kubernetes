@@ -13,25 +13,33 @@ azure:
     locationDefault:
 events: # this entire object can be left out if all tests are to be run
   - name: account_manager
-    excluded: "false"
+    excluded: false
     justification: "demo"
 
   - name: container_registry_access
-    excluded: "false"
+    excluded: false
     justification: "demo"
 
   - name: general
-    excluded: "false"
+    excluded: false
     justification: "demo"
+    probes:
+      - name: CIS-5.6.3
+        excluded: false
+        justification: "probe exclusion demo"
 
   - name: iam_control
-    excluded: "true"
+    excluded: false
     justification: "demo"
 
   - name: internet_access
-    excluded: "true"
+    excluded: false
     justification: "demo"
 
   - name: pod_security_policy
-    excluded: "true"
+    excluded: false
     justification: "demo"
+    probes:
+      - name: AZP-0.3
+        excluded: false
+        justification: "probe exclusion demo"

@@ -1,11 +1,10 @@
-package clouddriver
+package probes
 
 import (
 	"log"
 	"path/filepath"
 
 	"github.com/citihub/probr/internal/coreengine"
-	"github.com/citihub/probr/probes"
 	"github.com/cucumber/godog"
 )
 
@@ -16,11 +15,11 @@ func init() {
 	fp := filepath.Join("probes", "clouddriver", "events")
 
 	coreengine.AddTestHandler(td, &coreengine.GoDogTestTuple{
-		Handler: probes.GodogTestHandler,
+		Handler: GodogTestHandler,
 		Data: &coreengine.GodogTest{
 			TestDescriptor:       &td,
-			TestSuiteInitializer: TestSuiteInitialize,
-			ScenarioInitializer:  ScenarioInitialize,
+			TestSuiteInitializer: amTestSuiteInitialize,
+			ScenarioInitializer:  amScenarioInitialize,
 			FeaturePath:          &fp,
 		},
 	})
@@ -66,12 +65,12 @@ func aResouceDeploymentWillWithTheMessage(arg1, arg2 string) error {
 }
 
 //TestSuiteInitialize ...
-func TestSuiteInitialize(ctx *godog.TestSuiteContext) {
+func amTestSuiteInitialize(ctx *godog.TestSuiteContext) {
 	ctx.BeforeSuite(func() {}) //nothing for now
 }
 
-//ScenarioInitialize ...
-func ScenarioInitialize(ctx *godog.ScenarioContext) {
+//amScenarioInitialize ...
+func amScenarioInitialize(ctx *godog.ScenarioContext) {
 	ctx.BeforeScenario(func(*godog.Scenario) {}) //nothing for now
 
 	ctx.Step(`^a resouce can be deployed into the "([^"]*)" Account using the linked "([^"]*)" Credential$`, aResouceCanBeDeployedIntoTheAccountUsingTheLinkedCredential)

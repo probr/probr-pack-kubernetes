@@ -1,28 +1,18 @@
 // Package containerregistryaccess provides the implementation required to execute the
 // feature based test cases described in the the 'events' directory.
-package containerregistryaccess
+package probes
 
 import (
-	"log"
-
 	"github.com/cucumber/godog"
 
 	"github.com/citihub/probr/internal/clouddriver/kubernetes"
 	"github.com/citihub/probr/internal/coreengine"
 	"github.com/citihub/probr/internal/summary"
 	"github.com/citihub/probr/internal/utils"
-	"github.com/citihub/probr/probes"
-	"github.com/citihub/probr/probes/kubernetes/probe"
 )
 
-type probeState struct {
-	name  string
-	event *summary.Event
-	state probe.State
-}
-
 const (
-	NAME = "container_registry_access"
+	CRA_NAME = "container_registry_access"
 )
 
 // init() registers the feature tests descibed in this package with the test runner (coreengine.TestRunner) via the call
@@ -33,14 +23,14 @@ const (
 // invoke this function automatically on initial load.
 func init() {
 	td := coreengine.TestDescriptor{Group: coreengine.Kubernetes,
-		Category: coreengine.ContainerRegistryAccess, Name: NAME}
+		Category: coreengine.ContainerRegistryAccess, Name: CRA_NAME}
 
 	coreengine.AddTestHandler(td, &coreengine.GoDogTestTuple{
-		Handler: probes.GodogTestHandler,
+		Handler: GodogTestHandler,
 		Data: &coreengine.GodogTest{
 			TestDescriptor:       &td,
-			TestSuiteInitializer: TestSuiteInitialize,
-			ScenarioInitializer:  ScenarioInitialize,
+			TestSuiteInitializer: craTestSuiteInitialize,
+			ScenarioInitializer:  craScenarioInitialize,
 		},
 	})
 }
@@ -54,17 +44,6 @@ func SetContainerRegistryAccess(c kubernetes.ContainerRegistryAccess) {
 	cra = c
 }
 
-func (p *probeState) aKubernetesClusterIsDeployed() error {
-	b := cra.ClusterIsDeployed()
-
-	if b == nil || !*b {
-		log.Fatalf("[ERROR] Kubernetes cluster is not deployed")
-	}
-
-	p.event.LogProbe(p.name, nil) // If not fatal, success
-	return nil
-}
-
 // TEST STEPS:
 
 // CIS-6.1.3
@@ -72,9 +51,8 @@ func (p *probeState) aKubernetesClusterIsDeployed() error {
 func (p *probeState) iAmAuthorisedToPullFromAContainerRegistry() error {
 	pd, err := cra.SetupContainerAccessTestPod(utils.StringPtr("docker.io"))
 
-	e := p.event
-	s := probe.ProcessPodCreationResult(&p.state, pd, kubernetes.PSPContainerAllowedImages, e, err)
-	e.LogProbe(p.name, s)
+	s := ProcessPodCreationResult(&p.state, pd, kubernetes.PSPContainerAllowedImages, p.event, err)
+	p.event.LogProbe(p.name, s)
 	return s
 }
 
@@ -94,30 +72,20 @@ func (p *probeState) aUserAttemptsToDeployAContainerFrom(auth string, registry s
 	pd, err := cra.SetupContainerAccessTestPod(&registry)
 
 	e := p.event
-	s := probe.ProcessPodCreationResult(&p.state, pd, kubernetes.PSPContainerAllowedImages, e, err)
+	s := ProcessPodCreationResult(&p.state, pd, kubernetes.PSPContainerAllowedImages, e, err)
 	e.LogProbe(p.name, s)
 	return s
 }
 
 func (p *probeState) theDeploymentAttemptIs(res string) error {
-	s := probe.AssertResult(&p.state, res, "")
+	s := AssertResult(&p.state, res, "")
 	p.event.LogProbe(p.name, s)
 	return s
 }
 
-func (p *probeState) setup() {
-	//just make sure this is reset
-	p.state.PodName = ""
-	p.state.CreationError = nil
-}
-
-func (p *probeState) tearDown() {
-	cra.TeardownContainerAccessTestPod(&p.state.PodName, NAME)
-}
-
-// TestSuiteInitialize handles any overall Test Suite initialisation steps.  This is registered with the
+// craTestSuiteInitialize handles any overall Test Suite initialisation steps.  This is registered with the
 // test handler as part of the init() function.
-func TestSuiteInitialize(ctx *godog.TestSuiteContext) {
+func craTestSuiteInitialize(ctx *godog.TestSuiteContext) {
 	ctx.BeforeSuite(func() {}) //nothing for now
 
 	//check dependancies ...
@@ -127,18 +95,18 @@ func TestSuiteInitialize(ctx *godog.TestSuiteContext) {
 	}
 }
 
-// ScenarioInitialize initialises the specific test steps.  This is essentially the creation of the test
+// craScenarioInitialize initialises the specific test steps.  This is essentially the creation of the test
 // which reflects the tests described in the events directory.  There must be a test step registered for
 // each line in the feature files. Note: Godog will output stub steps and implementations if it doesn't find
 // a step / function defined.  See: https://github.com/cucumber/godog#example.
-func ScenarioInitialize(ctx *godog.ScenarioContext) {
+func craScenarioInitialize(ctx *godog.ScenarioContext) {
 	ps := probeState{}
 
 	ctx.BeforeScenario(func(s *godog.Scenario) {
 		ps.setup()
 		ps.name = s.Name
-		ps.event = summary.State.GetEventLog(NAME)
-		probes.LogScenarioStart(s)
+		ps.event = summary.State.GetEventLog(CRA_NAME)
+		LogScenarioStart(s)
 	})
 
 	//common
@@ -154,7 +122,8 @@ func ScenarioInitialize(ctx *godog.ScenarioContext) {
 	ctx.Step(`^the deployment attempt is "([^"]*)"$`, ps.theDeploymentAttemptIs)
 
 	ctx.AfterScenario(func(s *godog.Scenario, err error) {
-		ps.tearDown()
-		probes.LogScenarioEnd(s)
+		cra.TeardownContainerAccessTestPod(&ps.state.PodName, CRA_NAME)
+
+		LogScenarioEnd(s)
 	})
 }

@@ -1,14 +1,9 @@
 // Package general provides the implementation required to execute the feature-based test cases
 // described in the the 'events' directory.
-package general
+package probes
 
 import (
-	"log"
 	"strings"
-
-	"github.com/citihub/probr/internal/summary"
-	"github.com/citihub/probr/probes"
-	"github.com/citihub/probr/probes/kubernetes/probe"
 
 	"github.com/citihub/probr/internal/clouddriver/kubernetes"
 	"github.com/citihub/probr/internal/config"
@@ -17,14 +12,7 @@ import (
 	"github.com/cucumber/godog"
 )
 
-type probeState struct {
-	name             string
-	event            *summary.Event
-	state            probe.State
-	hasWildcardRoles bool
-}
-
-const NAME = "general"
+const GEN_NAME = "general"
 
 // init() registers the feature tests descibed in this package with the test runner (coreengine.TestRunner) via the call
 // to coreengine.AddTestHandler.  This links the test - described by the TestDescriptor - with the handler to invoke.  In
@@ -34,27 +22,16 @@ const NAME = "general"
 // invoke this function automatically on initial load.
 func init() {
 	td := coreengine.TestDescriptor{Group: coreengine.Kubernetes,
-		Category: coreengine.General, Name: NAME}
+		Category: coreengine.General, Name: GEN_NAME}
 
 	coreengine.AddTestHandler(td, &coreengine.GoDogTestTuple{
-		Handler: probes.GodogTestHandler,
+		Handler: GodogTestHandler,
 		Data: &coreengine.GodogTest{
 			TestDescriptor:       &td,
-			TestSuiteInitializer: TestSuiteInitialize,
-			ScenarioInitializer:  ScenarioInitialize,
+			TestSuiteInitializer: genTestSuiteInitialize,
+			ScenarioInitializer:  genScenarioInitialize,
 		},
 	})
-}
-
-//general
-func (p *probeState) aKubernetesClusterIsDeployed() error {
-	b := kubernetes.GetKubeInstance().ClusterIsDeployed()
-
-	if b == nil || !*b {
-		log.Fatalf("[ERROR] Kubernetes cluster is not deployed")
-	}
-	p.event.LogProbe(p.name, nil) // If not fatal, success
-	return nil
 }
 
 //@CIS-5.1.3
@@ -71,7 +48,7 @@ func (p *probeState) iInspectTheThatAreConfigured(roleLevel string) error {
 		p.hasWildcardRoles = len(*l) > 0
 	}
 	if err != nil {
-		err = probes.LogAndReturnError("error raised when retrieving roles for rolelevel %v: %v", roleLevel, err)
+		err = LogAndReturnError("error raised when retrieving roles for rolelevel %v: %v", roleLevel, err)
 	}
 	p.event.LogProbe(p.name, err)
 	return err
@@ -81,7 +58,7 @@ func (p *probeState) iShouldOnlyFindWildcardsInKnownAndAuthorisedConfigurations(
 	//we strip out system/known entries in the cluster roles & roles call
 	var err error
 	if p.hasWildcardRoles {
-		err = probes.LogAndReturnError("roles exist with wildcarded resources")
+		err = LogAndReturnError("roles exist with wildcarded resources")
 	}
 	p.event.LogProbe(p.name, err)
 	return err
@@ -97,7 +74,7 @@ func (p *probeState) iAttemptToCreateADeploymentWhichDoesNotHaveASecurityContext
 	pd, err := kubernetes.GetKubeInstance().CreatePod(&n, utils.StringPtr("probr-general-test-ns"), &b, &i, true, nil)
 
 	e := p.event
-	s := probe.ProcessPodCreationResult(&p.state, pd, kubernetes.UndefinedPodCreationErrorReason, e, err)
+	s := ProcessPodCreationResult(&p.state, pd, kubernetes.UndefinedPodCreationErrorReason, e, err)
 	e.LogProbe(p.name, s)
 	return s
 }
@@ -106,7 +83,7 @@ func (p *probeState) theDeploymentIsRejected() error {
 	//looking for a non-nil creation error
 	var err error
 	if p.state.CreationError == nil {
-		err = probes.LogAndReturnError("pod %v was created successfully. Test fail.", p.state.PodName)
+		err = LogAndReturnError("pod %v was created successfully. Test fail.", p.state.PodName)
 	}
 	p.event.LogProbe(p.name, err)
 	return err
@@ -124,32 +101,28 @@ func (p *probeState) iShouldNotBeAbleToAccessTheKubernetesWebUI() error {
 	return nil
 }
 
+// BUG - This step never gets run
 func (p *probeState) theKubernetesWebUIIsDisabled() error {
 	//look for the dashboard pod in the kube-system ns
 	pl, err := kubernetes.GetKubeInstance().GetPods("kube-system")
 
 	if err != nil {
-		err = probes.LogAndReturnError("error raised when trying to retrieve pods %v", err)
+		err = LogAndReturnError("error raised when trying to retrieve pods %v", err)
 	}
 
 	//a "pass" is the abscence of a "kubernetes-dashboard" pod
-	for _, p := range pl.Items {
-		if strings.HasPrefix(p.Name, "kubernetes-dashboard") {
-			err = probes.LogAndReturnError("kubernetes-dashboard pod found (%v) - test fail", p.Name)
+	for _, v := range pl.Items {
+		if strings.HasPrefix(v.Name, "kubernetes-dashboard") {
+			err = LogAndReturnError("kubernetes-dashboard pod found (%v) - test fail", v.Name)
 			break
 		}
 	}
-	p.event.LogProbe(p.name, err)
 	return err
 }
 
-func (p *probeState) tearDown() {
-	kubernetes.GetKubeInstance().DeletePod(&p.state.PodName, utils.StringPtr("probr-general-test-ns"), false, NAME)
-}
-
-// TestSuiteInitialize handles any overall Test Suite initialisation steps.  This is registered with the
+// genTestSuiteInitialize handles any overall Test Suite initialisation steps.  This is registered with the
 // test handler as part of the init() function.
-func TestSuiteInitialize(ctx *godog.TestSuiteContext) {
+func genTestSuiteInitialize(ctx *godog.TestSuiteContext) {
 
 	ctx.BeforeSuite(func() {}) //nothing for now
 
@@ -157,17 +130,15 @@ func TestSuiteInitialize(ctx *godog.TestSuiteContext) {
 
 }
 
-// ScenarioInitialize initialises the specific test steps.  This is essentially the creation of the test
+// genScenarioInitialize initialises the specific test steps.  This is essentially the creation of the test
 // which reflects the tests described in the events directory.  There must be a test step registered for
 // each line in the feature files. Note: Godog will output stub steps and implementations if it doesn't find
 // a step / function defined.  See: https://github.com/cucumber/godog#example.
-func ScenarioInitialize(ctx *godog.ScenarioContext) {
+func genScenarioInitialize(ctx *godog.ScenarioContext) {
 	ps := probeState{}
 
 	ctx.BeforeScenario(func(s *godog.Scenario) {
-		ps.name = s.Name
-		ps.event = summary.State.GetEventLog(NAME)
-		probes.LogScenarioStart(s)
+		BeforeScenario(GEN_NAME, &ps, s)
 	})
 
 	//general
@@ -185,7 +156,7 @@ func ScenarioInitialize(ctx *godog.ScenarioContext) {
 	ctx.Step(`^the Kubernetes Web UI is disabled$`, ps.theKubernetesWebUIIsDisabled)
 
 	ctx.AfterScenario(func(s *godog.Scenario, err error) {
-		ps.tearDown()
-		probes.LogScenarioEnd(s)
+		kubernetes.GetKubeInstance().DeletePod(&ps.state.PodName, utils.StringPtr("probr-general-test-ns"), false, GEN_NAME)
+		LogScenarioEnd(s)
 	})
 }
