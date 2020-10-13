@@ -21,7 +21,7 @@ The following elements are required to get started with Probr:
 ### Get the executable
 
 - **Option 1** - Download the latest Probr package by clicking the corresponding asset on our [release page](https://github.com/citihub/probr/releases).
-- **Option 2** - You may build the edge version of Probr by using `go build cmd/probr-cli/*.go` from the source code. This may also be necessary if an executable compatible with your system is not available in on the release page.
+- **Option 2** - You may build the edge version of Probr by using `go build -o probr.exe cmd/probr-cli/*.go` from the source code. This may also be necessary if an executable compatible with your system is not available in on the release page.
 
 *Note: The usage docs refer to the executable as `probr` but you should use the `probr.exe` package if you are working in Windows.*
 
@@ -29,13 +29,15 @@ The following elements are required to get started with Probr:
 
 1. If you will be using any custom files, move the downloaded executable to the associated working directory. Below are elements you may wish to add to your working directory:
 
-      - **kubeconfig** - Required. Default location: `~/. kube/config`
+      - **kubeconfig** - Required. Default location: `~/.kube/config`
       - **Probr config** - Not required, no default. Used to specify config options as code.
       - **output directory** - Not required *if* using output type of `INMEM`, which will simply print the probe results to the terminal. Default directory still needs to be created, but path name can be modified via config. Default location: `./testoutput`
 
 1. Set your configuration variables. For more on how to do this, see the config documentation further down on this page.
 
 1. Run the probr executable via `./probr [OPTIONS]`. Additional options can be seen via `./probr --help`
+
+*Note: Feature files are not included in the binary. In this present state, Probr must be executed from the top level directory of the source code.*
 
 ## Configuration
 
