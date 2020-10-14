@@ -100,7 +100,7 @@ func Init(configPath string) error {
 		return err
 	}
 	Vars = config
-	getEnvOrDefaults(&Vars) // Set any values not retrieved from file
+	setEnvOrDefaults(&Vars) // Set any values not retrieved from file
 	return nil
 }
 

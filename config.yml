@@ -1,4 +1,4 @@
-kubeConfig: .kubeconfig
+kubeConfig: .kube/config
 outputType: INMEM
 summaryEnabled: true
 images:
