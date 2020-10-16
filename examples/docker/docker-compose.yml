@@ -4,5 +4,5 @@ services:
             build: .
             volumes:
                 - $HOME/.kube:/root/.kube
-                - ./static-content:/probr/testoutput
+                - ./static-content:/probr/cucumber_output
 

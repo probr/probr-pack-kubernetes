@@ -13,12 +13,15 @@ import (
 // ConfigVars contains all possible config vars
 type ConfigVars struct {
 	// NOTE: Env and Defaults are ONLY available if corresponding logic is added to defaults.go and getters.go
-	KubeConfigPath string `yaml:"kubeConfig"`
-	KubeContext    string `yaml:"kubeContext"`
-	OutputType     string `yaml:"outputType"`
-	OutputDir      string `yaml:"outputDir"`
-	SummaryEnabled string `yaml:"summaryEnabled"`
-	Images         struct {
+	KubeConfigPath            string `yaml:"kubeConfig"`
+	KubeContext               string `yaml:"kubeContext"`
+	OutputType                string `yaml:"outputType"`
+	OutputDir                 string `yaml:"outputDir"`
+	AuditDir                  string `yaml:"auditDir"`
+	SummaryEnabled            string `yaml:"summaryEnabled"`
+	AuditEnabled              string `yaml:"auditEnabled"`
+	OverwriteHistoricalAudits string `yaml:"overwriteHistoricalAudits"`
+	Images                    struct {
 		Repository string `yaml:"repository"`
 		Curl       string `yaml:"curl"`
 		BusyBox    string `yaml:"busyBox"`
@@ -100,7 +103,7 @@ func Init(configPath string) error {
 		return err
 	}
 	Vars = config
-	setEnvOrDefaults(&Vars) // Set any values not retrieved from file
+	setFromEnvOrDefaults(&Vars) // Set any values not retrieved from file
 	return nil
 }
 

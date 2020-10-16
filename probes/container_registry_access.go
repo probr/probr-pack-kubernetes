@@ -7,7 +7,6 @@ import (
 
 	"github.com/citihub/probr/internal/clouddriver/kubernetes"
 	"github.com/citihub/probr/internal/coreengine"
-	"github.com/citihub/probr/internal/summary"
 	"github.com/citihub/probr/internal/utils"
 )
 
@@ -52,7 +51,7 @@ func (p *probeState) iAmAuthorisedToPullFromAContainerRegistry() error {
 	pd, err := cra.SetupContainerAccessTestPod(utils.StringPtr("docker.io"))
 
 	s := ProcessPodCreationResult(&p.state, pd, kubernetes.PSPContainerAllowedImages, p.event, err)
-	p.event.LogProbe(p.name, s)
+	p.event.AuditProbeStep(p.name, s)
 	return s
 }
 
@@ -73,13 +72,13 @@ func (p *probeState) aUserAttemptsToDeployAContainerFrom(auth string, registry s
 
 	e := p.event
 	s := ProcessPodCreationResult(&p.state, pd, kubernetes.PSPContainerAllowedImages, e, err)
-	e.LogProbe(p.name, s)
+	e.AuditProbeStep(p.name, s)
 	return s
 }
 
 func (p *probeState) theDeploymentAttemptIs(res string) error {
 	s := AssertResult(&p.state, res, "")
-	p.event.LogProbe(p.name, s)
+	p.event.AuditProbeStep(p.name, s)
 	return s
 }
 
@@ -103,10 +102,7 @@ func craScenarioInitialize(ctx *godog.ScenarioContext) {
 	ps := probeState{}
 
 	ctx.BeforeScenario(func(s *godog.Scenario) {
-		ps.setup()
-		ps.name = s.Name
-		ps.event = summary.State.GetEventLog(CRA_NAME)
-		LogScenarioStart(s)
+		ps.BeforeScenario(CRA_NAME, s)
 	})
 
 	//common

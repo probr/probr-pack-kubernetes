@@ -51,7 +51,7 @@ func (p *probeState) aPodIsDeployedInTheCluster() error {
 			p.podName = pod.GetObjectMeta().GetName()
 		}
 	}
-	p.event.LogProbe(p.name, err)
+	p.event.AuditProbeStep(p.name, err)
 	return err
 }
 
@@ -64,7 +64,7 @@ func (p *probeState) aProcessInsideThePodEstablishesADirectHTTPSConnectionTo(url
 
 	//hold on to the code
 	p.httpStatusCode = code
-	p.event.LogProbe(p.name, err)
+	p.event.AuditProbeStep(p.name, err)
 	return err
 }
 
@@ -77,7 +77,7 @@ func (p *probeState) accessIs(accessResult string) error {
 			err = LogAndReturnError("got HTTP Status Code %v - failed", p.httpStatusCode)
 		}
 	}
-	p.event.LogProbe(p.name, err)
+	p.event.AuditProbeStep(p.name, err)
 	return err
 }
 
@@ -104,7 +104,7 @@ func iaTestSuiteInitialize(ctx *godog.TestSuiteContext) {
 func iaScenarioInitialize(ctx *godog.ScenarioContext) {
 
 	ctx.BeforeScenario(func(s *godog.Scenario) {
-		BeforeScenario(IA_NAME, &IA_PROBE, s)
+		IA_PROBE.BeforeScenario(IA_NAME, s)
 	})
 
 	ctx.Step(`^a Kubernetes cluster is deployed$`, IA_PROBE.aKubernetesClusterIsDeployed)

@@ -11,7 +11,7 @@ A new State context is created each time `probr` is run, and is readily accessib
 
 **SummaryStateStruct.LogEventMeta**
 
-Adding entries to the an Event's meta data requires the name of the test and a key-value pair to be inserted:
+Adding entries to the an Event's meta data requires the name of the test and a key-value pair to be inserted. 
 
 ```
 n := "name-of-the-current-test"
@@ -90,10 +90,10 @@ if wait {
 summary.State.GetEventLog(event).CountPodDestroyed()
 ```
 
-**Event.LogProbe**
+**Event.AuditProbeStep**
 
-This function should be used every time a step in a probe completes. `LogProbe` will automatically form the name of the step from the name of the function that called it. The name value provided will establish which probe the step is a part of. The error (or nil) provided will dictate whether the test passes or fails.
+This function should be used every time a step in a probe completes. `AuditProbeStep` will automatically form the name of the step from the name of the function that called it. The name value provided will establish which probe the step is a part of. The error (or nil) provided will dictate whether the test passes or fails.
 
 ```
-p.event.LogProbe(p.name, nil) // Success
+p.event.AuditProbeStep(p.name, nil) // Success
 ```

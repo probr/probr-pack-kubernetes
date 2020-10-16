@@ -4,7 +4,6 @@ import (
 	"flag"
 	"log"
 
-	"github.com/citihub/probr"
 	"github.com/citihub/probr/internal/config"
 )
 
@@ -25,7 +24,7 @@ func handleFlags() {
 
 	createFlag("varsFile", "", "path to config file", varsFileHandler)
 	createFlag("outputDir", "", "output directory", outputDirHandler) // Must run prior to creating outputType flag
-	createFlag("outputType", "INMEM", "output defaults to write in memory, if 'IO' will write to specified output directory", outputTypeHandler)
+	createFlag("outputType", "", "output defaults to write in memory, if 'IO' will write to specified output directory", outputTypeHandler)
 	createFlag("tags", "", "test tags, e.g. -tags=\"@CIS-1.2.3, @CIS-4.5.6\".", tagsHandler)
 	createFlag("kubeConfig", "", "kube config file", kubeConfigHandler)
 	flag.Parse()
@@ -65,9 +64,8 @@ func outputDirHandler(v *string) {
 
 // outputTypeHandler validates provided value and sets output accordingly
 func outputTypeHandler(v *string) {
-	if *v != "" {
+	if len(*v) > 0 {
 		if *v == "IO" {
-			probr.SetIOPaths("", config.Vars.OutputDir)
 			log.Printf("[NOTICE] Probr results will be written to files in the specified output directory: %v", *v)
 		} else if *v == "INMEM" {
 			log.Printf("[NOTICE] Output type specified as INMEM: Results will not be handled by the CLI. Refer to the Summary Log for a results summary.")
@@ -84,14 +82,14 @@ func tagsHandler(v *string) {
 		log.Printf("[NOTICE] Tags have been added via command line.")
 	}
 	if len(config.Vars.GetTags()) == 0 {
-		log.Printf("[NOTICE] No tags specified. All probes will be run.")
+		log.Printf("[NOTICE] No tags specified.")
 	}
 }
 
 func kubeConfigHandler(v *string) {
 	if len(*v) > 0 {
 		config.Vars.KubeConfigPath = *v
-		log.Printf("[NOTICE] Kube Config has been overridden via command line")
+		log.Printf("[NOTICE] Kubeconfig path has been overridden via command line")
 	}
 	if len(config.Vars.KubeConfigPath) == 0 {
 		log.Printf("[NOTICE] No kubeconfig path specified. Falling back to default paths.")

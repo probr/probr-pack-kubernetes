@@ -1,5 +1,8 @@
 kubeConfig: .kube/config
-outputType: INMEM
+outputType: IO
+outputDir: cucumber_output
+auditDir: audit_output
+overwriteHistoricalAudits: true
 summaryEnabled: true
 images:
     repository:

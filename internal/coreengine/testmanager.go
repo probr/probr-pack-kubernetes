@@ -128,7 +128,7 @@ func (ts *TestStore) AddTest(td TestDescriptor) string {
 	}
 	ts.Tests[td.Name] = &t
 
-	summary.State.LogEventMeta(td.Name, "status", t.Status.String())
+	summary.State.GetEventLog(t.TestDescriptor.Name).Status = t.Status.String()
 	summary.State.LogEventMeta(td.Name, "group", td.Group.String())
 	summary.State.LogEventMeta(td.Name, "category", td.Category.String())
 

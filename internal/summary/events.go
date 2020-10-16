@@ -1,64 +1,54 @@
 package summary
 
 import (
-	"runtime"
-	"strings"
+	"github.com/cucumber/messages-go/v10"
 )
 
-type Probe struct {
-	Status string
-	Steps  map[string]string
-}
-
 type Event struct {
-	Meta          map[string]string
-	PodsCreated   int
-	PodsDestroyed int
-	ProbesFailed  int
-	Probes        map[string]*Probe
+	name            string
+	audit           *EventAudit
+	Meta            map[string]interface{}
+	PodsDestroyed   int
+	ProbesFailed    int
+	ProbesSucceeded int
+	Status          string
 }
 
-// CountPodCreated increments PodsCreated for event
+// CountPodCreated increments pods_created for event
 func (e *Event) CountPodCreated() {
-	e.PodsCreated = e.PodsCreated + 1
+	e.Meta["pods_created"] = e.Meta["pods_created"].(int) + 1
 }
 
-// CountPodDestroyed increments PodsDestroyed for event
+// CountPodDestroyed increments pods_destroyed for event
 func (e *Event) CountPodDestroyed() {
-	e.PodsDestroyed = e.PodsDestroyed + 1
+	e.Meta["pods_destroyed"] = e.Meta["pods_destroyed"].(int) + 1
 }
 
-// LogProbe
-func (e *Event) LogProbe(name string, err error) {
-	// get most recent caller function name as probe step
-	f := make([]uintptr, 1)
-	runtime.Callers(2, f)                      // add full caller path to empty object
-	step := runtime.FuncForPC(f[0] - 1).Name() // get full caller path in string form
-	s := strings.Split(step, ".")              // split full caller path
-	step = s[len(s)-1]                         // select last element from caller path
-
-	// Initialize any empty objects
-	if e.Probes == nil {
-		e.Probes = make(map[string]*Probe)
-	}
-	if e.Probes[name] == nil {
-		e.Probes[name] = new(Probe)
-		e.Probes[name].Steps = make(map[string]string)
-	}
-
-	// Now do the actual probe summary
-	if err == nil {
-		e.Probes[name].Steps[step] = "Passed"
-	} else {
-		e.Probes[name].Steps[step] = "Failed"
-		e.Probes[name].Status = "Failed"
-	}
-}
-
-func (e *Event) CountFailures() {
-	for _, v := range e.Probes {
-		if v.Status == "Failed" {
+// countResults stores the current total number of failures as e.ProbesFailed. Run at event end
+func (e *Event) countResults() {
+	for _, v := range e.audit.Probes {
+		if v.Result == "Failed" {
 			e.ProbesFailed = e.ProbesFailed + 1
+		} else {
+			e.ProbesSucceeded = e.ProbesSucceeded + 1
 		}
+	}
+}
+
+func (e *Event) AuditProbeStep(name string, err error) {
+	e.audit.logProbeStep(name, err)
+}
+
+func (e *Event) AuditProbeMeta(name string, tags []*messages.Pickle_PickleTag) {
+	if e.audit.Probes == nil {
+		e.audit.Probes = make(map[string]*ProbeAudit)
+	}
+	var t []string
+	for _, v := range tags {
+		t = append(t, v.Name)
+	}
+	e.audit.Probes[name] = &ProbeAudit{
+		Steps: make(map[string]*StepAudit),
+		Tags:  t,
 	}
 }

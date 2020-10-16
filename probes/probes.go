@@ -15,6 +15,24 @@ import (
 	apiv1 "k8s.io/api/core/v1"
 )
 
+// State captures useful state data for use in tests.
+type State struct {
+	PodName         string
+	CreationError   *kubernetes.PodCreationError
+	ExpectedReason  *kubernetes.PodCreationErrorReason
+	CommandExitCode int
+}
+
+type probeState struct {
+	name             string
+	event            *summary.Event
+	httpStatusCode   int
+	podName          string
+	state            State
+	useDefaultNS     bool
+	hasWildcardRoles bool
+}
+
 const rootDirName = "probr"
 
 var outputDir *string
@@ -74,7 +92,7 @@ func getOutputDirectory() (*string, error) {
 			return nil, fmt.Errorf("output directory not set - attempt to default resulted in error: %v", err)
 		}
 
-		f := filepath.Join(r, "testoutput")
+		f := filepath.Join(r, "cucumber_output")
 		outputDir = &f
 	}
 
@@ -136,23 +154,14 @@ func notExcluded(tags []*messages.Pickle_PickleTag) bool {
 	return true
 }
 
-func BeforeScenario(name string, ps *probeState, s *godog.Scenario) {
+func (ps *probeState) BeforeScenario(eventName string, s *godog.Scenario) {
 	if notExcluded(s.Tags) {
 		ps.setup()
 		ps.name = s.Name
-		ps.event = summary.State.GetEventLog(name)
+		ps.event = summary.State.GetEventLog(eventName)
+		ps.event.AuditProbeMeta(s.Name, s.Tags)
 		LogScenarioStart(s)
 	}
-}
-
-type probeState struct {
-	name             string
-	event            *summary.Event
-	httpStatusCode   int
-	podName          string
-	state            State
-	useDefaultNS     bool
-	hasWildcardRoles bool
 }
 
 // Setup resets scenario-specific values
@@ -160,14 +169,6 @@ func (p *probeState) setup() {
 	p.state.PodName = ""
 	p.state.CreationError = nil
 	p.useDefaultNS = false
-}
-
-// State captures useful state data for use in tests.
-type State struct {
-	PodName         string
-	CreationError   *kubernetes.PodCreationError
-	ExpectedReason  *kubernetes.PodCreationErrorReason
-	CommandExitCode int
 }
 
 // ProcessPodCreationResult is a convenince function to process the result of a pod creation attempt.
@@ -260,6 +261,6 @@ func (p *probeState) aKubernetesClusterIsDeployed() error {
 	if b == nil || !*b {
 		log.Fatalf("[ERROR] Kubernetes cluster is not deployed")
 	}
-	p.event.LogProbe(p.name, nil) // If not fatal, success
+	p.event.AuditProbeStep(p.name, nil) // If not fatal, success
 	return nil
 }

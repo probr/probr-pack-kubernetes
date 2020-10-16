@@ -50,7 +50,7 @@ func (p *probeState) iInspectTheThatAreConfigured(roleLevel string) error {
 	if err != nil {
 		err = LogAndReturnError("error raised when retrieving roles for rolelevel %v: %v", roleLevel, err)
 	}
-	p.event.LogProbe(p.name, err)
+	p.event.AuditProbeStep(p.name, err)
 	return err
 }
 
@@ -60,7 +60,7 @@ func (p *probeState) iShouldOnlyFindWildcardsInKnownAndAuthorisedConfigurations(
 	if p.hasWildcardRoles {
 		err = LogAndReturnError("roles exist with wildcarded resources")
 	}
-	p.event.LogProbe(p.name, err)
+	p.event.AuditProbeStep(p.name, err)
 	return err
 }
 
@@ -75,7 +75,7 @@ func (p *probeState) iAttemptToCreateADeploymentWhichDoesNotHaveASecurityContext
 
 	e := p.event
 	s := ProcessPodCreationResult(&p.state, pd, kubernetes.UndefinedPodCreationErrorReason, e, err)
-	e.LogProbe(p.name, s)
+	e.AuditProbeStep(p.name, s)
 	return s
 }
 
@@ -85,7 +85,7 @@ func (p *probeState) theDeploymentIsRejected() error {
 	if p.state.CreationError == nil {
 		err = LogAndReturnError("pod %v was created successfully. Test fail.", p.state.PodName)
 	}
-	p.event.LogProbe(p.name, err)
+	p.event.AuditProbeStep(p.name, err)
 	return err
 }
 
@@ -138,7 +138,7 @@ func genScenarioInitialize(ctx *godog.ScenarioContext) {
 	ps := probeState{}
 
 	ctx.BeforeScenario(func(s *godog.Scenario) {
-		BeforeScenario(GEN_NAME, &ps, s)
+		ps.BeforeScenario(GEN_NAME, s)
 	})
 
 	//general
