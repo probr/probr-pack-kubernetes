@@ -9,7 +9,7 @@ import (
 	"github.com/cucumber/godog"
 )
 
-const PSP_NAME = "pod_security_policy"
+const psp_name = "pod_security_policy"
 
 // PodSecurityPolicy is the section of the kubernetes package which provides the kubernetes interactions required to support
 // pod security policy
@@ -28,7 +28,7 @@ func SetPodSecurityPolicy(p kubernetes.PodSecurityPolicy) {
 // invoke this function automatically on initial load.
 func init() {
 	td := coreengine.TestDescriptor{Group: coreengine.Kubernetes,
-		Category: coreengine.PodSecurityPolicies, Name: PSP_NAME}
+		Category: coreengine.PodSecurityPolicies, Name: psp_name}
 
 	coreengine.AddTestHandler(td, &coreengine.GoDogTestTuple{
 		Handler: GodogTestHandler,
@@ -506,7 +506,7 @@ func pspScenarioInitialize(ctx *godog.ScenarioContext) {
 	ps := probeState{}
 
 	ctx.BeforeScenario(func(s *godog.Scenario) {
-		ps.BeforeScenario(PSP_NAME, s)
+		ps.BeforeScenario(psp_name, s)
 	})
 
 	ctx.Step(`^a Kubernetes cluster exists which we can deploy into$`, ps.aKubernetesClusterIsDeployed)
@@ -577,7 +577,7 @@ func pspScenarioInitialize(ctx *godog.ScenarioContext) {
 	ctx.Step(`^I should be able to perform an allowed command$`, ps.performAllowedCommand)
 
 	ctx.AfterScenario(func(s *godog.Scenario, err error) {
-		psp.TeardownPodSecurityTest(&ps.state.PodName, PSP_NAME)
+		psp.TeardownPodSecurityTest(&ps.state.PodName, psp_name)
 		ps.state.PodName = ""
 		ps.state.CreationError = nil
 		LogScenarioEnd(s)

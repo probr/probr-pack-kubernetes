@@ -12,7 +12,7 @@ import (
 	"github.com/cucumber/godog"
 )
 
-const GEN_NAME = "general"
+const gen_name = "general"
 
 // init() registers the feature tests descibed in this package with the test runner (coreengine.TestRunner) via the call
 // to coreengine.AddTestHandler.  This links the test - described by the TestDescriptor - with the handler to invoke.  In
@@ -22,7 +22,7 @@ const GEN_NAME = "general"
 // invoke this function automatically on initial load.
 func init() {
 	td := coreengine.TestDescriptor{Group: coreengine.Kubernetes,
-		Category: coreengine.General, Name: GEN_NAME}
+		Category: coreengine.General, Name: gen_name}
 
 	coreengine.AddTestHandler(td, &coreengine.GoDogTestTuple{
 		Handler: GodogTestHandler,
@@ -138,7 +138,7 @@ func genScenarioInitialize(ctx *godog.ScenarioContext) {
 	ps := probeState{}
 
 	ctx.BeforeScenario(func(s *godog.Scenario) {
-		ps.BeforeScenario(GEN_NAME, s)
+		ps.BeforeScenario(gen_name, s)
 	})
 
 	//general
@@ -156,7 +156,7 @@ func genScenarioInitialize(ctx *godog.ScenarioContext) {
 	ctx.Step(`^the Kubernetes Web UI is disabled$`, ps.theKubernetesWebUIIsDisabled)
 
 	ctx.AfterScenario(func(s *godog.Scenario, err error) {
-		kubernetes.GetKubeInstance().DeletePod(&ps.state.PodName, utils.StringPtr("probr-general-test-ns"), false, GEN_NAME)
+		kubernetes.GetKubeInstance().DeletePod(&ps.state.PodName, utils.StringPtr("probr-general-test-ns"), false, gen_name)
 		LogScenarioEnd(s)
 	})
 }

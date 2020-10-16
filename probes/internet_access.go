@@ -8,14 +8,14 @@ import (
 	"github.com/cucumber/godog"
 )
 
-const IA_NAME = "internet_access"
+const ia_name = "internet_access"
 
-var IA_PROBE probeState
+var ia_ps probeState
 
 func init() {
-	IA_PROBE = probeState{}
+	ia_ps = probeState{}
 	td := coreengine.TestDescriptor{Group: coreengine.Kubernetes,
-		Category: coreengine.InternetAccess, Name: IA_NAME}
+		Category: coreengine.InternetAccess, Name: ia_name}
 
 	coreengine.AddTestHandler(td, &coreengine.GoDogTestTuple{
 		Handler: GodogTestHandler,
@@ -87,7 +87,7 @@ func iaTestSuiteInitialize(ctx *godog.TestSuiteContext) {
 	ctx.BeforeSuite(func() {}) //nothing for now
 
 	ctx.AfterSuite(func() {
-		na.TeardownNetworkAccessTestPod(&IA_PROBE.podName, IA_NAME)
+		na.TeardownNetworkAccessTestPod(&ia_ps.podName, ia_name)
 	})
 
 	//check dependancies ...
@@ -104,16 +104,16 @@ func iaTestSuiteInitialize(ctx *godog.TestSuiteContext) {
 func iaScenarioInitialize(ctx *godog.ScenarioContext) {
 
 	ctx.BeforeScenario(func(s *godog.Scenario) {
-		IA_PROBE.BeforeScenario(IA_NAME, s)
+		ia_ps.BeforeScenario(ia_name, s)
 	})
 
-	ctx.Step(`^a Kubernetes cluster is deployed$`, IA_PROBE.aKubernetesClusterIsDeployed)
-	ctx.Step(`^a pod is deployed in the cluster$`, IA_PROBE.aPodIsDeployedInTheCluster)
-	ctx.Step(`^a process inside the pod establishes a direct http\(s\) connection to "([^"]*)"$`, IA_PROBE.aProcessInsideThePodEstablishesADirectHTTPSConnectionTo)
-	ctx.Step(`^access is "([^"]*)"$`, IA_PROBE.accessIs)
+	ctx.Step(`^a Kubernetes cluster is deployed$`, ia_ps.aKubernetesClusterIsDeployed)
+	ctx.Step(`^a pod is deployed in the cluster$`, ia_ps.aPodIsDeployedInTheCluster)
+	ctx.Step(`^a process inside the pod establishes a direct http\(s\) connection to "([^"]*)"$`, ia_ps.aProcessInsideThePodEstablishesADirectHTTPSConnectionTo)
+	ctx.Step(`^access is "([^"]*)"$`, ia_ps.accessIs)
 
 	ctx.AfterScenario(func(s *godog.Scenario, err error) {
-		IA_PROBE.httpStatusCode = 0
+		ia_ps.httpStatusCode = 0
 		LogScenarioEnd(s)
 	})
 }

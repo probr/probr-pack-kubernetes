@@ -32,7 +32,7 @@ type ConfigVars struct {
 		ClientSecret    string `yaml:"clientSecret"`
 		TenantID        string `yaml:"tenantID"`
 		LocationDefault string `yaml:"locationDefault"`
-		AzureIdentity   struct {
+		Identity        struct {
 			DefaultNamespaceAI  string `yaml:"defaultNamespaceAI"`
 			DefaultNamespaceAIB string `yaml:"defaultNamespaceAIB"`
 		} `yaml:"azureIdentity"`

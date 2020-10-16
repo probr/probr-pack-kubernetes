@@ -11,7 +11,7 @@ import (
 )
 
 const (
-	CRA_NAME = "container_registry_access"
+	cra_name = "container_registry_access"
 )
 
 // init() registers the feature tests descibed in this package with the test runner (coreengine.TestRunner) via the call
@@ -22,7 +22,7 @@ const (
 // invoke this function automatically on initial load.
 func init() {
 	td := coreengine.TestDescriptor{Group: coreengine.Kubernetes,
-		Category: coreengine.ContainerRegistryAccess, Name: CRA_NAME}
+		Category: coreengine.ContainerRegistryAccess, Name: cra_name}
 
 	coreengine.AddTestHandler(td, &coreengine.GoDogTestTuple{
 		Handler: GodogTestHandler,
@@ -102,7 +102,7 @@ func craScenarioInitialize(ctx *godog.ScenarioContext) {
 	ps := probeState{}
 
 	ctx.BeforeScenario(func(s *godog.Scenario) {
-		ps.BeforeScenario(CRA_NAME, s)
+		ps.BeforeScenario(cra_name, s)
 	})
 
 	//common
@@ -118,7 +118,7 @@ func craScenarioInitialize(ctx *godog.ScenarioContext) {
 	ctx.Step(`^the deployment attempt is "([^"]*)"$`, ps.theDeploymentAttemptIs)
 
 	ctx.AfterScenario(func(s *godog.Scenario, err error) {
-		cra.TeardownContainerAccessTestPod(&ps.state.PodName, CRA_NAME)
+		cra.TeardownContainerAccessTestPod(&ps.state.PodName, cra_name)
 
 		LogScenarioEnd(s)
 	})

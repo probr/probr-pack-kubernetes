@@ -17,7 +17,7 @@ import (
 	iamassets "github.com/citihub/probr/probes/kubernetes/iam/assets"
 )
 
-const IAM_NAME = "iam_control"
+const iam_name = "iam_control"
 
 // IdentityAccessManagement is the section of the kubernetes package which provides the kubernetes interactions required to support
 // identity access management probes.
@@ -36,7 +36,7 @@ func SetIAM(i kubernetes.IdentityAccessManagement) {
 // invoke this function automatically on initial load.
 func init() {
 	td := coreengine.TestDescriptor{Group: coreengine.Kubernetes,
-		Category: coreengine.IAM, Name: IAM_NAME}
+		Category: coreengine.IAM, Name: iam_name}
 
 	coreengine.AddTestHandler(td, &coreengine.GoDogTestTuple{
 		Handler: GodogTestHandler,
@@ -257,7 +257,7 @@ func iamScenarioInitialize(ctx *godog.ScenarioContext) {
 	ps := probeState{}
 
 	ctx.BeforeScenario(func(s *godog.Scenario) {
-		ps.BeforeScenario(IAM_NAME, s)
+		ps.BeforeScenario(iam_name, s)
 	})
 
 	//general/all
@@ -286,7 +286,7 @@ func iamScenarioInitialize(ctx *godog.ScenarioContext) {
 	ctx.Step(`^the cluster has managed identity components deployed$`, ps.theClusterHasManagedIdentityComponentsDeployed)
 
 	ctx.AfterScenario(func(s *godog.Scenario, err error) {
-		iam.DeleteIAMTestPod(ps.state.PodName, ps.useDefaultNS, IAM_NAME)
+		iam.DeleteIAMTestPod(ps.state.PodName, ps.useDefaultNS, iam_name)
 		LogScenarioEnd(s)
 	})
 }
