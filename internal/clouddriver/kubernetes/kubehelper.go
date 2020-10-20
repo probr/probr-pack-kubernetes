@@ -80,6 +80,14 @@ type PodCreationError struct {
 	ReasonCodes map[PodCreationErrorReason]*PodCreationErrorReason
 }
 
+type PodAudit struct {
+	PodName         string
+	Namespace       string
+	ContainerName   string
+	Image           string
+	SecurityContext *apiv1.SecurityContext
+}
+
 func (p *PodCreationError) Error() string {
 	return fmt.Sprintf("pod creation error: %v %v", p.ReasonCodes, p.err)
 }
@@ -111,9 +119,9 @@ type Kubernetes interface {
 	ClusterIsDeployed() *bool
 	GetClient() (*kubernetes.Clientset, error)
 	GetPods(ns string) (*apiv1.PodList, error)
-	CreatePod(pname *string, ns *string, cname *string, image *string, w bool, sc *apiv1.SecurityContext) (*apiv1.Pod, error)
-	CreatePodFromObject(p *apiv1.Pod, pname *string, ns *string, w bool) (*apiv1.Pod, error)
-	CreatePodFromYaml(y []byte, pname *string, ns *string, image *string, aadpodidbinding *string, w bool) (*apiv1.Pod, error)
+	CreatePod(pname string, ns string, cname string, image string, w bool, sc *apiv1.SecurityContext) (*apiv1.Pod, *PodAudit, error)
+	CreatePodFromObject(p *apiv1.Pod, pname string, ns string, w bool) (*apiv1.Pod, error)
+	CreatePodFromYaml(y []byte, pname string, ns string, image string, aadpodidbinding string, w bool) (*apiv1.Pod, error)
 	GetPodObject(pname string, ns string, cname string, image string, sc *apiv1.SecurityContext) *apiv1.Pod
 	ExecCommand(cmd, ns, pn *string) *CmdExecutionResult
 	DeletePod(pname *string, ns *string, w bool, e string) error
@@ -243,18 +251,20 @@ func getPods(c *kubernetes.Clientset, ns string) (*apiv1.PodList, error) {
 	return pods, nil
 }
 
-// CreatePod creates a pod with the supplied parameters.  A true value for 'w' indicates that the function
-// should wait (block) until the pod is in a running state.
-func (k *Kube) CreatePod(pname *string, ns *string, cname *string, image *string, w bool, sc *apiv1.SecurityContext) (*apiv1.Pod, error) {
+// CreatePod creates a pod with the supplied parameters.  A true value for 'wait' indicates that
+// the function should wait (block) until the pod is in a running state.
+func (k *Kube) CreatePod(podName string, ns string, containerName string, image string, wait bool, sc *apiv1.SecurityContext) (*apiv1.Pod, *PodAudit, error) {
 	//create Pod Objet ...
-	p := k.GetPodObject(*pname, *ns, *cname, *image, sc)
+	p := k.GetPodObject(podName, ns, containerName, image, sc)
+	audit := &PodAudit{podName, "probr-general-test-ns", containerName, image, sc}
 
-	return k.CreatePodFromObject(p, pname, ns, w)
+	pod, err := k.CreatePodFromObject(p, podName, ns, wait)
+	return pod, audit, err
 }
 
 // CreatePodFromYaml creates a pod for the supplied yaml.  A true value for 'w' indicates that the function
 // should wait (block) until the pod is in a running state.
-func (k *Kube) CreatePodFromYaml(y []byte, pname *string, ns *string, image *string, aadpodidbinding *string, w bool) (*apiv1.Pod, error) {
+func (k *Kube) CreatePodFromYaml(y []byte, pname string, ns string, image string, aadpodidbinding string, w bool) (*apiv1.Pod, error) {
 
 	decode := scheme.Codecs.UniversalDeserializer().Decode
 
@@ -262,20 +272,20 @@ func (k *Kube) CreatePodFromYaml(y []byte, pname *string, ns *string, image *str
 
 	p := o.(*apiv1.Pod)
 	//update the name to the one that's supplied
-	p.SetName(*pname)
+	p.SetName(pname)
 	//also update the image (which could have been supplied via the env)
 	//(only expecting one container, but loop in case of many)
-	if image != nil {
+	if image != "" {
 		for _, c := range p.Spec.Containers {
-			c.Image = *image
+			c.Image = image
 		}
 	}
 
-	if aadpodidbinding != nil {
+	if aadpodidbinding != "" {
 		if p.Labels == nil {
 			p.Labels = make(map[string]string)
 		}
-		p.Labels["aadpodidbinding"] = *aadpodidbinding
+		p.Labels["aadpodidbinding"] = aadpodidbinding
 	}
 
 	return k.CreatePodFromObject(p, pname, ns, w)
@@ -283,12 +293,12 @@ func (k *Kube) CreatePodFromYaml(y []byte, pname *string, ns *string, image *str
 
 // CreatePodFromObject creates a pod from the supplied pod object with the given pod name and namespace.  A true value for 'w' indicates that the function
 // should wait (block) until the pod is in a running state.
-func (k *Kube) CreatePodFromObject(p *apiv1.Pod, pname *string, ns *string, w bool) (*apiv1.Pod, error) {
-	if p == nil || pname == nil || ns == nil {
+func (k *Kube) CreatePodFromObject(p *apiv1.Pod, pname string, ns string, w bool) (*apiv1.Pod, error) {
+	if p == nil || pname == "" || ns == "" {
 		return nil, fmt.Errorf("one or more of pod (%v), podName (%v) or namespace (%v) is nil - cannot create POD", p, pname, ns)
 	}
 
-	log.Printf("[INFO] Creating pod %v in namespace %v", *pname, *ns)
+	log.Printf("[INFO] Creating pod %v in namespace %v", pname, ns)
 	log.Printf("[DEBUG] Pod details: %+v", *p)
 
 	c, err := k.GetClient()
@@ -297,13 +307,13 @@ func (k *Kube) CreatePodFromObject(p *apiv1.Pod, pname *string, ns *string, w bo
 	}
 
 	//create the namespace for the POD (noOp if already present)
-	_, err = k.createNamespace(ns)
+	_, err = k.createNamespace(&ns)
 	if err != nil {
 		return nil, err
 	}
 
 	//now do pod ...
-	pc := c.CoreV1().Pods(*ns)
+	pc := c.CoreV1().Pods(ns)
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
@@ -311,13 +321,13 @@ func (k *Kube) CreatePodFromObject(p *apiv1.Pod, pname *string, ns *string, w bo
 	res, err := pc.Create(ctx, p, metav1.CreateOptions{})
 	if err != nil {
 		if isAlreadyExists(err) {
-			log.Printf("[NOTICE] POD %v already exists. Returning existing.", *pname)
-			res, _ := pc.Get(ctx, *pname, metav1.GetOptions{})
+			log.Printf("[NOTICE] POD %v already exists. Returning existing.", pname)
+			res, _ := pc.Get(ctx, pname, metav1.GetOptions{})
 
 			//return it and nil out err
 			return res, nil
 		} else if isForbidden(err) {
-			log.Printf("[NOTICE] Creation of POD %v is forbidden: %v", *pname, err)
+			log.Printf("[NOTICE] Creation of POD %v is forbidden: %v", pname, err)
 			//return a specific error:
 			return nil, &PodCreationError{err, *k.toPodCreationErrorCode(err)}
 		}
@@ -328,7 +338,7 @@ func (k *Kube) CreatePodFromObject(p *apiv1.Pod, pname *string, ns *string, w bo
 
 	if w {
 		//wait:
-		err = k.waitForPhase(apiv1.PodRunning, c, ns, pname)
+		err = k.waitForPhase(apiv1.PodRunning, c, &ns, &pname)
 		if err != nil {
 			return res, err
 		}

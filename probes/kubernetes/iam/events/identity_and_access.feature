@@ -12,7 +12,6 @@ Feature: Ensure stringent authentication and authorisation
   @preventative @AZ-AAD-AI-1.0
   Scenario Outline: Prevent cross namespace Azure Identities
     Given a Kubernetes cluster exists which we can deploy into
-    And the default namespace has an AzureIdentityBinding
     When I create a simple pod in "<namespace>" namespace assigned with that AzureIdentityBinding
     Then the pod is deployed successfully
     But an attempt to obtain an access token from that pod should "<RESULT>"

@@ -12,23 +12,29 @@ import (
 )
 
 type EventAudit struct {
-	path   string
-	Name   string
-	Result string
-	Probes map[string]*ProbeAudit
+	path            string
+	Name            string
+	PodsDestroyed   *int
+	ProbesAttempted *int
+	ProbesSucceeded *int
+	ProbesFailed    *int
+	Result          *string
+	Probes          map[int]*ProbeAudit
 }
 
 type ProbeAudit struct {
-	Description string
-	Result      string
-	Tags        []string
-	Steps       map[string]*StepAudit
+	Name   string
+	Result string // Passed / Failed / Given Not Met
+	Tags   []string
+	Steps  map[int]*StepAudit
 }
 
 type StepAudit struct {
-	Result      string
-	Description string
-	Payload     string
+	Name        string
+	Description string      // Long-form exlanation of anything happening in the step
+	Result      string      // Passed / Failed
+	Error       string      // Log the error text
+	Payload     interface{} // Handles any values that are sent across the network
 }
 
 func (e *EventAudit) Write() {
@@ -49,25 +55,34 @@ func (e *EventAudit) Write() {
 	}
 }
 
-// logProbeStep sets pass/fail on probe based on err parameter
-func (e *EventAudit) logProbeStep(name string, err error) {
+// auditProbeStep sets description, payload, and pass/fail based on err parameter
+func (p *ProbeAudit) AuditProbeStep(description string, payload interface{}, err error) {
 	// Initialize any empty objects
-	probe := e.Probes[name]
 	// Now do the actual probe summary
-	stepName := getCallerName()
-	if err == nil {
-		probe.Steps[stepName] = &StepAudit{Result: "Passed"}
-	} else {
-		probe.Steps[stepName] = &StepAudit{Result: "Failed"}
-		probe.Result = "Failed" // Track this in both summary and audit
+	stepName := getCallerName(3)
+	stepNumber := len(p.Steps) + 1
+	p.Steps[stepNumber] = &StepAudit{
+		Name:        stepName,
+		Description: description,
+		Payload:     payload,
 	}
-	e.Probes[name] = probe
+	if err == nil {
+		p.Steps[stepNumber].Result = "Passed"
+	} else {
+		p.Steps[stepNumber].Result = "Failed"
+		p.Steps[stepNumber].Error = strings.Replace(err.Error(), "[ERROR] ", "", -1)
+		if stepNumber == 1 {
+			p.Result = "Given Not Met" // First entry is always a 'given'; failures should be ignored
+		} else {
+			p.Result = "Failed" // First 'given' was met, but a subsequent step failed
+		}
+	}
 }
 
 // getCallerName retrieves the name of the function prior to the location it is called
-func getCallerName() string {
+func getCallerName(up int) string {
 	f := make([]uintptr, 1)
-	runtime.Callers(4, f)                      // add full caller path to empty object
+	runtime.Callers(up, f)                     // add full caller path to empty object
 	step := runtime.FuncForPC(f[0] - 1).Name() // get full caller path in string form
 	s := strings.Split(step, ".")              // split full caller path
 	return s[len(s)-1]                         // select last element from caller path

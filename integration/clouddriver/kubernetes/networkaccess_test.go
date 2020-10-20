@@ -4,8 +4,8 @@ import (
 	"log"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
 	"github.com/citihub/probr/internal/clouddriver/kubernetes"
+	"github.com/stretchr/testify/assert"
 )
 
 //TODO: this will be revised when the unit/integration tests are refactored to be properly mocked
@@ -13,7 +13,7 @@ var na = kubernetes.NewDefaultNA()
 
 func TestSetupNetworkAccessTestPod(t *testing.T) {
 
-	p, err := na.SetupNetworkAccessTestPod()
+	p, _, err := na.SetupNetworkAccessTestPod()
 
 	assert.Nil(t, err)
 	assert.NotNil(t, p)
@@ -21,7 +21,7 @@ func TestSetupNetworkAccessTestPod(t *testing.T) {
 
 func TestIsURLAccessible(t *testing.T) {
 	//need to dupe above .. fix?
-	p, err := na.SetupNetworkAccessTestPod()
+	p, _, err := na.SetupNetworkAccessTestPod()
 
 	assert.Nil(t, err)
 	assert.NotNil(t, p)

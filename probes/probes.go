@@ -24,13 +24,14 @@ type State struct {
 }
 
 type probeState struct {
-	name             string
-	event            *summary.Event
-	httpStatusCode   int
-	podName          string
-	state            State
-	useDefaultNS     bool
-	hasWildcardRoles bool
+	name           string
+	audit          *summary.ProbeAudit
+	event          *summary.Event
+	httpStatusCode int
+	podName        string
+	state          State
+	useDefaultNS   bool
+	wildcardRoles  interface{}
 }
 
 const rootDirName = "probr"
@@ -154,12 +155,11 @@ func notExcluded(tags []*messages.Pickle_PickleTag) bool {
 	return true
 }
 
-func (ps *probeState) BeforeScenario(eventName string, s *godog.Scenario) {
+func (p *probeState) BeforeScenario(eventName string, s *godog.Scenario) {
 	if notExcluded(s.Tags) {
-		ps.setup()
-		ps.name = s.Name
-		ps.event = summary.State.GetEventLog(eventName)
-		ps.event.AuditProbeMeta(s.Name, s.Tags)
+		p.setup()
+		p.name = s.Name
+		p.audit = summary.State.GetEventLog(eventName).InitializeAuditor(s.Name, s.Tags)
 		LogScenarioStart(s)
 	}
 }
@@ -173,8 +173,7 @@ func (p *probeState) setup() {
 
 // ProcessPodCreationResult is a convenince function to process the result of a pod creation attempt.
 // It records state information on the supplied state structure.
-func ProcessPodCreationResult(s *State, pd *apiv1.Pod, expected kubernetes.PodCreationErrorReason, e *summary.Event, err error) error {
-
+func ProcessPodCreationResult(event *summary.Event, s *State, pd *apiv1.Pod, expected kubernetes.PodCreationErrorReason, err error) error {
 	//first check for errors:
 	if err != nil {
 		//check if we've got a partial pod creation
@@ -182,7 +181,7 @@ func ProcessPodCreationResult(s *State, pd *apiv1.Pod, expected kubernetes.PodCr
 		//in this case we need to hold onto the name so it can be deleted
 		if pd != nil {
 			s.PodName = pd.GetObjectMeta().GetName()
-			e.CountPodCreated()
+			event.CountPodCreated()
 			summary.State.LogPodName(s.PodName)
 		}
 
@@ -209,7 +208,7 @@ func ProcessPodCreationResult(s *State, pd *apiv1.Pod, expected kubernetes.PodCr
 	//if we've got this far, a pod was successfully created which could be
 	//valid for some tests
 	s.PodName = pd.GetObjectMeta().GetName()
-	e.CountPodCreated()
+	event.CountPodCreated()
 	summary.State.LogPodName(s.PodName)
 
 	//we're good
@@ -261,6 +260,23 @@ func (p *probeState) aKubernetesClusterIsDeployed() error {
 	if b == nil || !*b {
 		log.Fatalf("[ERROR] Kubernetes cluster is not deployed")
 	}
-	p.event.AuditProbeStep(p.name, nil) // If not fatal, success
+
+	description := "Passes if Probr successfully connects to the specified cluster."
+	payload := struct {
+		KubeConfigPath string
+		KubeContext    string
+	}{config.Vars.KubeConfigPath, config.Vars.KubeContext}
+	p.audit.AuditProbeStep(description, payload, nil)
+
 	return nil
+}
+
+func podPayload(pod *apiv1.Pod, podAudit *kubernetes.PodAudit) interface{} {
+	return struct {
+		Pod      *apiv1.Pod
+		PodAudit *kubernetes.PodAudit
+	}{
+		Pod:      pod,
+		PodAudit: podAudit,
+	}
 }

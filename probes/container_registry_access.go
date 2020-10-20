@@ -3,11 +3,13 @@
 package probes
 
 import (
+	"fmt"
+
 	"github.com/cucumber/godog"
 
 	"github.com/citihub/probr/internal/clouddriver/kubernetes"
+	"github.com/citihub/probr/internal/config"
 	"github.com/citihub/probr/internal/coreengine"
-	"github.com/citihub/probr/internal/utils"
 )
 
 const (
@@ -48,10 +50,14 @@ func SetContainerRegistryAccess(c kubernetes.ContainerRegistryAccess) {
 // CIS-6.1.3
 // Minimize cluster access to read-only
 func (p *probeState) iAmAuthorisedToPullFromAContainerRegistry() error {
-	pd, err := cra.SetupContainerAccessTestPod(utils.StringPtr("docker.io"))
+	pod, podAudit, err := cra.SetupContainerAccessTestPod(config.Vars.Images.Repository)
 
-	s := ProcessPodCreationResult(&p.state, pd, kubernetes.PSPContainerAllowedImages, p.event, err)
-	p.event.AuditProbeStep(p.name, s)
+	s := ProcessPodCreationResult(p.event, &p.state, pod, kubernetes.PSPContainerAllowedImages, err)
+
+	description := fmt.Sprintf("Creates a new pod using an image from %s. Passes if image successfully pulls and pod is built.", config.Vars.Images.Repository)
+	payload := podPayload(pod, podAudit)
+	p.audit.AuditProbeStep( description, payload, s)
+
 	return s
 }
 
@@ -68,17 +74,23 @@ func (p *probeState) thePushRequestIsRejectedDueToAuthorization() error {
 // CIS-6.1.4
 // Ensure only authorised container registries are allowed
 func (p *probeState) aUserAttemptsToDeployAContainerFrom(auth string, registry string) error {
-	pd, err := cra.SetupContainerAccessTestPod(&registry)
+	pod, podAudit, err := cra.SetupContainerAccessTestPod(registry)
 
-	e := p.event
-	s := ProcessPodCreationResult(&p.state, pd, kubernetes.PSPContainerAllowedImages, e, err)
-	e.AuditProbeStep(p.name, s)
+	s := ProcessPodCreationResult(p.event, &p.state, pod, kubernetes.PSPContainerAllowedImages, err)
+
+	description := fmt.Sprintf("Attempts to deploy a container from %s. Retains pod creation result in probe state. Passes so long as user is authorized to deploy containers.", registry)
+	payload := podPayload(pod, podAudit)
+	p.audit.AuditProbeStep( description, payload, s)
+
 	return s
 }
 
 func (p *probeState) theDeploymentAttemptIs(res string) error {
 	s := AssertResult(&p.state, res, "")
-	p.event.AuditProbeStep(p.name, s)
+
+	description := fmt.Sprintf("Asserts pod creation result in probe state is %s.", res)
+	p.audit.AuditProbeStep( description, nil, s)
+
 	return s
 }
 

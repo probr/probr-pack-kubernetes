@@ -17,7 +17,7 @@ func setFromEnvOrDefaults(e *ConfigVars) {
 	e.set(&e.SummaryEnabled, "PROBR_SUMMARY_ENABLED", "true")
 	e.set(&e.OutputType, "PROBR_OUTPUT_TYPE", "IO")
 	e.set(&e.OutputDir, "PROBR_OUTPUT_DIR", "cucumber_output")
-	e.set(&e.OverwriteHistoricalAudits, "OVERWRITE_AUDITS", "false")
+	e.set(&e.OverwriteHistoricalAudits, "OVERWRITE_AUDITS", "true")
 
 	e.set(&e.Images.Repository, "IMAGE_REPOSITORY", "docker.io")
 	e.set(&e.Images.Curl, "CURL_IMAGE", "curl")
@@ -55,14 +55,14 @@ func (e *ConfigVars) set(field interface{}, var_name string, default_value inter
 	default:
 		log.Fatalf("unexpected type for %v, %T", var_name, v)
 	case *string:
-		if field == "" {
+		if *field.(*string) == "" {
 			*field.(*string) = os.Getenv(var_name)
 		}
-		if field == "" {
+		if *field.(*string) == "" {
 			*field.(*string) = default_value.(string)
 		}
 	case *[]string:
-		if field == "" {
+		if len(*field.(*[]string)) == 0 {
 			t := os.Getenv(var_name) // if []string, env var should be comma separated values
 			if len(t) > 0 {
 				*field.(*[]string) = append(*field.(*[]string), strings.Split(t, ",")...)

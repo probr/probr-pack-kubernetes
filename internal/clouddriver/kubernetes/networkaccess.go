@@ -21,7 +21,7 @@ const (
 // NetworkAccess defines functionality for supporting Network Access tests.
 type NetworkAccess interface {
 	ClusterIsDeployed() *bool
-	SetupNetworkAccessTestPod() (*apiv1.Pod, error)
+	SetupNetworkAccessTestPod() (*apiv1.Pod, *PodAudit, error)
 	TeardownNetworkAccessTestPod(p *string, e string) error
 	AccessURL(pn *string, url *string) (int, error)
 }
@@ -62,7 +62,7 @@ func (n *NA) setup() {
 	n.testPodName = defaultNATestPodName
 
 	// image repository + curl from config
-	// but default if not supplied	
+	// but default if not supplied
 	i := config.Vars.Images.Repository
 	//need to fudge for 'curl' as it's registered as curlimages/curl
 	//on docker, so if we've been given a repository from the config
@@ -70,7 +70,7 @@ func (n *NA) setup() {
 	if len(i) < 1 || i == "docker.io" {
 		i = defaultNAImageRepository
 	}
-	
+
 	b := config.Vars.Images.Curl
 	if len(b) < 1 {
 		b = defaultNATestImage
@@ -85,10 +85,10 @@ func (n *NA) ClusterIsDeployed() *bool {
 }
 
 // SetupNetworkAccessTestPod creates a pod with characteristics required for testing network access.
-func (n *NA) SetupNetworkAccessTestPod() (*apiv1.Pod, error) {
+func (n *NA) SetupNetworkAccessTestPod() (*apiv1.Pod, *PodAudit, error) {
 	pname, ns, cname, image := GenerateUniquePodName(n.testPodName), n.testNamespace, n.testContainer, n.testImage
 	//let caller handle result:
-	return n.k.CreatePod(&pname, &ns, &cname, &image, true, nil)
+	return n.k.CreatePod(pname, ns, cname, image, true, nil)
 }
 
 // TeardownNetworkAccessTestPod deletes the test pod with the given name.

@@ -35,7 +35,7 @@ func TestGetPods(t *testing.T) {
 }
 
 func TestCreatePod(t *testing.T) {
-	_, err := kubernetes.GetKubeInstance().CreatePod(&testPod, &testNS, &testContainer, &testImage, true, nil)
+	_, _, err := kubernetes.GetKubeInstance().CreatePod(testPod, testNS, testContainer, testImage, true, nil)
 
 	handleResult(nil, err)
 }
@@ -45,7 +45,7 @@ func TestCreatePodFromYaml(t *testing.T) {
 	b, _ := ioutil.ReadFile("assets/pod-test.yaml")
 	//y := string(b)
 
-	_, err := kubernetes.GetKubeInstance().CreatePodFromYaml(b, &testPod, &testNS, &testImage, nil, true)
+	_, err := kubernetes.GetKubeInstance().CreatePodFromYaml(b, testPod, testNS, testImage, "", true)
 
 	handleResult(nil, err)
 }

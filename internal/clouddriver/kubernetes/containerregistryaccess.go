@@ -16,7 +16,7 @@ const (
 // ContainerRegistryAccess interface defines the methods to support container registry access tests.
 type ContainerRegistryAccess interface {
 	ClusterIsDeployed() *bool
-	SetupContainerAccessTestPod(r *string) (*apiv1.Pod, error)
+	SetupContainerAccessTestPod(r string) (*apiv1.Pod, *PodAudit, error)
 	TeardownContainerAccessTestPod(p *string, e string) error
 }
 
@@ -47,13 +47,13 @@ func (c *CRA) ClusterIsDeployed() *bool {
 }
 
 //SetupContainerAccessTestPod creates a pod with characteristics required for testing container access.
-func (c *CRA) SetupContainerAccessTestPod(r *string) (*apiv1.Pod, error) {
+func (c *CRA) SetupContainerAccessTestPod(r string) (*apiv1.Pod, *PodAudit, error) {
 	//full image is the repository + the caTestImage
-	i := *r + caTestImage
-	pname := GenerateUniquePodName(caPodNameBase + "-" + strings.ReplaceAll(*r, ".", "-"))
+	i := r + caTestImage
+	pname := GenerateUniquePodName(caPodNameBase + "-" + strings.ReplaceAll(r, ".", "-"))
 	ns, cname := caNamespace, caContainer
 	// let caller handle result ...
-	return c.k.CreatePod(&pname, &ns, &cname, &i, true, nil)
+	return c.k.CreatePod(pname, ns, cname, i, true, nil)
 }
 
 //TeardownContainerAccessTestPod deletes the supplied test pod in the container registry access namespace.

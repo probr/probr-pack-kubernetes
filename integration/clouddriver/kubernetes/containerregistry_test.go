@@ -5,12 +5,11 @@ import (
 	"testing"
 
 	"github.com/citihub/probr/internal/clouddriver/kubernetes"
-	"github.com/citihub/probr/internal/utils"
 )
 
 func TestSetupContainerRegistyPod(t *testing.T) {
 
-	pd, err := kubernetes.NewDefaultCRA().SetupContainerAccessTestPod(utils.StringPtr("docker.io"))
+	pd, _, err := kubernetes.NewDefaultCRA().SetupContainerAccessTestPod("docker.io")
 
 	fmt.Printf("pd: %v err: %v", pd, err)
 }

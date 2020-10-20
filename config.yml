@@ -1,6 +1,5 @@
 kubeConfig: .kube/config
-outputType: IO
-outputDir: cucumber_output
+auditEnabled: true
 auditDir: audit_output
 overwriteHistoricalAudits: true
 summaryEnabled: true

@@ -493,7 +493,8 @@ func (psp *PSP) CreatePODSettingSecurityContext(pr *bool, pe *bool, runAsUser *i
 	pname, ns, cname, image := GenerateUniquePodName(psp.testPodName), psp.testNamespace, psp.testContainer, psp.testImage
 
 	//let caller handle ...
-	return psp.k.CreatePod(&pname, &ns, &cname, &image, true, &sc)
+	pod, _, err := psp.k.CreatePod(pname, ns, cname, image, true, &sc)
+	return pod, err
 }
 
 // CreatePODSettingAttributes creates a POD with attributes:
@@ -522,7 +523,7 @@ func (psp *PSP) CreatePODSettingAttributes(hostPID *bool, hostIPC *bool, hostNet
 	po.Spec.HostNetwork = *hostNetwork
 
 	// create from PO (and let caller handle ...)
-	return psp.k.CreatePodFromObject(po, &pname, &ns, true)
+	return psp.k.CreatePodFromObject(po, pname, ns, true)
 }
 
 // CreatePODSettingCapabilities creates a pod with the supplied capabilities.
@@ -549,15 +550,14 @@ func (psp *PSP) CreatePODSettingCapabilities(c *[]string) (*apiv1.Pod, error) {
 	}
 
 	// create from PO (and let caller handle ...)
-	return psp.k.CreatePodFromObject(po, &pname, &ns, true)
+	return psp.k.CreatePodFromObject(po, pname, ns, true)
 }
 
 // CreatePodFromYaml creates a pod from the supplied yaml.
 func (psp *PSP) CreatePodFromYaml(y []byte) (*apiv1.Pod, error) {
 	pname := GenerateUniquePodName(psp.testPodName)
 
-	return psp.k.CreatePodFromYaml(y, &pname, utils.StringPtr(psp.testNamespace),
-		utils.StringPtr(psp.testImage), nil, true)
+	return psp.k.CreatePodFromYaml(y, pname, psp.testNamespace, psp.testImage, "", true)
 }
 
 // ExecPSPTestCmd executes the given PSPTestCommand against the supplied pod name.

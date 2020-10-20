@@ -222,8 +222,8 @@ func (i *IAM) filteredRawResourceGrp(g string, k string, f string) (bool, error)
 func (i *IAM) CreateIAMTestPod(y []byte, useDefaultNS bool) (*apiv1.Pod, error) {
 	n := GenerateUniquePodName(i.testPodName)
 
-	return i.k.CreatePodFromYaml(y, &n, i.getNamespace(useDefaultNS), &i.testImage,
-		i.getAadPodIDBinding(useDefaultNS), true)
+	return i.k.CreatePodFromYaml(y, n, *i.getNamespace(useDefaultNS), i.testImage,
+		*i.getAadPodIDBinding(useDefaultNS), true)
 }
 
 // DeleteIAMTestPod deletes the IAM test pod with the supplied name.

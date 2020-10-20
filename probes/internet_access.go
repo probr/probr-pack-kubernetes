@@ -6,6 +6,7 @@ import (
 	"github.com/citihub/probr/internal/clouddriver/kubernetes"
 	"github.com/citihub/probr/internal/coreengine"
 	"github.com/cucumber/godog"
+	apiv1 "k8s.io/api/core/v1"
 )
 
 const ia_name = "internet_access"
@@ -38,11 +39,15 @@ func SetNetworkAccess(n kubernetes.NetworkAccess) {
 
 func (p *probeState) aPodIsDeployedInTheCluster() error {
 	var err error
+	var podAudit *kubernetes.PodAudit
+	var pod *apiv1.Pod
 	if p.podName != "" {
 		//only one pod is needed for all probes in this event
 		log.Printf("[DEBUG] Pod %v has already been created - reusing the pod", p.podName)
 	} else {
-		pod, e := na.SetupNetworkAccessTestPod()
+		pd, pa, e := na.SetupNetworkAccessTestPod()
+		podAudit = pa
+		pod = pd
 		if e != nil {
 			err = e
 		} else if pod == nil {
@@ -51,7 +56,11 @@ func (p *probeState) aPodIsDeployedInTheCluster() error {
 			p.podName = pod.GetObjectMeta().GetName()
 		}
 	}
-	p.event.AuditProbeStep(p.name, err)
+
+	description := ""
+	payload := podPayload(pod, podAudit)
+	p.audit.AuditProbeStep( description, payload, err)
+
 	return err
 }
 
@@ -64,7 +73,11 @@ func (p *probeState) aProcessInsideThePodEstablishesADirectHTTPSConnectionTo(url
 
 	//hold on to the code
 	p.httpStatusCode = code
-	p.event.AuditProbeStep(p.name, err)
+
+	description := ""
+	var payload interface{}
+	p.audit.AuditProbeStep( description, payload, err)
+
 	return err
 }
 
@@ -77,7 +90,11 @@ func (p *probeState) accessIs(accessResult string) error {
 			err = LogAndReturnError("got HTTP Status Code %v - failed", p.httpStatusCode)
 		}
 	}
-	p.event.AuditProbeStep(p.name, err)
+
+	description := ""
+	var payload interface{}
+	p.audit.AuditProbeStep( description, payload, err)
+
 	return err
 }
 

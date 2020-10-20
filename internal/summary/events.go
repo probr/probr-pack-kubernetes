@@ -9,9 +9,10 @@ type Event struct {
 	audit           *EventAudit
 	Meta            map[string]interface{}
 	PodsDestroyed   int
-	ProbesFailed    int
+	ProbesAttempted int
 	ProbesSucceeded int
-	Status          string
+	ProbesFailed    int
+	Result          string
 }
 
 // CountPodCreated increments pods_created for event
@@ -26,29 +27,29 @@ func (e *Event) CountPodDestroyed() {
 
 // countResults stores the current total number of failures as e.ProbesFailed. Run at event end
 func (e *Event) countResults() {
+	e.ProbesAttempted = len(e.audit.Probes)
 	for _, v := range e.audit.Probes {
 		if v.Result == "Failed" {
 			e.ProbesFailed = e.ProbesFailed + 1
-		} else {
+		} else if v.Result == "Passed" {
 			e.ProbesSucceeded = e.ProbesSucceeded + 1
 		}
 	}
 }
 
-func (e *Event) AuditProbeStep(name string, err error) {
-	e.audit.logProbeStep(name, err)
-}
-
-func (e *Event) AuditProbeMeta(name string, tags []*messages.Pickle_PickleTag) {
+func (e *Event) InitializeAuditor(name string, tags []*messages.Pickle_PickleTag) *ProbeAudit {
 	if e.audit.Probes == nil {
-		e.audit.Probes = make(map[string]*ProbeAudit)
+		e.audit.Probes = make(map[int]*ProbeAudit)
 	}
+	probeCounter := len(e.audit.Probes) + 1
 	var t []string
-	for _, v := range tags {
-		t = append(t, v.Name)
+	for _, tag := range tags {
+		t = append(t, tag.Name)
 	}
-	e.audit.Probes[name] = &ProbeAudit{
-		Steps: make(map[string]*StepAudit),
+	e.audit.Probes[probeCounter] = &ProbeAudit{
+		Name:  name,
+		Steps: make(map[int]*StepAudit),
 		Tags:  t,
 	}
+	return e.audit.Probes[probeCounter]
 }

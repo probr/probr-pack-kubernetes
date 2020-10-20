@@ -94,6 +94,8 @@ summary.State.GetEventLog(event).CountPodDestroyed()
 
 This function should be used every time a step in a probe completes. `AuditProbeStep` will automatically form the name of the step from the name of the function that called it. The name value provided will establish which probe the step is a part of. The error (or nil) provided will dictate whether the test passes or fails.
 
+The description and payload values are arbitrary and are used only to assist auditors in their evaluation. A `nil` error will be recorded as a successful step.
+
 ```
-p.event.AuditProbeStep(p.name, nil) // Success
+p.audit.AuditProbeStep( "description string", payloadObject, err) 
 ```

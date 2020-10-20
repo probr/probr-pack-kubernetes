@@ -105,24 +105,31 @@ func (s *SummaryState) initEvent(n string) {
 				path: ap,
 			},
 		}
-		s.Events[n].Meta["audit_path"] = ap
+		s.Events[n].Meta["audit_path"] = ap // Meta is open for extension, any similar data can be stored there as needed
+
+		// The event auditor should have pointers to the summary information
+		s.Events[n].audit.PodsDestroyed = &s.Events[n].PodsDestroyed
+		s.Events[n].audit.ProbesAttempted = &s.Events[n].ProbesAttempted
+		s.Events[n].audit.ProbesSucceeded = &s.Events[n].ProbesSucceeded
+		s.Events[n].audit.ProbesFailed = &s.Events[n].ProbesFailed
+		s.Events[n].audit.Result = &s.Events[n].Result
 	}
 }
 
 func (s *SummaryState) completeEvent(e *Event) {
 	e.countResults()
-	if e.Status == "Excluded" {
+	if e.Result == "Excluded" {
 		e.Meta["audit_path"] = ""
 		s.EventsSkipped = s.EventsSkipped + 1
 	} else if len(e.audit.Probes) < 1 {
-		e.Status = "No Probes Executed"
+		e.Result = "No Probes Executed"
 		e.Meta["audit_path"] = ""
 		s.EventsSkipped = s.EventsSkipped + 1
 	} else if e.ProbesFailed < 1 {
-		e.Status = "Success"
+		e.Result = "Success"
 		s.EventsPassed = s.EventsPassed + 1
 	} else {
-		e.Status = "Failed"
+		e.Result = "Failed"
 		s.EventsFailed = s.EventsFailed + 1
 	}
 }
