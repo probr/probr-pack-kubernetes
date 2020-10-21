@@ -11,10 +11,10 @@ import (
 
 const ia_name = "internet_access"
 
-var ia_ps probeState
+var ia_ps scenarioState
 
 func init() {
-	ia_ps = probeState{}
+	ia_ps = scenarioState{}
 	td := coreengine.TestDescriptor{Group: coreengine.Kubernetes,
 		Category: coreengine.InternetAccess, Name: ia_name}
 
@@ -37,13 +37,13 @@ func SetNetworkAccess(n kubernetes.NetworkAccess) {
 	na = n
 }
 
-func (p *probeState) aPodIsDeployedInTheCluster() error {
+func (s *scenarioState) aPodIsDeployedInTheCluster() error {
 	var err error
 	var podAudit *kubernetes.PodAudit
 	var pod *apiv1.Pod
-	if p.podName != "" {
+	if s.podName != "" {
 		//only one pod is needed for all probes in this event
-		log.Printf("[DEBUG] Pod %v has already been created - reusing the pod", p.podName)
+		log.Printf("[DEBUG] Pod %v has already been created - reusing the pod", s.podName)
 	} else {
 		pd, pa, e := na.SetupNetworkAccessTestPod()
 		podAudit = pa
@@ -53,47 +53,47 @@ func (p *probeState) aPodIsDeployedInTheCluster() error {
 		} else if pod == nil {
 			err = LogAndReturnError("Failed to setup network access test pod")
 		} else {
-			p.podName = pod.GetObjectMeta().GetName()
+			s.podName = pod.GetObjectMeta().GetName()
 		}
 	}
 
 	description := ""
 	payload := podPayload(pod, podAudit)
-	p.audit.AuditProbeStep( description, payload, err)
+	s.audit.AuditProbeStep(description, payload, err)
 
 	return err
 }
 
-func (p *probeState) aProcessInsideThePodEstablishesADirectHTTPSConnectionTo(url string) error {
-	code, err := na.AccessURL(&p.podName, &url)
+func (s *scenarioState) aProcessInsideThePodEstablishesADirectHTTPSConnectionTo(url string) error {
+	code, err := na.AccessURL(&s.podName, &url)
 
 	if err != nil {
 		err = LogAndReturnError("[ERROR] Error raised when attempting to access URL: %v", err)
 	}
 
 	//hold on to the code
-	p.httpStatusCode = code
+	s.httpStatusCode = code
 
 	description := ""
 	var payload interface{}
-	p.audit.AuditProbeStep( description, payload, err)
+	s.audit.AuditProbeStep(description, payload, err)
 
 	return err
 }
 
-func (p *probeState) accessIs(accessResult string) error {
+func (s *scenarioState) accessIs(accessResult string) error {
 	var err error
 	if accessResult == "blocked" {
 		//then the result should be anything other than 200
-		if p.httpStatusCode == 200 {
+		if s.httpStatusCode == 200 {
 			//it's a fail:
-			err = LogAndReturnError("got HTTP Status Code %v - failed", p.httpStatusCode)
+			err = LogAndReturnError("got HTTP Status Code %v - failed", s.httpStatusCode)
 		}
 	}
 
 	description := ""
 	var payload interface{}
-	p.audit.AuditProbeStep( description, payload, err)
+	s.audit.AuditProbeStep(description, payload, err)
 
 	return err
 }

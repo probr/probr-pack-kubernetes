@@ -49,7 +49,7 @@ func init() {
 }
 
 // azureIdentitySetupCheck executes the provided function and returns a formatted error
-func (p *probeState) azureIdentitySetupCheck(f func(bool) (bool, error), useDefaultNS bool, k string) error {
+func (s *scenarioState) azureIdentitySetupCheck(f func(bool) (bool, error), useDefaultNS bool, k string) error {
 
 	b, err := f(useDefaultNS)
 
@@ -65,74 +65,74 @@ func (p *probeState) azureIdentitySetupCheck(f func(bool) (bool, error), useDefa
 }
 
 //AZ-AAD-AI-1.0
-func (p *probeState) theDefaultNamespaceHasAnAzureIdentityBinding() error {
-	err := p.azureIdentitySetupCheck(iam.AzureIdentityBindingExists, true, "AzureIdentityBinding")
+func (s *scenarioState) theDefaultNamespaceHasAnAzureIdentityBinding() error {
+	err := s.azureIdentitySetupCheck(iam.AzureIdentityBindingExists, true, "AzureIdentityBinding")
 
 	description := "Gets the AzureIdentityBindings, then filters according to namespace (default, if none supplied). Passes if binding is retrieved for namespace."
-	p.audit.AuditProbeStep(description, nil, err)
+	s.audit.AuditProbeStep(description, nil, err)
 
 	return err
 
 }
 
-func (p *probeState) iCreateASimplePodInNamespaceAssignedWithThatAzureIdentityBinding(namespace string) error {
+func (s *scenarioState) iCreateASimplePodInNamespaceAssignedWithThatAzureIdentityBinding(namespace string) error {
 
 	y, err := iamassets.Asset("assets/yaml/iam-azi-test-aib-curl.yaml")
 	if err != nil {
 		err = LogAndReturnError("error reading yaml for test: %v", err)
 	} else {
 		if namespace == "the default" {
-			p.useDefaultNS = true
+			s.useDefaultNS = true
 		}
-		pd, err := iam.CreateIAMTestPod(y, p.useDefaultNS)
-		err = ProcessPodCreationResult(p.event, &p.state, pd, kubernetes.UndefinedPodCreationErrorReason, err)
+		pd, err := iam.CreateIAMTestPod(y, s.useDefaultNS)
+		err = ProcessPodCreationResult(s.event, &s.podState, pd, kubernetes.UndefinedPodCreationErrorReason, err)
 	}
 
 	description := ""
 	var payload interface{}
-	p.audit.AuditProbeStep(description, payload, err)
+	s.audit.AuditProbeStep(description, payload, err)
 
 	return err
 
 }
 
 //AZ-AAD-AI-1.0, AZ-AAD-AI-1.1
-func (p *probeState) thePodIsDeployedSuccessfully() error {
+func (s *scenarioState) thePodIsDeployedSuccessfully() error {
 	//check for pod name
 	//note: the pod may still have a creation error if it didn't start up properly, but will have a name if the deployment succeeded
 	//i.e.:
 	// podName != "" -> successful deploy, potentially non-nil creation error
 	// podName == "" -> unsuccessful deploy, non-nil creation error
 	var err error
-	if p.state.PodName == "" {
-		err = LogAndReturnError("pod was not deployed successfully - creation error: %v", p.state.CreationError)
+	if s.podState.PodName == "" {
+		err = LogAndReturnError("pod was not deployed successfully - creation error: %v", s.podState.CreationError)
 	}
 
 	description := ""
 	var payload interface{}
-	p.audit.AuditProbeStep(description, payload, err)
+	s.audit.AuditProbeStep(description, payload, err)
 
 	return err
 }
 
-func (p *probeState) anAttemptToObtainAnAccessTokenFromThatPodShouldFail() error {
+func (s *scenarioState) anAttemptToObtainAnAccessTokenFromThatPodShouldFail() error {
 	//reuse the parameterised / scenario outline func
-	err := p.anAttemptToObtainAnAccessTokenFromThatPodShould("Fail")
+	err := s.anAttemptToObtainAnAccessTokenFromThatPodShould("Fail")
 
 	description := ""
 	var payload interface{}
-	p.audit.AuditProbeStep(description, payload, err)
+	s.audit.AuditProbeStep(description, payload, err)
 
 	return err
 }
 
-func (p *probeState) anAttemptToObtainAnAccessTokenFromThatPodShould(expectedresult string) error {
+func (s *scenarioState) anAttemptToObtainAnAccessTokenFromThatPodShould(expectedresult string) error {
 	var err error
-	if p.state.CreationError != nil {
-		err = LogAndReturnError("failed to create pod", p.state.CreationError)
+	if s.podState.CreationError != nil {
+		err = LogAndReturnError("failed to create pod", s.podState.CreationError)
 	} else {
 		//curl for the auth token ... need to supply appropiate ns
-		res, err := iam.GetAccessToken(p.state.PodName, p.useDefaultNS)
+		res, err := iam.GetAccessToken(s.podState.PodName, s.useDefaultNS)
 
 		if err != nil {
 			//this is an error from trying to execute the command as opposed to
@@ -142,12 +142,12 @@ func (p *probeState) anAttemptToObtainAnAccessTokenFromThatPodShould(expectedres
 			if expectedresult == "Fail" {
 				if res != nil && len(*res) > 0 {
 					//we got a token .. error
-					err = LogAndReturnError("token was successfully acquired on pod %v (result: %v)", p.state.PodName, *res)
+					err = LogAndReturnError("token was successfully acquired on pod %v (result: %v)", s.podState.PodName, *res)
 				}
 			} else if expectedresult == "Succeed" {
 				if res == nil {
 					//we didn't get a token .. error
-					err = LogAndReturnError("failed to acquire token on pod %v", p.state.PodName)
+					err = LogAndReturnError("failed to acquire token on pod %v", s.podState.PodName)
 				}
 			} else {
 				err = LogAndReturnError("unrecognised expected result: %v", expectedresult)
@@ -157,52 +157,52 @@ func (p *probeState) anAttemptToObtainAnAccessTokenFromThatPodShould(expectedres
 
 	description := ""
 	var payload interface{}
-	p.audit.AuditProbeStep(description, payload, err)
+	s.audit.AuditProbeStep(description, payload, err)
 
 	return err
 }
 
 //AZ-AAD-AI-1.1
-func (p *probeState) theDefaultNamespaceHasAnAzureIdentity() error {
-	err := p.azureIdentitySetupCheck(iam.AzureIdentityExists, true, "AzureIdentity")
+func (s *scenarioState) theDefaultNamespaceHasAnAzureIdentity() error {
+	err := s.azureIdentitySetupCheck(iam.AzureIdentityExists, true, "AzureIdentity")
 
 	description := ""
 	var payload interface{}
-	p.audit.AuditProbeStep(description, payload, err)
+	s.audit.AuditProbeStep(description, payload, err)
 
 	return err
 
 }
 
-func (p *probeState) iCreateAnAzureIdentityBindingCalledInANondefaultNamespace(arg1 string) error {
-	err := p.azureIdentitySetupCheck(iam.AzureIdentityBindingExists, false, "AzureIdentityBinding")
+func (s *scenarioState) iCreateAnAzureIdentityBindingCalledInANondefaultNamespace(arg1 string) error {
+	err := s.azureIdentitySetupCheck(iam.AzureIdentityBindingExists, false, "AzureIdentityBinding")
 
 	description := ""
 	var payload interface{}
-	p.audit.AuditProbeStep(description, payload, err)
+	s.audit.AuditProbeStep(description, payload, err)
 
 	return err
 }
 
-func (p *probeState) iDeployAPodAssignedWithTheAzureIdentityBindingIntoTheSameNamespaceAsTheAzureIdentityBinding(arg1, arg2 string) error {
+func (s *scenarioState) iDeployAPodAssignedWithTheAzureIdentityBindingIntoTheSameNamespaceAsTheAzureIdentityBinding(arg1, arg2 string) error {
 
 	y, err := iamassets.Asset("assets/yaml/iam-azi-test-aib-curl.yaml")
 	if err != nil {
 		err = LogAndReturnError("error reading yaml for test: %v", err)
 	} else {
 		pd, err := iam.CreateIAMTestPod(y, false)
-		err = ProcessPodCreationResult(p.event, &p.state, pd, kubernetes.UndefinedPodCreationErrorReason, err)
+		err = ProcessPodCreationResult(s.event, &s.podState, pd, kubernetes.UndefinedPodCreationErrorReason, err)
 	}
 
 	description := ""
 	var payload interface{}
-	p.audit.AuditProbeStep(description, payload, err)
+	s.audit.AuditProbeStep(description, payload, err)
 
 	return err
 }
 
 //AZ-AAD-AI-1.2
-func (p *probeState) theClusterHasManagedIdentityComponentsDeployed() error {
+func (s *scenarioState) theClusterHasManagedIdentityComponentsDeployed() error {
 	//look for the mic pods in the default ns
 	pl, err := kubernetes.GetKubeInstance().GetPods("")
 
@@ -214,7 +214,7 @@ func (p *probeState) theClusterHasManagedIdentityComponentsDeployed() error {
 		for _, pd := range pl.Items {
 			if strings.HasPrefix(pd.Name, "mic-") {
 				//grab the pod name as we'll execute the cmd against this:
-				p.state.PodName = pd.Name
+				s.podState.PodName = pd.Name
 				err = nil
 			}
 		}
@@ -225,15 +225,15 @@ func (p *probeState) theClusterHasManagedIdentityComponentsDeployed() error {
 
 	description := ""
 	var payload interface{}
-	p.audit.AuditProbeStep(description, payload, err)
+	s.audit.AuditProbeStep(description, payload, err)
 
 	return err
 }
 
-func (p *probeState) iExecuteTheCommandAgainstTheMICPod(arg1 string) error {
+func (s *scenarioState) iExecuteTheCommandAgainstTheMICPod(arg1 string) error {
 
 	c := kubernetes.CatAzJSON
-	res, err := iam.ExecuteVerificationCmd(p.state.PodName, c, true)
+	res, err := iam.ExecuteVerificationCmd(s.podState.PodName, c, true)
 
 	if err != nil {
 		//this is an error from trying to execute the command as opposed to
@@ -248,25 +248,25 @@ func (p *probeState) iExecuteTheCommandAgainstTheMICPod(arg1 string) error {
 	}
 	if err != nil {
 		// store the result code
-		p.state.CommandExitCode = res.Code
+		s.podState.CommandExitCode = res.Code
 	}
 
 	description := ""
 	var payload interface{}
-	p.audit.AuditProbeStep(description, payload, err)
+	s.audit.AuditProbeStep(description, payload, err)
 
 	return err
 }
 
-func (p *probeState) kubernetesShouldPreventMeFromRunningTheCommand() error {
+func (s *scenarioState) kubernetesShouldPreventMeFromRunningTheCommand() error {
 	var err error
-	if p.state.CommandExitCode == 0 {
+	if s.podState.CommandExitCode == 0 {
 		//bad! don't want the command to succeed
 		err = LogAndReturnError("verification command was not blocked")
 	}
 
 	description := "Examines probe state to ensure that verification command was blocked."
-	p.audit.AuditProbeStep(description, nil, err)
+	s.audit.AuditProbeStep(description, nil, err)
 
 	return err
 }
@@ -296,7 +296,7 @@ func iamTestSuiteInitialize(ctx *godog.TestSuiteContext) {
 // a step / function defined.  See: https://github.com/cucumber/godog#example.
 func iamScenarioInitialize(ctx *godog.ScenarioContext) {
 
-	ps := probeState{}
+	ps := scenarioState{}
 
 	ctx.BeforeScenario(func(s *godog.Scenario) {
 		ps.BeforeScenario(iam_name, s)
@@ -328,7 +328,7 @@ func iamScenarioInitialize(ctx *godog.ScenarioContext) {
 	ctx.Step(`^the cluster has managed identity components deployed$`, ps.theClusterHasManagedIdentityComponentsDeployed)
 
 	ctx.AfterScenario(func(s *godog.Scenario, err error) {
-		iam.DeleteIAMTestPod(ps.state.PodName, ps.useDefaultNS, iam_name)
+		iam.DeleteIAMTestPod(ps.podState.PodName, ps.useDefaultNS, iam_name)
 		LogScenarioEnd(s)
 	})
 }

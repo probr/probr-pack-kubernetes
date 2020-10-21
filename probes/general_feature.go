@@ -37,42 +37,42 @@ func init() {
 
 // BUG - This step doesn't run
 //@CIS-5.1.3
-func (p *probeState) iInspectTheThatAreConfigured(roleLevel string) error {
+func (s *scenarioState) iInspectTheThatAreConfigured(roleLevel string) error {
 	var err error
 	if roleLevel == "Cluster Roles" {
 		l, e := kubernetes.GetKubeInstance().GetClusterRolesByResource("*")
 		err = e
-		p.wildcardRoles = l
+		s.wildcardRoles = l
 	} else if roleLevel == "Roles" {
 		l, e := kubernetes.GetKubeInstance().GetRolesByResource("*")
 		err = e
-		p.wildcardRoles = l
+		s.wildcardRoles = l
 	}
 	if err != nil {
 		err = LogAndReturnError("error raised when retrieving '%v': %v", roleLevel, err)
 	}
 
 	description := fmt.Sprintf("Ensures that %s are configured. Retains wildcard roles in state for following steps. Passes if retrieval command does not have error.", roleLevel)
-	p.audit.AuditProbeStep(description, p, err)
+	s.audit.AuditProbeStep(description, s, err)
 	return err
 }
 
-func (p *probeState) iShouldOnlyFindWildcardsInKnownAndAuthorisedConfigurations() error {
+func (s *scenarioState) iShouldOnlyFindWildcardsInKnownAndAuthorisedConfigurations() error {
 	//we strip out system/known entries in the cluster roles & roles call
 	var err error
-	wildcardCount := len(p.wildcardRoles.([]interface{}))
+	wildcardCount := len(s.wildcardRoles.([]interface{}))
 	if wildcardCount > 0 {
 		err = LogAndReturnError("roles exist with wildcarded resources")
 	}
 
 	description := "Examines probe state's wildcard roles. Passes if no wildcard roles are found."
-	p.audit.AuditProbeStep(description, p, err)
+	s.audit.AuditProbeStep(description, s, err)
 
 	return err
 }
 
 //@CIS-5.6.3
-func (p *probeState) iAttemptToCreateADeploymentWhichDoesNotHaveASecurityContext() error {
+func (s *scenarioState) iAttemptToCreateADeploymentWhichDoesNotHaveASecurityContext() error {
 	cname := "probr-general"
 	pod_name := kubernetes.GenerateUniquePodName(cname)
 	image := config.Vars.Images.Repository + "/" + config.Vars.Images.BusyBox
@@ -80,30 +80,30 @@ func (p *probeState) iAttemptToCreateADeploymentWhichDoesNotHaveASecurityContext
 	//create pod with nil security context
 	pod, podAudit, err := kubernetes.GetKubeInstance().CreatePod(pod_name, "probr-general-test-ns", cname, image, true, nil)
 
-	err = ProcessPodCreationResult(p.event, &p.state, pod, kubernetes.UndefinedPodCreationErrorReason, err)
+	err = ProcessPodCreationResult(s.event, &s.podState, pod, kubernetes.UndefinedPodCreationErrorReason, err)
 
 	description := "Attempts to create a deployment without a security context. Retains the status of the deployment in probe state for following steps. Passes if created, or if an expected error is encountered."
 	payload := podPayload(pod, podAudit)
-	p.audit.AuditProbeStep(description, payload, err)
+	s.audit.AuditProbeStep(description, payload, err)
 	return err
 }
 
-func (p *probeState) theDeploymentIsRejected() error {
+func (s *scenarioState) theDeploymentIsRejected() error {
 	//looking for a non-nil creation error
 	var err error
-	if p.state.CreationError == nil {
-		err = LogAndReturnError("pod %v was created successfully. Test fail.", p.state.PodName)
+	if s.podState.CreationError == nil {
+		err = LogAndReturnError("pod %v was created successfully. Test fail.", s.podState.PodName)
 	}
 
 	description := "Looks for a creation error on the current probe state. Passes if error is found, because it should have been rejected."
-	p.audit.AuditProbeStep(description, nil, err)
+	s.audit.AuditProbeStep(description, nil, err)
 
 	return err
 }
 
 //@CIS-6.10.1
 // PENDING IMPLEMENTATION
-func (p *probeState) iShouldNotBeAbleToAccessTheKubernetesWebUI() error {
+func (s *scenarioState) iShouldNotBeAbleToAccessTheKubernetesWebUI() error {
 	//TODO: will be difficult to test this.  To access it, a proxy needs to be created:
 	//az aks browse --resource-group rg-probr-all-policies --name ProbrAllPolicies
 	//which will then open a browser at:
@@ -113,7 +113,7 @@ func (p *probeState) iShouldNotBeAbleToAccessTheKubernetesWebUI() error {
 	return nil
 }
 
-func (p *probeState) theKubernetesWebUIIsDisabled() error {
+func (s *scenarioState) theKubernetesWebUIIsDisabled() error {
 	//look for the dashboard pod in the kube-system ns
 	pl, err := kubernetes.GetKubeInstance().GetPods("kube-system")
 
@@ -129,7 +129,7 @@ func (p *probeState) theKubernetesWebUIIsDisabled() error {
 	}
 
 	description := "Attempts to find a pod in the 'kube-system' namespace with the prefix 'kubernetes-dashboard'. Passes if no pod is returned."
-	p.audit.AuditProbeStep(description, nil, err)
+	s.audit.AuditProbeStep(description, nil, err)
 
 	return err
 }
@@ -149,7 +149,7 @@ func genTestSuiteInitialize(ctx *godog.TestSuiteContext) {
 // each line in the feature files. Note: Godog will output stub steps and implementations if it doesn't find
 // a step / function defined.  See: https://github.com/cucumber/godog#example.
 func genScenarioInitialize(ctx *godog.ScenarioContext) {
-	ps := probeState{}
+	ps := scenarioState{}
 
 	ctx.BeforeScenario(func(s *godog.Scenario) {
 		ps.BeforeScenario(gen_name, s)
@@ -170,7 +170,7 @@ func genScenarioInitialize(ctx *godog.ScenarioContext) {
 	ctx.Step(`^the Kubernetes Web UI is disabled$`, ps.theKubernetesWebUIIsDisabled)
 
 	ctx.AfterScenario(func(s *godog.Scenario, err error) {
-		kubernetes.GetKubeInstance().DeletePod(&ps.state.PodName, utils.StringPtr("probr-general-test-ns"), false, gen_name)
+		kubernetes.GetKubeInstance().DeletePod(&ps.podState.PodName, utils.StringPtr("probr-general-test-ns"), false, gen_name)
 		LogScenarioEnd(s)
 	})
 }

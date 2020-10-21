@@ -49,49 +49,49 @@ func SetContainerRegistryAccess(c kubernetes.ContainerRegistryAccess) {
 
 // CIS-6.1.3
 // Minimize cluster access to read-only
-func (p *probeState) iAmAuthorisedToPullFromAContainerRegistry() error {
+func (s *scenarioState) iAmAuthorisedToPullFromAContainerRegistry() error {
 	pod, podAudit, err := cra.SetupContainerAccessTestPod(config.Vars.Images.Repository)
 
-	s := ProcessPodCreationResult(p.event, &p.state, pod, kubernetes.PSPContainerAllowedImages, err)
+	err = ProcessPodCreationResult(s.event, &s.podState, pod, kubernetes.PSPContainerAllowedImages, err)
 
 	description := fmt.Sprintf("Creates a new pod using an image from %s. Passes if image successfully pulls and pod is built.", config.Vars.Images.Repository)
 	payload := podPayload(pod, podAudit)
-	p.audit.AuditProbeStep( description, payload, s)
+	s.audit.AuditProbeStep(description, payload, err)
 
-	return s
+	return err
 }
 
 // PENDING IMPLEMENTATION
-func (p *probeState) iAttemptToPushToTheContainerRegistryUsingTheClusterIdentity() error {
+func (s *scenarioState) iAttemptToPushToTheContainerRegistryUsingTheClusterIdentity() error {
 	return godog.ErrPending
 }
 
 // PENDING IMPLEMENTATION
-func (p *probeState) thePushRequestIsRejectedDueToAuthorization() error {
+func (s *scenarioState) thePushRequestIsRejectedDueToAuthorization() error {
 	return godog.ErrPending
 }
 
 // CIS-6.1.4
 // Ensure only authorised container registries are allowed
-func (p *probeState) aUserAttemptsToDeployAContainerFrom(auth string, registry string) error {
+func (s *scenarioState) aUserAttemptsToDeployAContainerFrom(auth string, registry string) error {
 	pod, podAudit, err := cra.SetupContainerAccessTestPod(registry)
 
-	s := ProcessPodCreationResult(p.event, &p.state, pod, kubernetes.PSPContainerAllowedImages, err)
+	err = ProcessPodCreationResult(s.event, &s.podState, pod, kubernetes.PSPContainerAllowedImages, err)
 
 	description := fmt.Sprintf("Attempts to deploy a container from %s. Retains pod creation result in probe state. Passes so long as user is authorized to deploy containers.", registry)
 	payload := podPayload(pod, podAudit)
-	p.audit.AuditProbeStep( description, payload, s)
+	s.audit.AuditProbeStep(description, payload, err)
 
-	return s
+	return err
 }
 
-func (p *probeState) theDeploymentAttemptIs(res string) error {
-	s := AssertResult(&p.state, res, "")
+func (s *scenarioState) theDeploymentAttemptIs(res string) error {
+	err := AssertResult(&s.podState, res, "")
 
 	description := fmt.Sprintf("Asserts pod creation result in probe state is %s.", res)
-	p.audit.AuditProbeStep( description, nil, s)
+	s.audit.AuditProbeStep(description, nil, err)
 
-	return s
+	return err
 }
 
 // craTestSuiteInitialize handles any overall Test Suite initialisation steps.  This is registered with the
@@ -111,7 +111,7 @@ func craTestSuiteInitialize(ctx *godog.TestSuiteContext) {
 // each line in the feature files. Note: Godog will output stub steps and implementations if it doesn't find
 // a step / function defined.  See: https://github.com/cucumber/godog#example.
 func craScenarioInitialize(ctx *godog.ScenarioContext) {
-	ps := probeState{}
+	ps := scenarioState{}
 
 	ctx.BeforeScenario(func(s *godog.Scenario) {
 		ps.BeforeScenario(cra_name, s)
@@ -130,7 +130,7 @@ func craScenarioInitialize(ctx *godog.ScenarioContext) {
 	ctx.Step(`^the deployment attempt is "([^"]*)"$`, ps.theDeploymentAttemptIs)
 
 	ctx.AfterScenario(func(s *godog.Scenario, err error) {
-		cra.TeardownContainerAccessTestPod(&ps.state.PodName, cra_name)
+		cra.TeardownContainerAccessTestPod(&ps.podState.PodName, cra_name)
 
 		LogScenarioEnd(s)
 	})

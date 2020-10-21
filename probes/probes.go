@@ -15,21 +15,21 @@ import (
 	apiv1 "k8s.io/api/core/v1"
 )
 
-// State captures useful state data for use in tests.
-type State struct {
+// State captures useful pod state data for use in a scenario's state.
+type podState struct {
 	PodName         string
 	CreationError   *kubernetes.PodCreationError
 	ExpectedReason  *kubernetes.PodCreationErrorReason
 	CommandExitCode int
 }
 
-type probeState struct {
+type scenarioState struct {
 	name           string
 	audit          *summary.ProbeAudit
 	event          *summary.Event
 	httpStatusCode int
 	podName        string
-	state          State
+	podState       podState
 	useDefaultNS   bool
 	wildcardRoles  interface{}
 }
@@ -155,25 +155,25 @@ func notExcluded(tags []*messages.Pickle_PickleTag) bool {
 	return true
 }
 
-func (p *probeState) BeforeScenario(eventName string, s *godog.Scenario) {
-	if notExcluded(s.Tags) {
-		p.setup()
-		p.name = s.Name
-		p.audit = summary.State.GetEventLog(eventName).InitializeAuditor(s.Name, s.Tags)
-		LogScenarioStart(s)
+func (s *scenarioState) BeforeScenario(eventName string, gs *godog.Scenario) {
+	if notExcluded(gs.Tags) {
+		s.setup()
+		s.name = gs.Name
+		s.audit = summary.State.GetEventLog(eventName).InitializeAuditor(gs.Name, gs.Tags)
+		LogScenarioStart(gs)
 	}
 }
 
 // Setup resets scenario-specific values
-func (p *probeState) setup() {
-	p.state.PodName = ""
-	p.state.CreationError = nil
-	p.useDefaultNS = false
+func (s *scenarioState) setup() {
+	s.podState.PodName = ""
+	s.podState.CreationError = nil
+	s.useDefaultNS = false
 }
 
 // ProcessPodCreationResult is a convenince function to process the result of a pod creation attempt.
 // It records state information on the supplied state structure.
-func ProcessPodCreationResult(event *summary.Event, s *State, pd *apiv1.Pod, expected kubernetes.PodCreationErrorReason, err error) error {
+func ProcessPodCreationResult(event *summary.Event, s *podState, pd *apiv1.Pod, expected kubernetes.PodCreationErrorReason, err error) error {
 	//first check for errors:
 	if err != nil {
 		//check if we've got a partial pod creation
@@ -217,7 +217,7 @@ func ProcessPodCreationResult(event *summary.Event, s *State, pd *apiv1.Pod, exp
 
 // AssertResult evaluate the state in the context of the expected condition, e.g. if expected is "fail",
 // then the expecation is that a creation error will be present.
-func AssertResult(s *State, res, msg string) error {
+func AssertResult(s *podState, res, msg string) error {
 
 	if res == "Fail" || res == "denied" {
 		//expect pod creation error to be non-null
@@ -254,7 +254,7 @@ func AssertResult(s *State, res, msg string) error {
 }
 
 //general feature steps:
-func (p *probeState) aKubernetesClusterIsDeployed() error {
+func (s *scenarioState) aKubernetesClusterIsDeployed() error {
 	b := kubernetes.GetKubeInstance().ClusterIsDeployed()
 
 	if b == nil || !*b {
@@ -266,7 +266,7 @@ func (p *probeState) aKubernetesClusterIsDeployed() error {
 		KubeConfigPath string
 		KubeContext    string
 	}{config.Vars.KubeConfigPath, config.Vars.KubeContext}
-	p.audit.AuditProbeStep(description, payload, nil)
+	s.audit.AuditProbeStep(description, payload, nil)
 
 	return nil
 }
