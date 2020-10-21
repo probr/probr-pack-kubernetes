@@ -38,7 +38,7 @@ func main() {
 			os.Exit(2) // Error code 1 is reserved for probe test failures, and should not fail in CI
 		}
 		if out == nil || len(out) == 0 {
-			log.Printf("[ERROR] Test results not written to file, possibly due to permissions on the specified output directory: %s", config.Vars.OutputDir)
+			log.Printf("[ERROR] Test results not written to file, possibly due to permissions on the specified output directory: %s", config.Vars.CucumberDir)
 		}
 	}
 	summary.State.PrintSummary()

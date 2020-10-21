@@ -16,7 +16,7 @@ type ConfigVars struct {
 	KubeConfigPath            string `yaml:"kubeConfig"`
 	KubeContext               string `yaml:"kubeContext"`
 	OutputType                string `yaml:"outputType"`
-	OutputDir                 string `yaml:"outputDir"`
+	CucumberDir               string `yaml:"outputDir"`
 	AuditDir                  string `yaml:"auditDir"`
 	SummaryEnabled            string `yaml:"summaryEnabled"`
 	AuditEnabled              string `yaml:"auditEnabled"`

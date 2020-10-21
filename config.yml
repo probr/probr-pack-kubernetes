@@ -1,6 +1,7 @@
 kubeConfig: .kube/config
 auditEnabled: true
 auditDir: audit_output
+cucumberDir: cucumber_output
 overwriteHistoricalAudits: true
 summaryEnabled: true
 images:

@@ -16,7 +16,8 @@ func setFromEnvOrDefaults(e *ConfigVars) {
 	e.set(&e.AuditEnabled, "PROBR_AUDIT_ENABLED", "true")
 	e.set(&e.SummaryEnabled, "PROBR_SUMMARY_ENABLED", "true")
 	e.set(&e.OutputType, "PROBR_OUTPUT_TYPE", "IO")
-	e.set(&e.OutputDir, "PROBR_OUTPUT_DIR", "cucumber_output")
+	e.set(&e.CucumberDir, "PROBR_CUCUMBER_DIR", "cucumber_output")
+	e.set(&e.AuditDir, "PROBR_AUDIT_DIR", "audit_output")
 	e.set(&e.OverwriteHistoricalAudits, "OVERWRITE_AUDITS", "true")
 
 	e.set(&e.Images.Repository, "IMAGE_REPOSITORY", "docker.io")
@@ -36,10 +37,6 @@ func setFromEnvOrDefaults(e *ConfigVars) {
 
 func getDefaultKubeConfigPath() string {
 	return filepath.Join(homeDir(), ".kube", "config")
-}
-
-func getDefaultOutputDir() string {
-	return filepath.Join(homeDir(), "cucumber_output")
 }
 
 func homeDir() string {

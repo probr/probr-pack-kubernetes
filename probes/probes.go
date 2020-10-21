@@ -93,7 +93,7 @@ func getOutputDirectory() (*string, error) {
 			return nil, fmt.Errorf("output directory not set - attempt to default resulted in error: %v", err)
 		}
 
-		f := filepath.Join(r, "cucumber_output")
+		f := filepath.Join(r, config.Vars.CucumberDir)
 		outputDir = &f
 	}
 
