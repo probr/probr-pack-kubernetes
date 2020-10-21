@@ -8,6 +8,7 @@ type Event struct {
 	name            string
 	audit           *EventAudit
 	Meta            map[string]interface{}
+	PodsCreated     int
 	PodsDestroyed   int
 	ProbesAttempted int
 	ProbesSucceeded int
@@ -17,12 +18,12 @@ type Event struct {
 
 // CountPodCreated increments pods_created for event
 func (e *Event) CountPodCreated() {
-	e.Meta["pods_created"] = e.Meta["pods_created"].(int) + 1
+	e.PodsCreated = e.PodsCreated + 1
 }
 
 // CountPodDestroyed increments pods_destroyed for event
 func (e *Event) CountPodDestroyed() {
-	e.Meta["pods_destroyed"] = e.Meta["pods_destroyed"].(int) + 1
+	e.PodsDestroyed = e.PodsDestroyed + 1
 }
 
 // countResults stores the current total number of failures as e.ProbesFailed. Run at event end

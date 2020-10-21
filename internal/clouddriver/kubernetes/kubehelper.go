@@ -560,9 +560,8 @@ func (k *Kube) DeletePod(pname *string, ns *string, wait bool, event string) err
 	}
 
 	if wait {
-		waitForDelete(c, ns, pname)
+		waitForDelete(c, ns, pname, event)
 	}
-	summary.State.GetEventLog(event).CountPodDestroyed()
 	log.Printf("[INFO] POD %v deleted.", *pname)
 
 	return nil
@@ -957,7 +956,7 @@ func (k *Kube) podInErrorState(p *apiv1.Pod) (bool, *PodCreationError) {
 	return false, nil
 }
 
-func waitForDelete(c *kubernetes.Clientset, ns *string, n *string) error {
+func waitForDelete(c *kubernetes.Clientset, ns *string, n *string, eventName string) error {
 
 	ps := c.CoreV1().Pods(*ns)
 
@@ -980,6 +979,7 @@ func waitForDelete(c *kubernetes.Clientset, ns *string, n *string) error {
 		log.Printf("[DEBUG] Watch Container status: %+v", p.Status.ContainerStatuses)
 
 		if e.Type == "DELETED" {
+			summary.State.GetEventLog(eventName).CountPodDestroyed()
 			log.Printf("[INFO] DELETED event received for pod %v", p.GetObjectMeta().GetName())
 			break
 		}
