@@ -1,4 +1,4 @@
-package probes
+package coreengine
 
 import (
 	"bytes"
@@ -13,22 +13,21 @@ import (
 	"github.com/cucumber/godog/colors"
 
 	"github.com/citihub/probr/internal/config"
-	"github.com/citihub/probr/internal/coreengine"
 )
 
-// GodogTestHandler is a general implmentation of coreengine.TestHandlerFunc.  Based on the
+// GodogTestHandler is a general implmentation of TestHandlerFunc.  Based on the
 // output type, the test will either be executed using an in-memory or file output.  In
 // both cases, the handler uses the data supplied in GodogTest to call the underlying
 // GoDog test suite.
-func GodogTestHandler(gd *coreengine.GodogTest) (int, *bytes.Buffer, error) {
+func GodogTestHandler(gd *GodogTest) (int, *bytes.Buffer, error) {
 	if config.Vars.OutputType == "INMEM" {
 		return inMemGodogTestHandler(gd)
 	}
 	return toFileGodogTestHandler(gd)
 }
 
-func toFileGodogTestHandler(gd *coreengine.GodogTest) (int, *bytes.Buffer, error) {
-	o, err := GetOutputPath(&gd.TestDescriptor.Name)
+func toFileGodogTestHandler(gd *GodogTest) (int, *bytes.Buffer, error) {
+	o, err := getOutputPath(&gd.TestDescriptor.Name)
 	if err != nil {
 		return -1, nil, err
 	}
@@ -52,14 +51,14 @@ func toFileGodogTestHandler(gd *coreengine.GodogTest) (int, *bytes.Buffer, error
 	return status, nil, err
 }
 
-func inMemGodogTestHandler(gd *coreengine.GodogTest) (int, *bytes.Buffer, error) {
+func inMemGodogTestHandler(gd *GodogTest) (int, *bytes.Buffer, error) {
 	var t []byte
 	o := bytes.NewBuffer(t)
 	status, err := runTestSuite(o, gd)
 	return status, o, err
 }
 
-func runTestSuite(o io.Writer, gd *coreengine.GodogTest) (int, error) {
+func runTestSuite(o io.Writer, gd *GodogTest) (int, error) {
 	f, err := getProbesPath(gd)
 	if err != nil {
 		return -2, err
@@ -83,8 +82,8 @@ func runTestSuite(o io.Writer, gd *coreengine.GodogTest) (int, error) {
 	return status, nil
 }
 
-func getProbesPath(gd *coreengine.GodogTest) (string, error) {
-	r, err := GetRootDir()
+func getProbesPath(gd *GodogTest) (string, error) {
+	r, err := getRootDir()
 	if err != nil {
 		return "", fmt.Errorf("unable to determine root directory - not able to perform tests")
 	}

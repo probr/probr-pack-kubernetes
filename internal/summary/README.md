@@ -39,7 +39,7 @@ Many summarys will be made directly to probes. In order to do so, the probe must
 	ctx.BeforeScenario(func(s *godog.Scenario) {
 		ps.name = s.Name
 		ps.probe = summary.State.GetProbeLog(NAME)
-		scenarios.LogScenarioStart(s)
+		coreengine.LogScenarioStart(s)
 	})
 ```
 

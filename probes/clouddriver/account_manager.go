@@ -1,4 +1,4 @@
-package probes
+package clouddriver_probes
 
 import (
 	"log"
@@ -12,10 +12,10 @@ func init() {
 	td := coreengine.TestDescriptor{Group: coreengine.CloudDriver,
 		Category: coreengine.General, Name: "account_manager"}
 
-	fp := filepath.Join("probes", "clouddriver", "events")
+	fp := filepath.Join("probes", "clouddriver", "probe_definitions")
 
 	coreengine.AddTestHandler(td, &coreengine.GoDogTestTuple{
-		Handler: GodogTestHandler,
+		Handler: coreengine.GodogTestHandler,
 		Data: &coreengine.GodogTest{
 			TestDescriptor:       &td,
 			TestSuiteInitializer: amTestSuiteInitialize,

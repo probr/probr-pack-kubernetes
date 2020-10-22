@@ -1,4 +1,4 @@
-package probes
+package k8s_probes
 
 //go:generate go-bindata.exe -pkg $GOPACKAGE -o assets/assets.go assets/yaml
 
@@ -22,16 +22,16 @@ func SetPodSecurityPolicy(p kubernetes.PodSecurityPolicy) {
 
 // init() registers the feature tests descibed in this package with the test runner (coreengine.TestRunner) via the call
 // to coreengine.AddTestHandler.  This links the test - described by the TestDescriptor - with the handler to invoke.  In
-// this case, the general test handler is being used (GodogTestHandler) and the GodogTest data provides the data
+// this case, the general test handler is being used (coreengine.GodogTestHandler) and the GodogTest data provides the data
 // require to execute the test.  Specifically, the data includes the Test Suite and Scenario Initializers from this package
-// which will be called from GodogTestHandler.  Note: a blank import at probr library level should be done to
+// which will be called from coreengine.GodogTestHandler.  Note: a blank import at probr library level should be done to
 // invoke this function automatically on initial load.
 func init() {
 	td := coreengine.TestDescriptor{Group: coreengine.Kubernetes,
 		Category: coreengine.PodSecurityPolicies, Name: psp_name}
 
 	coreengine.AddTestHandler(td, &coreengine.GoDogTestTuple{
-		Handler: GodogTestHandler,
+		Handler: coreengine.GodogTestHandler,
 		Data: &coreengine.GodogTest{
 			TestDescriptor:       &td,
 			TestSuiteInitializer: pspTestSuiteInitialize,
@@ -79,14 +79,14 @@ func (s *scenarioState) runControlTest(cf func() (*bool, error), c string) error
 	yesNo, err := cf()
 
 	if err != nil {
-		return LogAndReturnError("error determining Pod Security Policy: %v error: %v", c, err)
+		return coreengine.LogAndReturnError("error determining Pod Security Policy: %v error: %v", c, err)
 	}
 	if yesNo == nil {
-		return LogAndReturnError("result of %v is nil despite no error being raised from the call", c)
+		return coreengine.LogAndReturnError("result of %v is nil despite no error being raised from the call", c)
 	}
 
 	if !*yesNo {
-		return LogAndReturnError("%v is NOT restricted (result: %t)", c, *yesNo)
+		return coreengine.LogAndReturnError("%v is NOT restricted (result: %t)", c, *yesNo)
 	}
 
 	return nil
@@ -102,15 +102,15 @@ func (s *scenarioState) runVerificationTest(c kubernetes.PSPVerificationProbe) e
 		if err != nil {
 			//this is an error from trying to execute the command as opposed to
 			//the command itself returning an error
-			return LogAndReturnError("error raised trying to execute verification command (%v) - %v", c.Cmd, err)
+			return coreengine.LogAndReturnError("error raised trying to execute verification command (%v) - %v", c.Cmd, err)
 		}
 		if res == nil {
-			return LogAndReturnError("<nil> result received when trying to execute verification command (%v)", c.Cmd)
+			return coreengine.LogAndReturnError("<nil> result received when trying to execute verification command (%v)", c.Cmd)
 		}
 		if res.Err != nil && res.Internal {
 			//we have an error which was raised before reaching the cluster (i.e. it's "internal")
 			//this indicates that the command was not successfully executed
-			return LogAndReturnError("error raised trying to execute verification command (%v)", c.Cmd)
+			return coreengine.LogAndReturnError("error raised trying to execute verification command (%v)", c.Cmd)
 		}
 
 		//we've managed to execution against the cluster.  This may have failed due to pod security, but this
@@ -121,7 +121,7 @@ func (s *scenarioState) runVerificationTest(c kubernetes.PSPVerificationProbe) e
 			return nil
 		}
 		//else it's a fail:
-		return LogAndReturnError("exit code %d from verification commnad %q did not match expected %d",
+		return coreengine.LogAndReturnError("exit code %d from verification commnad %q did not match expected %d",
 			res.Code, c.Cmd, c.ExpectedExitCode)
 	}
 
@@ -721,7 +721,7 @@ func pspScenarioInitialize(ctx *godog.ScenarioContext) {
 		psp.TeardownPodSecurityTest(&ps.podState.PodName, psp_name)
 		ps.podState.PodName = ""
 		ps.podState.CreationError = nil
-		LogScenarioEnd(s)
+		coreengine.LogScenarioEnd(s)
 	})
 
 }

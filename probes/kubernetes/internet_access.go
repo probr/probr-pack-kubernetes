@@ -1,4 +1,4 @@
-package probes
+package k8s_probes
 
 import (
 	"log"
@@ -19,7 +19,7 @@ func init() {
 		Category: coreengine.InternetAccess, Name: ia_name}
 
 	coreengine.AddTestHandler(td, &coreengine.GoDogTestTuple{
-		Handler: GodogTestHandler,
+		Handler: coreengine.GodogTestHandler,
 		Data: &coreengine.GodogTest{
 			TestDescriptor:       &td,
 			TestSuiteInitializer: iaTestSuiteInitialize,
@@ -51,7 +51,7 @@ func (s *scenarioState) aPodIsDeployedInTheCluster() error {
 		if e != nil {
 			err = e
 		} else if pod == nil {
-			err = LogAndReturnError("Failed to setup network access test pod")
+			err = coreengine.LogAndReturnError("Failed to setup network access test pod")
 		} else {
 			s.podName = pod.GetObjectMeta().GetName()
 		}
@@ -68,7 +68,7 @@ func (s *scenarioState) aProcessInsideThePodEstablishesADirectHTTPSConnectionTo(
 	code, err := na.AccessURL(&s.podName, &url)
 
 	if err != nil {
-		err = LogAndReturnError("[ERROR] Error raised when attempting to access URL: %v", err)
+		err = coreengine.LogAndReturnError("[ERROR] Error raised when attempting to access URL: %v", err)
 	}
 
 	//hold on to the code
@@ -87,7 +87,7 @@ func (s *scenarioState) accessIs(accessResult string) error {
 		//then the result should be anything other than 200
 		if s.httpStatusCode == 200 {
 			//it's a fail:
-			err = LogAndReturnError("got HTTP Status Code %v - failed", s.httpStatusCode)
+			err = coreengine.LogAndReturnError("got HTTP Status Code %v - failed", s.httpStatusCode)
 		}
 	}
 
@@ -131,6 +131,6 @@ func iaScenarioInitialize(ctx *godog.ScenarioContext) {
 
 	ctx.AfterScenario(func(s *godog.Scenario, err error) {
 		ia_ps.httpStatusCode = 0
-		LogScenarioEnd(s)
+		coreengine.LogScenarioEnd(s)
 	})
 }

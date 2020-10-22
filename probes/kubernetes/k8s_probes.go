@@ -1,17 +1,13 @@
-package probes
+package k8s_probes
 
 import (
-	"fmt"
 	"log"
-	"os"
-	"path/filepath"
-	"strings"
 
 	"github.com/citihub/probr/internal/clouddriver/kubernetes"
 	"github.com/citihub/probr/internal/config"
+	"github.com/citihub/probr/internal/coreengine"
 	"github.com/citihub/probr/internal/summary"
 	"github.com/cucumber/godog"
-	"github.com/cucumber/messages-go/v10"
 	apiv1 "k8s.io/api/core/v1"
 )
 
@@ -34,133 +30,12 @@ type scenarioState struct {
 	wildcardRoles  interface{}
 }
 
-const rootDirName = "probr"
-
-var outputDir *string
-
-// GetRootDir gets the root directory of the probr executable.
-func GetRootDir() (string, error) {
-	//TODO: fix this!! think it's a tad dodgy!
-	pwd, _ := os.Getwd()
-	log.Printf("[DEBUG] GetRootDir pwd is: %v", pwd)
-
-	b := strings.Contains(pwd, rootDirName)
-	if !b {
-		return "", fmt.Errorf("could not find '%v' root directory in %v", rootDirName, pwd)
-	}
-
-	s := strings.SplitAfter(pwd, rootDirName)
-	log.Printf("[DEBUG] path(s) after splitting: %v\n", s)
-
-	if len(s) < 1 {
-		//expect at least one result
-		return "", fmt.Errorf("could not split out '%v' from directory in %v", rootDirName, pwd)
-	}
-
-	if !strings.HasSuffix(s[0], rootDirName) {
-		//the first path should end with "probr"
-		return "", fmt.Errorf("first path after split (%v) does not end with '%v'", s[0], rootDirName)
-	}
-
-	return s[0], nil
-}
-
-// SetOutputDirectory allows specification of the output directory for the test output json files.
-func SetOutputDirectory(d *string) {
-	outputDir = d
-}
-
-// GetOutputPath gets the output path for the test based on the output directory
-// plus the test name supplied
-func GetOutputPath(t *string) (*os.File, error) {
-	outPath, err := getOutputDirectory()
-	if err != nil {
-		return nil, err
-	}
-	os.Mkdir(*outPath, os.ModeDir)
-
-	//filename is test name (supplied) + .json
-	fn := *t + ".json"
-	return os.Create(filepath.Join(*outPath, fn))
-}
-
-func getOutputDirectory() (*string, error) {
-	if outputDir == nil || len(*outputDir) < 1 {
-		log.Printf("[INFO] output directory not set - attempting to default")
-		//default it:
-		r, err := GetRootDir()
-		if err != nil {
-			return nil, fmt.Errorf("output directory not set - attempt to default resulted in error: %v", err)
-		}
-
-		f := filepath.Join(r, config.Vars.CucumberDir)
-		outputDir = &f
-	}
-
-	log.Printf("[INFO] output directory is: %v", *outputDir)
-
-	return outputDir, nil
-}
-
-// LogAndReturnError logs the given string and raise an error with the same string.  This is useful in Godog steps
-// where an error is displayed in the test report but not logged.
-func LogAndReturnError(e string, v ...interface{}) error {
-	var b strings.Builder
-	b.WriteString("[ERROR] ")
-	b.WriteString(e)
-
-	s := fmt.Sprintf(b.String(), v...)
-	log.Print(s)
-
-	return fmt.Errorf(s)
-}
-
-// LogScenarioStart logs the name and tags associtated with the supplied scenario.
-func LogScenarioStart(s *godog.Scenario) {
-	log.Print(scenarioString(true, s))
-}
-
-// LogScenarioEnd logs the name and tags associtated with the supplied scenario.
-func LogScenarioEnd(s *godog.Scenario) {
-	log.Print(scenarioString(false, s))
-}
-
-func scenarioString(st bool, s *godog.Scenario) string {
-	var b strings.Builder
-	if st {
-		b.WriteString("[INFO] >>> Scenario Start: ")
-	} else {
-		b.WriteString("[INFO] <<< Scenario End: ")
-	}
-
-	b.WriteString(s.Name)
-	b.WriteString(". (Tags: ")
-
-	for _, t := range s.Tags {
-		b.WriteString(t.GetName())
-		b.WriteString(" ")
-	}
-	b.WriteString(").")
-	return b.String()
-}
-
-func notExcluded(tags []*messages.Pickle_PickleTag) bool {
-	for _, exclusion := range config.Vars.TagExclusions {
-		for _, tag := range tags {
-			if tag.Name == "@"+exclusion {
-				return false
-			}
-		}
-	}
-	return true
-}
-
 func (s *scenarioState) BeforeScenario(probeName string, gs *godog.Scenario) {
-	if notExcluded(gs.Tags) {
+	if coreengine.TagsNotExcluded(gs.Tags) {
 		s.setup()
 		s.name = gs.Name
 		s.audit = summary.State.GetProbeLog(probeName).InitializeAuditor(gs.Name, gs.Tags)
-		LogScenarioStart(gs)
+		coreengine.LogScenarioStart(gs)
 	}
 }
 
@@ -195,7 +70,7 @@ func ProcessPodCreationResult(probe *summary.Probe, s *podState, pd *apiv1.Pod, 
 		}
 		//unexpected error
 		//in this case something unexpected has happened, return an error to cucumber
-		return LogAndReturnError("error attempting to create POD: %v", err)
+		return coreengine.LogAndReturnError("error attempting to create POD: %v", err)
 	}
 
 	//No errors: pod creation may or may not have been expected.  This will be determined
@@ -223,13 +98,13 @@ func AssertResult(s *podState, res, msg string) error {
 		//expect pod creation error to be non-null
 		if s.CreationError == nil {
 			//it's a fail:
-			return LogAndReturnError("pod %v was created - test failed", s.PodName)
+			return coreengine.LogAndReturnError("pod %v was created - test failed", s.PodName)
 		}
 		//should also check code:
 		_, exists := s.CreationError.ReasonCodes[*s.ExpectedReason]
 		if !exists {
 			//also a fail:
-			return LogAndReturnError("pod not was created but failure reasons (%v) did not contain expected (%v)- test failed",
+			return coreengine.LogAndReturnError("pod not was created but failure reasons (%v) did not contain expected (%v)- test failed",
 				s.CreationError.ReasonCodes, s.ExpectedReason)
 		}
 
@@ -241,7 +116,7 @@ func AssertResult(s *podState, res, msg string) error {
 		// then expect the pod creation error to be nil
 		if s.CreationError != nil {
 			//it's a fail:
-			return LogAndReturnError("pod was not created - test failed: %v", s.CreationError)
+			return coreengine.LogAndReturnError("pod was not created - test failed: %v", s.CreationError)
 		}
 
 		//else we're good ...
@@ -249,7 +124,7 @@ func AssertResult(s *podState, res, msg string) error {
 	}
 
 	// we've been given a result that we don't know about ...
-	return LogAndReturnError("desired result %v is not recognised", res)
+	return coreengine.LogAndReturnError("desired result %v is not recognised", res)
 
 }
 

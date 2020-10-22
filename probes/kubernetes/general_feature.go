@@ -1,6 +1,6 @@
 // Package general provides the implementation required to execute the feature-based test cases
 // described in the the 'events' directory.
-package probes
+package k8s_probes
 
 import (
 	"fmt"
@@ -17,16 +17,16 @@ const gen_name = "general"
 
 // init() registers the feature tests descibed in this package with the test runner (coreengine.TestRunner) via the call
 // to coreengine.AddTestHandler.  This links the test - described by the TestDescriptor - with the handler to invoke.  In
-// this case, the general test handler is being used (probes.GodogTestHandler) and the GodogTest data provides the data
+// this case, the general test handler is being used (probes.coreengine.GodogTestHandler) and the GodogTest data provides the data
 // require to execute the test.  Specifically, the data includes the Test Suite and Scenario Initializers from this package
-// which will be called from probes.GodogTestHandler.  Note: a blank import at probr library level should be done to
+// which will be called from probes.coreengine.GodogTestHandler.  Note: a blank import at probr library level should be done to
 // invoke this function automatically on initial load.
 func init() {
 	td := coreengine.TestDescriptor{Group: coreengine.Kubernetes,
 		Category: coreengine.General, Name: gen_name}
 
 	coreengine.AddTestHandler(td, &coreengine.GoDogTestTuple{
-		Handler: GodogTestHandler,
+		Handler: coreengine.GodogTestHandler,
 		Data: &coreengine.GodogTest{
 			TestDescriptor:       &td,
 			TestSuiteInitializer: genTestSuiteInitialize,
@@ -49,7 +49,7 @@ func (s *scenarioState) iInspectTheThatAreConfigured(roleLevel string) error {
 		s.wildcardRoles = l
 	}
 	if err != nil {
-		err = LogAndReturnError("error raised when retrieving '%v': %v", roleLevel, err)
+		err = coreengine.LogAndReturnError("error raised when retrieving '%v': %v", roleLevel, err)
 	}
 
 	description := fmt.Sprintf("Ensures that %s are configured. Retains wildcard roles in state for following steps. Passes if retrieval command does not have error.", roleLevel)
@@ -62,7 +62,7 @@ func (s *scenarioState) iShouldOnlyFindWildcardsInKnownAndAuthorisedConfiguratio
 	var err error
 	wildcardCount := len(s.wildcardRoles.([]interface{}))
 	if wildcardCount > 0 {
-		err = LogAndReturnError("roles exist with wildcarded resources")
+		err = coreengine.LogAndReturnError("roles exist with wildcarded resources")
 	}
 
 	description := "Examines scenario state's wildcard roles. Passes if no wildcard roles are found."
@@ -92,7 +92,7 @@ func (s *scenarioState) theDeploymentIsRejected() error {
 	//looking for a non-nil creation error
 	var err error
 	if s.podState.CreationError == nil {
-		err = LogAndReturnError("pod %v was created successfully. Test fail.", s.podState.PodName)
+		err = coreengine.LogAndReturnError("pod %v was created successfully. Test fail.", s.podState.PodName)
 	}
 
 	description := "Looks for a creation error on the current scenario state. Passes if error is found, because it should have been rejected."
@@ -118,12 +118,12 @@ func (s *scenarioState) theKubernetesWebUIIsDisabled() error {
 	pl, err := kubernetes.GetKubeInstance().GetPods("kube-system")
 
 	if err != nil {
-		err = LogAndReturnError("error raised when trying to retrieve pods: %v", err)
+		err = coreengine.LogAndReturnError("error raised when trying to retrieve pods: %v", err)
 	} else {
 		//a "pass" is the abscence of a "kubernetes-dashboard" pod
 		for _, v := range pl.Items {
 			if strings.HasPrefix(v.Name, "kubernetes-dashboard") {
-				err = LogAndReturnError("kubernetes-dashboard pod found (%v) - test fail", v.Name)
+				err = coreengine.LogAndReturnError("kubernetes-dashboard pod found (%v) - test fail", v.Name)
 			}
 		}
 	}
@@ -171,6 +171,6 @@ func genScenarioInitialize(ctx *godog.ScenarioContext) {
 
 	ctx.AfterScenario(func(s *godog.Scenario, err error) {
 		kubernetes.GetKubeInstance().DeletePod(&ps.podState.PodName, utils.StringPtr("probr-general-test-ns"), false, gen_name)
-		LogScenarioEnd(s)
+		coreengine.LogScenarioEnd(s)
 	})
 }

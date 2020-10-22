@@ -1,6 +1,6 @@
 // Package containerregistryaccess provides the implementation required to execute the
 // feature based test cases described in the the 'events' directory.
-package probes
+package k8s_probes
 
 import (
 	"fmt"
@@ -18,16 +18,16 @@ const (
 
 // init() registers the feature tests descibed in this package with the test runner (coreengine.TestRunner) via the call
 // to coreengine.AddTestHandler.  This links the test - described by the TestDescriptor - with the handler to invoke.  In
-// this case, the general test handler is being used (probes.GodogTestHandler) and the GodogTest data provides the data
+// this case, the general test handler is being used (probes.coreengine.GodogTestHandler) and the GodogTest data provides the data
 // require to execute the test.  Specifically, the data includes the Test Suite and Scenario Initializers from this package
-// which will be called from probes.GodogTestHandler.  Note: a blank import at probr library level should be done to
+// which will be called from probes.coreengine.GodogTestHandler.  Note: a blank import at probr library level should be done to
 // invoke this function automatically on initial load.
 func init() {
 	td := coreengine.TestDescriptor{Group: coreengine.Kubernetes,
 		Category: coreengine.ContainerRegistryAccess, Name: cra_name}
 
 	coreengine.AddTestHandler(td, &coreengine.GoDogTestTuple{
-		Handler: GodogTestHandler,
+		Handler: coreengine.GodogTestHandler,
 		Data: &coreengine.GodogTest{
 			TestDescriptor:       &td,
 			TestSuiteInitializer: craTestSuiteInitialize,
@@ -132,6 +132,6 @@ func craScenarioInitialize(ctx *godog.ScenarioContext) {
 	ctx.AfterScenario(func(s *godog.Scenario, err error) {
 		cra.TeardownContainerAccessTestPod(&ps.podState.PodName, cra_name)
 
-		LogScenarioEnd(s)
+		coreengine.LogScenarioEnd(s)
 	})
 }

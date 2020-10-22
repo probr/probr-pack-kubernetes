@@ -3,7 +3,8 @@ package probr
 import (
 	"github.com/citihub/probr/internal/clouddriver/kubernetes"
 	"github.com/citihub/probr/internal/coreengine"
-	"github.com/citihub/probr/probes"
+	_ "github.com/citihub/probr/probes/clouddriver"
+	_ "github.com/citihub/probr/probes/kubernetes"
 )
 
 //TODO: revise when interface this bit up ...
@@ -67,5 +68,5 @@ func ReadTestResults(ts *coreengine.TestStore, name string) (string, string, err
 
 // SetIOPaths ...
 func SetIOPaths(i string, o string) {
-	probes.SetOutputDirectory(&o)
+	coreengine.SetOutputDirectory(&o)
 }
