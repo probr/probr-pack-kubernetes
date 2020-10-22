@@ -37,20 +37,20 @@ type ConfigVars struct {
 			DefaultNamespaceAIB string `yaml:"defaultNamespaceAIB"`
 		} `yaml:"azureIdentity"`
 	} `yaml:"azure"`
-	Events             []Event  `yaml:"events"`
+	Probes             []Probe  `yaml:"probes"`
 	SystemClusterRoles []string `yaml:"systemClusterRoles"`
 	Tags               string   `yaml:"tags"`
 	TagExclusions      []string // not from yaml
 }
 
-type Event struct {
+type Probe struct {
 	Name          string  `yaml:"name"`
 	Excluded      bool    `yaml:"excluded"`
 	Justification string  `yaml:"justification"`
-	Probes        []Probe `yaml:"probes"`
+	Scenarios        []Scenario `yaml:"scenarios"`
 }
 
-type Probe struct {
+type Scenario struct {
 	Name          string `yaml:"name"`
 	Excluded      bool   `yaml:"excluded"`
 	Justification string `yaml:"justification"`
@@ -61,11 +61,11 @@ var Vars ConfigVars
 
 // GetTags parses Tags with TagExclusions
 func (ctx *ConfigVars) GetTags() string {
-	for _, v := range ctx.Events {
+	for _, v := range ctx.Probes {
 		if v.Excluded {
 			ctx.HandleExclusion(v.Name, v.Justification)
 		} else {
-			ctx.HandleProbeExclusions(&v)
+			ctx.HandleScenarioExclusions(&v)
 		}
 	}
 	return ctx.Tags
@@ -83,8 +83,8 @@ func (ctx *ConfigVars) HandleExclusion(name, justification string) {
 	ctx.TagExclusions = append(ctx.TagExclusions, name) // Add exclusion to list
 }
 
-func (ctx *ConfigVars) HandleProbeExclusions(e *Event) {
-	for _, v := range e.Probes {
+func (ctx *ConfigVars) HandleScenarioExclusions(e *Probe) {
+	for _, v := range e.Scenarios {
 		if v.Excluded {
 			ctx.HandleExclusion(v.Name, v.Justification)
 		}

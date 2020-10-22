@@ -58,7 +58,7 @@ func (s *scenarioState) theOperationWillWithAnError(res, msg string) error {
 
 	description := ""
 	var payload interface{}
-	s.audit.AuditProbeStep(description, payload, err)
+	s.audit.AuditScenarioStep(description, payload, err)
 
 	return err
 }
@@ -68,7 +68,7 @@ func (s *scenarioState) performAllowedCommand() error {
 
 	description := ""
 	var payload interface{}
-	s.audit.AuditProbeStep(description, payload, err)
+	s.audit.AuditScenarioStep(description, payload, err)
 
 	return err
 }
@@ -144,11 +144,11 @@ func (s *scenarioState) privilegedAccessRequestIsMarkedForTheKubernetesDeploymen
 
 	pd, err := psp.CreatePODSettingSecurityContext(&pa, nil, nil)
 
-	err = ProcessPodCreationResult(s.event, &s.podState, pd, kubernetes.PSPNoPrivilege, err)
+	err = ProcessPodCreationResult(s.probe, &s.podState, pd, kubernetes.PSPNoPrivilege, err)
 
 	description := ""
 	var payload interface{}
-	s.audit.AuditProbeStep(description, payload, err)
+	s.audit.AuditScenarioStep(description, payload, err)
 
 	return err
 }
@@ -158,7 +158,7 @@ func (s *scenarioState) someControlExistsToPreventPrivilegedAccessForKubernetesD
 
 	description := ""
 	var payload interface{}
-	s.audit.AuditProbeStep(description, payload, err)
+	s.audit.AuditScenarioStep(description, payload, err)
 
 	return err
 }
@@ -168,7 +168,7 @@ func (s *scenarioState) iShouldNotBeAbleToPerformACommandThatRequiresPrivilegedA
 
 	description := ""
 	var payload interface{}
-	s.audit.AuditProbeStep(description, payload, err)
+	s.audit.AuditScenarioStep(description, payload, err)
 
 	return err
 }
@@ -186,11 +186,11 @@ func (s *scenarioState) hostPIDRequestIsMarkedForTheKubernetesDeployment(hostPID
 
 	pd, err := psp.CreatePODSettingAttributes(&hostPID, nil, nil)
 
-	err = ProcessPodCreationResult(s.event, &s.podState, pd, kubernetes.PSPHostNamespace, err)
+	err = ProcessPodCreationResult(s.probe, &s.podState, pd, kubernetes.PSPHostNamespace, err)
 
 	description := ""
 	var payload interface{}
-	s.audit.AuditProbeStep(description, payload, err)
+	s.audit.AuditScenarioStep(description, payload, err)
 
 	return err
 }
@@ -200,7 +200,7 @@ func (s *scenarioState) someSystemExistsToPreventAKubernetesContainerFromRunning
 
 	description := ""
 	var payload interface{}
-	s.audit.AuditProbeStep(description, payload, err)
+	s.audit.AuditScenarioStep(description, payload, err)
 
 	return err
 }
@@ -210,7 +210,7 @@ func (s *scenarioState) iShouldNotBeAbleToPerformACommandThatProvidesAccessToThe
 
 	description := ""
 	var payload interface{}
-	s.audit.AuditProbeStep(description, payload, err)
+	s.audit.AuditScenarioStep(description, payload, err)
 
 	return err
 }
@@ -227,11 +227,11 @@ func (s *scenarioState) hostIPCRequestIsMarkedForTheKubernetesDeployment(hostIPC
 
 	pd, err := psp.CreatePODSettingAttributes(nil, &hostIPC, nil)
 
-	err = ProcessPodCreationResult(s.event, &s.podState, pd, kubernetes.PSPHostNamespace, err)
+	err = ProcessPodCreationResult(s.probe, &s.podState, pd, kubernetes.PSPHostNamespace, err)
 
 	description := ""
 	var payload interface{}
-	s.audit.AuditProbeStep(description, payload, err)
+	s.audit.AuditScenarioStep(description, payload, err)
 
 	return err
 
@@ -242,7 +242,7 @@ func (s *scenarioState) someSystemExistsToPreventAKubernetesDeploymentFromRunnin
 
 	description := ""
 	var payload interface{}
-	s.audit.AuditProbeStep(description, payload, err)
+	s.audit.AuditScenarioStep(description, payload, err)
 
 	return err
 }
@@ -252,7 +252,7 @@ func (s *scenarioState) iShouldNotBeAbleToPerformACommandThatProvidesAccessToThe
 
 	description := ""
 	var payload interface{}
-	s.audit.AuditProbeStep(description, payload, err)
+	s.audit.AuditScenarioStep(description, payload, err)
 
 	return err
 }
@@ -269,11 +269,11 @@ func (s *scenarioState) hostNetworkRequestIsMarkedForTheKubernetesDeployment(hos
 
 	pd, err := psp.CreatePODSettingAttributes(nil, nil, &hostNetwork)
 
-	err = ProcessPodCreationResult(s.event, &s.podState, pd, kubernetes.PSPHostNetwork, err)
+	err = ProcessPodCreationResult(s.probe, &s.podState, pd, kubernetes.PSPHostNetwork, err)
 
 	description := ""
 	var payload interface{}
-	s.audit.AuditProbeStep(description, payload, err)
+	s.audit.AuditScenarioStep(description, payload, err)
 
 	return err
 }
@@ -283,7 +283,7 @@ func (s *scenarioState) someSystemExistsToPreventAKubernetesDeploymentFromRunnin
 
 	description := ""
 	var payload interface{}
-	s.audit.AuditProbeStep(description, payload, err)
+	s.audit.AuditScenarioStep(description, payload, err)
 
 	return err
 
@@ -293,7 +293,7 @@ func (s *scenarioState) iShouldNotBeAbleToPerformACommandThatProvidesAccessToThe
 
 	description := ""
 	var payload interface{}
-	s.audit.AuditProbeStep(description, payload, err)
+	s.audit.AuditScenarioStep(description, payload, err)
 
 	return err
 }
@@ -310,11 +310,11 @@ func (s *scenarioState) privilegedEscalationIsMarkedForTheKubernetesDeployment(p
 
 	pd, err := psp.CreatePODSettingSecurityContext(nil, &pa, nil)
 
-	err = ProcessPodCreationResult(s.event, &s.podState, pd, kubernetes.PSPNoPrivilegeEscalation, err)
+	err = ProcessPodCreationResult(s.probe, &s.podState, pd, kubernetes.PSPNoPrivilegeEscalation, err)
 
 	description := ""
 	var payload interface{}
-	s.audit.AuditProbeStep(description, payload, err)
+	s.audit.AuditScenarioStep(description, payload, err)
 
 	return err
 
@@ -324,7 +324,7 @@ func (s *scenarioState) someSystemExistsToPreventAKubernetesDeploymentFromRunnin
 
 	description := ""
 	var payload interface{}
-	s.audit.AuditProbeStep(description, payload, err)
+	s.audit.AuditScenarioStep(description, payload, err)
 
 	return err
 }
@@ -342,11 +342,11 @@ func (s *scenarioState) theUserRequestedIsForTheKubernetesDeployment(requestedUs
 	}
 
 	pd, err := psp.CreatePODSettingSecurityContext(nil, nil, &runAsUser)
-	err = ProcessPodCreationResult(s.event, &s.podState, pd, kubernetes.PSPAllowedUsersGroups, err)
+	err = ProcessPodCreationResult(s.probe, &s.podState, pd, kubernetes.PSPAllowedUsersGroups, err)
 
 	description := ""
 	var payload interface{}
-	s.audit.AuditProbeStep(description, payload, err)
+	s.audit.AuditScenarioStep(description, payload, err)
 
 	return err
 }
@@ -356,7 +356,7 @@ func (s *scenarioState) someSystemExistsToPreventAKubernetesDeploymentFromRunnin
 
 	description := ""
 	var payload interface{}
-	s.audit.AuditProbeStep(description, payload, err)
+	s.audit.AuditScenarioStep(description, payload, err)
 
 	return err
 }
@@ -366,7 +366,7 @@ func (s *scenarioState) theKubernetesDeploymentShouldRunWithANonrootUID() error 
 
 	description := ""
 	var payload interface{}
-	s.audit.AuditProbeStep(description, payload, err)
+	s.audit.AuditScenarioStep(description, payload, err)
 
 	return err
 }
@@ -381,11 +381,11 @@ func (s *scenarioState) nETRAWIsMarkedForTheKubernetesDeployment(netRawRequested
 	}
 
 	pd, err := psp.CreatePODSettingCapabilities(&c)
-	err = ProcessPodCreationResult(s.event, &s.podState, pd, kubernetes.PSPAllowedCapabilities, err)
+	err = ProcessPodCreationResult(s.probe, &s.podState, pd, kubernetes.PSPAllowedCapabilities, err)
 
 	description := ""
 	var payload interface{}
-	s.audit.AuditProbeStep(description, payload, err)
+	s.audit.AuditScenarioStep(description, payload, err)
 
 	return err
 }
@@ -395,7 +395,7 @@ func (s *scenarioState) someSystemExistsToPreventAKubernetesDeploymentFromRunnin
 
 	description := ""
 	var payload interface{}
-	s.audit.AuditProbeStep(description, payload, err)
+	s.audit.AuditScenarioStep(description, payload, err)
 
 	return err
 }
@@ -405,7 +405,7 @@ func (s *scenarioState) iShouldNotBeAbleToPerformACommandThatRequiresNETRAWCapab
 
 	description := ""
 	var payload interface{}
-	s.audit.AuditProbeStep(description, payload, err)
+	s.audit.AuditScenarioStep(description, payload, err)
 
 	return err
 }
@@ -421,11 +421,11 @@ func (s *scenarioState) additionalCapabilitiesForTheKubernetesDeployment(addCapa
 	}
 
 	pd, err := psp.CreatePODSettingCapabilities(&c)
-	err = ProcessPodCreationResult(s.event, &s.podState, pd, kubernetes.PSPAllowedCapabilities, err)
+	err = ProcessPodCreationResult(s.probe, &s.podState, pd, kubernetes.PSPAllowedCapabilities, err)
 
 	description := ""
 	var payload interface{}
-	s.audit.AuditProbeStep(description, payload, err)
+	s.audit.AuditScenarioStep(description, payload, err)
 
 	return err
 }
@@ -435,7 +435,7 @@ func (s *scenarioState) someSystemExistsToPreventKubernetesDeploymentsWithCapabi
 
 	description := ""
 	var payload interface{}
-	s.audit.AuditProbeStep(description, payload, err)
+	s.audit.AuditScenarioStep(description, payload, err)
 
 	return err
 }
@@ -445,7 +445,7 @@ func (s *scenarioState) iShouldNotBeAbleToPerformACommandThatRequiresCapabilitie
 
 	description := ""
 	var payload interface{}
-	s.audit.AuditProbeStep(description, payload, err)
+	s.audit.AuditScenarioStep(description, payload, err)
 
 	return err
 }
@@ -462,11 +462,11 @@ func (s *scenarioState) assignedCapabilitiesForTheKubernetesDeployment(assignCap
 	}
 
 	pd, err := psp.CreatePODSettingCapabilities(&c)
-	err = ProcessPodCreationResult(s.event, &s.podState, pd, kubernetes.PSPAllowedCapabilities, err)
+	err = ProcessPodCreationResult(s.probe, &s.podState, pd, kubernetes.PSPAllowedCapabilities, err)
 
 	description := ""
 	var payload interface{}
-	s.audit.AuditProbeStep(description, payload, err)
+	s.audit.AuditScenarioStep(description, payload, err)
 
 	return err
 
@@ -476,7 +476,7 @@ func (s *scenarioState) someSystemExistsToPreventKubernetesDeploymentsWithAssign
 
 	description := ""
 	var payload interface{}
-	s.audit.AuditProbeStep(description, payload, err)
+	s.audit.AuditScenarioStep(description, payload, err)
 
 	return err
 }
@@ -486,7 +486,7 @@ func (s *scenarioState) iShouldNotBeAbleToPerformACommandThatRequiresAnyCapabili
 
 	description := ""
 	var payload interface{}
-	s.audit.AuditProbeStep(description, payload, err)
+	s.audit.AuditScenarioStep(description, payload, err)
 
 	return err
 }
@@ -505,12 +505,12 @@ func (s *scenarioState) anPortRangeIsRequestedForTheKubernetesDeployment(portRan
 
 	if err == nil {
 		pd, err := psp.CreatePodFromYaml(y)
-		err = ProcessPodCreationResult(s.event, &s.podState, pd, kubernetes.PSPAllowedPortRange, err)
+		err = ProcessPodCreationResult(s.probe, &s.podState, pd, kubernetes.PSPAllowedPortRange, err)
 	}
 
 	description := ""
 	var payload interface{}
-	s.audit.AuditProbeStep(description, payload, err)
+	s.audit.AuditScenarioStep(description, payload, err)
 
 	return err
 
@@ -521,7 +521,7 @@ func (s *scenarioState) someSystemExistsToPreventKubernetesDeploymentsWithUnappr
 
 	description := ""
 	var payload interface{}
-	s.audit.AuditProbeStep(description, payload, err)
+	s.audit.AuditScenarioStep(description, payload, err)
 
 	return err
 }
@@ -531,7 +531,7 @@ func (s *scenarioState) iShouldNotBeAbleToPerformACommandThatAccessAnUnapprovedP
 
 	description := ""
 	var payload interface{}
-	s.audit.AuditProbeStep(description, payload, err)
+	s.audit.AuditScenarioStep(description, payload, err)
 
 	return err
 }
@@ -550,12 +550,12 @@ func (s *scenarioState) anVolumeTypeIsRequestedForTheKubernetesDeployment(volume
 
 	if err == nil {
 		pd, err := psp.CreatePodFromYaml(y)
-		err = ProcessPodCreationResult(s.event, &s.podState, pd, kubernetes.PSPAllowedVolumeTypes, err)
+		err = ProcessPodCreationResult(s.probe, &s.podState, pd, kubernetes.PSPAllowedVolumeTypes, err)
 	}
 
 	description := ""
 	var payload interface{}
-	s.audit.AuditProbeStep(description, payload, err)
+	s.audit.AuditScenarioStep(description, payload, err)
 
 	return err
 }
@@ -565,7 +565,7 @@ func (s *scenarioState) someSystemExistsToPreventKubernetesDeploymentsWithUnappr
 
 	description := ""
 	var payload interface{}
-	s.audit.AuditProbeStep(description, payload, err)
+	s.audit.AuditScenarioStep(description, payload, err)
 
 	return err
 }
@@ -593,12 +593,12 @@ func (s *scenarioState) anSeccompProfileIsRequestedForTheKubernetesDeployment(se
 
 	if err != nil {
 		pd, err := psp.CreatePodFromYaml(y)
-		err = ProcessPodCreationResult(s.event, &s.podState, pd, kubernetes.PSPSeccompProfile, err)
+		err = ProcessPodCreationResult(s.probe, &s.podState, pd, kubernetes.PSPSeccompProfile, err)
 	}
 
 	description := ""
 	var payload interface{}
-	s.audit.AuditProbeStep(description, payload, err)
+	s.audit.AuditScenarioStep(description, payload, err)
 
 	return err
 }
@@ -608,7 +608,7 @@ func (s *scenarioState) someSystemExistsToPreventKubernetesDeploymentsWithoutApp
 
 	description := ""
 	var payload interface{}
-	s.audit.AuditProbeStep(description, payload, err)
+	s.audit.AuditScenarioStep(description, payload, err)
 
 	return err
 }
@@ -617,7 +617,7 @@ func (s *scenarioState) iShouldNotBeAbleToPerformASystemCallThatIsBlockedByTheSe
 
 	description := ""
 	var payload interface{}
-	s.audit.AuditProbeStep(description, payload, err)
+	s.audit.AuditScenarioStep(description, payload, err)
 
 	return err
 }

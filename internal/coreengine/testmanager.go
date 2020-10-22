@@ -128,9 +128,9 @@ func (ts *TestStore) AddTest(td TestDescriptor) string {
 	}
 	ts.Tests[td.Name] = &t
 
-	summary.State.GetEventLog(t.TestDescriptor.Name).Result = t.Status.String()
-	summary.State.LogEventMeta(td.Name, "group", td.Group.String())
-	summary.State.LogEventMeta(td.Name, "category", td.Category.String())
+	summary.State.GetProbeLog(t.TestDescriptor.Name).Result = t.Status.String()
+	summary.State.LogProbeMeta(td.Name, "group", td.Group.String())
+	summary.State.LogProbeMeta(td.Name, "category", td.Category.String())
 
 	return td.Name
 }
@@ -175,7 +175,7 @@ func (ts *TestStore) ExecAllTests() (int, error) {
 
 	for name := range ts.Tests {
 		st, err := ts.ExecTest(name)
-		summary.State.EventComplete(name)
+		summary.State.ProbeComplete(name)
 		if err != nil {
 			//log but continue with remaining tests
 			log.Printf("[ERROR] error executing test: %v", err)

@@ -1,23 +1,23 @@
 # Summary Engineering Notes
 
-Summary is intended for development use to enable systematic event logging.
+Summary is intended for development use to enable systematic probe logging.
 
-These logs are designed to be one-per-event. Each test may have multiple events, and multiple events will likely share similar event types. Events will overwrite _within_ each test, however, to ensure that only one event type is logged per test.
+These logs are designed to be one-per-probe. Each test may have multiple probes, and multiple probes will likely share similar probe types. Probes will overwrite _within_ each test, however, to ensure that only one probe type is logged per test.
 
 ### State
 
 A new State context is created each time `probr` is run, and is readily accessible anywhere in the code via `summary.State`.
 
 
-**SummaryStateStruct.LogEventMeta**
+**SummaryStateStruct.LogProbeMeta**
 
-Adding entries to the an Event's meta data requires the name of the test and a key-value pair to be inserted. 
+Adding entries to the an Probe's meta data requires the name of the test and a key-value pair to be inserted. 
 
 ```
 n := "name-of-the-current-test"
 k = "arbitrary_key_name"
 v = "string_value"
-summary.State.LogEventMeta(n, k, v)
+summary.State.LogProbeMeta(n, k, v)
 ```
 
 **SummaryStateStruct.LogPodName**
@@ -31,30 +31,30 @@ if pd != nil {
 }
 ```
 
-**SummaryStateStruct.GetEventLog**
+**SummaryStateStruct.GetProbeLog**
 
-Many summarys will be made directly to events. In order to do so, the event must first be retrieved by name. In the example below, the event is being stored alongside other test context information for easy access during execution.
+Many summarys will be made directly to probes. In order to do so, the probe must first be retrieved by name. In the example below, the probe is being stored alongside other test context information for easy access during execution.
 
 ```
 	ctx.BeforeScenario(func(s *godog.Scenario) {
 		ps.name = s.Name
-		ps.event = summary.State.GetEventLog(NAME)
-		probes.LogScenarioStart(s)
+		ps.probe = summary.State.GetProbeLog(NAME)
+		scenarios.LogScenarioStart(s)
 	})
 ```
 
-**SummaryStateStruct.EventComplete**
+**SummaryStateStruct.ProbeComplete**
 
-After an event has finished running every probe, we should summary the final outcome of the event.
+After an probe has finished running every scenario, we should summary the final outcome of the probe.
 
 ```
 s, o, err := g.Handler(g.Data)
-summary.State.EventComplete(t.TestDescriptor.Name)
+summary.State.ProbeComplete(t.TestDescriptor.Name)
 ```
 
 **SummaryStateStruct.SetProbrStatus**
 
-After all events have completed, we should set the final probr status. This step may not always be relevant, as it may be possible to nest it within other methods such as `PrintSummary`. This should be reevaluated after more feedback has been gathered regarding how Probr is being used.
+After all probes have completed, we should set the final probr status. This step may not always be relevant, as it may be possible to nest it within other methods such as `PrintSummary`. This should be reevaluated after more feedback has been gathered regarding how Probr is being used.
 
 ```
 summary.State.SetProbrStatus()
@@ -69,11 +69,11 @@ summary.State.PrintSummary()
 os.Exit(s)
 ```
 
-### Events
+### Probes
 
-**Event.CountPodCreated** and **Event.CountPodDestroyed**
+**Probe.CountPodCreated** and **Probe.CountPodDestroyed**
 
-Whenever Probr will create or destroy a pod, these counters should be called to update the event accordingly.
+Whenever Probr will create or destroy a pod, these counters should be called to update the probe accordingly.
 
 ```
 if pd != nil {
@@ -87,15 +87,15 @@ if pd != nil {
 if wait {
   waitForDelete(c, ns, pname)
 }
-summary.State.GetEventLog(event).CountPodDestroyed()
+summary.State.GetProbeLog(probe).CountPodDestroyed()
 ```
 
-**Event.AuditProbeStep**
+**Probe.AuditScenarioStep**
 
-This function should be used every time a step in a probe completes. `AuditProbeStep` will automatically form the name of the step from the name of the function that called it. The name value provided will establish which probe the step is a part of. The error (or nil) provided will dictate whether the test passes or fails.
+This function should be used every time a step in a scenario completes. `AuditScenarioStep` will automatically form the name of the step from the name of the function that called it. The name value provided will establish which scenario the step is a part of. The error (or nil) provided will dictate whether the test passes or fails.
 
 The description and payload values are arbitrary and are used only to assist auditors in their evaluation. A `nil` error will be recorded as a successful step.
 
 ```
-s.audit.AuditProbeStep( "description string", payloadObject, err) 
+s.audit.AuditScenarioStep( "description string", payloadObject, err) 
 ```

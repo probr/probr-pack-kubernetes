@@ -11,18 +11,18 @@ import (
 	"github.com/citihub/probr/internal/config"
 )
 
-type EventAudit struct {
+type ProbeAudit struct {
 	path            string
 	Name            string
 	PodsDestroyed   *int
-	ProbesAttempted *int
-	ProbesSucceeded *int
-	ProbesFailed    *int
+	ScenariosAttempted *int
+	ScenariosSucceeded *int
+	ScenariosFailed    *int
 	Result          *string
-	Probes          map[int]*ProbeAudit
+	Scenarios          map[int]*ScenarioAudit
 }
 
-type ProbeAudit struct {
+type ScenarioAudit struct {
 	Name   string
 	Result string // Passed / Failed / Given Not Met
 	Tags   []string
@@ -37,7 +37,7 @@ type StepAudit struct {
 	Payload     interface{} // Handles any values that are sent across the network
 }
 
-func (e *EventAudit) Write() {
+func (e *ProbeAudit) Write() {
 	if config.Vars.AuditEnabled == "true" && e.probeRan() {
 		_, err := os.Stat(e.path)
 		if err == nil && config.Vars.OverwriteHistoricalAudits == "false" {
@@ -55,8 +55,8 @@ func (e *EventAudit) Write() {
 	}
 }
 
-// auditProbeStep sets description, payload, and pass/fail based on err parameter
-func (p *ProbeAudit) AuditProbeStep(description string, payload interface{}, err error) {
+// auditScenarioStep sets description, payload, and pass/fail based on err parameter
+func (p *ScenarioAudit) AuditScenarioStep(description string, payload interface{}, err error) {
 	// Initialize any empty objects
 	// Now do the actual probe summary
 	stepName := getCallerName(3)
@@ -89,8 +89,8 @@ func getCallerName(up int) string {
 	return s[len(s)-1]                         // select last element from caller path
 }
 
-func (e *EventAudit) probeRan() bool {
-	if len(e.Probes) > 0 {
+func (e *ProbeAudit) probeRan() bool {
+	if len(e.Scenarios) > 0 {
 		return true
 	}
 	return false

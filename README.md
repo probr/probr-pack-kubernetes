@@ -31,7 +31,7 @@ The following elements are required to get started with Probr:
 
       - **kubeconfig** - Required. Default location: `~/.kube/config`
       - **Probr config** - Not required, no default. Used to specify config options as code.
-      - **output directory** - Not required *if* using output type of `INMEM`, which will simply print the probe results to the terminal. Default directory still needs to be created, but path name can be modified via config. Default location: `./cucumber_output`
+      - **output directory** - Not required *if* using output type of `INMEM`, which will simply print the scenario results to the terminal. Default directory still needs to be created, but path name can be modified via config. Default location: `./cucumber_output`
 
 1. Set your configuration variables. For more on how to do this, see the config documentation further down on this page.
 

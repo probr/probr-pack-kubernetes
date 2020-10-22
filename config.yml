@@ -14,7 +14,7 @@ azure:
     clientSecret:
     tenantID:
     locationDefault:
-events: # this entire object can be left out if all tests are to be run
+probes: # this entire object can be left out if all tests are to be run
   - name: account_manager
     excluded: false
     justification: "demo"
@@ -26,10 +26,10 @@ events: # this entire object can be left out if all tests are to be run
   - name: general
     excluded: false
     justification: "demo"
-    probes:
+    scenarios:
       - name: CIS-5.6.3
         excluded: false
-        justification: "probe exclusion demo"
+        justification: "scenario exclusion demo"
 
   - name: iam_control
     excluded: false
@@ -42,7 +42,7 @@ events: # this entire object can be left out if all tests are to be run
   - name: pod_security_policy
     excluded: false
     justification: "demo"
-    probes:
+    scenarios:
       - name: AZP-0.3
         excluded: false
-        justification: "probe exclusion demo"
+        justification: "scenario exclusion demo"

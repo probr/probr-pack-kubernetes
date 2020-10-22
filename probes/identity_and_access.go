@@ -20,7 +20,7 @@ import (
 const iam_name = "iam_control"
 
 // IdentityAccessManagement is the section of the kubernetes package which provides the kubernetes interactions required to support
-// identity access management probes.
+// identity access management scenarios.
 var iam kubernetes.IdentityAccessManagement
 
 // SetIAM allows injection of an IdentityAccessManagement helper.
@@ -69,7 +69,7 @@ func (s *scenarioState) theDefaultNamespaceHasAnAzureIdentityBinding() error {
 	err := s.azureIdentitySetupCheck(iam.AzureIdentityBindingExists, true, "AzureIdentityBinding")
 
 	description := "Gets the AzureIdentityBindings, then filters according to namespace (default, if none supplied). Passes if binding is retrieved for namespace."
-	s.audit.AuditProbeStep(description, nil, err)
+	s.audit.AuditScenarioStep(description, nil, err)
 
 	return err
 
@@ -85,12 +85,12 @@ func (s *scenarioState) iCreateASimplePodInNamespaceAssignedWithThatAzureIdentit
 			s.useDefaultNS = true
 		}
 		pd, err := iam.CreateIAMTestPod(y, s.useDefaultNS)
-		err = ProcessPodCreationResult(s.event, &s.podState, pd, kubernetes.UndefinedPodCreationErrorReason, err)
+		err = ProcessPodCreationResult(s.probe, &s.podState, pd, kubernetes.UndefinedPodCreationErrorReason, err)
 	}
 
 	description := ""
 	var payload interface{}
-	s.audit.AuditProbeStep(description, payload, err)
+	s.audit.AuditScenarioStep(description, payload, err)
 
 	return err
 
@@ -110,7 +110,7 @@ func (s *scenarioState) thePodIsDeployedSuccessfully() error {
 
 	description := ""
 	var payload interface{}
-	s.audit.AuditProbeStep(description, payload, err)
+	s.audit.AuditScenarioStep(description, payload, err)
 
 	return err
 }
@@ -121,7 +121,7 @@ func (s *scenarioState) anAttemptToObtainAnAccessTokenFromThatPodShouldFail() er
 
 	description := ""
 	var payload interface{}
-	s.audit.AuditProbeStep(description, payload, err)
+	s.audit.AuditScenarioStep(description, payload, err)
 
 	return err
 }
@@ -157,7 +157,7 @@ func (s *scenarioState) anAttemptToObtainAnAccessTokenFromThatPodShould(expected
 
 	description := ""
 	var payload interface{}
-	s.audit.AuditProbeStep(description, payload, err)
+	s.audit.AuditScenarioStep(description, payload, err)
 
 	return err
 }
@@ -168,7 +168,7 @@ func (s *scenarioState) theDefaultNamespaceHasAnAzureIdentity() error {
 
 	description := ""
 	var payload interface{}
-	s.audit.AuditProbeStep(description, payload, err)
+	s.audit.AuditScenarioStep(description, payload, err)
 
 	return err
 
@@ -179,7 +179,7 @@ func (s *scenarioState) iCreateAnAzureIdentityBindingCalledInANondefaultNamespac
 
 	description := ""
 	var payload interface{}
-	s.audit.AuditProbeStep(description, payload, err)
+	s.audit.AuditScenarioStep(description, payload, err)
 
 	return err
 }
@@ -191,12 +191,12 @@ func (s *scenarioState) iDeployAPodAssignedWithTheAzureIdentityBindingIntoTheSam
 		err = LogAndReturnError("error reading yaml for test: %v", err)
 	} else {
 		pd, err := iam.CreateIAMTestPod(y, false)
-		err = ProcessPodCreationResult(s.event, &s.podState, pd, kubernetes.UndefinedPodCreationErrorReason, err)
+		err = ProcessPodCreationResult(s.probe, &s.podState, pd, kubernetes.UndefinedPodCreationErrorReason, err)
 	}
 
 	description := ""
 	var payload interface{}
-	s.audit.AuditProbeStep(description, payload, err)
+	s.audit.AuditScenarioStep(description, payload, err)
 
 	return err
 }
@@ -225,7 +225,7 @@ func (s *scenarioState) theClusterHasManagedIdentityComponentsDeployed() error {
 
 	description := ""
 	var payload interface{}
-	s.audit.AuditProbeStep(description, payload, err)
+	s.audit.AuditScenarioStep(description, payload, err)
 
 	return err
 }
@@ -253,7 +253,7 @@ func (s *scenarioState) iExecuteTheCommandAgainstTheMICPod(arg1 string) error {
 
 	description := ""
 	var payload interface{}
-	s.audit.AuditProbeStep(description, payload, err)
+	s.audit.AuditScenarioStep(description, payload, err)
 
 	return err
 }
@@ -265,8 +265,8 @@ func (s *scenarioState) kubernetesShouldPreventMeFromRunningTheCommand() error {
 		err = LogAndReturnError("verification command was not blocked")
 	}
 
-	description := "Examines probe state to ensure that verification command was blocked."
-	s.audit.AuditProbeStep(description, nil, err)
+	description := "Examines scenario state to ensure that verification command was blocked."
+	s.audit.AuditScenarioStep(description, nil, err)
 
 	return err
 }

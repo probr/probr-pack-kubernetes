@@ -29,7 +29,7 @@ func init() {
 }
 
 // NetworkAccess is the section of the kubernetes package which provides the kubernetes interactions required to support
-// network access probes.
+// network access scenarios.
 var na kubernetes.NetworkAccess
 
 // SetNetworkAccess allows injection of a specific NetworkAccess helper.
@@ -42,7 +42,7 @@ func (s *scenarioState) aPodIsDeployedInTheCluster() error {
 	var podAudit *kubernetes.PodAudit
 	var pod *apiv1.Pod
 	if s.podName != "" {
-		//only one pod is needed for all probes in this event
+		//only one pod is needed for all scenarios in this probe
 		log.Printf("[DEBUG] Pod %v has already been created - reusing the pod", s.podName)
 	} else {
 		pd, pa, e := na.SetupNetworkAccessTestPod()
@@ -59,7 +59,7 @@ func (s *scenarioState) aPodIsDeployedInTheCluster() error {
 
 	description := ""
 	payload := podPayload(pod, podAudit)
-	s.audit.AuditProbeStep(description, payload, err)
+	s.audit.AuditScenarioStep(description, payload, err)
 
 	return err
 }
@@ -76,7 +76,7 @@ func (s *scenarioState) aProcessInsideThePodEstablishesADirectHTTPSConnectionTo(
 
 	description := ""
 	var payload interface{}
-	s.audit.AuditProbeStep(description, payload, err)
+	s.audit.AuditScenarioStep(description, payload, err)
 
 	return err
 }
@@ -93,7 +93,7 @@ func (s *scenarioState) accessIs(accessResult string) error {
 
 	description := ""
 	var payload interface{}
-	s.audit.AuditProbeStep(description, payload, err)
+	s.audit.AuditScenarioStep(description, payload, err)
 
 	return err
 }

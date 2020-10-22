@@ -56,14 +56,14 @@ func AddTestHandler(td TestDescriptor, gd *GoDogTestTuple) {
 // GodogTest data structure.
 func (ts *TestStore) RunTest(t *Test) (int, error) {
 	if t == nil {
-		summary.State.GetEventLog(t.TestDescriptor.Name).Result = "Internal Error - Test not found"
+		summary.State.GetProbeLog(t.TestDescriptor.Name).Result = "Internal Error - Test not found"
 		return 2, fmt.Errorf("test is nil - cannot run test")
 	}
 
 	if t.TestDescriptor == nil {
 		//update status
 		*t.Status = Error
-		summary.State.GetEventLog(t.TestDescriptor.Name).Result = "Internal Error - Test descriptor not found"
+		summary.State.GetProbeLog(t.TestDescriptor.Name).Result = "Internal Error - Test descriptor not found"
 		return 3, fmt.Errorf("test descriptor is nil - cannot run test")
 	}
 
@@ -73,7 +73,7 @@ func (ts *TestStore) RunTest(t *Test) (int, error) {
 	if !exists {
 		//update status
 		*t.Status = Error
-		summary.State.GetEventLog(t.TestDescriptor.Name).Result = "Internal Error - No handler available for test"
+		summary.State.GetProbeLog(t.TestDescriptor.Name).Result = "Internal Error - No handler available for test"
 		return 4, fmt.Errorf("no test handler available for %v - cannot run test", *t.TestDescriptor)
 	}
 

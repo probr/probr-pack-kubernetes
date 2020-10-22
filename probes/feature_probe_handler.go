@@ -60,7 +60,7 @@ func inMemGodogTestHandler(gd *coreengine.GodogTest) (int, *bytes.Buffer, error)
 }
 
 func runTestSuite(o io.Writer, gd *coreengine.GodogTest) (int, error) {
-	f, err := getEventsPath(gd)
+	f, err := getProbesPath(gd)
 	if err != nil {
 		return -2, err
 	}
@@ -83,7 +83,7 @@ func runTestSuite(o io.Writer, gd *coreengine.GodogTest) (int, error) {
 	return status, nil
 }
 
-func getEventsPath(gd *coreengine.GodogTest) (string, error) {
+func getProbesPath(gd *coreengine.GodogTest) (string, error) {
 	r, err := GetRootDir()
 	if err != nil {
 		return "", fmt.Errorf("unable to determine root directory - not able to perform tests")
