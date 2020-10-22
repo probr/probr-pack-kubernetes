@@ -27,7 +27,7 @@ func GodogTestHandler(gd *GodogTest) (int, *bytes.Buffer, error) {
 }
 
 func toFileGodogTestHandler(gd *GodogTest) (int, *bytes.Buffer, error) {
-	o, err := getOutputPath(&gd.TestDescriptor.Name)
+	o, err := getOutputPath(gd.TestDescriptor.Name)
 	if err != nil {
 		return -1, nil, err
 	}

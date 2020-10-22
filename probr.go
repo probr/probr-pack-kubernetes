@@ -19,7 +19,6 @@ func addTest(tm *coreengine.TestStore, n string, g coreengine.Group, c coreengin
 	tm.AddTest(td)
 }
 
-// RunAllTests MUST run after SetIOPaths
 func RunAllTests() (int, *coreengine.TestStore, error) {
 	tm := coreengine.NewTestManager() // get the test mgr
 
@@ -64,9 +63,4 @@ func ReadTestResults(ts *coreengine.TestStore, name string) (string, string, err
 		return string(b), n, nil
 	}
 	return "", "", nil
-}
-
-// SetIOPaths ...
-func SetIOPaths(i string, o string) {
-	coreengine.SetOutputDirectory(&o)
 }

@@ -43,41 +43,15 @@ func getRootDir() (string, error) {
 	return s[0], nil
 }
 
-// SetOutputDirectory allows specification of the output directory for the test output json files.
-func SetOutputDirectory(d *string) {
-	outputDir = d
-}
-
 // getOutputPath gets the output path for the test based on the output directory
 // plus the test name supplied
-func getOutputPath(t *string) (*os.File, error) {
-	outPath, err := getOutputDirectory()
-	if err != nil {
-		return nil, err
-	}
-	os.Mkdir(*outPath, os.ModeDir)
+func getOutputPath(t string) (*os.File, error) {
+
+	os.Mkdir(config.Vars.CucumberDir, os.ModeDir)
 
 	//filename is test name (supplied) + .json
-	fn := *t + ".json"
-	return os.Create(filepath.Join(*outPath, fn))
-}
-
-func getOutputDirectory() (*string, error) {
-	if outputDir == nil || len(*outputDir) < 1 {
-		log.Printf("[INFO] output directory not set - attempting to default")
-		//default it:
-		r, err := getRootDir()
-		if err != nil {
-			return nil, fmt.Errorf("output directory not set - attempt to default resulted in error: %v", err)
-		}
-
-		f := filepath.Join(r, config.Vars.CucumberDir)
-		outputDir = &f
-	}
-
-	log.Printf("[INFO] output directory is: %v", *outputDir)
-
-	return outputDir, nil
+	fn := t + ".json"
+	return os.Create(filepath.Join(config.Vars.CucumberDir, fn))
 }
 
 // coreengine.LogAndReturnError logs the given string and raise an error with the same string.  This is useful in Godog steps
