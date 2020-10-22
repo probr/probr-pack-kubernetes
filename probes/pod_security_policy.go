@@ -5,7 +5,7 @@ package probes
 import (
 	"github.com/citihub/probr/internal/clouddriver/kubernetes"
 	"github.com/citihub/probr/internal/coreengine"
-	podsecuritypolicy "github.com/citihub/probr/probes/kubernetes/podsecuritypolicy/assets"
+	podsecuritypolicy "github.com/citihub/probr/probes/kubernetes/assets/podsecuritypolicy"
 	"github.com/cucumber/godog"
 )
 

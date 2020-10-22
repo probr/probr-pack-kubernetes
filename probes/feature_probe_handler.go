@@ -97,9 +97,9 @@ func getProbesPath(gd *coreengine.GodogTest) (string, error) {
 	//otherwise derive it from the group and category data:
 	var g = gd.TestDescriptor.Group.String()
 	var c = gd.TestDescriptor.Category.String()
+	group := strings.ReplaceAll(strings.ToLower(g), " ", "")
+	category := strings.ReplaceAll(strings.ToLower(c), " ", "")
 
-	return filepath.Join(r, "probes",
-		strings.ReplaceAll(strings.ToLower(g), " ", ""),
-		strings.ReplaceAll(strings.ToLower(c), " ", ""), "events"), nil
+	return filepath.Join(r, "probes", group, "probe_definitions", category), nil
 
 }

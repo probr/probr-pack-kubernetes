@@ -14,7 +14,7 @@ import (
 	"github.com/citihub/probr/internal/coreengine"
 	"github.com/cucumber/godog"
 
-	iamassets "github.com/citihub/probr/probes/kubernetes/iam/assets"
+	iamassets "github.com/citihub/probr/probes/kubernetes/assets/iam"
 )
 
 const iam_name = "iam_control"
