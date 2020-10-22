@@ -68,6 +68,7 @@ func (p *ProbeAudit) AuditProbeStep(description string, payload interface{}, err
 	}
 	if err == nil {
 		p.Steps[stepNumber].Result = "Passed"
+		p.Result = "Passed"
 	} else {
 		p.Steps[stepNumber].Result = "Failed"
 		p.Steps[stepNumber].Error = strings.Replace(err.Error(), "[ERROR] ", "", -1)
