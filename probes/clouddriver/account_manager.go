@@ -2,62 +2,50 @@ package clouddriver_probes
 
 import (
 	"log"
-	"path/filepath"
 
-	"github.com/citihub/probr/internal/coreengine"
 	"github.com/cucumber/godog"
 )
-
-func init() {
-	td := coreengine.TestDescriptor{Group: coreengine.CloudDriver, Name: "account_manager"}
-
-	fp := filepath.Join("probes", "clouddriver", "probe_definitions")
-
-	coreengine.AddTestHandler(td, &coreengine.GoDogTestTuple{
-		Handler: coreengine.GodogTestHandler,
-		Data: &coreengine.GodogTest{
-			TestDescriptor:       &td,
-			TestSuiteInitializer: amTestSuiteInitialize,
-			ScenarioInitializer:  amScenarioInitialize,
-			FeaturePath:          &fp,
-		},
-	})
-}
 
 //This is the main implementation of the BDD/Cucumber feature test
 //keep it in a separate file for clarity
 //(as it will be utilised from the "test" file and the "test handler")
 
+// PENDING IMPLEMENTATION
 func aResouceCanBeDeployedIntoTheAccountUsingTheLinkedCredential(arg1, arg2 string) error {
 	// return godog.ErrPending
 	log.Printf("[INFO] *** THEN: resource can be deployed ACCOUNT: %v | *** CREDENTIAL: %v \n", arg1, arg2)
 	return nil
 }
 
+// PENDING IMPLEMENTATION
 func credentialWithAccessToTheAccountIsAlreadyConfiguredInTheSystem(arg1, arg2 string) error {
 	// return godog.ErrPending
 	log.Printf("[INFO] *** AND: CREDENTIAL: %v with access to ACCOUNT: %v ALREADY EXISTS \n", arg1, arg2)
 	return nil
 }
 
+// PENDING IMPLEMENTATION
 func iAddTheAccountDetailsToTheSystem(arg1 string) error {
 	log.Printf("[INFO] *** WHEN: ADD ACCOUNT: %v to the system \n", arg1)
 	// return godog.ErrPending
 	return nil
 }
 
+// PENDING IMPLEMENTATION
 func iAmConfiguringAAccount(arg1 string) error {
 	log.Printf("[INFO] *** GIVEN: Configuring ACCOUNT: %v \n", arg1)
 	// return godog.ErrPending
 	return nil
 }
 
+// PENDING IMPLEMENTATION
 func iLinkTheCredentialToTheAccount(arg1, arg2 string) error {
 	// return godog.ErrPending
 	log.Printf("[INFO] *** CREDENTIAL: %v | *** ACCOUNT: %v \n", arg1, arg2)
 	return nil
 }
 
+// PENDING IMPLEMENTATION
 func aResouceDeploymentWillWithTheMessage(arg1, arg2 string) error {
 	log.Printf("[INFO] *** THEN: %v %v", arg1, arg2)
 	return nil

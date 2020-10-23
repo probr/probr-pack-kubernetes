@@ -26,25 +26,6 @@ func SetIAM(i kubernetes.IdentityAccessManagement) {
 	iam = i
 }
 
-// init() registers the feature tests descibed in this package with the test runner (coreengine.TestRunner) via the call
-// to coreengine.AddTestHandler.  This links the test - described by the TestDescriptor - with the handler to invoke.  In
-// this case, the general test handler is being used (probes.coreengine.GodogTestHandler) and the GodogTest data provides the data
-// require to execute the test.  Specifically, the data includes the Test Suite and Scenario Initializers from this package
-// which will be called from probes.coreengine.GodogTestHandler.  Note: a blank import at probr library level should be done to
-// invoke this function automatically on initial load.
-func init() {
-	td := coreengine.TestDescriptor{Group: coreengine.Kubernetes, Name: iam_name}
-
-	coreengine.AddTestHandler(td, &coreengine.GoDogTestTuple{
-		Handler: coreengine.GodogTestHandler,
-		Data: &coreengine.GodogTest{
-			TestDescriptor:       &td,
-			TestSuiteInitializer: iamTestSuiteInitialize,
-			ScenarioInitializer:  iamScenarioInitialize,
-		},
-	})
-}
-
 // azureIdentitySetupCheck executes the provided function and returns a formatted error
 func (s *scenarioState) azureIdentitySetupCheck(f func(bool) (bool, error), useDefaultNS bool, k string) error {
 
@@ -296,7 +277,7 @@ func iamScenarioInitialize(ctx *godog.ScenarioContext) {
 	ps := scenarioState{}
 
 	ctx.BeforeScenario(func(s *godog.Scenario) {
-		ps.BeforeScenario(iam_name, s)
+		ps.BeforeScenario(InternetAccess.String(), s)
 	})
 
 	//general/all
@@ -325,7 +306,7 @@ func iamScenarioInitialize(ctx *godog.ScenarioContext) {
 	ctx.Step(`^the cluster has managed identity components deployed$`, ps.theClusterHasManagedIdentityComponentsDeployed)
 
 	ctx.AfterScenario(func(s *godog.Scenario, err error) {
-		iam.DeleteIAMTestPod(ps.podState.PodName, ps.useDefaultNS, iam_name)
+		iam.DeleteIAMTestPod(ps.podState.PodName, ps.useDefaultNS, InternetAccess.String())
 		coreengine.LogScenarioEnd(s)
 	})
 }

@@ -13,25 +13,6 @@ import (
 	"github.com/cucumber/godog"
 )
 
-// init() registers the feature tests descibed in this package with the test runner (coreengine.TestRunner) via the call
-// to coreengine.AddTestHandler.  This links the test - described by the TestDescriptor - with the handler to invoke.  In
-// this case, the general test handler is being used (probes.coreengine.GodogTestHandler) and the GodogTest data provides the data
-// require to execute the test.  Specifically, the data includes the Test Suite and Scenario Initializers from this package
-// which will be called from probes.coreengine.GodogTestHandler.  Note: a blank import at probr library level should be done to
-// invoke this function automatically on initial load.
-func init() {
-	td := coreengine.TestDescriptor{Group: coreengine.Kubernetes, Name: gen_name}
-
-	coreengine.AddTestHandler(td, &coreengine.GoDogTestTuple{
-		Handler: coreengine.GodogTestHandler,
-		Data: &coreengine.GodogTest{
-			TestDescriptor:       &td,
-			TestSuiteInitializer: genTestSuiteInitialize,
-			ScenarioInitializer:  genScenarioInitialize,
-		},
-	})
-}
-
 // BUG - This step doesn't run
 //@CIS-5.1.3
 func (s *scenarioState) iInspectTheThatAreConfigured(roleLevel string) error {
@@ -149,7 +130,8 @@ func genScenarioInitialize(ctx *godog.ScenarioContext) {
 	ps := scenarioState{}
 
 	ctx.BeforeScenario(func(s *godog.Scenario) {
-		ps.BeforeScenario(gen_name, s)
+		ps.BeforeScenario(General.String(),
+			s)
 	})
 
 	//general
@@ -167,7 +149,7 @@ func genScenarioInitialize(ctx *godog.ScenarioContext) {
 	ctx.Step(`^the Kubernetes Web UI is disabled$`, ps.theKubernetesWebUIIsDisabled)
 
 	ctx.AfterScenario(func(s *godog.Scenario, err error) {
-		kubernetes.GetKubeInstance().DeletePod(&ps.podState.PodName, utils.StringPtr("probr-general-test-ns"), false, gen_name)
+		kubernetes.GetKubeInstance().DeletePod(&ps.podState.PodName, utils.StringPtr("probr-general-test-ns"), false, General.String())
 		coreengine.LogScenarioEnd(s)
 	})
 }

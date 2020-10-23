@@ -4,33 +4,21 @@ import (
 	"github.com/citihub/probr/internal/clouddriver/kubernetes"
 	"github.com/citihub/probr/internal/coreengine"
 	_ "github.com/citihub/probr/probes/clouddriver"
-	_ "github.com/citihub/probr/probes/kubernetes"
+	k8s_probes "github.com/citihub/probr/probes/kubernetes"
 )
 
 //TODO: revise when interface this bit up ...
 var kube = kubernetes.GetKubeInstance()
 
-func addTest(tm *coreengine.TestStore, n string, g coreengine.Group) {
-	td := coreengine.TestDescriptor{
-		Group: g,
-		Name:  n,
-	}
-	tm.AddTest(td)
-}
-
 func RunAllTests() (int, *coreengine.TestStore, error) {
-	tm := coreengine.NewTestManager() // get the test mgr
+	ts := coreengine.NewTestManager() // get the test mgr
 
-	//add some tests and add them to the TM - we need to tidy this up!
-	addTest(tm, "container_registry_access", coreengine.Kubernetes)
-	addTest(tm, "internet_access", coreengine.Kubernetes)
-	addTest(tm, "pod_security_policy", coreengine.Kubernetes)
-	addTest(tm, "account_manager", coreengine.CloudDriver)
-	addTest(tm, "general", coreengine.Kubernetes)
-	addTest(tm, "iam_control", coreengine.Kubernetes)
+	for _, probe := range k8s_probes.Probes {
+		ts.AddTest(probe.GetGodogTest())
+	}
 
-	s, err := tm.ExecAllTests() // Executes all added (queued) tests
-	return s, tm, err
+	s, err := ts.ExecAllTests() // Executes all added (queued) tests
+	return s, ts, err
 }
 
 //GetAllTestResults ...

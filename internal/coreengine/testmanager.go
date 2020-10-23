@@ -4,7 +4,6 @@
 package coreengine
 
 import (
-	"bytes"
 	"errors"
 	"log"
 	"sync"
@@ -44,15 +43,6 @@ func (g Group) String() string {
 	return [...]string{"kubernetes", "clouddriver", "coreengine"}[g]
 }
 
-// Test encapsulates the data required to support test execution.
-type Test struct {
-	TestDescriptor *TestDescriptor `json:"test_descriptor,omitempty"`
-
-	Status *TestStatus `json:"status,omitempty"`
-
-	Results *bytes.Buffer
-}
-
 // TestDescriptor describes the specific test case and includes name and group.
 type TestDescriptor struct {
 	Group Group  `json:"group,omitempty"`
@@ -62,8 +52,8 @@ type TestDescriptor struct {
 // TestStore maintains a collection of tests to be run and their status.  FailedTests is an explicit
 // collection of failed tests.
 type TestStore struct {
-	Tests       map[string]*Test
-	FailedTests map[TestStatus]*Test
+	Tests       map[string]*GodogTest
+	FailedTests map[TestStatus]*GodogTest
 	Lock        sync.RWMutex
 }
 
@@ -80,37 +70,34 @@ func GetAvailableTests() *[]TestDescriptor {
 // NewTestManager creates a new test manager, backed by TestStore
 func NewTestManager() *TestStore {
 	return &TestStore{
-		Tests: make(map[string]*Test),
+		Tests: make(map[string]*GodogTest),
 	}
 }
 
-// AddTest adds a test, described by the TestDescriptor, to the TestStore.
-func (ts *TestStore) AddTest(td TestDescriptor) string {
+// AddTest provided GodogTest to the TestStore.
+func (ts *TestStore) AddTest(test *GodogTest) string {
 	ts.Lock.Lock()
 	defer ts.Lock.Unlock()
 
-	var s TestStatus
-	if td.isExcluded() {
-		s = Excluded
+	var status TestStatus
+	if test.TestDescriptor.isExcluded() {
+		status = Excluded
 	} else {
-		s = Pending
+		status = Pending
 	}
 
 	//add the test
-	t := Test{
-		TestDescriptor: &td,
-		Status:         &s,
-	}
-	ts.Tests[td.Name] = &t
+	test.Status = &status
+	ts.Tests[test.TestDescriptor.Name] = test
 
-	summary.State.GetProbeLog(t.TestDescriptor.Name).Result = t.Status.String()
-	summary.State.LogProbeMeta(td.Name, "group", td.Group.String())
+	summary.State.GetProbeLog(test.TestDescriptor.Name).Result = test.Status.String()
+	summary.State.LogProbeMeta(test.TestDescriptor.Name, "group", test.TestDescriptor.Group.String())
 
-	return td.Name
+	return test.TestDescriptor.Name
 }
 
 // GetTest returns the test identified by the given name.
-func (ts *TestStore) GetTest(name string) (*Test, error) {
+func (ts *TestStore) GetTest(name string) (*GodogTest, error) {
 	ts.Lock.Lock()
 	defer ts.Lock.Unlock()
 
@@ -123,24 +110,17 @@ func (ts *TestStore) GetTest(name string) (*Test, error) {
 	return t, nil
 }
 
-//GetTest by TestDescriptor ... TODO
-
 // ExecTest executes the test identified by the specified name.
 func (ts *TestStore) ExecTest(name string) (int, error) {
 	t, err := ts.GetTest(name)
-
 	if err != nil {
-		return 1, err
+		return 1, err // Failure
 	}
 	if t.Status.String() != Excluded.String() {
-		return ts.RunTest(t)
+		return ts.RunTest(t) // Return test results
 	}
-	//TODO: manage store
-	//move to FAILURE / SUCCESS as approriate ...
-	return 0, nil
+	return 0, nil // Succeed if test is excluded
 }
-
-//ExecTest by TestDescriptor, etc ... TODO.  In this case there may be more than one so we should set up for concurrency
 
 // ExecAllTests executes all tests that are present in the TestStore.
 func (ts *TestStore) ExecAllTests() (int, error) {
@@ -162,7 +142,7 @@ func (ts *TestStore) ExecAllTests() (int, error) {
 }
 
 func (td *TestDescriptor) isExcluded() bool {
-	v := []string{td.Name, td.Group.String()}
+	v := []string{td.Name, td.Group.String()} // iterable name & group strings
 	for _, r := range v {
 		if tagIsExcluded(r) {
 			return true
@@ -171,9 +151,9 @@ func (td *TestDescriptor) isExcluded() bool {
 	return false
 }
 
-func tagIsExcluded(e string) bool {
-	for _, t := range config.Vars.TagExclusions {
-		if t == e {
+func tagIsExcluded(tag string) bool {
+	for _, exclusion := range config.Vars.TagExclusions {
+		if tag == exclusion {
 			return true
 		}
 	}

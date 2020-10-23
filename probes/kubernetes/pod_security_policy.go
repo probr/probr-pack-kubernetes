@@ -18,25 +18,6 @@ func SetPodSecurityPolicy(p kubernetes.PodSecurityPolicy) {
 	psp = p
 }
 
-// init() registers the feature tests descibed in this package with the test runner (coreengine.TestRunner) via the call
-// to coreengine.AddTestHandler.  This links the test - described by the TestDescriptor - with the handler to invoke.  In
-// this case, the general test handler is being used (coreengine.GodogTestHandler) and the GodogTest data provides the data
-// require to execute the test.  Specifically, the data includes the Test Suite and Scenario Initializers from this package
-// which will be called from coreengine.GodogTestHandler.  Note: a blank import at probr library level should be done to
-// invoke this function automatically on initial load.
-func init() {
-	td := coreengine.TestDescriptor{Group: coreengine.Kubernetes, Name: psp_name}
-
-	coreengine.AddTestHandler(td, &coreengine.GoDogTestTuple{
-		Handler: coreengine.GodogTestHandler,
-		Data: &coreengine.GodogTest{
-			TestDescriptor:       &td,
-			TestSuiteInitializer: pspTestSuiteInitialize,
-			ScenarioInitializer:  pspScenarioInitialize,
-		},
-	})
-}
-
 // general statements.  Cluster exists, etc. Also result/outcome
 
 func (s *scenarioState) creationWillWithAMessage(arg1, arg2 string) error {
@@ -644,7 +625,7 @@ func pspScenarioInitialize(ctx *godog.ScenarioContext) {
 	ps := scenarioState{}
 
 	ctx.BeforeScenario(func(s *godog.Scenario) {
-		ps.BeforeScenario(psp_name, s)
+		ps.BeforeScenario(PodSecurityPolicy.String(), s)
 	})
 
 	ctx.Step(`^a Kubernetes cluster exists which we can deploy into$`, ps.aKubernetesClusterIsDeployed)
@@ -715,7 +696,7 @@ func pspScenarioInitialize(ctx *godog.ScenarioContext) {
 	ctx.Step(`^I should be able to perform an allowed command$`, ps.performAllowedCommand)
 
 	ctx.AfterScenario(func(s *godog.Scenario, err error) {
-		psp.TeardownPodSecurityTest(&ps.podState.PodName, psp_name)
+		psp.TeardownPodSecurityTest(&ps.podState.PodName, PodSecurityPolicy.String())
 		ps.podState.PodName = ""
 		ps.podState.CreationError = nil
 		coreengine.LogScenarioEnd(s)

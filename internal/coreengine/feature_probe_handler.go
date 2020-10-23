@@ -19,11 +19,11 @@ import (
 // output type, the test will either be executed using an in-memory or file output.  In
 // both cases, the handler uses the data supplied in GodogTest to call the underlying
 // GoDog test suite.
-func GodogTestHandler(gd *GodogTest) (int, *bytes.Buffer, error) {
+func GodogTestHandler(test *GodogTest) (int, *bytes.Buffer, error) {
 	if config.Vars.OutputType == "INMEM" {
-		return inMemGodogTestHandler(gd)
+		return inMemGodogTestHandler(test)
 	}
-	return toFileGodogTestHandler(gd)
+	return toFileGodogTestHandler(test)
 }
 
 func toFileGodogTestHandler(gd *GodogTest) (int, *bytes.Buffer, error) {
@@ -97,6 +97,5 @@ func getProbesPath(gd *GodogTest) (string, error) {
 	g := gd.TestDescriptor.Group.String()
 	group := strings.ReplaceAll(strings.ToLower(g), " ", "")
 	name := strings.ReplaceAll(gd.TestDescriptor.Name, "_", "")
-
 	return filepath.Join(r, "probes", group, "probe_definitions", name), nil
 }

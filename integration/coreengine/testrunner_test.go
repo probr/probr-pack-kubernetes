@@ -50,7 +50,7 @@ func TestTestRunner(t *testing.T) {
 	sat1 := coreengine.Pending
 
 	//construct the test to run
-	test1 := coreengine.Test{
+	test1 := coreengine.GodogTest{
 		TestDescriptor: &td,
 		Status:         &sat1,
 	}
@@ -94,7 +94,7 @@ func TestTestRunner(t *testing.T) {
 	sat2 := coreengine.Pending
 
 	//construct the test to run
-	test2 := coreengine.Test{
+	test2 := coreengine.GodogTest{
 		TestDescriptor: &td2,
 		Status:         &sat2,
 	}
@@ -125,7 +125,7 @@ func TestTestRunnerInMem(t *testing.T) {
 	sat1 := coreengine.Pending
 
 	//construct the test to run
-	test1 := coreengine.Test{
+	test1 := coreengine.GodogTest{
 		TestDescriptor: &td,
 		Status:         &sat1,
 	}

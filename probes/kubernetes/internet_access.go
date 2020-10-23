@@ -13,16 +13,6 @@ var ia_ps scenarioState
 
 func init() {
 	ia_ps = scenarioState{}
-	td := coreengine.TestDescriptor{Group: coreengine.Kubernetes, Name: ia_name}
-
-	coreengine.AddTestHandler(td, &coreengine.GoDogTestTuple{
-		Handler: coreengine.GodogTestHandler,
-		Data: &coreengine.GodogTest{
-			TestDescriptor:       &td,
-			TestSuiteInitializer: iaTestSuiteInitialize,
-			ScenarioInitializer:  iaScenarioInitialize,
-		},
-	})
 }
 
 // NetworkAccess is the section of the kubernetes package which provides the kubernetes interactions required to support
@@ -101,7 +91,7 @@ func iaTestSuiteInitialize(ctx *godog.TestSuiteContext) {
 	ctx.BeforeSuite(func() {}) //nothing for now
 
 	ctx.AfterSuite(func() {
-		na.TeardownNetworkAccessTestPod(&ia_ps.podName, ia_name)
+		na.TeardownNetworkAccessTestPod(&ia_ps.podName, InternetAccess.String())
 	})
 
 	//check dependancies ...
@@ -118,7 +108,7 @@ func iaTestSuiteInitialize(ctx *godog.TestSuiteContext) {
 func iaScenarioInitialize(ctx *godog.ScenarioContext) {
 
 	ctx.BeforeScenario(func(s *godog.Scenario) {
-		ia_ps.BeforeScenario(ia_name, s)
+		ia_ps.BeforeScenario(InternetAccess.String(), s)
 	})
 
 	ctx.Step(`^a Kubernetes cluster is deployed$`, ia_ps.aKubernetesClusterIsDeployed)

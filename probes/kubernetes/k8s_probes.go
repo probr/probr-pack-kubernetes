@@ -11,7 +11,7 @@ import (
 	apiv1 "k8s.io/api/core/v1"
 )
 
-// State captures useful pod state data for use in a scenario's state.
+// podState captures useful pod state data for use in a scenario's state.
 type podState struct {
 	PodName         string
 	CreationError   *kubernetes.PodCreationError
@@ -30,13 +30,73 @@ type scenarioState struct {
 	wildcardRoles  interface{}
 }
 
+type Probe int
+
 const (
-	cra_name = "container_registry_access"
-	gen_name = "general"
-	psp_name = "pod_security_policy"
-	ia_name  = "internet_access"
-	iam_name = "iam_control"
+	ContainerRegistryAccess Probe = iota
+	General
+	PodSecurityPolicy
+	InternetAccess
+	IAMControl
 )
+
+// Probes contains all probes with helper functions allowing all to be added in a loop
+var Probes []Probe
+
+func init() {
+	Probes = []Probe{
+		ContainerRegistryAccess,
+		General,
+		PodSecurityPolicy,
+		InternetAccess,
+		IAMControl,
+	}
+}
+
+func (p Probe) String() string {
+	return [...]string{
+		"container_registry_access",
+		"general",
+		"pod_security_policy",
+		"internet_access",
+		"iam_control",
+	}[p]
+}
+
+func (p Probe) TestSuiteContext(s *godog.TestSuiteContext) {
+	f := [...]func(*godog.TestSuiteContext){
+		craTestSuiteInitialize,
+		genTestSuiteInitialize,
+		pspTestSuiteInitialize,
+		iaTestSuiteInitialize,
+		iamTestSuiteInitialize,
+	}[p]
+	f(s)
+}
+
+func (p Probe) ScenarioContext(s *godog.ScenarioContext) {
+	f := [...]func(*godog.ScenarioContext){
+		craScenarioInitialize,
+		genScenarioInitialize,
+		pspScenarioInitialize,
+		iaScenarioInitialize,
+		iamScenarioInitialize,
+	}[p]
+	f(s)
+}
+
+func (p Probe) GetGodogTest() *coreengine.GodogTest {
+	td := coreengine.TestDescriptor{Group: coreengine.Kubernetes, Name: p.String()}
+
+	return &coreengine.GodogTest{
+		TestDescriptor:       &td,
+		TestSuiteInitializer: p.TestSuiteContext,
+		ScenarioInitializer:  p.ScenarioContext,
+	}
+}
+
+//
+// Helper Functions
 
 func (s *scenarioState) BeforeScenario(probeName string, gs *godog.Scenario) {
 	if coreengine.TagsNotExcluded(gs.Tags) {

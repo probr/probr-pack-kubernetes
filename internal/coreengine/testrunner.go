@@ -3,7 +3,6 @@ package coreengine
 import (
 	"bytes"
 	"fmt"
-	"sync"
 
 	"github.com/citihub/probr/internal/summary"
 	"github.com/cucumber/godog"
@@ -11,7 +10,7 @@ import (
 
 // TestRunner describes the interface that should be implemented to support the execution of tests.
 type TestRunner interface {
-	RunTest(t *Test) error
+	RunTest(t *GodogTest) error
 }
 
 // TestHandlerFunc describes a callback that should be implemented by test cases in order for TestRunner
@@ -25,77 +24,36 @@ type GodogTest struct {
 	TestSuiteInitializer func(*godog.TestSuiteContext)
 	ScenarioInitializer  func(*godog.ScenarioContext)
 	FeaturePath          *string
-}
-
-// GoDogTestTuple holds the tuple of data required when excuting the test case, namely the function to call as
-// denoted by Handler and the data to pass to the function, as denoted by Data.
-type GoDogTestTuple struct {
-	Handler TestHandlerFunc
-	Data    *GodogTest
-}
-
-var (
-	handlers    = make(map[TestDescriptor]*GoDogTestTuple)
-	handlersMux sync.RWMutex
-)
-
-// AddTestHandler adds the TestHandlerFunc to the handler map, keyed on the TestDescriptor, and is effectively
-// a register of the test cases.  This is the mechanism which links the test case handler to the TestRunner,
-// therefore it is essential that the test case register itself with the TestRunner by calling this function
-// supplying a description of the test and the GoDogTestTuple.  See pod_security_feature.init() for an example.
-func AddTestHandler(td TestDescriptor, gd *GoDogTestTuple) {
-	handlersMux.Lock()
-	defer handlersMux.Unlock()
-
-	handlers[td] = gd
+	Status               *TestStatus `json:"status,omitempty"`
+	Results              *bytes.Buffer
 }
 
 // RunTest runs the test case described by the supplied Test.  It looks in it's test register (the handlers global
-// variable) for an entry with the same TestDescriptor as the supplied test.  If found, it uses the
-// function and data held in the GoDogTestTuple to execute the test: it calls the handler function with the
-// GodogTest data structure.
-func (ts *TestStore) RunTest(t *Test) (int, error) {
-	if t == nil {
-		summary.State.GetProbeLog(t.TestDescriptor.Name).Result = "Internal Error - Test not found"
+// variable) for an entry with the same TestDescriptor as the supplied test.  If found, it uses the provided GodogTest
+func (ts *TestStore) RunTest(test *GodogTest) (int, error) {
+
+	if test == nil {
+		summary.State.GetProbeLog(test.TestDescriptor.Name).Result = "Internal Error - Test not found"
 		return 2, fmt.Errorf("test is nil - cannot run test")
 	}
 
-	if t.TestDescriptor == nil {
+	if test.TestDescriptor == nil {
 		//update status
-		*t.Status = Error
-		summary.State.GetProbeLog(t.TestDescriptor.Name).Result = "Internal Error - Test descriptor not found"
+		*test.Status = Error
+		summary.State.GetProbeLog(test.TestDescriptor.Name).Result = "Internal Error - Test descriptor not found"
 		return 3, fmt.Errorf("test descriptor is nil - cannot run test")
 	}
 
-	// get the handler (based on the test supplied)
-	g, exists := getHandler(t)
+	s, o, err := GodogTestHandler(test)
 
-	if !exists {
-		//update status
-		*t.Status = Error
-		summary.State.GetProbeLog(t.TestDescriptor.Name).Result = "Internal Error - No handler available for test"
-		return 4, fmt.Errorf("no test handler available for %v - cannot run test", *t.TestDescriptor)
-	}
-
-	s, o, err := g.Handler(g.Data) // Currently the only handler type is coreengine.GodogTestHandler, but this can be extended
 	if s == 0 {
 		// success
-		*t.Status = CompleteSuccess
+		*test.Status = CompleteSuccess
 	} else {
 		// fail
-		*t.Status = CompleteFail
-
-		//TODO: this could be adjusted based on test strictness ...
+		*test.Status = CompleteFail
 	}
 
-	t.Results = o // If in-mem output provided, store as Results
+	test.Results = o // If in-mem output provided, store as Results
 	return s, err
-}
-
-func getHandler(t *Test) (*GoDogTestTuple, bool) {
-	handlersMux.Lock()
-	defer handlersMux.Unlock()
-	g, exists := handlers[*(*t).TestDescriptor]
-
-	return g, exists
 }

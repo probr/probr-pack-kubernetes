@@ -12,25 +12,6 @@ import (
 	"github.com/citihub/probr/internal/coreengine"
 )
 
-// init() registers the feature tests descibed in this package with the test runner (coreengine.TestRunner) via the call
-// to coreengine.AddTestHandler.  This links the test - described by the TestDescriptor - with the handler to invoke.  In
-// this case, the general test handler is being used (probes.coreengine.GodogTestHandler) and the GodogTest data provides the data
-// require to execute the test.  Specifically, the data includes the Test Suite and Scenario Initializers from this package
-// which will be called from probes.coreengine.GodogTestHandler.  Note: a blank import at probr library level should be done to
-// invoke this function automatically on initial load.
-func init() {
-	td := coreengine.TestDescriptor{Group: coreengine.Kubernetes, Name: cra_name}
-
-	coreengine.AddTestHandler(td, &coreengine.GoDogTestTuple{
-		Handler: coreengine.GodogTestHandler,
-		Data: &coreengine.GodogTest{
-			TestDescriptor:       &td,
-			TestSuiteInitializer: craTestSuiteInitialize,
-			ScenarioInitializer:  craScenarioInitialize,
-		},
-	})
-}
-
 // ContainerRegistryAccess is the section of the kubernetes package which provides the kubernetes interactions required to support
 // container registry scenarios.
 var cra kubernetes.ContainerRegistryAccess
@@ -109,7 +90,7 @@ func craScenarioInitialize(ctx *godog.ScenarioContext) {
 	ps := scenarioState{}
 
 	ctx.BeforeScenario(func(s *godog.Scenario) {
-		ps.BeforeScenario(cra_name, s)
+		ps.BeforeScenario(ContainerRegistryAccess.String(), s)
 	})
 
 	//common
@@ -125,7 +106,7 @@ func craScenarioInitialize(ctx *godog.ScenarioContext) {
 	ctx.Step(`^the deployment attempt is "([^"]*)"$`, ps.theDeploymentAttemptIs)
 
 	ctx.AfterScenario(func(s *godog.Scenario, err error) {
-		cra.TeardownContainerAccessTestPod(&ps.podState.PodName, cra_name)
+		cra.TeardownContainerAccessTestPod(&ps.podState.PodName, ContainerRegistryAccess.String())
 
 		coreengine.LogScenarioEnd(s)
 	})
