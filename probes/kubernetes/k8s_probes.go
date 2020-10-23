@@ -30,6 +30,14 @@ type scenarioState struct {
 	wildcardRoles  interface{}
 }
 
+const (
+	cra_name = "container_registry_access"
+	gen_name = "general"
+	psp_name = "pod_security_policy"
+	ia_name  = "internet_access"
+	iam_name = "iam_control"
+)
+
 func (s *scenarioState) BeforeScenario(probeName string, gs *godog.Scenario) {
 	if coreengine.TagsNotExcluded(gs.Tags) {
 		s.setup()

@@ -9,8 +9,6 @@ import (
 	"github.com/cucumber/godog"
 )
 
-const psp_name = "pod_security_policy"
-
 // PodSecurityPolicy is the section of the kubernetes package which provides the kubernetes interactions required to support
 // pod security policy
 var psp kubernetes.PodSecurityPolicy
@@ -27,8 +25,7 @@ func SetPodSecurityPolicy(p kubernetes.PodSecurityPolicy) {
 // which will be called from coreengine.GodogTestHandler.  Note: a blank import at probr library level should be done to
 // invoke this function automatically on initial load.
 func init() {
-	td := coreengine.TestDescriptor{Group: coreengine.Kubernetes,
-		Category: coreengine.PodSecurityPolicies, Name: psp_name}
+	td := coreengine.TestDescriptor{Group: coreengine.Kubernetes, Name: psp_name}
 
 	coreengine.AddTestHandler(td, &coreengine.GoDogTestTuple{
 		Handler: coreengine.GodogTestHandler,

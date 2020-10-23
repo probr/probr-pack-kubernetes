@@ -10,11 +10,10 @@ import (
 //TODO: revise when interface this bit up ...
 var kube = kubernetes.GetKubeInstance()
 
-func addTest(tm *coreengine.TestStore, n string, g coreengine.Group, c coreengine.Category) {
+func addTest(tm *coreengine.TestStore, n string, g coreengine.Group) {
 	td := coreengine.TestDescriptor{
-		Group:    g,
-		Category: c,
-		Name:     n,
+		Group: g,
+		Name:  n,
 	}
 	tm.AddTest(td)
 }
@@ -23,12 +22,12 @@ func RunAllTests() (int, *coreengine.TestStore, error) {
 	tm := coreengine.NewTestManager() // get the test mgr
 
 	//add some tests and add them to the TM - we need to tidy this up!
-	addTest(tm, "container_registry_access", coreengine.Kubernetes, coreengine.ContainerRegistryAccess)
-	addTest(tm, "internet_access", coreengine.Kubernetes, coreengine.InternetAccess)
-	addTest(tm, "pod_security_policy", coreengine.Kubernetes, coreengine.PodSecurityPolicies)
-	addTest(tm, "account_manager", coreengine.CloudDriver, coreengine.General)
-	addTest(tm, "general", coreengine.Kubernetes, coreengine.General)
-	addTest(tm, "iam_control", coreengine.Kubernetes, coreengine.IAM)
+	addTest(tm, "container_registry_access", coreengine.Kubernetes)
+	addTest(tm, "internet_access", coreengine.Kubernetes)
+	addTest(tm, "pod_security_policy", coreengine.Kubernetes)
+	addTest(tm, "account_manager", coreengine.CloudDriver)
+	addTest(tm, "general", coreengine.Kubernetes)
+	addTest(tm, "iam_control", coreengine.Kubernetes)
 
 	s, err := tm.ExecAllTests() // Executes all added (queued) tests
 	return s, tm, err

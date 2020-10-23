@@ -3,8 +3,8 @@ package coreengine_test
 import (
 	"testing"
 
-	"github.com/stretchr/testify/assert"
 	"github.com/citihub/probr/internal/coreengine"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestTestStatus(t *testing.T) {
@@ -36,9 +36,8 @@ func TestAddGetTest(t *testing.T) {
 
 	//test descriptor ... (general)
 	grp := coreengine.CloudDriver
-	cat := coreengine.General
 	name := "account_manager"
-	td := coreengine.TestDescriptor{Group: grp, Category: cat, Name: name}
+	td := coreengine.TestDescriptor{Group: grp, Name: name}
 
 	sat1 := coreengine.Pending
 
@@ -63,7 +62,7 @@ func TestAddGetTest(t *testing.T) {
 	assert.NotNil(t, rtntest)
 }
 
-func addTest(tm *coreengine.TestStore, testname string, grp coreengine.Group, cat coreengine.Category) {
-	td := coreengine.TestDescriptor{Group: grp, Category: cat, Name: testname}
+func addTest(tm *coreengine.TestStore, testname string, grp coreengine.Group) {
+	td := coreengine.TestDescriptor{Group: grp, Name: testname}
 	tm.AddTest(td)
 }

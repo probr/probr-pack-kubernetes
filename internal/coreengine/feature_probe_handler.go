@@ -93,12 +93,10 @@ func getProbesPath(gd *GodogTest) (string, error) {
 		return filepath.Join(r, *gd.FeaturePath), nil
 	}
 
-	//otherwise derive it from the group and category data:
-	var g = gd.TestDescriptor.Group.String()
-	var c = gd.TestDescriptor.Category.String()
+	//otherwise derive it from the group and name data:
+	g := gd.TestDescriptor.Group.String()
 	group := strings.ReplaceAll(strings.ToLower(g), " ", "")
-	category := strings.ReplaceAll(strings.ToLower(c), " ", "")
+	name := strings.ReplaceAll(gd.TestDescriptor.Name, "_", "")
 
-	return filepath.Join(r, "probes", group, "probe_definitions", category), nil
-
+	return filepath.Join(r, "probes", group, "probe_definitions", name), nil
 }

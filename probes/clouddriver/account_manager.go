@@ -9,8 +9,7 @@ import (
 )
 
 func init() {
-	td := coreengine.TestDescriptor{Group: coreengine.CloudDriver,
-		Category: coreengine.General, Name: "account_manager"}
+	td := coreengine.TestDescriptor{Group: coreengine.CloudDriver, Name: "account_manager"}
 
 	fp := filepath.Join("probes", "clouddriver", "probe_definitions")
 

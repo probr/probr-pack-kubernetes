@@ -3,8 +3,8 @@ package coreengine_test
 import (
 	"testing"
 
-	"github.com/stretchr/testify/assert"
 	"github.com/citihub/probr/internal/coreengine"
+	"github.com/stretchr/testify/assert"
 )
 
 // Test manager integration tests, so actually calling out to Kube ...
@@ -15,9 +15,8 @@ func TestExecTest(t *testing.T) {
 
 	//test descriptor ... (general)
 	grp := coreengine.CloudDriver
-	cat := coreengine.General
 	name := "account_manager"
-	td := coreengine.TestDescriptor{Group: grp, Category: cat, Name: name}
+	td := coreengine.TestDescriptor{Group: grp, Name: name}
 
 	tm := coreengine.NewTestManager() // get the test mgr
 
@@ -38,14 +37,14 @@ func TestExecAllTests(t *testing.T) {
 	tm := coreengine.NewTestManager()
 
 	//add some tests and add them to the TM
-	addTest(tm, "account_manager", coreengine.CloudDriver, coreengine.General)
-	addTest(tm, "pod_security_policy", coreengine.Kubernetes, coreengine.PodSecurityPolicies)
-	addTest(tm, "internet_access", coreengine.Kubernetes, coreengine.InternetAccess)
+	addTest(tm, "account_manager", coreengine.CloudDriver)
+	addTest(tm, "pod_security_policy", coreengine.Kubernetes)
+	addTest(tm, "internet_access", coreengine.Kubernetes)
 
 	tm.ExecAllTests()
 }
 
-func addTest(tm *coreengine.TestStore, testname string, grp coreengine.Group, cat coreengine.Category) {
-	td := coreengine.TestDescriptor{Group: grp, Category: cat, Name: testname}
+func addTest(tm *coreengine.TestStore, testname string, grp coreengine.Group) {
+	td := coreengine.TestDescriptor{Group: grp, Name: testname}
 	tm.AddTest(td)
 }

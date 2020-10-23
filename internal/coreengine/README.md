@@ -60,8 +60,7 @@ type GodogTest struct {
 Here is an example where all of the above logic is brought together to add a new handler that can be utilized by tests:
 
 ```
-td := coreengine.TestDescriptor{Group: coreengine.CloudDriver,
-    Category: coreengine.General, Name: "account_manager"}
+td := coreengine.TestDescriptor{Group: coreengine.CloudDriver, Name: "account_manager"}
 
 fp := filepath.Join("probes", "clouddriver", "probe_definitions")
 

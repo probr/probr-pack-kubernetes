@@ -44,30 +44,6 @@ func (g Group) String() string {
 	return [...]string{"kubernetes", "clouddriver", "coreengine"}[g]
 }
 
-// Category type describes the category to with the test belongs, e.g. PodSecurity, Network, etc.
-type Category int
-
-// Category type enumeration.
-const (
-	RBAC Category = iota
-	PodSecurityPolicies
-	NetworkPolicies
-	SecretsMgmt
-	General
-	ContainerRegistryAccess
-	ImageScanning
-	IAM
-	KeyMgmt
-	Authentication
-	Storage
-	InternetAccess
-)
-
-func (c Category) String() string {
-	return [...]string{"RBAC", "Pod Security Policy", "Network Policies", "Secrets Mgmt", "General", "Container Registry Access", "Image Scanning", "IAM",
-		"Key Mgmt", "Authentication", "Storage", "InternetAccess"}[c]
-}
-
 // Test encapsulates the data required to support test execution.
 type Test struct {
 	TestDescriptor *TestDescriptor `json:"test_descriptor,omitempty"`
@@ -77,11 +53,10 @@ type Test struct {
 	Results *bytes.Buffer
 }
 
-// TestDescriptor describes the specific test case and includes name, category and group.
+// TestDescriptor describes the specific test case and includes name and group.
 type TestDescriptor struct {
-	Group    Group    `json:"group,omitempty"`
-	Category Category `json:"category,omitempty"`
-	Name     string   `json:"name,omitempty"`
+	Group Group  `json:"group,omitempty"`
+	Name  string `json:"name,omitempty"`
 }
 
 // TestStore maintains a collection of tests to be run and their status.  FailedTests is an explicit
@@ -130,7 +105,6 @@ func (ts *TestStore) AddTest(td TestDescriptor) string {
 
 	summary.State.GetProbeLog(t.TestDescriptor.Name).Result = t.Status.String()
 	summary.State.LogProbeMeta(td.Name, "group", td.Group.String())
-	summary.State.LogProbeMeta(td.Name, "category", td.Category.String())
 
 	return td.Name
 }
@@ -188,7 +162,7 @@ func (ts *TestStore) ExecAllTests() (int, error) {
 }
 
 func (td *TestDescriptor) isExcluded() bool {
-	v := []string{td.Name, td.Group.String(), td.Category.String()}
+	v := []string{td.Name, td.Group.String()}
 	for _, r := range v {
 		if tagIsExcluded(r) {
 			return true
