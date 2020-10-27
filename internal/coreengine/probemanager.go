@@ -57,17 +57,7 @@ type ProbeStore struct {
 	Lock         sync.RWMutex
 }
 
-// GetAvailableProbes return the collection of available tests.
-func GetAvailableProbes() *[]ProbeDescriptor {
-	//TODO: to implement
-	//get this from the ProbeRunner handler store - basically it's the collection of
-	//tests that have registered a handler ..
-
-	// return &p
-	return nil
-}
-
-// NewProbeStore creates a new test manager, backed by ProbeStore
+// NewProbeStore creates a new object to store GodogProbes
 func NewProbeStore() *ProbeStore {
 	return &ProbeStore{
 		Probes: make(map[string]*GodogProbe),
@@ -75,7 +65,7 @@ func NewProbeStore() *ProbeStore {
 }
 
 // AddProbe provided GodogProbe to the ProbeStore.
-func (ps *ProbeStore) AddProbe(probe *GodogProbe) string {
+func (ps *ProbeStore) AddProbe(probe *GodogProbe) {
 	ps.Lock.Lock()
 	defer ps.Lock.Unlock()
 
@@ -92,8 +82,6 @@ func (ps *ProbeStore) AddProbe(probe *GodogProbe) string {
 
 	summary.State.GetProbeLog(probe.ProbeDescriptor.Name).Result = probe.Status.String()
 	summary.State.LogProbeMeta(probe.ProbeDescriptor.Name, "group", probe.ProbeDescriptor.Group.String())
-
-	return probe.ProbeDescriptor.Name
 }
 
 // GetProbe returns the test identified by the given name.

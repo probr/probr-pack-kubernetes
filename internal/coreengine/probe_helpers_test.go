@@ -8,9 +8,10 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/citihub/probr/internal/config"
 	"github.com/cucumber/godog"
 	"github.com/cucumber/messages-go/v10"
+
+	"github.com/citihub/probr/internal/config"
 )
 
 func TestGetRootDir(t *testing.T) {
@@ -21,30 +22,29 @@ func TestGetRootDir(t *testing.T) {
 	}
 }
 
-func TestGetProbesPath(t *testing.T) {
-	var failed bool
-	r, _ := getRootDir()
-	desired_path := filepath.Join(r, "probes", "clouddriver", "probe_definitions", "accountmanager")
+func TestGetOutputPath(t *testing.T) {
+	var file *os.File
+	d := "test_output_dir"
+	f := "test_file"
+	desired_file := filepath.Join(d, f) + ".json"
+	defer func() {
+		// Cleanup test assets
+		file.Close()
+		err := os.RemoveAll(d)
+		if err != nil {
+			t.Logf("%s", err)
+		}
 
-	// Test with feature path provided
-	p := filepath.Join("probes", "clouddriver", "probe_definitions", "accountmanager")
-	test := &GodogProbe{FeaturePath: &p}
-	path, err := getProbesPath(test)
-	if err != nil || desired_path != path {
-		t.Logf("Custom feature path not handled properly")
-		failed = true
-	}
-
-	// Test building path from properties
-	test = &GodogProbe{ProbeDescriptor: &ProbeDescriptor{Group: CloudDriver, Name: "account_manager"}}
-	path, err = getProbesPath(test)
-	if err != nil || desired_path != path {
-		t.Logf("Failed to build probe path from GodogProbe properties")
-		failed = true
-	}
-
-	// Allow both failures to log before ending, if applicable
-	if failed {
+		// Swallow any panics and print a verbose error message
+		if err := recover(); err != nil {
+			t.Logf("Panicked when trying to create directory or file: '%s'", desired_file)
+			t.Fail()
+		}
+	}()
+	config.Vars.CucumberDir = d
+	file, _ = getOutputPath(f)
+	if desired_file != file.Name() {
+		t.Logf("Desired filepath '%s' does not match '%s'", desired_file, file.Name())
 		t.Fail()
 	}
 }
@@ -66,7 +66,6 @@ func TestLogAndReturnError(t *testing.T) {
 }
 
 func TestScenarioString(t *testing.T) {
-	var failed bool
 	gs := &godog.Scenario{Name: "test scenario"}
 
 	// Start scenario
@@ -74,7 +73,7 @@ func TestScenarioString(t *testing.T) {
 	s_contains_string := strings.Contains(s, "Start")
 	if !s_contains_string {
 		t.Logf("Test string does not contain 'Start'")
-		failed = true
+		t.Fail()
 	}
 
 	// End scenario
@@ -82,11 +81,6 @@ func TestScenarioString(t *testing.T) {
 	s_contains_string = strings.Contains(s, "End")
 	if !s_contains_string {
 		t.Logf("Test string does not contain 'End'")
-		failed = true
-	}
-
-	// Allow both failures to log before ending, if applicable
-	if failed {
 		t.Fail()
 	}
 }

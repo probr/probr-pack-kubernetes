@@ -7,9 +7,10 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/citihub/probr/internal/config"
 	"github.com/cucumber/godog"
 	"github.com/cucumber/messages-go/v10"
+
+	"github.com/citihub/probr/internal/config"
 )
 
 const rootDirName = "probr"

@@ -28,7 +28,7 @@ jobs:
     - name: Unit tests
       run: |
             cd internal
-            go test ./...
+            sudo go test ./...
 
     - name: Build
       run: go build -o probr ./cmd/probr-cli/*.go
