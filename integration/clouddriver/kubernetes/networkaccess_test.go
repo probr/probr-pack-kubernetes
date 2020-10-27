@@ -11,9 +11,9 @@ import (
 //TODO: this will be revised when the unit/integration tests are refactored to be properly mocked
 var na = kubernetes.NewDefaultNA()
 
-func TestSetupNetworkAccessTestPod(t *testing.T) {
+func TestSetupNetworkAccessProbePod(t *testing.T) {
 
-	p, _, err := na.SetupNetworkAccessTestPod()
+	p, _, err := na.SetupNetworkAccessProbePod()
 
 	assert.Nil(t, err)
 	assert.NotNil(t, p)
@@ -21,7 +21,7 @@ func TestSetupNetworkAccessTestPod(t *testing.T) {
 
 func TestIsURLAccessible(t *testing.T) {
 	//need to dupe above .. fix?
-	p, _, err := na.SetupNetworkAccessTestPod()
+	p, _, err := na.SetupNetworkAccessProbePod()
 
 	assert.Nil(t, err)
 	assert.NotNil(t, p)

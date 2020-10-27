@@ -15,19 +15,19 @@ import (
 	"github.com/citihub/probr/internal/config"
 )
 
-// GodogTestHandler is a general implmentation of TestHandlerFunc.  Based on the
+// GodogProbeHandler is a general implmentation of ProbeHandlerFunc.  Based on the
 // output type, the test will either be executed using an in-memory or file output.  In
-// both cases, the handler uses the data supplied in GodogTest to call the underlying
+// both cases, the handler uses the data supplied in GodogProbe to call the underlying
 // GoDog test suite.
-func GodogTestHandler(test *GodogTest) (int, *bytes.Buffer, error) {
+func GodogProbeHandler(probe *GodogProbe) (int, *bytes.Buffer, error) {
 	if config.Vars.OutputType == "INMEM" {
-		return inMemGodogTestHandler(test)
+		return inMemGodogProbeHandler(probe)
 	}
-	return toFileGodogTestHandler(test)
+	return toFileGodogProbeHandler(probe)
 }
 
-func toFileGodogTestHandler(gd *GodogTest) (int, *bytes.Buffer, error) {
-	o, err := getOutputPath(gd.TestDescriptor.Name)
+func toFileGodogProbeHandler(gd *GodogProbe) (int, *bytes.Buffer, error) {
+	o, err := getOutputPath(gd.ProbeDescriptor.Name)
 	if err != nil {
 		return -1, nil, err
 	}
@@ -51,14 +51,14 @@ func toFileGodogTestHandler(gd *GodogTest) (int, *bytes.Buffer, error) {
 	return status, nil, err
 }
 
-func inMemGodogTestHandler(gd *GodogTest) (int, *bytes.Buffer, error) {
+func inMemGodogProbeHandler(gd *GodogProbe) (int, *bytes.Buffer, error) {
 	var t []byte
 	o := bytes.NewBuffer(t)
 	status, err := runTestSuite(o, gd)
 	return status, o, err
 }
 
-func runTestSuite(o io.Writer, gd *GodogTest) (int, error) {
+func runTestSuite(o io.Writer, gd *GodogProbe) (int, error) {
 	f, err := getProbesPath(gd)
 	if err != nil {
 		return -2, err
@@ -73,8 +73,8 @@ func runTestSuite(o io.Writer, gd *GodogTest) (int, error) {
 	}
 
 	status := godog.TestSuite{
-		Name:                 gd.TestDescriptor.Name,
-		TestSuiteInitializer: gd.TestSuiteInitializer,
+		Name:                 gd.ProbeDescriptor.Name,
+		TestSuiteInitializer: gd.ProbeInitializer,
 		ScenarioInitializer:  gd.ScenarioInitializer,
 		Options:              &opts,
 	}.Run()
@@ -82,7 +82,7 @@ func runTestSuite(o io.Writer, gd *GodogTest) (int, error) {
 	return status, nil
 }
 
-func getProbesPath(gd *GodogTest) (string, error) {
+func getProbesPath(gd *GodogProbe) (string, error) {
 	r, err := getRootDir()
 	if err != nil {
 		return "", fmt.Errorf("unable to determine root directory - not able to perform tests")
@@ -94,8 +94,8 @@ func getProbesPath(gd *GodogTest) (string, error) {
 	}
 
 	//otherwise derive it from the group and name data:
-	g := gd.TestDescriptor.Group.String()
+	g := gd.ProbeDescriptor.Group.String()
 	group := strings.ReplaceAll(strings.ToLower(g), " ", "")
-	name := strings.ReplaceAll(gd.TestDescriptor.Name, "_", "")
+	name := strings.ReplaceAll(gd.ProbeDescriptor.Name, "_", "")
 	return filepath.Join(r, "probes", group, "probe_definitions", name), nil
 }

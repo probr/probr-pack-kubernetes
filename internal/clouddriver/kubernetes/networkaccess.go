@@ -11,18 +11,18 @@ import (
 
 const (
 	//default values.  Overrides can be set via the environment.
-	defaultNATestNamespace   = "probr-network-access-test-ns" //this needs to be set up as an exculsion in the image registry policy
+	defaultNAProbeNamespace   = "probr-network-access-test-ns" //this needs to be set up as an exculsion in the image registry policy
 	defaultNAImageRepository = "curlimages"
-	defaultNATestImage       = "curl"
-	defaultNATestContainer   = "na-test"
-	defaultNATestPodName     = "na-test-pod"
+	defaultNAProbeImage       = "curl"
+	defaultNAProbeContainer   = "na-test"
+	defaultNAProbePodName     = "na-test-pod"
 )
 
 // NetworkAccess defines functionality for supporting Network Access tests.
 type NetworkAccess interface {
 	ClusterIsDeployed() *bool
-	SetupNetworkAccessTestPod() (*apiv1.Pod, *PodAudit, error)
-	TeardownNetworkAccessTestPod(p *string, e string) error
+	SetupNetworkAccessProbePod() (*apiv1.Pod, *PodAudit, error)
+	TeardownNetworkAccessProbePod(p *string, e string) error
 	AccessURL(pn *string, url *string) (int, error)
 }
 
@@ -30,10 +30,10 @@ type NetworkAccess interface {
 type NA struct {
 	k Kubernetes
 
-	testNamespace string
-	testImage     string
-	testContainer string
-	testPodName   string
+	probeNamespace string
+	probeImage     string
+	probeContainer string
+	probePodName   string
 }
 
 // NewNA creates a new instance of NA with the supplied kubernetes instance.
@@ -57,9 +57,9 @@ func NewDefaultNA() *NA {
 func (n *NA) setup() {
 
 	//just default these for now (not sure we'll ever want to supply):
-	n.testNamespace = defaultNATestNamespace
-	n.testContainer = defaultNATestContainer
-	n.testPodName = defaultNATestPodName
+	n.probeNamespace = defaultNAProbeNamespace
+	n.probeContainer = defaultNAProbeContainer
+	n.probePodName = defaultNAProbePodName
 
 	// image repository + curl from config
 	// but default if not supplied
@@ -73,10 +73,10 @@ func (n *NA) setup() {
 
 	b := config.Vars.Images.Curl
 	if len(b) < 1 {
-		b = defaultNATestImage
+		b = defaultNAProbeImage
 	}
 
-	n.testImage = i + "/" + b
+	n.probeImage = i + "/" + b
 }
 
 // ClusterIsDeployed verifies if a suitable cluster is deployed.
@@ -84,18 +84,18 @@ func (n *NA) ClusterIsDeployed() *bool {
 	return n.k.ClusterIsDeployed()
 }
 
-// SetupNetworkAccessTestPod creates a pod with characteristics required for testing network access.
-func (n *NA) SetupNetworkAccessTestPod() (*apiv1.Pod, *PodAudit, error) {
-	pname, ns, cname, image := GenerateUniquePodName(n.testPodName), n.testNamespace, n.testContainer, n.testImage
+// SetupNetworkAccessProbePod creates a pod with characteristics required for testing network access.
+func (n *NA) SetupNetworkAccessProbePod() (*apiv1.Pod, *PodAudit, error) {
+	pname, ns, cname, image := GenerateUniquePodName(n.probePodName), n.probeNamespace, n.probeContainer, n.probeImage
 	//let caller handle result:
 	return n.k.CreatePod(pname, ns, cname, image, true, nil)
 }
 
-// TeardownNetworkAccessTestPod deletes the test pod with the given name.
-func (n *NA) TeardownNetworkAccessTestPod(p *string, e string) error {
+// TeardownNetworkAccessProbePod deletes the test pod with the given name.
+func (n *NA) TeardownNetworkAccessProbePod(p *string, e string) error {
 	_, exists := os.LookupEnv("DONT_DELETE")
 	if !exists {
-		ns := n.testNamespace
+		ns := n.probeNamespace
 		err := n.k.DeletePod(p, &ns, false, e) //don't worry about waiting
 		return err
 	}
@@ -108,7 +108,7 @@ func (n *NA) AccessURL(pn *string, url *string) (int, error) {
 
 	//create a curl command to access the supplied url
 	cmd := "curl -s -o /dev/null -I -L -w %{http_code} " + *url
-	ns := n.testNamespace
+	ns := n.probeNamespace
 	res := n.k.ExecCommand(&cmd, &ns, pn)
 	httpCode := res.Stdout
 

@@ -32,7 +32,7 @@ func (s *scenarioState) aPodIsDeployedInTheCluster() error {
 		//only one pod is needed for all scenarios in this probe
 		log.Printf("[DEBUG] Pod %v has already been created - reusing the pod", s.podName)
 	} else {
-		pd, pa, e := na.SetupNetworkAccessTestPod()
+		pd, pa, e := na.SetupNetworkAccessProbePod()
 		podAudit = pa
 		pod = pd
 		if e != nil {
@@ -85,13 +85,13 @@ func (s *scenarioState) accessIs(accessResult string) error {
 	return err
 }
 
-// iaTestSuiteInitialize handles any overall Test Suite initialisation steps.  This is registered with the
+// iaProbeInitialize handles any overall Test Suite initialisation steps.  This is registered with the
 // test handler as part of the init() function.
-func iaTestSuiteInitialize(ctx *godog.TestSuiteContext) {
+func iaProbeInitialize(ctx *godog.TestSuiteContext) {
 	ctx.BeforeSuite(func() {}) //nothing for now
 
 	ctx.AfterSuite(func() {
-		na.TeardownNetworkAccessTestPod(&ia_ps.podName, InternetAccess.String())
+		na.TeardownNetworkAccessProbePod(&ia_ps.podName, InternetAccess.String())
 	})
 
 	//check dependancies ...

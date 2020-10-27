@@ -11,14 +11,14 @@ import (
 	apiv1 "k8s.io/api/core/v1"
 )
 
-func TestPSPTestCommand(t *testing.T) {
+func TestPSPProbeCommand(t *testing.T) {
 	assert.Equal(t, "chroot .", Chroot.String())
 	assert.Equal(t, "nsenter -t 1 -p ps", EnterHostPIDNS.String())
 	assert.Equal(t, "nsenter -t 1 -i ps", EnterHostIPCNS.String())
 	assert.Equal(t, "nsenter -t 1 -n ps", EnterHostNetworkNS.String())
 	assert.Equal(t, "id -u > 0 ", VerifyNonRootUID.String())
-	assert.Equal(t, "ping google.com", NetRawTest.String())
-	assert.Equal(t, "ip link add dummy0 type dummy", SpecialCapTest.String())
+	assert.Equal(t, "ping google.com", NetRawProbe.String())
+	assert.Equal(t, "ip link add dummy0 type dummy", SpecialCapProbe.String())
 
 }
 

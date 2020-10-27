@@ -32,7 +32,7 @@ func TestExecVerificationCmd(t *testing.T) {
 
 	b, _ := ioutil.ReadFile("assets/pod-test.yaml")
 
-	pd, _ := i.CreateIAMTestPod(b, true)
+	pd, _ := i.CreateIAMProbePod(b, true)
 
 	i.ExecuteVerificationCmd(pd.Name, kubernetes.CurlAuthToken, true)
 }

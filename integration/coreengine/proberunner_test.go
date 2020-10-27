@@ -37,27 +37,27 @@ func TestMain(m *testing.M) {
 	os.Exit(result)
 }
 
-func TestTestRunner(t *testing.T) {
+func TestProbeRunner(t *testing.T) {
 
-	tr := coreengine.TestStore{}
+	tr := coreengine.ProbeStore{}
 
 	//test descriptor ... (general)
 	grp := coreengine.CloudDriver
 	name := "account_manager"
-	td := coreengine.TestDescriptor{Group: grp, Name: name}
+	td := coreengine.ProbeDescriptor{Group: grp, Name: name}
 
 	//specific terms for *this* test
 	sat1 := coreengine.Pending
 
 	//construct the test to run
-	test1 := coreengine.GodogTest{
-		TestDescriptor: &td,
+	test1 := coreengine.GodogProbe{
+		ProbeDescriptor: &td,
 		Status:         &sat1,
 	}
 
 	assert.NotNil(t, test1)
 
-	st, err := tr.RunTest(&test1)
+	st, err := tr.RunProbe(&test1)
 
 	//not expecting this one to fail:
 	assert.Nil(t, err)
@@ -66,7 +66,7 @@ func TestTestRunner(t *testing.T) {
 
 	//update the name and watch it fail:
 	td.Name = "not_a_test"
-	st, err = tr.RunTest(&test1)
+	st, err = tr.RunProbe(&test1)
 
 	//expecting an error in this case:
 	assert.NotNil(t, err)
@@ -75,9 +75,9 @@ func TestTestRunner(t *testing.T) {
 	assert.Equal(t, coreengine.Error, *test1.Status)
 
 	//test for nil descriptor
-	test1.TestDescriptor = nil
+	test1.ProbeDescriptor = nil
 
-	st, err = tr.RunTest(&test1)
+	st, err = tr.RunProbe(&test1)
 
 	//expecting an error in this case:
 	assert.NotNil(t, err)
@@ -88,20 +88,20 @@ func TestTestRunner(t *testing.T) {
 	//try another one ..
 	//test descriptor ... (general)
 	name2 := "internet_access"
-	td2 := coreengine.TestDescriptor{Name: name2}
+	td2 := coreengine.ProbeDescriptor{Name: name2}
 
 	//specific terms for *this* test
 	sat2 := coreengine.Pending
 
 	//construct the test to run
-	test2 := coreengine.GodogTest{
-		TestDescriptor: &td2,
+	test2 := coreengine.GodogProbe{
+		ProbeDescriptor: &td2,
 		Status:         &sat2,
 	}
 
 	assert.NotNil(t, test2)
 
-	st, err = tr.RunTest(&test2)
+	st, err = tr.RunProbe(&test2)
 
 	//now testing against an evironment which should have the correct
 	//network access rules, hence this test should succeed
@@ -111,28 +111,28 @@ func TestTestRunner(t *testing.T) {
 
 }
 
-func TestTestRunnerInMem(t *testing.T) {
+func TestProbeRunnerInMem(t *testing.T) {
 	config.Vars.OutputType = "INMEM"
 
-	tr := coreengine.TestStore{}
+	tr := coreengine.ProbeStore{}
 
 	//test descriptor ... (general)
 	grp := coreengine.CloudDriver
 	name := "account_manager"
-	td := coreengine.TestDescriptor{Group: grp, Name: name}
+	td := coreengine.ProbeDescriptor{Group: grp, Name: name}
 
 	//specific terms for *this* test
 	sat1 := coreengine.Pending
 
 	//construct the test to run
-	test1 := coreengine.GodogTest{
-		TestDescriptor: &td,
+	test1 := coreengine.GodogProbe{
+		ProbeDescriptor: &td,
 		Status:         &sat1,
 	}
 
 	assert.NotNil(t, test1)
 
-	st, err := tr.RunTest(&test1)
+	st, err := tr.RunProbe(&test1)
 
 	//not expecting this one to fail:
 	assert.Nil(t, err)

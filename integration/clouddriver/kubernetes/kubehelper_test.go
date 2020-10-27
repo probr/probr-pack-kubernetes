@@ -16,10 +16,10 @@ import (
 )
 
 var (
-	testNS        = "probrtestns"
-	testPod       = "probrtestpod"
-	testContainer = "curlimages"
-	testImage     = "curlimages/curl"
+	probeNS        = "probrtestns"
+	probePod       = "probrtestpod"
+	probeContainer = "curlimages"
+	probeImage     = "curlimages/curl"
 )
 
 func TestMain(m *testing.M) {
@@ -35,7 +35,7 @@ func TestGetPods(t *testing.T) {
 }
 
 func TestCreatePod(t *testing.T) {
-	_, _, err := kubernetes.GetKubeInstance().CreatePod(testPod, testNS, testContainer, testImage, true, nil)
+	_, _, err := kubernetes.GetKubeInstance().CreatePod(probePod, probeNS, probeContainer, probeImage, true, nil)
 
 	handleResult(nil, err)
 }
@@ -45,7 +45,7 @@ func TestCreatePodFromYaml(t *testing.T) {
 	b, _ := ioutil.ReadFile("assets/pod-test.yaml")
 	//y := string(b)
 
-	_, err := kubernetes.GetKubeInstance().CreatePodFromYaml(b, testPod, testNS, testImage, "", true)
+	_, err := kubernetes.GetKubeInstance().CreatePodFromYaml(b, probePod, probeNS, probeImage, "", true)
 
 	handleResult(nil, err)
 }
@@ -55,7 +55,7 @@ func TestExecCmd(t *testing.T) {
 	url := "http://www.google.com"
 	cmd := "curl -s -o /dev/null -I -L -w %{http_code} " + url
 
-	res := kubernetes.GetKubeInstance().ExecCommand(&cmd, &testNS, &testPod)
+	res := kubernetes.GetKubeInstance().ExecCommand(&cmd, &probeNS, &probePod)
 
 	log.Printf("[NOTICE] Test command result:")
 	log.Printf("[NOTICE] stdout: %v stderr: %v exit code: %v", res.Stdout, res.Stderr, res.Code)
@@ -64,26 +64,26 @@ func TestExecCmd(t *testing.T) {
 }
 
 func TestDeletePod(t *testing.T) {
-	err := kubernetes.GetKubeInstance().DeletePod(&testPod, &testNS, true, "")
+	err := kubernetes.GetKubeInstance().DeletePod(&probePod, &probeNS, true, "")
 
 	handleResult(nil, err)
 }
 
 func TestDeleteNamespace(t *testing.T) {
-	err := kubernetes.GetKubeInstance().DeleteNamespace(&testNS)
+	err := kubernetes.GetKubeInstance().DeleteNamespace(&probeNS)
 
 	handleResult(nil, err)
 }
 
 func TestConfigMap(t *testing.T) {
 	c := "test-cm"
-	cm, err := kubernetes.GetKubeInstance().CreateConfigMap(&c, &testNS)
+	cm, err := kubernetes.GetKubeInstance().CreateConfigMap(&c, &probeNS)
 
 	handleResult(nil, err)
 
 	//now delete it:
 	if cm != nil {
-		err = kubernetes.GetKubeInstance().DeleteConfigMap(&c, &testNS)
+		err = kubernetes.GetKubeInstance().DeleteConfigMap(&c, &probeNS)
 		handleResult(nil, err)
 	}
 }

@@ -65,11 +65,11 @@ func (p Probe) String() string {
 
 func (p Probe) TestSuiteContext(s *godog.TestSuiteContext) {
 	f := [...]func(*godog.TestSuiteContext){
-		craTestSuiteInitialize,
-		genTestSuiteInitialize,
-		pspTestSuiteInitialize,
-		iaTestSuiteInitialize,
-		iamTestSuiteInitialize,
+		craProbeInitialize,
+		genProbeInitialize,
+		pspProbeInitialize,
+		iaProbeInitialize,
+		iamProbeInitialize,
 	}[p]
 	f(s)
 }
@@ -85,13 +85,13 @@ func (p Probe) ScenarioContext(s *godog.ScenarioContext) {
 	f(s)
 }
 
-func (p Probe) GetGodogTest() *coreengine.GodogTest {
-	td := coreengine.TestDescriptor{Group: coreengine.Kubernetes, Name: p.String()}
+func (p Probe) GetGodogProbe() *coreengine.GodogProbe {
+	pd := coreengine.ProbeDescriptor{Group: coreengine.Kubernetes, Name: p.String()}
 
-	return &coreengine.GodogTest{
-		TestDescriptor:       &td,
-		TestSuiteInitializer: p.TestSuiteContext,
-		ScenarioInitializer:  p.ScenarioContext,
+	return &coreengine.GodogProbe{
+		ProbeDescriptor:     &pd,
+		ProbeInitializer:    p.TestSuiteContext,
+		ScenarioInitializer: p.ScenarioContext,
 	}
 }
 

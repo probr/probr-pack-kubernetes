@@ -28,7 +28,7 @@ func TestGetProbesPath(t *testing.T) {
 
 	// Test with feature path provided
 	p := filepath.Join("probes", "clouddriver", "probe_definitions", "accountmanager")
-	test := &GodogTest{FeaturePath: &p}
+	test := &GodogProbe{FeaturePath: &p}
 	path, err := getProbesPath(test)
 	if err != nil || desired_path != path {
 		t.Logf("Custom feature path not handled properly")
@@ -36,10 +36,10 @@ func TestGetProbesPath(t *testing.T) {
 	}
 
 	// Test building path from properties
-	test = &GodogTest{TestDescriptor: &TestDescriptor{Group: CloudDriver, Name: "account_manager"}}
+	test = &GodogProbe{ProbeDescriptor: &ProbeDescriptor{Group: CloudDriver, Name: "account_manager"}}
 	path, err = getProbesPath(test)
 	if err != nil || desired_path != path {
-		t.Logf("Failed to build probe path from GodogTest properties")
+		t.Logf("Failed to build probe path from GodogProbe properties")
 		failed = true
 	}
 

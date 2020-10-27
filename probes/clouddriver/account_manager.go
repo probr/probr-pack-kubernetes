@@ -51,8 +51,8 @@ func aResouceDeploymentWillWithTheMessage(arg1, arg2 string) error {
 	return nil
 }
 
-//TestSuiteInitialize ...
-func amTestSuiteInitialize(ctx *godog.TestSuiteContext) {
+//ProbeInitialize ...
+func amProbeInitialize(ctx *godog.TestSuiteContext) {
 	ctx.BeforeSuite(func() {}) //nothing for now
 }
 

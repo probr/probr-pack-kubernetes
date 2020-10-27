@@ -10,22 +10,22 @@ import (
 //TODO: revise when interface this bit up ...
 var kube = kubernetes.GetKubeInstance()
 
-func RunAllTests() (int, *coreengine.TestStore, error) {
-	ts := coreengine.NewTestManager() // get the test mgr
+func RunAllProbes() (int, *coreengine.ProbeStore, error) {
+	ts := coreengine.NewProbeStore() // get the test mgr
 
 	for _, probe := range k8s_probes.Probes {
-		ts.AddTest(probe.GetGodogTest())
+		ts.AddProbe(probe.GetGodogProbe())
 	}
 
-	s, err := ts.ExecAllTests() // Executes all added (queued) tests
+	s, err := ts.ExecAllProbes() // Executes all added (queued) tests
 	return s, ts, err
 }
 
-//GetAllTestResults ...
-func GetAllTestResults(ts *coreengine.TestStore) (map[string]string, error) {
+//GetAllProbeResults ...
+func GetAllProbeResults(ps *coreengine.ProbeStore) (map[string]string, error) {
 	out := make(map[string]string)
-	for name := range ts.Tests {
-		r, n, err := ReadTestResults(ts, name)
+	for name := range ps.Probes {
+		r, n, err := ReadProbeResults(ps, name)
 		if err != nil {
 			return nil, err
 		}
@@ -36,15 +36,15 @@ func GetAllTestResults(ts *coreengine.TestStore) (map[string]string, error) {
 	return out, nil
 }
 
-//ReadTestResults ...
-func ReadTestResults(ts *coreengine.TestStore, name string) (string, string, error) {
-	t, err := ts.GetTest(name)
-	test := t
+//ReadProbeResults ...
+func ReadProbeResults(ps *coreengine.ProbeStore, name string) (string, string, error) {
+	p, err := ps.GetProbe(name)
+	probe := p
 	if err != nil {
 		return "", "", err
 	}
-	r := test.Results
-	n := test.TestDescriptor.Name
+	r := probe.Results
+	n := probe.ProbeDescriptor.Name
 	if r != nil {
 		b := r.Bytes()
 		return string(b), n, nil

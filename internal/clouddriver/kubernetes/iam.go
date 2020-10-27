@@ -19,25 +19,25 @@ import (
 
 const (
 	//default values.  Overrides can be supplied via the environment.
-	defaultIAMTestNamespace = "probr-rbac-test-ns"
+	defaultIAMProbeNamespace = "probr-rbac-test-ns"
 	//NOTE: either the above namespace needs to be added to the exclusion list on the
 	//container registry rule or busybox need to be available in the allowed (probably internal) registry
 	defaultIAMImageRepository = "curlimages"
-	defaultIAMTestImage       = "curl"
-	defaultIAMTestContainer   = "iam-test"
-	defaultIAMTestPodName     = "iam-test-pod"
+	defaultIAMProbeImage       = "curl"
+	defaultIAMProbeContainer   = "iam-test"
+	defaultIAMProbePodName     = "iam-test-pod"
 )
 
-// IAMTestCommand defines commands for use in testing IAM
-type IAMTestCommand int
+// IAMProbeCommand defines commands for use in testing IAM
+type IAMProbeCommand int
 
-// enum supporting IAMTestCommand
+// enum supporting IAMProbeCommand
 const (
-	CatAzJSON IAMTestCommand = iota
+	CatAzJSON IAMProbeCommand = iota
 	CurlAuthToken
 )
 
-func (c IAMTestCommand) String() string {
+func (c IAMProbeCommand) String() string {
 	return [...]string{"cat /etc/kubernetes/azure.json",
 		"curl http://169.254.169.254/metadata/identity/oauth2/token?api-version=2018-02-01&resource=https%3A%2F%2Fmanagement.azure.com%2F -H Metadata:true -s"}[c]
 }
@@ -47,9 +47,9 @@ type IdentityAccessManagement interface {
 	AzureIdentityExists(useDefaultNS bool) (bool, error)
 	AzureIdentityBindingExists(useDefaultNS bool) (bool, error)
 	CreateAIB(y []byte, ai string, n string, ns string) (bool, error)
-	CreateIAMTestPod(y []byte, useDefaultNS bool) (*apiv1.Pod, error)
-	DeleteIAMTestPod(n string, useDefaultNS bool, e string) error
-	ExecuteVerificationCmd(pn string, cmd IAMTestCommand, useDefaultNS bool) (*CmdExecutionResult, error)
+	CreateIAMProbePod(y []byte, useDefaultNS bool) (*apiv1.Pod, error)
+	DeleteIAMProbePod(n string, useDefaultNS bool, e string) error
+	ExecuteVerificationCmd(pn string, cmd IAMProbeCommand, useDefaultNS bool) (*CmdExecutionResult, error)
 	GetAccessToken(pn string, useDefaultNS bool) (*string, error)
 }
 
@@ -57,10 +57,10 @@ type IdentityAccessManagement interface {
 type IAM struct {
 	k Kubernetes
 
-	testNamespace string
-	testImage     string
-	testContainer string
-	testPodName   string
+	probeNamespace string
+	probeImage     string
+	probeContainer string
+	probePodName   string
 
 	testAzureIdentityBinding string
 }
@@ -81,9 +81,9 @@ func NewDefaultIAM() *IAM {
 
 func (i *IAM) setenv() {
 	//just default these for now (not sure we'll ever want to supply):
-	i.testNamespace = defaultIAMTestNamespace
-	i.testContainer = defaultIAMTestContainer
-	i.testPodName = defaultIAMTestPodName
+	i.probeNamespace = defaultIAMProbeNamespace
+	i.probeContainer = defaultIAMProbeContainer
+	i.probePodName = defaultIAMProbePodName
 
 	// image repository + curl from config
 	// but default if not supplied
@@ -96,10 +96,10 @@ func (i *IAM) setenv() {
 	}
 	b := config.Vars.Images.Curl
 	if len(b) < 1 {
-		b = defaultIAMTestImage
+		b = defaultIAMProbeImage
 	}
 
-	i.testImage = ig + "/" + b
+	i.probeImage = ig + "/" + b
 
 	i.testAzureIdentityBinding = "probr-specificns-aib"
 }
@@ -218,21 +218,21 @@ func (i *IAM) filteredRawResourceGrp(g string, k string, f string) (bool, error)
 	return false, nil
 }
 
-// CreateIAMTestPod creates a pod configured for IAM test cases.
-func (i *IAM) CreateIAMTestPod(y []byte, useDefaultNS bool) (*apiv1.Pod, error) {
-	n := GenerateUniquePodName(i.testPodName)
+// CreateIAMProbePod creates a pod configured for IAM test cases.
+func (i *IAM) CreateIAMProbePod(y []byte, useDefaultNS bool) (*apiv1.Pod, error) {
+	n := GenerateUniquePodName(i.probePodName)
 
-	return i.k.CreatePodFromYaml(y, n, *i.getNamespace(useDefaultNS), i.testImage,
+	return i.k.CreatePodFromYaml(y, n, *i.getNamespace(useDefaultNS), i.probeImage,
 		*i.getAadPodIDBinding(useDefaultNS), true)
 }
 
-// DeleteIAMTestPod deletes the IAM test pod with the supplied name.
-func (i *IAM) DeleteIAMTestPod(n string, useDefaultNS bool, e string) error {
+// DeleteIAMProbePod deletes the IAM test pod with the supplied name.
+func (i *IAM) DeleteIAMProbePod(n string, useDefaultNS bool, e string) error {
 	return i.k.DeletePod(&n, i.getNamespace(useDefaultNS), false, e) //don't worry about waiting
 }
 
 // ExecuteVerificationCmd executes a verification command against the supplied pod name.
-func (i *IAM) ExecuteVerificationCmd(pn string, cmd IAMTestCommand, useDefaultNS bool) (*CmdExecutionResult, error) {
+func (i *IAM) ExecuteVerificationCmd(pn string, cmd IAMProbeCommand, useDefaultNS bool) (*CmdExecutionResult, error) {
 	c := cmd.String()
 	res := i.k.ExecCommand(&c, i.getNamespace(useDefaultNS), &pn)
 
@@ -270,7 +270,7 @@ func (i *IAM) getNamespace(useDefaultNS bool) *string {
 	if useDefaultNS {
 		ns = "default"
 	} else {
-		ns = i.testNamespace
+		ns = i.probeNamespace
 	}
 
 	return &ns

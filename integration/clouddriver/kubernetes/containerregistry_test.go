@@ -9,7 +9,7 @@ import (
 
 func TestSetupContainerRegistyPod(t *testing.T) {
 
-	pd, _, err := kubernetes.NewDefaultCRA().SetupContainerAccessTestPod("docker.io")
+	pd, _, err := kubernetes.NewDefaultCRA().SetupContainerAccessProbePod("docker.io")
 
 	fmt.Printf("pd: %v err: %v", pd, err)
 }

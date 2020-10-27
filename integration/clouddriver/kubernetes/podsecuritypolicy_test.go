@@ -49,7 +49,7 @@ func TestCreatePODSettingPrivilegedAccess(t *testing.T) {
 func TestCreatePODSettingCapabilities(t *testing.T) {
 	var c = make([]string, 1)
 	c[0] = "NET_ADMIN"
-	
+
 	p, err := psp.CreatePODSettingCapabilities(&c)
 
 	//pod creation should fail so p should be nil
@@ -59,7 +59,7 @@ func TestCreatePODSettingCapabilities(t *testing.T) {
 }
 
 func TestPrivilegedEscalationPrevented(t *testing.T) {
-	res, err := psp.ExecPSPTestCmd(nil, kubernetes.Chroot)
+	res, err := psp.ExecPSPProbeCmd(nil, kubernetes.Chroot)
 
 	//this should fail against a secured cluster
 	//non-zero result required

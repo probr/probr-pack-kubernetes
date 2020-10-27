@@ -23,7 +23,7 @@ func main() {
 	config.LogConfigState()
 
 	//exec 'em all (for now!)
-	s, ts, err := probr.RunAllTests()
+	s, ts, err := probr.RunAllProbes()
 	if err != nil {
 		log.Printf("[ERROR] Error executing tests %v", err)
 		os.Exit(2) // Error code 1 is reserved for probe test failures, and should not fail in CI
@@ -32,7 +32,7 @@ func main() {
 	summary.State.SetProbrStatus()
 
 	if config.Vars.OutputType == "IO" {
-		out, err := probr.GetAllTestResults(ts)
+		out, err := probr.GetAllProbeResults(ts)
 		if err != nil {
 			log.Printf("[ERROR] Experienced error getting test results: %v", s)
 			os.Exit(2) // Error code 1 is reserved for probe test failures, and should not fail in CI

@@ -49,7 +49,7 @@ After an probe has finished running every scenario, we should summary the final 
 
 ```
 s, o, err := g.Handler(g.Data)
-summary.State.ProbeComplete(t.TestDescriptor.Name)
+summary.State.ProbeComplete(t.ProbeDescriptor.Name)
 ```
 
 **SummaryStateStruct.SetProbrStatus**

@@ -112,9 +112,9 @@ func (s *scenarioState) theKubernetesWebUIIsDisabled() error {
 	return err
 }
 
-// genTestSuiteInitialize handles any overall Test Suite initialisation steps.  This is registered with the
+// genProbeInitialize handles any overall Test Suite initialisation steps.  This is registered with the
 // test handler as part of the init() function.
-func genTestSuiteInitialize(ctx *godog.TestSuiteContext) {
+func genProbeInitialize(ctx *godog.TestSuiteContext) {
 
 	ctx.BeforeSuite(func() {}) //nothing for now
 
