@@ -1,4 +1,4 @@
-package main
+package cli_flags
 
 import (
 	"flag"
@@ -20,7 +20,7 @@ func (f *Flag) executeHandler() {
 	f.Handler(f.Value)
 }
 
-func handleFlags() {
+func HandleFlags() {
 
 	createFlag("varsFile", "", "path to config file", varsFileHandler)
 	createFlag("outputDir", "", "output directory", outputDirHandler) // Must run prior to creating outputType flag

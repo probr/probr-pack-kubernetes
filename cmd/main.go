@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"github.com/citihub/probr"
+	"github.com/citihub/probr/cmd/cli_flags"
 	"github.com/citihub/probr/internal/clouddriver/kubernetes"
 	"github.com/citihub/probr/internal/config"
 	"github.com/citihub/probr/internal/summary"
@@ -19,7 +20,7 @@ var (
 var kube = kubernetes.GetKubeInstance()
 
 func main() {
-	handleFlags()
+	cli_flags.HandleFlags()
 	config.LogConfigState()
 
 	//exec 'em all (for now!)

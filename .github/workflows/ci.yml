@@ -31,4 +31,4 @@ jobs:
             sudo go test ./...
 
     - name: Build
-      run: go build -o probr ./cmd/probr-cli/*.go
+      run: go build -o probr ./cmd/main.go
