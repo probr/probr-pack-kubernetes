@@ -2,6 +2,7 @@
 package utils
 
 import (
+	"fmt"
 	"runtime"
 	"strings"
 )
@@ -33,4 +34,15 @@ func GetCallerName(up int) string {
 func GetCallerFileLine() (string, int) {
 	_, file, line, _ := runtime.Caller(2)
 	return file, line
+}
+
+// utils.ReformatError prefixes the error string ready for logging and/or output
+func ReformatError(e string, v ...interface{}) error {
+	var b strings.Builder
+	b.WriteString("[ERROR] ")
+	b.WriteString(e)
+
+	s := fmt.Sprintf(b.String(), v...)
+
+	return fmt.Errorf(s)
 }

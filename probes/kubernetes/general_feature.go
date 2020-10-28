@@ -4,6 +4,7 @@ package k8s_probes
 
 import (
 	"fmt"
+	"log"
 	"strings"
 
 	"github.com/citihub/probr/internal/clouddriver/kubernetes"
@@ -27,7 +28,7 @@ func (s *scenarioState) iInspectTheThatAreConfigured(roleLevel string) error {
 		s.wildcardRoles = l
 	}
 	if err != nil {
-		err = coreengine.LogAndReturnError("error raised when retrieving '%v': %v", roleLevel, err)
+		err = utils.ReformatError("error raised when retrieving '%v': %v", roleLevel, err)
 	}
 
 	description := fmt.Sprintf("Ensures that %s are configured. Retains wildcard roles in state for following steps. Passes if retrieval command does not have error.", roleLevel)
@@ -40,7 +41,7 @@ func (s *scenarioState) iShouldOnlyFindWildcardsInKnownAndAuthorisedConfiguratio
 	var err error
 	wildcardCount := len(s.wildcardRoles.([]interface{}))
 	if wildcardCount > 0 {
-		err = coreengine.LogAndReturnError("roles exist with wildcarded resources")
+		err = utils.ReformatError("roles exist with wildcarded resources")
 	}
 
 	description := "Examines scenario state's wildcard roles. Passes if no wildcard roles are found."
@@ -70,7 +71,7 @@ func (s *scenarioState) theDeploymentIsRejected() error {
 	//looking for a non-nil creation error
 	var err error
 	if s.podState.CreationError == nil {
-		err = coreengine.LogAndReturnError("pod %v was created successfully. Test fail.", s.podState.PodName)
+		err = utils.ReformatError("pod %v was created successfully. Test fail.", s.podState.PodName)
 	}
 
 	description := "Looks for a creation error on the current scenario state. Passes if error is found, because it should have been rejected."
@@ -96,12 +97,13 @@ func (s *scenarioState) theKubernetesWebUIIsDisabled() error {
 	pl, err := kubernetes.GetKubeInstance().GetPods("kube-system")
 
 	if err != nil {
-		err = coreengine.LogAndReturnError("error raised when trying to retrieve pods: %v", err)
+		err = utils.ReformatError("error raised when trying to retrieve pods: %v", err)
+		log.Print(err)
 	} else {
 		//a "pass" is the abscence of a "kubernetes-dashboard" pod
 		for _, v := range pl.Items {
 			if strings.HasPrefix(v.Name, "kubernetes-dashboard") {
-				err = coreengine.LogAndReturnError("kubernetes-dashboard pod found (%v) - test fail", v.Name)
+				err = utils.ReformatError("kubernetes-dashboard pod found (%v) - test fail", v.Name)
 			}
 		}
 	}

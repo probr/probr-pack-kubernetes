@@ -5,6 +5,7 @@ import (
 
 	"github.com/citihub/probr/internal/clouddriver/kubernetes"
 	"github.com/citihub/probr/internal/coreengine"
+	"github.com/citihub/probr/internal/utils"
 	"github.com/cucumber/godog"
 	apiv1 "k8s.io/api/core/v1"
 )
@@ -38,7 +39,8 @@ func (s *scenarioState) aPodIsDeployedInTheCluster() error {
 		if e != nil {
 			err = e
 		} else if pod == nil {
-			err = coreengine.LogAndReturnError("Failed to setup network access test pod")
+			err = utils.ReformatError("Failed to setup network access test pod")
+			log.Print(err)
 		} else {
 			s.podName = pod.GetObjectMeta().GetName()
 		}
@@ -55,7 +57,8 @@ func (s *scenarioState) aProcessInsideThePodEstablishesADirectHTTPSConnectionTo(
 	code, err := na.AccessURL(&s.podName, &url)
 
 	if err != nil {
-		err = coreengine.LogAndReturnError("[ERROR] Error raised when attempting to access URL: %v", err)
+		err = utils.ReformatError("[ERROR] Error raised when attempting to access URL: %v", err)
+		log.Print(err)
 	}
 
 	//hold on to the code
@@ -74,7 +77,7 @@ func (s *scenarioState) accessIs(accessResult string) error {
 		//then the result should be anything other than 200
 		if s.httpStatusCode == 200 {
 			//it's a fail:
-			err = coreengine.LogAndReturnError("got HTTP Status Code %v - failed", s.httpStatusCode)
+			err = utils.ReformatError("got HTTP Status Code %v - failed", s.httpStatusCode)
 		}
 	}
 

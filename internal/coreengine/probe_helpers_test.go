@@ -1,8 +1,6 @@
 package coreengine
 
 import (
-	"bytes"
-	"log"
 	"os"
 	"path/filepath"
 	"strings"
@@ -45,22 +43,6 @@ func TestGetOutputPath(t *testing.T) {
 	file, _ = getOutputPath(f)
 	if desired_file != file.Name() {
 		t.Logf("Desired filepath '%s' does not match '%s'", desired_file, file.Name())
-		t.Fail()
-	}
-}
-
-func TestLogAndReturnError(t *testing.T) {
-	var buf bytes.Buffer
-	log.SetOutput(&buf) // Intercept expected Stderr output
-	defer func() {
-		log.SetOutput(os.Stderr) // Return to normal Stderr handling after function
-	}()
-
-	long_string := "Verify that this somewhat long string remains unchanged in the output after being handled"
-	err := LogAndReturnError(long_string)
-	err_contains_string := strings.Contains(err.Error(), long_string)
-	if !err_contains_string {
-		t.Logf("Test string was not properly included in retured error")
 		t.Fail()
 	}
 }

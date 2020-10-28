@@ -8,10 +8,12 @@ package k8s_probes
 //go:generate go-bindata.exe -pkg $GOPACKAGE -o assets/assets.go assets/yaml
 
 import (
+	"log"
 	"strings"
 
 	"github.com/citihub/probr/internal/clouddriver/kubernetes"
 	"github.com/citihub/probr/internal/coreengine"
+	"github.com/citihub/probr/internal/utils"
 	"github.com/cucumber/godog"
 
 	iamassets "github.com/citihub/probr/probes/kubernetes/assets/iam"
@@ -32,11 +34,15 @@ func (s *scenarioState) azureIdentitySetupCheck(f func(bool) (bool, error), useD
 	b, err := f(useDefaultNS)
 
 	if err != nil {
-		return coreengine.LogAndReturnError("error raised when checking for %v: %v", k, err)
+		err = utils.ReformatError("error raised when checking for %v: %v", k, err)
+		log.Print(err)
+		return err
 	}
 
 	if !b {
-		return coreengine.LogAndReturnError("%v does not exist (result: %t)", k, b)
+		err = utils.ReformatError("%v does not exist (result: %t)", k, b)
+		log.Print(err)
+		return err
 	}
 
 	return nil
@@ -57,7 +63,8 @@ func (s *scenarioState) iCreateASimplePodInNamespaceAssignedWithThatAzureIdentit
 
 	y, err := iamassets.Asset("assets/yaml/iam-azi-test-aib-curl.yaml")
 	if err != nil {
-		err = coreengine.LogAndReturnError("error reading yaml for test: %v", err)
+		err = utils.ReformatError("error reading yaml for test: %v", err)
+		log.Print(err)
 	} else {
 		if namespace == "the default" {
 			s.useDefaultNS = true
@@ -83,7 +90,8 @@ func (s *scenarioState) thePodIsDeployedSuccessfully() error {
 	// podName == "" -> unsuccessful deploy, non-nil creation error
 	var err error
 	if s.podState.PodName == "" {
-		err = coreengine.LogAndReturnError("pod was not deployed successfully - creation error: %v", s.podState.CreationError)
+		err = utils.ReformatError("pod was not deployed successfully - creation error: %v", s.podState.CreationError)
+		log.Print(err)
 	}
 
 	description := ""
@@ -107,7 +115,8 @@ func (s *scenarioState) anAttemptToObtainAnAccessTokenFromThatPodShouldFail() er
 func (s *scenarioState) anAttemptToObtainAnAccessTokenFromThatPodShould(expectedresult string) error {
 	var err error
 	if s.podState.CreationError != nil {
-		err = coreengine.LogAndReturnError("failed to create pod", s.podState.CreationError)
+		err = utils.ReformatError("failed to create pod", s.podState.CreationError)
+		log.Print(err)
 	} else {
 		//curl for the auth token ... need to supply appropiate ns
 		res, err := iam.GetAccessToken(s.podState.PodName, s.useDefaultNS)
@@ -115,20 +124,22 @@ func (s *scenarioState) anAttemptToObtainAnAccessTokenFromThatPodShould(expected
 		if err != nil {
 			//this is an error from trying to execute the command as opposed to
 			//the command itself returning an error
-			err = coreengine.LogAndReturnError("error raised trying to execute auth token command - %v", err)
+			err = utils.ReformatError("error raised trying to execute auth token command - %v", err)
+			log.Print(err)
 		} else {
 			if expectedresult == "Fail" {
 				if res != nil && len(*res) > 0 {
 					//we got a token .. error
-					err = coreengine.LogAndReturnError("token was successfully acquired on pod %v (result: %v)", s.podState.PodName, *res)
+					err = utils.ReformatError("token was successfully acquired on pod %v (result: %v)", s.podState.PodName, *res)
 				}
 			} else if expectedresult == "Succeed" {
 				if res == nil {
 					//we didn't get a token .. error
-					err = coreengine.LogAndReturnError("failed to acquire token on pod %v", s.podState.PodName)
+					err = utils.ReformatError("failed to acquire token on pod %v", s.podState.PodName)
 				}
 			} else {
-				err = coreengine.LogAndReturnError("unrecognised expected result: %v", expectedresult)
+				err = utils.ReformatError("unrecognised expected result: %v", expectedresult)
+				log.Print(err)
 			}
 		}
 	}
@@ -166,7 +177,8 @@ func (s *scenarioState) iDeployAPodAssignedWithTheAzureIdentityBindingIntoTheSam
 
 	y, err := iamassets.Asset("assets/yaml/iam-azi-test-aib-curl.yaml")
 	if err != nil {
-		err = coreengine.LogAndReturnError("error reading yaml for test: %v", err)
+		err = utils.ReformatError("error reading yaml for test: %v", err)
+		log.Print(err)
 	} else {
 		pd, err := iam.CreateIAMProbePod(y, false)
 		err = ProcessPodCreationResult(s.probe, &s.podState, pd, kubernetes.UndefinedPodCreationErrorReason, err)
@@ -185,7 +197,8 @@ func (s *scenarioState) theClusterHasManagedIdentityComponentsDeployed() error {
 	pl, err := kubernetes.GetKubeInstance().GetPods("")
 
 	if err != nil {
-		err = coreengine.LogAndReturnError("error raised when trying to retrieve pods %v", err)
+		err = utils.ReformatError("error raised when trying to retrieve pods %v", err)
+		log.Print(err)
 	} else {
 		//a "pass" is the prescence of a "mic*" pod(s)
 		//break on the first ...
@@ -197,7 +210,7 @@ func (s *scenarioState) theClusterHasManagedIdentityComponentsDeployed() error {
 			}
 		}
 		if err != nil {
-			err = coreengine.LogAndReturnError("no MIC pods found - test fail")
+			err = utils.ReformatError("no MIC pods found - test fail")
 		}
 	}
 
@@ -216,13 +229,16 @@ func (s *scenarioState) iExecuteTheCommandAgainstTheMICPod(arg1 string) error {
 	if err != nil {
 		//this is an error from trying to execute the command as opposed to
 		//the command itself returning an error
-		err = coreengine.LogAndReturnError("error raised trying to execute verification command (%v) - %v", c, err)
+		err = utils.ReformatError("error raised trying to execute verification command (%v) - %v", c, err)
+		log.Print(err)
 	} else if res == nil {
-		err = coreengine.LogAndReturnError("<nil> result received when trying to execute verification command (%v)", c)
+		err = utils.ReformatError("<nil> result received when trying to execute verification command (%v)", c)
+		log.Print(err)
 	} else if res.Err != nil && res.Internal {
 		//we have an error which was raised before reaching the cluster (i.e. it's "internal")
 		//this indicates that the command was not successfully executed
-		err = coreengine.LogAndReturnError("error raised trying to execute verification command (%v)", c)
+		err = utils.ReformatError("error raised trying to execute verification command (%v)", c)
+		log.Print(err)
 	}
 	if err != nil {
 		// store the result code
@@ -240,7 +256,7 @@ func (s *scenarioState) kubernetesShouldPreventMeFromRunningTheCommand() error {
 	var err error
 	if s.podState.CommandExitCode == 0 {
 		//bad! don't want the command to succeed
-		err = coreengine.LogAndReturnError("verification command was not blocked")
+		err = utils.ReformatError("verification command was not blocked")
 	}
 
 	description := "Examines scenario state to ensure that verification command was blocked."

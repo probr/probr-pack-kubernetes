@@ -7,6 +7,8 @@ import (
 	"github.com/citihub/probr/internal/config"
 	"github.com/citihub/probr/internal/coreengine"
 	"github.com/citihub/probr/internal/summary"
+	"github.com/citihub/probr/internal/utils"
+
 	"github.com/cucumber/godog"
 	apiv1 "k8s.io/api/core/v1"
 )
@@ -138,7 +140,9 @@ func ProcessPodCreationResult(probe *summary.Probe, s *podState, pd *apiv1.Pod, 
 		}
 		//unexpected error
 		//in this case something unexpected has happened, return an error to cucumber
-		return coreengine.LogAndReturnError("error attempting to create POD: %v", err)
+		err = utils.ReformatError("error attempting to create POD: %v", err)
+		log.Print(err)
+		return err
 	}
 
 	//No errors: pod creation may or may not have been expected.  This will be determined
@@ -166,13 +170,13 @@ func AssertResult(s *podState, res, msg string) error {
 		//expect pod creation error to be non-null
 		if s.CreationError == nil {
 			//it's a fail:
-			return coreengine.LogAndReturnError("pod %v was created - test failed", s.PodName)
+			return utils.ReformatError("pod %v was created - test failed", s.PodName)
 		}
 		//should also check code:
 		_, exists := s.CreationError.ReasonCodes[*s.ExpectedReason]
 		if !exists {
 			//also a fail:
-			return coreengine.LogAndReturnError("pod not was created but failure reasons (%v) did not contain expected (%v)- test failed",
+			return utils.ReformatError("pod not was created but failure reasons (%v) did not contain expected (%v)- test failed",
 				s.CreationError.ReasonCodes, s.ExpectedReason)
 		}
 
@@ -184,7 +188,7 @@ func AssertResult(s *podState, res, msg string) error {
 		// then expect the pod creation error to be nil
 		if s.CreationError != nil {
 			//it's a fail:
-			return coreengine.LogAndReturnError("pod was not created - test failed: %v", s.CreationError)
+			return utils.ReformatError("pod was not created - test failed: %v", s.CreationError)
 		}
 
 		//else we're good ...
@@ -192,7 +196,9 @@ func AssertResult(s *podState, res, msg string) error {
 	}
 
 	// we've been given a result that we don't know about ...
-	return coreengine.LogAndReturnError("desired result %v is not recognised", res)
+	err := utils.ReformatError("desired result %v is not recognised", res)
+	log.Print(err)
+	return err
 
 }
 

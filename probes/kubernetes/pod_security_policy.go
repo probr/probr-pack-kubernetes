@@ -3,8 +3,11 @@ package k8s_probes
 //go:generate go-bindata.exe -pkg $GOPACKAGE -o assets/assets.go assets/yaml
 
 import (
+	"log"
+
 	"github.com/citihub/probr/internal/clouddriver/kubernetes"
 	"github.com/citihub/probr/internal/coreengine"
+	"github.com/citihub/probr/internal/utils"
 	podsecuritypolicy "github.com/citihub/probr/probes/kubernetes/assets/podsecuritypolicy"
 	"github.com/cucumber/godog"
 )
@@ -57,14 +60,18 @@ func (s *scenarioState) runControlProbe(cf func() (*bool, error), c string) erro
 	yesNo, err := cf()
 
 	if err != nil {
-		return coreengine.LogAndReturnError("error determining Pod Security Policy: %v error: %v", c, err)
+		err = utils.ReformatError("error determining Pod Security Policy: %v error: %v", c, err)
+		log.Print(err)
+		return err
 	}
 	if yesNo == nil {
-		return coreengine.LogAndReturnError("result of %v is nil despite no error being raised from the call", c)
+		err = utils.ReformatError("result of %v is nil despite no error being raised from the call", c)
+		log.Print(err)
+		return err
 	}
 
 	if !*yesNo {
-		return coreengine.LogAndReturnError("%v is NOT restricted (result: %t)", c, *yesNo)
+		return utils.ReformatError("%v is NOT restricted (result: %t)", c, *yesNo)
 	}
 
 	return nil
@@ -80,15 +87,21 @@ func (s *scenarioState) runVerificationProbe(c kubernetes.PSPVerificationProbe) 
 		if err != nil {
 			//this is an error from trying to execute the command as opposed to
 			//the command itself returning an error
-			return coreengine.LogAndReturnError("error raised trying to execute verification command (%v) - %v", c.Cmd, err)
+			err = utils.ReformatError("error raised trying to execute verification command (%v) - %v", c.Cmd, err)
+			log.Print(err)
+			return err
 		}
 		if res == nil {
-			return coreengine.LogAndReturnError("<nil> result received when trying to execute verification command (%v)", c.Cmd)
+			err = utils.ReformatError("<nil> result received when trying to execute verification command (%v)", c.Cmd)
+			log.Print(err)
+			return err
 		}
 		if res.Err != nil && res.Internal {
 			//we have an error which was raised before reaching the cluster (i.e. it's "internal")
 			//this indicates that the command was not successfully executed
-			return coreengine.LogAndReturnError("error raised trying to execute verification command (%v)", c.Cmd)
+			err = utils.ReformatError("error raised trying to execute verification command (%v)", c.Cmd)
+			log.Print(err)
+			return err
 		}
 
 		//we've managed to execution against the cluster.  This may have failed due to pod security, but this
@@ -99,7 +112,7 @@ func (s *scenarioState) runVerificationProbe(c kubernetes.PSPVerificationProbe) 
 			return nil
 		}
 		//else it's a fail:
-		return coreengine.LogAndReturnError("exit code %d from verification commnad %q did not match expected %d",
+		return utils.ReformatError("exit code %d from verification commnad %q did not match expected %d",
 			res.Code, c.Cmd, c.ExpectedExitCode)
 	}
 

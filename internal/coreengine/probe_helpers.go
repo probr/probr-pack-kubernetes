@@ -55,19 +55,6 @@ func getOutputPath(t string) (*os.File, error) {
 	return os.Create(filepath.Join(config.Vars.CucumberDir, fn))
 }
 
-// coreengine.LogAndReturnError logs the given string and raise an error with the same string.  This is useful in Godog steps
-// where an error is displayed in the test report but not logged.
-func LogAndReturnError(e string, v ...interface{}) error {
-	var b strings.Builder
-	b.WriteString("[ERROR] ")
-	b.WriteString(e)
-
-	s := fmt.Sprintf(b.String(), v...)
-	log.Print(s)
-
-	return fmt.Errorf(s)
-}
-
 // LogScenarioStart logs the name and tags associtated with the supplied scenario.
 func LogScenarioStart(s *godog.Scenario) {
 	log.Print(scenarioString(true, s))
