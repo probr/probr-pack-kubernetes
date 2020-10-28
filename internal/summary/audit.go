@@ -5,20 +5,20 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
-	"runtime"
 	"strings"
 
 	"github.com/citihub/probr/internal/config"
+	"github.com/citihub/probr/internal/utils"
 )
 
 type ProbeAudit struct {
-	path            string
-	Name            string
-	PodsDestroyed   *int
+	path               string
+	Name               string
+	PodsDestroyed      *int
 	ScenariosAttempted *int
 	ScenariosSucceeded *int
 	ScenariosFailed    *int
-	Result          *string
+	Result             *string
 	Scenarios          map[int]*ScenarioAudit
 }
 
@@ -59,7 +59,7 @@ func (e *ProbeAudit) Write() {
 func (p *ScenarioAudit) AuditScenarioStep(description string, payload interface{}, err error) {
 	// Initialize any empty objects
 	// Now do the actual probe summary
-	stepName := getCallerName(3)
+	stepName := utils.GetCallerName(1)
 	stepNumber := len(p.Steps) + 1
 	p.Steps[stepNumber] = &StepAudit{
 		Name:        stepName,
@@ -78,15 +78,6 @@ func (p *ScenarioAudit) AuditScenarioStep(description string, payload interface{
 			p.Result = "Failed" // First 'given' was met, but a subsequent step failed
 		}
 	}
-}
-
-// getCallerName retrieves the name of the function prior to the location it is called
-func getCallerName(up int) string {
-	f := make([]uintptr, 1)
-	runtime.Callers(up, f)                     // add full caller path to empty object
-	step := runtime.FuncForPC(f[0] - 1).Name() // get full caller path in string form
-	s := strings.Split(step, ".")              // split full caller path
-	return s[len(s)-1]                         // select last element from caller path
 }
 
 func (e *ProbeAudit) probeRan() bool {
