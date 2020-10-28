@@ -1,0 +1,1090 @@
+{
+  "Name": "pod_security_policy",
+  "PodsDestroyed": 0,
+  "ScenariosAttempted": 36,
+  "ScenariosSucceeded": 9,
+  "ScenariosFailed": 27,
+  "Result": "Failed",
+  "Scenarios": {
+    "1": {
+      "Name": "Prevent a deployment from running with privileged access",
+      "Result": "Failed",
+      "Tags": [
+        "@kubernetes",
+        "@pod_security_policy",
+        "@CIS-5.2",
+        "@preventative",
+        "@CIS-5.2.1"
+      ],
+      "Steps": {
+        "1": {
+          "Name": "aKubernetesClusterIsDeployed",
+          "Description": "Passes if Probr successfully connects to the specified cluster.",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": {
+            "KubeConfigPath": "C:\\Users\\eknight\\.kube\\config",
+            "KubeContext": ""
+          }
+        },
+        "2": {
+          "Name": "someControlExistsToPreventPrivilegedAccessForKubernetesDeploymentsToAnActiveKubernetesCluster",
+          "Description": "",
+          "Result": "Failed",
+          "Error": "PrivilegedAccessIsRestricted is NOT restricted (result: false)",
+          "Payload": null
+        }
+      }
+    },
+    "10": {
+      "Name": "Prevent a deployment from running with the hostNetwork flag.",
+      "Result": "Failed",
+      "Tags": [
+        "@kubernetes",
+        "@pod_security_policy",
+        "@CIS-5.2",
+        "@preventative",
+        "@CIS-5.2.4"
+      ],
+      "Steps": {
+        "1": {
+          "Name": "aKubernetesClusterIsDeployed",
+          "Description": "Passes if Probr successfully connects to the specified cluster.",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": {
+            "KubeConfigPath": "C:\\Users\\eknight\\.kube\\config",
+            "KubeContext": ""
+          }
+        },
+        "2": {
+          "Name": "someSystemExistsToPreventAKubernetesDeploymentFromRunningUsingTheHostNetworkInAnExistingKubernetesCluster",
+          "Description": "",
+          "Result": "Failed",
+          "Error": "HostNetworkIsRestricted is NOT restricted (result: false)",
+          "Payload": null
+        }
+      }
+    },
+    "11": {
+      "Name": "Prevent a deployment from running with the hostNetwork flag.",
+      "Result": "Failed",
+      "Tags": [
+        "@kubernetes",
+        "@pod_security_policy",
+        "@CIS-5.2",
+        "@preventative",
+        "@CIS-5.2.4"
+      ],
+      "Steps": {
+        "1": {
+          "Name": "aKubernetesClusterIsDeployed",
+          "Description": "Passes if Probr successfully connects to the specified cluster.",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": {
+            "KubeConfigPath": "C:\\Users\\eknight\\.kube\\config",
+            "KubeContext": ""
+          }
+        },
+        "2": {
+          "Name": "someSystemExistsToPreventAKubernetesDeploymentFromRunningUsingTheHostNetworkInAnExistingKubernetesCluster",
+          "Description": "",
+          "Result": "Failed",
+          "Error": "HostNetworkIsRestricted is NOT restricted (result: false)",
+          "Payload": null
+        }
+      }
+    },
+    "12": {
+      "Name": "Prevent a deployment from running with the hostNetwork flag.",
+      "Result": "Failed",
+      "Tags": [
+        "@kubernetes",
+        "@pod_security_policy",
+        "@CIS-5.2",
+        "@preventative",
+        "@CIS-5.2.4"
+      ],
+      "Steps": {
+        "1": {
+          "Name": "aKubernetesClusterIsDeployed",
+          "Description": "Passes if Probr successfully connects to the specified cluster.",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": {
+            "KubeConfigPath": "C:\\Users\\eknight\\.kube\\config",
+            "KubeContext": ""
+          }
+        },
+        "2": {
+          "Name": "someSystemExistsToPreventAKubernetesDeploymentFromRunningUsingTheHostNetworkInAnExistingKubernetesCluster",
+          "Description": "",
+          "Result": "Failed",
+          "Error": "HostNetworkIsRestricted is NOT restricted (result: false)",
+          "Payload": null
+        }
+      }
+    },
+    "13": {
+      "Name": "Prevent a deployment from running with the allowPrivilegeEscalation flag",
+      "Result": "Failed",
+      "Tags": [
+        "@kubernetes",
+        "@pod_security_policy",
+        "@CIS-5.2",
+        "@preventative",
+        "@CIS-5.2.5"
+      ],
+      "Steps": {
+        "1": {
+          "Name": "aKubernetesClusterIsDeployed",
+          "Description": "Passes if Probr successfully connects to the specified cluster.",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": {
+            "KubeConfigPath": "C:\\Users\\eknight\\.kube\\config",
+            "KubeContext": ""
+          }
+        },
+        "2": {
+          "Name": "someSystemExistsToPreventAKubernetesDeploymentFromRunningUsingTheAllowPrivilegeEscalationInAnExistingKubernetesCluster",
+          "Description": "",
+          "Result": "Failed",
+          "Error": "PrivilegedEscalationIsRestricted is NOT restricted (result: false)",
+          "Payload": null
+        }
+      }
+    },
+    "14": {
+      "Name": "Prevent a deployment from running with the allowPrivilegeEscalation flag",
+      "Result": "Failed",
+      "Tags": [
+        "@kubernetes",
+        "@pod_security_policy",
+        "@CIS-5.2",
+        "@preventative",
+        "@CIS-5.2.5"
+      ],
+      "Steps": {
+        "1": {
+          "Name": "aKubernetesClusterIsDeployed",
+          "Description": "Passes if Probr successfully connects to the specified cluster.",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": {
+            "KubeConfigPath": "C:\\Users\\eknight\\.kube\\config",
+            "KubeContext": ""
+          }
+        },
+        "2": {
+          "Name": "someSystemExistsToPreventAKubernetesDeploymentFromRunningUsingTheAllowPrivilegeEscalationInAnExistingKubernetesCluster",
+          "Description": "",
+          "Result": "Failed",
+          "Error": "PrivilegedEscalationIsRestricted is NOT restricted (result: false)",
+          "Payload": null
+        }
+      }
+    },
+    "15": {
+      "Name": "Prevent a deployment from running with the allowPrivilegeEscalation flag",
+      "Result": "Failed",
+      "Tags": [
+        "@kubernetes",
+        "@pod_security_policy",
+        "@CIS-5.2",
+        "@preventative",
+        "@CIS-5.2.5"
+      ],
+      "Steps": {
+        "1": {
+          "Name": "aKubernetesClusterIsDeployed",
+          "Description": "Passes if Probr successfully connects to the specified cluster.",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": {
+            "KubeConfigPath": "C:\\Users\\eknight\\.kube\\config",
+            "KubeContext": ""
+          }
+        },
+        "2": {
+          "Name": "someSystemExistsToPreventAKubernetesDeploymentFromRunningUsingTheAllowPrivilegeEscalationInAnExistingKubernetesCluster",
+          "Description": "",
+          "Result": "Failed",
+          "Error": "PrivilegedEscalationIsRestricted is NOT restricted (result: false)",
+          "Payload": null
+        }
+      }
+    },
+    "16": {
+      "Name": "Prevent a deployment from running as the root user",
+      "Result": "Failed",
+      "Tags": [
+        "@kubernetes",
+        "@pod_security_policy",
+        "@CIS-5.2",
+        "@preventative",
+        "@CIS-5.2.6"
+      ],
+      "Steps": {
+        "1": {
+          "Name": "aKubernetesClusterIsDeployed",
+          "Description": "Passes if Probr successfully connects to the specified cluster.",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": {
+            "KubeConfigPath": "C:\\Users\\eknight\\.kube\\config",
+            "KubeContext": ""
+          }
+        },
+        "2": {
+          "Name": "someSystemExistsToPreventAKubernetesDeploymentFromRunningAsTheRootUserInAnExistingKubernetesCluster",
+          "Description": "",
+          "Result": "Failed",
+          "Error": "RootUserIsRestricted is NOT restricted (result: false)",
+          "Payload": null
+        }
+      }
+    },
+    "17": {
+      "Name": "Prevent a deployment from running as the root user",
+      "Result": "Failed",
+      "Tags": [
+        "@kubernetes",
+        "@pod_security_policy",
+        "@CIS-5.2",
+        "@preventative",
+        "@CIS-5.2.6"
+      ],
+      "Steps": {
+        "1": {
+          "Name": "aKubernetesClusterIsDeployed",
+          "Description": "Passes if Probr successfully connects to the specified cluster.",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": {
+            "KubeConfigPath": "C:\\Users\\eknight\\.kube\\config",
+            "KubeContext": ""
+          }
+        },
+        "2": {
+          "Name": "someSystemExistsToPreventAKubernetesDeploymentFromRunningAsTheRootUserInAnExistingKubernetesCluster",
+          "Description": "",
+          "Result": "Failed",
+          "Error": "RootUserIsRestricted is NOT restricted (result: false)",
+          "Payload": null
+        }
+      }
+    },
+    "18": {
+      "Name": "Prevent a deployment from running as the root user",
+      "Result": "Failed",
+      "Tags": [
+        "@kubernetes",
+        "@pod_security_policy",
+        "@CIS-5.2",
+        "@preventative",
+        "@CIS-5.2.6"
+      ],
+      "Steps": {
+        "1": {
+          "Name": "aKubernetesClusterIsDeployed",
+          "Description": "Passes if Probr successfully connects to the specified cluster.",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": {
+            "KubeConfigPath": "C:\\Users\\eknight\\.kube\\config",
+            "KubeContext": ""
+          }
+        },
+        "2": {
+          "Name": "someSystemExistsToPreventAKubernetesDeploymentFromRunningAsTheRootUserInAnExistingKubernetesCluster",
+          "Description": "",
+          "Result": "Failed",
+          "Error": "RootUserIsRestricted is NOT restricted (result: false)",
+          "Payload": null
+        }
+      }
+    },
+    "19": {
+      "Name": "Prevent deployments from running with the NET_RAW capability.",
+      "Result": "Failed",
+      "Tags": [
+        "@kubernetes",
+        "@pod_security_policy",
+        "@CIS-5.2",
+        "@preventitive",
+        "@CIS-5.2.7"
+      ],
+      "Steps": {
+        "1": {
+          "Name": "aKubernetesClusterIsDeployed",
+          "Description": "Passes if Probr successfully connects to the specified cluster.",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": {
+            "KubeConfigPath": "C:\\Users\\eknight\\.kube\\config",
+            "KubeContext": ""
+          }
+        },
+        "2": {
+          "Name": "someSystemExistsToPreventAKubernetesDeploymentFromRunningWithNETRAWCapabilityInAnExistingKubernetesCluster",
+          "Description": "",
+          "Result": "Failed",
+          "Error": "NETRAWIsRestricted is NOT restricted (result: false)",
+          "Payload": null
+        }
+      }
+    },
+    "2": {
+      "Name": "Prevent a deployment from running with privileged access",
+      "Result": "Failed",
+      "Tags": [
+        "@kubernetes",
+        "@pod_security_policy",
+        "@CIS-5.2",
+        "@preventative",
+        "@CIS-5.2.1"
+      ],
+      "Steps": {
+        "1": {
+          "Name": "aKubernetesClusterIsDeployed",
+          "Description": "Passes if Probr successfully connects to the specified cluster.",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": {
+            "KubeConfigPath": "C:\\Users\\eknight\\.kube\\config",
+            "KubeContext": ""
+          }
+        },
+        "2": {
+          "Name": "someControlExistsToPreventPrivilegedAccessForKubernetesDeploymentsToAnActiveKubernetesCluster",
+          "Description": "",
+          "Result": "Failed",
+          "Error": "PrivilegedAccessIsRestricted is NOT restricted (result: false)",
+          "Payload": null
+        }
+      }
+    },
+    "20": {
+      "Name": "Prevent deployments from running with the NET_RAW capability.",
+      "Result": "Failed",
+      "Tags": [
+        "@kubernetes",
+        "@pod_security_policy",
+        "@CIS-5.2",
+        "@preventitive",
+        "@CIS-5.2.7"
+      ],
+      "Steps": {
+        "1": {
+          "Name": "aKubernetesClusterIsDeployed",
+          "Description": "Passes if Probr successfully connects to the specified cluster.",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": {
+            "KubeConfigPath": "C:\\Users\\eknight\\.kube\\config",
+            "KubeContext": ""
+          }
+        },
+        "2": {
+          "Name": "someSystemExistsToPreventAKubernetesDeploymentFromRunningWithNETRAWCapabilityInAnExistingKubernetesCluster",
+          "Description": "",
+          "Result": "Failed",
+          "Error": "NETRAWIsRestricted is NOT restricted (result: false)",
+          "Payload": null
+        }
+      }
+    },
+    "21": {
+      "Name": "Prevent deployments from running with the NET_RAW capability.",
+      "Result": "Failed",
+      "Tags": [
+        "@kubernetes",
+        "@pod_security_policy",
+        "@CIS-5.2",
+        "@preventitive",
+        "@CIS-5.2.7"
+      ],
+      "Steps": {
+        "1": {
+          "Name": "aKubernetesClusterIsDeployed",
+          "Description": "Passes if Probr successfully connects to the specified cluster.",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": {
+            "KubeConfigPath": "C:\\Users\\eknight\\.kube\\config",
+            "KubeContext": ""
+          }
+        },
+        "2": {
+          "Name": "someSystemExistsToPreventAKubernetesDeploymentFromRunningWithNETRAWCapabilityInAnExistingKubernetesCluster",
+          "Description": "",
+          "Result": "Failed",
+          "Error": "NETRAWIsRestricted is NOT restricted (result: false)",
+          "Payload": null
+        }
+      }
+    },
+    "22": {
+      "Name": "Prevent container running with capabilities beyond the default set.",
+      "Result": "Passed",
+      "Tags": [
+        "@kubernetes",
+        "@pod_security_policy",
+        "@CIS-5.2",
+        "@preventitive",
+        "@CIS-5.2.8"
+      ],
+      "Steps": {
+        "1": {
+          "Name": "aKubernetesClusterIsDeployed",
+          "Description": "Passes if Probr successfully connects to the specified cluster.",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": {
+            "KubeConfigPath": "C:\\Users\\eknight\\.kube\\config",
+            "KubeContext": ""
+          }
+        },
+        "2": {
+          "Name": "someSystemExistsToPreventKubernetesDeploymentsWithCapabilitiesBeyondTheDefaultSetFromBeingDeployedToAnExistingKubernetesCluster",
+          "Description": "",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": null
+        }
+      }
+    },
+    "23": {
+      "Name": "Prevent container running with capabilities beyond the default set.",
+      "Result": "Passed",
+      "Tags": [
+        "@kubernetes",
+        "@pod_security_policy",
+        "@CIS-5.2",
+        "@preventitive",
+        "@CIS-5.2.8"
+      ],
+      "Steps": {
+        "1": {
+          "Name": "aKubernetesClusterIsDeployed",
+          "Description": "Passes if Probr successfully connects to the specified cluster.",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": {
+            "KubeConfigPath": "C:\\Users\\eknight\\.kube\\config",
+            "KubeContext": ""
+          }
+        },
+        "2": {
+          "Name": "someSystemExistsToPreventKubernetesDeploymentsWithCapabilitiesBeyondTheDefaultSetFromBeingDeployedToAnExistingKubernetesCluster",
+          "Description": "",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": null
+        }
+      }
+    },
+    "24": {
+      "Name": "Prevent container running with capabilities beyond the default set.",
+      "Result": "Passed",
+      "Tags": [
+        "@kubernetes",
+        "@pod_security_policy",
+        "@CIS-5.2",
+        "@preventitive",
+        "@CIS-5.2.8"
+      ],
+      "Steps": {
+        "1": {
+          "Name": "aKubernetesClusterIsDeployed",
+          "Description": "Passes if Probr successfully connects to the specified cluster.",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": {
+            "KubeConfigPath": "C:\\Users\\eknight\\.kube\\config",
+            "KubeContext": ""
+          }
+        },
+        "2": {
+          "Name": "someSystemExistsToPreventKubernetesDeploymentsWithCapabilitiesBeyondTheDefaultSetFromBeingDeployedToAnExistingKubernetesCluster",
+          "Description": "",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": null
+        }
+      }
+    },
+    "25": {
+      "Name": "Prevent deployments from running with assigned capabilities.",
+      "Result": "Failed",
+      "Tags": [
+        "@kubernetes",
+        "@pod_security_policy",
+        "@CIS-5.2",
+        "@preventitive",
+        "@CIS-5.2.9"
+      ],
+      "Steps": {
+        "1": {
+          "Name": "aKubernetesClusterIsDeployed",
+          "Description": "Passes if Probr successfully connects to the specified cluster.",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": {
+            "KubeConfigPath": "C:\\Users\\eknight\\.kube\\config",
+            "KubeContext": ""
+          }
+        },
+        "2": {
+          "Name": "someSystemExistsToPreventKubernetesDeploymentsWithAssignedCapabilitiesFromBeingDeployedToAnExistingKubernetesCluster",
+          "Description": "",
+          "Result": "Failed",
+          "Error": "AssignedCapabilitiesAreRestricted is NOT restricted (result: false)",
+          "Payload": null
+        }
+      }
+    },
+    "26": {
+      "Name": "Prevent deployments from running with assigned capabilities.",
+      "Result": "Failed",
+      "Tags": [
+        "@kubernetes",
+        "@pod_security_policy",
+        "@CIS-5.2",
+        "@preventitive",
+        "@CIS-5.2.9"
+      ],
+      "Steps": {
+        "1": {
+          "Name": "aKubernetesClusterIsDeployed",
+          "Description": "Passes if Probr successfully connects to the specified cluster.",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": {
+            "KubeConfigPath": "C:\\Users\\eknight\\.kube\\config",
+            "KubeContext": ""
+          }
+        },
+        "2": {
+          "Name": "someSystemExistsToPreventKubernetesDeploymentsWithAssignedCapabilitiesFromBeingDeployedToAnExistingKubernetesCluster",
+          "Description": "",
+          "Result": "Failed",
+          "Error": "AssignedCapabilitiesAreRestricted is NOT restricted (result: false)",
+          "Payload": null
+        }
+      }
+    },
+    "27": {
+      "Name": "Prevent deployments from running with assigned capabilities.",
+      "Result": "Failed",
+      "Tags": [
+        "@kubernetes",
+        "@pod_security_policy",
+        "@CIS-5.2",
+        "@preventitive",
+        "@CIS-5.2.9"
+      ],
+      "Steps": {
+        "1": {
+          "Name": "aKubernetesClusterIsDeployed",
+          "Description": "Passes if Probr successfully connects to the specified cluster.",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": {
+            "KubeConfigPath": "C:\\Users\\eknight\\.kube\\config",
+            "KubeContext": ""
+          }
+        },
+        "2": {
+          "Name": "someSystemExistsToPreventKubernetesDeploymentsWithAssignedCapabilitiesFromBeingDeployedToAnExistingKubernetesCluster",
+          "Description": "",
+          "Result": "Failed",
+          "Error": "AssignedCapabilitiesAreRestricted is NOT restricted (result: false)",
+          "Payload": null
+        }
+      }
+    },
+    "28": {
+      "Name": "Prevent deployments from accessing unapproved port range",
+      "Result": "Passed",
+      "Tags": [
+        "@kubernetes",
+        "@pod_security_policy",
+        "@CIS-5.2",
+        "@preventitive",
+        "@AZP-0.1"
+      ],
+      "Steps": {
+        "1": {
+          "Name": "aKubernetesClusterIsDeployed",
+          "Description": "Passes if Probr successfully connects to the specified cluster.",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": {
+            "KubeConfigPath": "C:\\Users\\eknight\\.kube\\config",
+            "KubeContext": ""
+          }
+        },
+        "2": {
+          "Name": "someSystemExistsToPreventKubernetesDeploymentsWithUnapprovedPortRangeFromBeingDeployedToAnExistingKubernetesCluster",
+          "Description": "",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": null
+        }
+      }
+    },
+    "29": {
+      "Name": "Prevent deployments from accessing unapproved port range",
+      "Result": "Passed",
+      "Tags": [
+        "@kubernetes",
+        "@pod_security_policy",
+        "@CIS-5.2",
+        "@preventitive",
+        "@AZP-0.1"
+      ],
+      "Steps": {
+        "1": {
+          "Name": "aKubernetesClusterIsDeployed",
+          "Description": "Passes if Probr successfully connects to the specified cluster.",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": {
+            "KubeConfigPath": "C:\\Users\\eknight\\.kube\\config",
+            "KubeContext": ""
+          }
+        },
+        "2": {
+          "Name": "someSystemExistsToPreventKubernetesDeploymentsWithUnapprovedPortRangeFromBeingDeployedToAnExistingKubernetesCluster",
+          "Description": "",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": null
+        }
+      }
+    },
+    "3": {
+      "Name": "Prevent a deployment from running with privileged access",
+      "Result": "Failed",
+      "Tags": [
+        "@kubernetes",
+        "@pod_security_policy",
+        "@CIS-5.2",
+        "@preventative",
+        "@CIS-5.2.1"
+      ],
+      "Steps": {
+        "1": {
+          "Name": "aKubernetesClusterIsDeployed",
+          "Description": "Passes if Probr successfully connects to the specified cluster.",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": {
+            "KubeConfigPath": "C:\\Users\\eknight\\.kube\\config",
+            "KubeContext": ""
+          }
+        },
+        "2": {
+          "Name": "someControlExistsToPreventPrivilegedAccessForKubernetesDeploymentsToAnActiveKubernetesCluster",
+          "Description": "",
+          "Result": "Failed",
+          "Error": "PrivilegedAccessIsRestricted is NOT restricted (result: false)",
+          "Payload": null
+        }
+      }
+    },
+    "30": {
+      "Name": "Prevent deployments from accessing unapproved port range",
+      "Result": "Passed",
+      "Tags": [
+        "@kubernetes",
+        "@pod_security_policy",
+        "@CIS-5.2",
+        "@preventitive",
+        "@AZP-0.1"
+      ],
+      "Steps": {
+        "1": {
+          "Name": "aKubernetesClusterIsDeployed",
+          "Description": "Passes if Probr successfully connects to the specified cluster.",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": {
+            "KubeConfigPath": "C:\\Users\\eknight\\.kube\\config",
+            "KubeContext": ""
+          }
+        },
+        "2": {
+          "Name": "someSystemExistsToPreventKubernetesDeploymentsWithUnapprovedPortRangeFromBeingDeployedToAnExistingKubernetesCluster",
+          "Description": "",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": null
+        }
+      }
+    },
+    "31": {
+      "Name": "Prevent deployments from accessing unapproved volume types",
+      "Result": "Passed",
+      "Tags": [
+        "@kubernetes",
+        "@pod_security_policy",
+        "@CIS-5.2",
+        "@preventitive",
+        "@AZP-0.2"
+      ],
+      "Steps": {
+        "1": {
+          "Name": "aKubernetesClusterIsDeployed",
+          "Description": "Passes if Probr successfully connects to the specified cluster.",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": {
+            "KubeConfigPath": "C:\\Users\\eknight\\.kube\\config",
+            "KubeContext": ""
+          }
+        },
+        "2": {
+          "Name": "someSystemExistsToPreventKubernetesDeploymentsWithUnapprovedVolumeTypesFromBeingDeployedToAnExistingKubernetesCluster",
+          "Description": "",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": null
+        }
+      }
+    },
+    "32": {
+      "Name": "Prevent deployments from accessing unapproved volume types",
+      "Result": "Passed",
+      "Tags": [
+        "@kubernetes",
+        "@pod_security_policy",
+        "@CIS-5.2",
+        "@preventitive",
+        "@AZP-0.2"
+      ],
+      "Steps": {
+        "1": {
+          "Name": "aKubernetesClusterIsDeployed",
+          "Description": "Passes if Probr successfully connects to the specified cluster.",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": {
+            "KubeConfigPath": "C:\\Users\\eknight\\.kube\\config",
+            "KubeContext": ""
+          }
+        },
+        "2": {
+          "Name": "someSystemExistsToPreventKubernetesDeploymentsWithUnapprovedVolumeTypesFromBeingDeployedToAnExistingKubernetesCluster",
+          "Description": "",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": null
+        }
+      }
+    },
+    "33": {
+      "Name": "Prevent deployments from accessing unapproved volume types",
+      "Result": "Passed",
+      "Tags": [
+        "@kubernetes",
+        "@pod_security_policy",
+        "@CIS-5.2",
+        "@preventitive",
+        "@AZP-0.2"
+      ],
+      "Steps": {
+        "1": {
+          "Name": "aKubernetesClusterIsDeployed",
+          "Description": "Passes if Probr successfully connects to the specified cluster.",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": {
+            "KubeConfigPath": "C:\\Users\\eknight\\.kube\\config",
+            "KubeContext": ""
+          }
+        },
+        "2": {
+          "Name": "someSystemExistsToPreventKubernetesDeploymentsWithUnapprovedVolumeTypesFromBeingDeployedToAnExistingKubernetesCluster",
+          "Description": "",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": null
+        }
+      }
+    },
+    "34": {
+      "Name": "Prevent deployments from running without approved seccomp profile",
+      "Result": "Failed",
+      "Tags": [
+        "@kubernetes",
+        "@pod_security_policy",
+        "@CIS-5.2",
+        "@preventitive",
+        "@AZP-0.3"
+      ],
+      "Steps": {
+        "1": {
+          "Name": "aKubernetesClusterIsDeployed",
+          "Description": "Passes if Probr successfully connects to the specified cluster.",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": {
+            "KubeConfigPath": "C:\\Users\\eknight\\.kube\\config",
+            "KubeContext": ""
+          }
+        },
+        "2": {
+          "Name": "someSystemExistsToPreventKubernetesDeploymentsWithoutApprovedSeccompProfilesFromBeingDeployedToAnExistingKubernetesCluster",
+          "Description": "",
+          "Result": "Failed",
+          "Error": "SeccompProfilesAreRestricted is NOT restricted (result: false)",
+          "Payload": null
+        }
+      }
+    },
+    "35": {
+      "Name": "Prevent deployments from running without approved seccomp profile",
+      "Result": "Failed",
+      "Tags": [
+        "@kubernetes",
+        "@pod_security_policy",
+        "@CIS-5.2",
+        "@preventitive",
+        "@AZP-0.3"
+      ],
+      "Steps": {
+        "1": {
+          "Name": "aKubernetesClusterIsDeployed",
+          "Description": "Passes if Probr successfully connects to the specified cluster.",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": {
+            "KubeConfigPath": "C:\\Users\\eknight\\.kube\\config",
+            "KubeContext": ""
+          }
+        },
+        "2": {
+          "Name": "someSystemExistsToPreventKubernetesDeploymentsWithoutApprovedSeccompProfilesFromBeingDeployedToAnExistingKubernetesCluster",
+          "Description": "",
+          "Result": "Failed",
+          "Error": "SeccompProfilesAreRestricted is NOT restricted (result: false)",
+          "Payload": null
+        }
+      }
+    },
+    "36": {
+      "Name": "Prevent deployments from running without approved seccomp profile",
+      "Result": "Failed",
+      "Tags": [
+        "@kubernetes",
+        "@pod_security_policy",
+        "@CIS-5.2",
+        "@preventitive",
+        "@AZP-0.3"
+      ],
+      "Steps": {
+        "1": {
+          "Name": "aKubernetesClusterIsDeployed",
+          "Description": "Passes if Probr successfully connects to the specified cluster.",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": {
+            "KubeConfigPath": "C:\\Users\\eknight\\.kube\\config",
+            "KubeContext": ""
+          }
+        },
+        "2": {
+          "Name": "someSystemExistsToPreventKubernetesDeploymentsWithoutApprovedSeccompProfilesFromBeingDeployedToAnExistingKubernetesCluster",
+          "Description": "",
+          "Result": "Failed",
+          "Error": "SeccompProfilesAreRestricted is NOT restricted (result: false)",
+          "Payload": null
+        }
+      }
+    },
+    "4": {
+      "Name": "Prevent a deployment from running with the hostPID",
+      "Result": "Failed",
+      "Tags": [
+        "@kubernetes",
+        "@pod_security_policy",
+        "@CIS-5.2",
+        "@preventative",
+        "@CIS-5.2.2"
+      ],
+      "Steps": {
+        "1": {
+          "Name": "aKubernetesClusterIsDeployed",
+          "Description": "Passes if Probr successfully connects to the specified cluster.",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": {
+            "KubeConfigPath": "C:\\Users\\eknight\\.kube\\config",
+            "KubeContext": ""
+          }
+        },
+        "2": {
+          "Name": "someSystemExistsToPreventAKubernetesContainerFromRunningUsingTheHostPIDOnTheActiveKubernetesCluster",
+          "Description": "",
+          "Result": "Failed",
+          "Error": "HostPIDIsRestricted is NOT restricted (result: false)",
+          "Payload": null
+        }
+      }
+    },
+    "5": {
+      "Name": "Prevent a deployment from running with the hostPID",
+      "Result": "Failed",
+      "Tags": [
+        "@kubernetes",
+        "@pod_security_policy",
+        "@CIS-5.2",
+        "@preventative",
+        "@CIS-5.2.2"
+      ],
+      "Steps": {
+        "1": {
+          "Name": "aKubernetesClusterIsDeployed",
+          "Description": "Passes if Probr successfully connects to the specified cluster.",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": {
+            "KubeConfigPath": "C:\\Users\\eknight\\.kube\\config",
+            "KubeContext": ""
+          }
+        },
+        "2": {
+          "Name": "someSystemExistsToPreventAKubernetesContainerFromRunningUsingTheHostPIDOnTheActiveKubernetesCluster",
+          "Description": "",
+          "Result": "Failed",
+          "Error": "HostPIDIsRestricted is NOT restricted (result: false)",
+          "Payload": null
+        }
+      }
+    },
+    "6": {
+      "Name": "Prevent a deployment from running with the hostPID",
+      "Result": "Failed",
+      "Tags": [
+        "@kubernetes",
+        "@pod_security_policy",
+        "@CIS-5.2",
+        "@preventative",
+        "@CIS-5.2.2"
+      ],
+      "Steps": {
+        "1": {
+          "Name": "aKubernetesClusterIsDeployed",
+          "Description": "Passes if Probr successfully connects to the specified cluster.",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": {
+            "KubeConfigPath": "C:\\Users\\eknight\\.kube\\config",
+            "KubeContext": ""
+          }
+        },
+        "2": {
+          "Name": "someSystemExistsToPreventAKubernetesContainerFromRunningUsingTheHostPIDOnTheActiveKubernetesCluster",
+          "Description": "",
+          "Result": "Failed",
+          "Error": "HostPIDIsRestricted is NOT restricted (result: false)",
+          "Payload": null
+        }
+      }
+    },
+    "7": {
+      "Name": "Prevent a deployment from running with the hostIPC flag.",
+      "Result": "Failed",
+      "Tags": [
+        "@kubernetes",
+        "@pod_security_policy",
+        "@CIS-5.2",
+        "@preventative",
+        "@CIS-5.2.3"
+      ],
+      "Steps": {
+        "1": {
+          "Name": "aKubernetesClusterIsDeployed",
+          "Description": "Passes if Probr successfully connects to the specified cluster.",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": {
+            "KubeConfigPath": "C:\\Users\\eknight\\.kube\\config",
+            "KubeContext": ""
+          }
+        },
+        "2": {
+          "Name": "someSystemExistsToPreventAKubernetesDeploymentFromRunningUsingTheHostIPCInAnExistingKubernetesCluster",
+          "Description": "",
+          "Result": "Failed",
+          "Error": "HostIPCIsRestricted is NOT restricted (result: false)",
+          "Payload": null
+        }
+      }
+    },
+    "8": {
+      "Name": "Prevent a deployment from running with the hostIPC flag.",
+      "Result": "Failed",
+      "Tags": [
+        "@kubernetes",
+        "@pod_security_policy",
+        "@CIS-5.2",
+        "@preventative",
+        "@CIS-5.2.3"
+      ],
+      "Steps": {
+        "1": {
+          "Name": "aKubernetesClusterIsDeployed",
+          "Description": "Passes if Probr successfully connects to the specified cluster.",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": {
+            "KubeConfigPath": "C:\\Users\\eknight\\.kube\\config",
+            "KubeContext": ""
+          }
+        },
+        "2": {
+          "Name": "someSystemExistsToPreventAKubernetesDeploymentFromRunningUsingTheHostIPCInAnExistingKubernetesCluster",
+          "Description": "",
+          "Result": "Failed",
+          "Error": "HostIPCIsRestricted is NOT restricted (result: false)",
+          "Payload": null
+        }
+      }
+    },
+    "9": {
+      "Name": "Prevent a deployment from running with the hostIPC flag.",
+      "Result": "Failed",
+      "Tags": [
+        "@kubernetes",
+        "@pod_security_policy",
+        "@CIS-5.2",
+        "@preventative",
+        "@CIS-5.2.3"
+      ],
+      "Steps": {
+        "1": {
+          "Name": "aKubernetesClusterIsDeployed",
+          "Description": "Passes if Probr successfully connects to the specified cluster.",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": {
+            "KubeConfigPath": "C:\\Users\\eknight\\.kube\\config",
+            "KubeContext": ""
+          }
+        },
+        "2": {
+          "Name": "someSystemExistsToPreventAKubernetesDeploymentFromRunningUsingTheHostIPCInAnExistingKubernetesCluster",
+          "Description": "",
+          "Result": "Failed",
+          "Error": "HostIPCIsRestricted is NOT restricted (result: false)",
+          "Payload": null
+        }
+      }
+    }
+  }
+}

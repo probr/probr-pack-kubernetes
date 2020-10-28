@@ -1,0 +1,115 @@
+{
+  "Name": "general",
+  "PodsDestroyed": 0,
+  "ScenariosAttempted": 4,
+  "ScenariosSucceeded": 4,
+  "ScenariosFailed": 0,
+  "Result": "Success",
+  "Scenarios": {
+    "1": {
+      "Name": "Minimise wildcards in Roles and Cluster Roles",
+      "Result": "Passed",
+      "Tags": [
+        "@kubernetes",
+        "@general",
+        "@CIS-5.1.3"
+      ],
+      "Steps": {
+        "1": {
+          "Name": "aKubernetesClusterIsDeployed",
+          "Description": "Passes if Probr successfully connects to the specified cluster.",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": {
+            "KubeConfigPath": "C:\\Users\\eknight\\.kube\\config",
+            "KubeContext": ""
+          }
+        },
+        "2": {
+          "Name": "iInspectTheThatAreConfigured",
+          "Description": "Ensures that Roles are configured. Retains wildcard roles in state for following steps. Passes if retrieval command does not have error.",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": {}
+        }
+      }
+    },
+    "2": {
+      "Name": "Minimise wildcards in Roles and Cluster Roles",
+      "Result": "Passed",
+      "Tags": [
+        "@kubernetes",
+        "@general",
+        "@CIS-5.1.3"
+      ],
+      "Steps": {
+        "1": {
+          "Name": "aKubernetesClusterIsDeployed",
+          "Description": "Passes if Probr successfully connects to the specified cluster.",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": {
+            "KubeConfigPath": "C:\\Users\\eknight\\.kube\\config",
+            "KubeContext": ""
+          }
+        },
+        "2": {
+          "Name": "iInspectTheThatAreConfigured",
+          "Description": "Ensures that Cluster Roles are configured. Retains wildcard roles in state for following steps. Passes if retrieval command does not have error.",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": {}
+        }
+      }
+    },
+    "3": {
+      "Name": "Ensure Security Contexts are enforced",
+      "Result": "Passed",
+      "Tags": [
+        "@kubernetes",
+        "@general",
+        "@CIS-5.6.3"
+      ],
+      "Steps": {
+        "1": {
+          "Name": "aKubernetesClusterIsDeployed",
+          "Description": "Passes if Probr successfully connects to the specified cluster.",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": {
+            "KubeConfigPath": "C:\\Users\\eknight\\.kube\\config",
+            "KubeContext": ""
+          }
+        }
+      }
+    },
+    "4": {
+      "Name": "Ensure Kubernetes Web UI is disabled",
+      "Result": "Passed",
+      "Tags": [
+        "@kubernetes",
+        "@general",
+        "@CIS-6.10.1"
+      ],
+      "Steps": {
+        "1": {
+          "Name": "aKubernetesClusterIsDeployed",
+          "Description": "Passes if Probr successfully connects to the specified cluster.",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": {
+            "KubeConfigPath": "C:\\Users\\eknight\\.kube\\config",
+            "KubeContext": ""
+          }
+        },
+        "2": {
+          "Name": "theKubernetesWebUIIsDisabled",
+          "Description": "Attempts to find a pod in the 'kube-system' namespace with the prefix 'kubernetes-dashboard'. Passes if no pod is returned.",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": null
+        }
+      }
+    }
+  }
+}

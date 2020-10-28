@@ -1,0 +1,125 @@
+{
+  "Name": "container_registry_access",
+  "PodsDestroyed": 0,
+  "ScenariosAttempted": 5,
+  "ScenariosSucceeded": 5,
+  "ScenariosFailed": 0,
+  "Result": "Success",
+  "Scenarios": {
+    "1": {
+      "Name": "Ensure container image registries are read-only",
+      "Result": "Passed",
+      "Tags": [
+        "@kubernetes",
+        "@container_registry_access",
+        "@CIS-6.1",
+        "@preventative",
+        "@CIS-6.1.3"
+      ],
+      "Steps": {
+        "1": {
+          "Name": "aKubernetesClusterIsDeployed",
+          "Description": "Passes if Probr successfully connects to the specified cluster.",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": {
+            "KubeConfigPath": "C:\\Users\\eknight\\.kube\\config",
+            "KubeContext": ""
+          }
+        }
+      }
+    },
+    "2": {
+      "Name": "Ensure only authorised container registries are allowed",
+      "Result": "Passed",
+      "Tags": [
+        "@kubernetes",
+        "@container_registry_access",
+        "@CIS-6.1",
+        "@preventative",
+        "@CIS-6.1.4"
+      ],
+      "Steps": {
+        "1": {
+          "Name": "aKubernetesClusterIsDeployed",
+          "Description": "Passes if Probr successfully connects to the specified cluster.",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": {
+            "KubeConfigPath": "C:\\Users\\eknight\\.kube\\config",
+            "KubeContext": ""
+          }
+        }
+      }
+    },
+    "3": {
+      "Name": "Ensure only authorised container registries are allowed",
+      "Result": "Passed",
+      "Tags": [
+        "@kubernetes",
+        "@container_registry_access",
+        "@CIS-6.1",
+        "@preventative",
+        "@CIS-6.1.4"
+      ],
+      "Steps": {
+        "1": {
+          "Name": "aKubernetesClusterIsDeployed",
+          "Description": "Passes if Probr successfully connects to the specified cluster.",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": {
+            "KubeConfigPath": "C:\\Users\\eknight\\.kube\\config",
+            "KubeContext": ""
+          }
+        }
+      }
+    },
+    "4": {
+      "Name": "Ensure only authorised container registries are allowed",
+      "Result": "Passed",
+      "Tags": [
+        "@kubernetes",
+        "@container_registry_access",
+        "@CIS-6.1",
+        "@preventative",
+        "@CIS-6.1.4"
+      ],
+      "Steps": {
+        "1": {
+          "Name": "aKubernetesClusterIsDeployed",
+          "Description": "Passes if Probr successfully connects to the specified cluster.",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": {
+            "KubeConfigPath": "C:\\Users\\eknight\\.kube\\config",
+            "KubeContext": ""
+          }
+        }
+      }
+    },
+    "5": {
+      "Name": "Ensure only authorised container registries are allowed",
+      "Result": "Passed",
+      "Tags": [
+        "@kubernetes",
+        "@container_registry_access",
+        "@CIS-6.1",
+        "@preventative",
+        "@CIS-6.1.4"
+      ],
+      "Steps": {
+        "1": {
+          "Name": "aKubernetesClusterIsDeployed",
+          "Description": "Passes if Probr successfully connects to the specified cluster.",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": {
+            "KubeConfigPath": "C:\\Users\\eknight\\.kube\\config",
+            "KubeContext": ""
+          }
+        }
+      }
+    }
+  }
+}

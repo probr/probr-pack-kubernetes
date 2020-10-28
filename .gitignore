@@ -249,6 +249,7 @@ __debug_bin
 # probr misc ('probr' is Linux exe)
 cucumber_output
 audit_output
+!examples/*
 probr
 static-content/
 .kube/

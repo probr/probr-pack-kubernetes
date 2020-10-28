@@ -1,0 +1,4102 @@
+[
+    {
+        "uri": "C:\\Users\\eknight\\dev\\probr\\probes\\kubernetes\\probe_definitions\\podsecuritypolicy\\pod-security-policy.feature",
+        "id": "maximise-security-through-pod-security-policies",
+        "keyword": "Feature",
+        "name": "Maximise security through Pod Security Policies",
+        "description": "As a Cloud Security Adminministrator\nI want to ensure that a stringent set of Pod Security Policies are present\nSo that a policy of least privilege can be enforced in order to prevent malicious attacks on my organization",
+        "line": 4,
+        "comments": [
+            {
+                "value": "#Rule: Insert tags here. ... for some reason 'Rule:' doesn't work in latest godog ..",
+                "line": 10
+            },
+            {
+                "value": "#TODO: for 5.2.1 .. these are all 'creation', so 'deployment running' should be changed to 'deployment created'",
+                "line": 11
+            },
+            {
+                "value": "#TODO: question .. how specific should we be on the control terminology?  e.g. should we stick with",
+                "line": 12
+            },
+            {
+                "value": "# the below, or specific, like \"And 'isPrivileged' is set to \u003ctrue|false\u003e\"??",
+                "line": 13
+            },
+            {
+                "value": "#TODO: also ... for 5.2.5, we can test to prevent creation, but what about trying to execute a cmd which reqs root?",
+                "line": 14
+            },
+            {
+                "value": "# think we should do that, but is that a separate scenario or blend into this one?  for some this makes sense - mark with @detective?",
+                "line": 15
+            }
+        ],
+        "tags": [
+            {
+                "name": "@kubernetes",
+                "line": 1
+            },
+            {
+                "name": "@pod_security_policy",
+                "line": 2
+            },
+            {
+                "name": "@CIS-5.2",
+                "line": 3
+            }
+        ],
+        "elements": [
+            {
+                "id": "maximise-security-through-pod-security-policies;prevent-a-deployment-from-running-with-privileged-access;;2",
+                "keyword": "Scenario Outline",
+                "name": "Prevent a deployment from running with privileged access",
+                "description": "",
+                "line": 29,
+                "type": "scenario",
+                "tags": [
+                    {
+                        "name": "@kubernetes",
+                        "line": 1
+                    },
+                    {
+                        "name": "@pod_security_policy",
+                        "line": 2
+                    },
+                    {
+                        "name": "@CIS-5.2",
+                        "line": 3
+                    },
+                    {
+                        "name": "@preventative",
+                        "line": 17
+                    },
+                    {
+                        "name": "@CIS-5.2.1",
+                        "line": 17
+                    }
+                ],
+                "steps": [
+                    {
+                        "keyword": "Given ",
+                        "name": "a Kubernetes cluster exists which we can deploy into",
+                        "line": 29,
+                        "match": {
+                            "location": "k8s_probes.go:200"
+                        },
+                        "result": {
+                            "status": "passed",
+                            "duration": 0
+                        }
+                    },
+                    {
+                        "keyword": "And ",
+                        "name": "some system exists to prevent a Kubernetes deployment running with privileged access in an existing Kubernetes cluster",
+                        "line": 29,
+                        "match": {
+                            "location": "pod_security_policy.go:134"
+                        },
+                        "result": {
+                            "status": "failed",
+                            "error_message": "[ERROR] PrivilegedAccessIsRestricted is NOT restricted (result: false)",
+                            "duration": 112231700
+                        }
+                    },
+                    {
+                        "keyword": "When ",
+                        "name": "a Kubernetes deployment is applied to an existing Kubernetes cluster",
+                        "line": 29,
+                        "match": {
+                            "location": "pod_security_policy.go:28"
+                        },
+                        "result": {
+                            "status": "skipped"
+                        }
+                    },
+                    {
+                        "keyword": "And ",
+                        "name": "privileged access request is marked \"True\" for the Kubernetes deployment",
+                        "line": 29,
+                        "match": {
+                            "location": "pod_security_policy.go:115"
+                        },
+                        "result": {
+                            "status": "skipped"
+                        }
+                    },
+                    {
+                        "keyword": "Then ",
+                        "name": "the operation will \"Fail\" with an error \"Containers with privileged access can’t run\"",
+                        "line": 29,
+                        "match": {
+                            "location": "pod_security_policy.go:34"
+                        },
+                        "result": {
+                            "status": "skipped"
+                        }
+                    },
+                    {
+                        "keyword": "But ",
+                        "name": "I should not be able to perform a command that requires privileged access",
+                        "line": 29,
+                        "match": {
+                            "location": "pod_security_policy.go:144"
+                        },
+                        "result": {
+                            "status": "skipped"
+                        }
+                    },
+                    {
+                        "keyword": "And ",
+                        "name": "I should be able to perform an allowed command",
+                        "line": 29,
+                        "match": {
+                            "location": "pod_security_policy.go:44"
+                        },
+                        "result": {
+                            "status": "skipped"
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "maximise-security-through-pod-security-policies;prevent-a-deployment-from-running-with-privileged-access;;3",
+                "keyword": "Scenario Outline",
+                "name": "Prevent a deployment from running with privileged access",
+                "description": "",
+                "line": 30,
+                "type": "scenario",
+                "tags": [
+                    {
+                        "name": "@kubernetes",
+                        "line": 1
+                    },
+                    {
+                        "name": "@pod_security_policy",
+                        "line": 2
+                    },
+                    {
+                        "name": "@CIS-5.2",
+                        "line": 3
+                    },
+                    {
+                        "name": "@preventative",
+                        "line": 17
+                    },
+                    {
+                        "name": "@CIS-5.2.1",
+                        "line": 17
+                    }
+                ],
+                "steps": [
+                    {
+                        "keyword": "Given ",
+                        "name": "a Kubernetes cluster exists which we can deploy into",
+                        "line": 30,
+                        "match": {
+                            "location": "k8s_probes.go:200"
+                        },
+                        "result": {
+                            "status": "passed",
+                            "duration": 497600
+                        }
+                    },
+                    {
+                        "keyword": "And ",
+                        "name": "some system exists to prevent a Kubernetes deployment running with privileged access in an existing Kubernetes cluster",
+                        "line": 30,
+                        "match": {
+                            "location": "pod_security_policy.go:134"
+                        },
+                        "result": {
+                            "status": "failed",
+                            "error_message": "[ERROR] PrivilegedAccessIsRestricted is NOT restricted (result: false)",
+                            "duration": 4769300
+                        }
+                    },
+                    {
+                        "keyword": "When ",
+                        "name": "a Kubernetes deployment is applied to an existing Kubernetes cluster",
+                        "line": 30,
+                        "match": {
+                            "location": "pod_security_policy.go:28"
+                        },
+                        "result": {
+                            "status": "skipped"
+                        }
+                    },
+                    {
+                        "keyword": "And ",
+                        "name": "privileged access request is marked \"False\" for the Kubernetes deployment",
+                        "line": 30,
+                        "match": {
+                            "location": "pod_security_policy.go:115"
+                        },
+                        "result": {
+                            "status": "skipped"
+                        }
+                    },
+                    {
+                        "keyword": "Then ",
+                        "name": "the operation will \"Succeed\" with an error \"No error would show\"",
+                        "line": 30,
+                        "match": {
+                            "location": "pod_security_policy.go:34"
+                        },
+                        "result": {
+                            "status": "skipped"
+                        }
+                    },
+                    {
+                        "keyword": "But ",
+                        "name": "I should not be able to perform a command that requires privileged access",
+                        "line": 30,
+                        "match": {
+                            "location": "pod_security_policy.go:144"
+                        },
+                        "result": {
+                            "status": "skipped"
+                        }
+                    },
+                    {
+                        "keyword": "And ",
+                        "name": "I should be able to perform an allowed command",
+                        "line": 30,
+                        "match": {
+                            "location": "pod_security_policy.go:44"
+                        },
+                        "result": {
+                            "status": "skipped"
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "maximise-security-through-pod-security-policies;prevent-a-deployment-from-running-with-privileged-access;;4",
+                "keyword": "Scenario Outline",
+                "name": "Prevent a deployment from running with privileged access",
+                "description": "",
+                "line": 31,
+                "type": "scenario",
+                "tags": [
+                    {
+                        "name": "@kubernetes",
+                        "line": 1
+                    },
+                    {
+                        "name": "@pod_security_policy",
+                        "line": 2
+                    },
+                    {
+                        "name": "@CIS-5.2",
+                        "line": 3
+                    },
+                    {
+                        "name": "@preventative",
+                        "line": 17
+                    },
+                    {
+                        "name": "@CIS-5.2.1",
+                        "line": 17
+                    }
+                ],
+                "steps": [
+                    {
+                        "keyword": "Given ",
+                        "name": "a Kubernetes cluster exists which we can deploy into",
+                        "line": 31,
+                        "match": {
+                            "location": "k8s_probes.go:200"
+                        },
+                        "result": {
+                            "status": "passed",
+                            "duration": 0
+                        }
+                    },
+                    {
+                        "keyword": "And ",
+                        "name": "some system exists to prevent a Kubernetes deployment running with privileged access in an existing Kubernetes cluster",
+                        "line": 31,
+                        "match": {
+                            "location": "pod_security_policy.go:134"
+                        },
+                        "result": {
+                            "status": "failed",
+                            "error_message": "[ERROR] PrivilegedAccessIsRestricted is NOT restricted (result: false)",
+                            "duration": 0
+                        }
+                    },
+                    {
+                        "keyword": "When ",
+                        "name": "a Kubernetes deployment is applied to an existing Kubernetes cluster",
+                        "line": 31,
+                        "match": {
+                            "location": "pod_security_policy.go:28"
+                        },
+                        "result": {
+                            "status": "skipped"
+                        }
+                    },
+                    {
+                        "keyword": "And ",
+                        "name": "privileged access request is marked \"Not Defined\" for the Kubernetes deployment",
+                        "line": 31,
+                        "match": {
+                            "location": "pod_security_policy.go:115"
+                        },
+                        "result": {
+                            "status": "skipped"
+                        }
+                    },
+                    {
+                        "keyword": "Then ",
+                        "name": "the operation will \"Succeed\" with an error \"No error would show\"",
+                        "line": 31,
+                        "match": {
+                            "location": "pod_security_policy.go:34"
+                        },
+                        "result": {
+                            "status": "skipped"
+                        }
+                    },
+                    {
+                        "keyword": "But ",
+                        "name": "I should not be able to perform a command that requires privileged access",
+                        "line": 31,
+                        "match": {
+                            "location": "pod_security_policy.go:144"
+                        },
+                        "result": {
+                            "status": "skipped"
+                        }
+                    },
+                    {
+                        "keyword": "And ",
+                        "name": "I should be able to perform an allowed command",
+                        "line": 31,
+                        "match": {
+                            "location": "pod_security_policy.go:44"
+                        },
+                        "result": {
+                            "status": "skipped"
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "maximise-security-through-pod-security-policies;prevent-a-deployment-from-running-with-the-hostpid;;2",
+                "keyword": "Scenario Outline",
+                "name": "Prevent a deployment from running with the hostPID",
+                "description": "",
+                "line": 45,
+                "type": "scenario",
+                "tags": [
+                    {
+                        "name": "@kubernetes",
+                        "line": 1
+                    },
+                    {
+                        "name": "@pod_security_policy",
+                        "line": 2
+                    },
+                    {
+                        "name": "@CIS-5.2",
+                        "line": 3
+                    },
+                    {
+                        "name": "@preventative",
+                        "line": 33
+                    },
+                    {
+                        "name": "@CIS-5.2.2",
+                        "line": 33
+                    }
+                ],
+                "steps": [
+                    {
+                        "keyword": "Given ",
+                        "name": "a Kubernetes cluster exists which we can deploy into",
+                        "line": 45,
+                        "match": {
+                            "location": "k8s_probes.go:200"
+                        },
+                        "result": {
+                            "status": "passed",
+                            "duration": 0
+                        }
+                    },
+                    {
+                        "keyword": "And ",
+                        "name": "some system exists to prevent a Kubernetes deployment from running using the hostPID in an existing Kubernetes cluster",
+                        "line": 45,
+                        "match": {
+                            "location": "pod_security_policy.go:176"
+                        },
+                        "result": {
+                            "status": "failed",
+                            "error_message": "[ERROR] HostPIDIsRestricted is NOT restricted (result: false)",
+                            "duration": 0
+                        }
+                    },
+                    {
+                        "keyword": "When ",
+                        "name": "a Kubernetes deployment is applied to an existing Kubernetes cluster",
+                        "line": 45,
+                        "match": {
+                            "location": "pod_security_policy.go:28"
+                        },
+                        "result": {
+                            "status": "skipped"
+                        }
+                    },
+                    {
+                        "keyword": "And ",
+                        "name": "hostPID request is marked \"True\" for the Kubernetes deployment",
+                        "line": 45,
+                        "match": {
+                            "location": "pod_security_policy.go:156"
+                        },
+                        "result": {
+                            "status": "skipped"
+                        }
+                    },
+                    {
+                        "keyword": "Then ",
+                        "name": "the operation will \"Fail\" with an error \"Containers cant run using hostPID\"",
+                        "line": 45,
+                        "match": {
+                            "location": "pod_security_policy.go:34"
+                        },
+                        "result": {
+                            "status": "skipped"
+                        }
+                    },
+                    {
+                        "keyword": "But ",
+                        "name": "I should not be able to perform a command that provides access to the host PID namespace",
+                        "line": 45,
+                        "match": {
+                            "location": "pod_security_policy.go:186"
+                        },
+                        "result": {
+                            "status": "skipped"
+                        }
+                    },
+                    {
+                        "keyword": "And ",
+                        "name": "I should be able to perform an allowed command",
+                        "line": 45,
+                        "match": {
+                            "location": "pod_security_policy.go:44"
+                        },
+                        "result": {
+                            "status": "skipped"
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "maximise-security-through-pod-security-policies;prevent-a-deployment-from-running-with-the-hostpid;;3",
+                "keyword": "Scenario Outline",
+                "name": "Prevent a deployment from running with the hostPID",
+                "description": "",
+                "line": 46,
+                "type": "scenario",
+                "tags": [
+                    {
+                        "name": "@kubernetes",
+                        "line": 1
+                    },
+                    {
+                        "name": "@pod_security_policy",
+                        "line": 2
+                    },
+                    {
+                        "name": "@CIS-5.2",
+                        "line": 3
+                    },
+                    {
+                        "name": "@preventative",
+                        "line": 33
+                    },
+                    {
+                        "name": "@CIS-5.2.2",
+                        "line": 33
+                    }
+                ],
+                "steps": [
+                    {
+                        "keyword": "Given ",
+                        "name": "a Kubernetes cluster exists which we can deploy into",
+                        "line": 46,
+                        "match": {
+                            "location": "k8s_probes.go:200"
+                        },
+                        "result": {
+                            "status": "passed",
+                            "duration": 0
+                        }
+                    },
+                    {
+                        "keyword": "And ",
+                        "name": "some system exists to prevent a Kubernetes deployment from running using the hostPID in an existing Kubernetes cluster",
+                        "line": 46,
+                        "match": {
+                            "location": "pod_security_policy.go:176"
+                        },
+                        "result": {
+                            "status": "failed",
+                            "error_message": "[ERROR] HostPIDIsRestricted is NOT restricted (result: false)",
+                            "duration": 1995400
+                        }
+                    },
+                    {
+                        "keyword": "When ",
+                        "name": "a Kubernetes deployment is applied to an existing Kubernetes cluster",
+                        "line": 46,
+                        "match": {
+                            "location": "pod_security_policy.go:28"
+                        },
+                        "result": {
+                            "status": "skipped"
+                        }
+                    },
+                    {
+                        "keyword": "And ",
+                        "name": "hostPID request is marked \"False\" for the Kubernetes deployment",
+                        "line": 46,
+                        "match": {
+                            "location": "pod_security_policy.go:156"
+                        },
+                        "result": {
+                            "status": "skipped"
+                        }
+                    },
+                    {
+                        "keyword": "Then ",
+                        "name": "the operation will \"Succeed\" with an error \"\"",
+                        "line": 46,
+                        "match": {
+                            "location": "pod_security_policy.go:34"
+                        },
+                        "result": {
+                            "status": "skipped"
+                        }
+                    },
+                    {
+                        "keyword": "But ",
+                        "name": "I should not be able to perform a command that provides access to the host PID namespace",
+                        "line": 46,
+                        "match": {
+                            "location": "pod_security_policy.go:186"
+                        },
+                        "result": {
+                            "status": "skipped"
+                        }
+                    },
+                    {
+                        "keyword": "And ",
+                        "name": "I should be able to perform an allowed command",
+                        "line": 46,
+                        "match": {
+                            "location": "pod_security_policy.go:44"
+                        },
+                        "result": {
+                            "status": "skipped"
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "maximise-security-through-pod-security-policies;prevent-a-deployment-from-running-with-the-hostpid;;4",
+                "keyword": "Scenario Outline",
+                "name": "Prevent a deployment from running with the hostPID",
+                "description": "",
+                "line": 47,
+                "type": "scenario",
+                "tags": [
+                    {
+                        "name": "@kubernetes",
+                        "line": 1
+                    },
+                    {
+                        "name": "@pod_security_policy",
+                        "line": 2
+                    },
+                    {
+                        "name": "@CIS-5.2",
+                        "line": 3
+                    },
+                    {
+                        "name": "@preventative",
+                        "line": 33
+                    },
+                    {
+                        "name": "@CIS-5.2.2",
+                        "line": 33
+                    }
+                ],
+                "steps": [
+                    {
+                        "keyword": "Given ",
+                        "name": "a Kubernetes cluster exists which we can deploy into",
+                        "line": 47,
+                        "match": {
+                            "location": "k8s_probes.go:200"
+                        },
+                        "result": {
+                            "status": "passed",
+                            "duration": 0
+                        }
+                    },
+                    {
+                        "keyword": "And ",
+                        "name": "some system exists to prevent a Kubernetes deployment from running using the hostPID in an existing Kubernetes cluster",
+                        "line": 47,
+                        "match": {
+                            "location": "pod_security_policy.go:176"
+                        },
+                        "result": {
+                            "status": "failed",
+                            "error_message": "[ERROR] HostPIDIsRestricted is NOT restricted (result: false)",
+                            "duration": 1160400
+                        }
+                    },
+                    {
+                        "keyword": "When ",
+                        "name": "a Kubernetes deployment is applied to an existing Kubernetes cluster",
+                        "line": 47,
+                        "match": {
+                            "location": "pod_security_policy.go:28"
+                        },
+                        "result": {
+                            "status": "skipped"
+                        }
+                    },
+                    {
+                        "keyword": "And ",
+                        "name": "hostPID request is marked \"Not Defined\" for the Kubernetes deployment",
+                        "line": 47,
+                        "match": {
+                            "location": "pod_security_policy.go:156"
+                        },
+                        "result": {
+                            "status": "skipped"
+                        }
+                    },
+                    {
+                        "keyword": "Then ",
+                        "name": "the operation will \"Succeed\" with an error \"\"",
+                        "line": 47,
+                        "match": {
+                            "location": "pod_security_policy.go:34"
+                        },
+                        "result": {
+                            "status": "skipped"
+                        }
+                    },
+                    {
+                        "keyword": "But ",
+                        "name": "I should not be able to perform a command that provides access to the host PID namespace",
+                        "line": 47,
+                        "match": {
+                            "location": "pod_security_policy.go:186"
+                        },
+                        "result": {
+                            "status": "skipped"
+                        }
+                    },
+                    {
+                        "keyword": "And ",
+                        "name": "I should be able to perform an allowed command",
+                        "line": 47,
+                        "match": {
+                            "location": "pod_security_policy.go:44"
+                        },
+                        "result": {
+                            "status": "skipped"
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "maximise-security-through-pod-security-policies;prevent-a-deployment-from-running-with-the-hostipc-flag.;;2",
+                "keyword": "Scenario Outline",
+                "name": "Prevent a deployment from running with the hostIPC flag.",
+                "description": "",
+                "line": 61,
+                "type": "scenario",
+                "tags": [
+                    {
+                        "name": "@kubernetes",
+                        "line": 1
+                    },
+                    {
+                        "name": "@pod_security_policy",
+                        "line": 2
+                    },
+                    {
+                        "name": "@CIS-5.2",
+                        "line": 3
+                    },
+                    {
+                        "name": "@preventative",
+                        "line": 49
+                    },
+                    {
+                        "name": "@CIS-5.2.3",
+                        "line": 49
+                    }
+                ],
+                "steps": [
+                    {
+                        "keyword": "Given ",
+                        "name": "a Kubernetes cluster exists which we can deploy into",
+                        "line": 61,
+                        "match": {
+                            "location": "k8s_probes.go:200"
+                        },
+                        "result": {
+                            "status": "passed",
+                            "duration": 0
+                        }
+                    },
+                    {
+                        "keyword": "And ",
+                        "name": "some system exists to prevent a Kubernetes deployment from running using the hostIPC in an existing Kubernetes cluster",
+                        "line": 61,
+                        "match": {
+                            "location": "pod_security_policy.go:218"
+                        },
+                        "result": {
+                            "status": "failed",
+                            "error_message": "[ERROR] HostIPCIsRestricted is NOT restricted (result: false)",
+                            "duration": 1024700
+                        }
+                    },
+                    {
+                        "keyword": "When ",
+                        "name": "a Kubernetes deployment is applied to an existing Kubernetes cluster",
+                        "line": 61,
+                        "match": {
+                            "location": "pod_security_policy.go:28"
+                        },
+                        "result": {
+                            "status": "skipped"
+                        }
+                    },
+                    {
+                        "keyword": "And ",
+                        "name": "hostIPC request is marked \"True\" for the Kubernetes deployment",
+                        "line": 61,
+                        "match": {
+                            "location": "pod_security_policy.go:197"
+                        },
+                        "result": {
+                            "status": "skipped"
+                        }
+                    },
+                    {
+                        "keyword": "Then ",
+                        "name": "the operation will \"Fail\" with an error \"Containers with hostIPC access can’t run\"",
+                        "line": 61,
+                        "match": {
+                            "location": "pod_security_policy.go:34"
+                        },
+                        "result": {
+                            "status": "skipped"
+                        }
+                    },
+                    {
+                        "keyword": "But ",
+                        "name": "I should not be able to perform a command that provides access to the host IPC namespace",
+                        "line": 61,
+                        "match": {
+                            "location": "pod_security_policy.go:228"
+                        },
+                        "result": {
+                            "status": "skipped"
+                        }
+                    },
+                    {
+                        "keyword": "And ",
+                        "name": "I should be able to perform an allowed command",
+                        "line": 61,
+                        "match": {
+                            "location": "pod_security_policy.go:44"
+                        },
+                        "result": {
+                            "status": "skipped"
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "maximise-security-through-pod-security-policies;prevent-a-deployment-from-running-with-the-hostipc-flag.;;3",
+                "keyword": "Scenario Outline",
+                "name": "Prevent a deployment from running with the hostIPC flag.",
+                "description": "",
+                "line": 62,
+                "type": "scenario",
+                "tags": [
+                    {
+                        "name": "@kubernetes",
+                        "line": 1
+                    },
+                    {
+                        "name": "@pod_security_policy",
+                        "line": 2
+                    },
+                    {
+                        "name": "@CIS-5.2",
+                        "line": 3
+                    },
+                    {
+                        "name": "@preventative",
+                        "line": 49
+                    },
+                    {
+                        "name": "@CIS-5.2.3",
+                        "line": 49
+                    }
+                ],
+                "steps": [
+                    {
+                        "keyword": "Given ",
+                        "name": "a Kubernetes cluster exists which we can deploy into",
+                        "line": 62,
+                        "match": {
+                            "location": "k8s_probes.go:200"
+                        },
+                        "result": {
+                            "status": "passed",
+                            "duration": 666500
+                        }
+                    },
+                    {
+                        "keyword": "And ",
+                        "name": "some system exists to prevent a Kubernetes deployment from running using the hostIPC in an existing Kubernetes cluster",
+                        "line": 62,
+                        "match": {
+                            "location": "pod_security_policy.go:218"
+                        },
+                        "result": {
+                            "status": "failed",
+                            "error_message": "[ERROR] HostIPCIsRestricted is NOT restricted (result: false)",
+                            "duration": 8517200
+                        }
+                    },
+                    {
+                        "keyword": "When ",
+                        "name": "a Kubernetes deployment is applied to an existing Kubernetes cluster",
+                        "line": 62,
+                        "match": {
+                            "location": "pod_security_policy.go:28"
+                        },
+                        "result": {
+                            "status": "skipped"
+                        }
+                    },
+                    {
+                        "keyword": "And ",
+                        "name": "hostIPC request is marked \"False\" for the Kubernetes deployment",
+                        "line": 62,
+                        "match": {
+                            "location": "pod_security_policy.go:197"
+                        },
+                        "result": {
+                            "status": "skipped"
+                        }
+                    },
+                    {
+                        "keyword": "Then ",
+                        "name": "the operation will \"Succeed\" with an error \"No error would show\"",
+                        "line": 62,
+                        "match": {
+                            "location": "pod_security_policy.go:34"
+                        },
+                        "result": {
+                            "status": "skipped"
+                        }
+                    },
+                    {
+                        "keyword": "But ",
+                        "name": "I should not be able to perform a command that provides access to the host IPC namespace",
+                        "line": 62,
+                        "match": {
+                            "location": "pod_security_policy.go:228"
+                        },
+                        "result": {
+                            "status": "skipped"
+                        }
+                    },
+                    {
+                        "keyword": "And ",
+                        "name": "I should be able to perform an allowed command",
+                        "line": 62,
+                        "match": {
+                            "location": "pod_security_policy.go:44"
+                        },
+                        "result": {
+                            "status": "skipped"
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "maximise-security-through-pod-security-policies;prevent-a-deployment-from-running-with-the-hostipc-flag.;;4",
+                "keyword": "Scenario Outline",
+                "name": "Prevent a deployment from running with the hostIPC flag.",
+                "description": "",
+                "line": 63,
+                "type": "scenario",
+                "tags": [
+                    {
+                        "name": "@kubernetes",
+                        "line": 1
+                    },
+                    {
+                        "name": "@pod_security_policy",
+                        "line": 2
+                    },
+                    {
+                        "name": "@CIS-5.2",
+                        "line": 3
+                    },
+                    {
+                        "name": "@preventative",
+                        "line": 49
+                    },
+                    {
+                        "name": "@CIS-5.2.3",
+                        "line": 49
+                    }
+                ],
+                "steps": [
+                    {
+                        "keyword": "Given ",
+                        "name": "a Kubernetes cluster exists which we can deploy into",
+                        "line": 63,
+                        "match": {
+                            "location": "k8s_probes.go:200"
+                        },
+                        "result": {
+                            "status": "passed",
+                            "duration": 0
+                        }
+                    },
+                    {
+                        "keyword": "And ",
+                        "name": "some system exists to prevent a Kubernetes deployment from running using the hostIPC in an existing Kubernetes cluster",
+                        "line": 63,
+                        "match": {
+                            "location": "pod_security_policy.go:218"
+                        },
+                        "result": {
+                            "status": "failed",
+                            "error_message": "[ERROR] HostIPCIsRestricted is NOT restricted (result: false)",
+                            "duration": 0
+                        }
+                    },
+                    {
+                        "keyword": "When ",
+                        "name": "a Kubernetes deployment is applied to an existing Kubernetes cluster",
+                        "line": 63,
+                        "match": {
+                            "location": "pod_security_policy.go:28"
+                        },
+                        "result": {
+                            "status": "skipped"
+                        }
+                    },
+                    {
+                        "keyword": "And ",
+                        "name": "hostIPC request is marked \"Not defined\" for the Kubernetes deployment",
+                        "line": 63,
+                        "match": {
+                            "location": "pod_security_policy.go:197"
+                        },
+                        "result": {
+                            "status": "skipped"
+                        }
+                    },
+                    {
+                        "keyword": "Then ",
+                        "name": "the operation will \"Succeed\" with an error \"No error would show\"",
+                        "line": 63,
+                        "match": {
+                            "location": "pod_security_policy.go:34"
+                        },
+                        "result": {
+                            "status": "skipped"
+                        }
+                    },
+                    {
+                        "keyword": "But ",
+                        "name": "I should not be able to perform a command that provides access to the host IPC namespace",
+                        "line": 63,
+                        "match": {
+                            "location": "pod_security_policy.go:228"
+                        },
+                        "result": {
+                            "status": "skipped"
+                        }
+                    },
+                    {
+                        "keyword": "And ",
+                        "name": "I should be able to perform an allowed command",
+                        "line": 63,
+                        "match": {
+                            "location": "pod_security_policy.go:44"
+                        },
+                        "result": {
+                            "status": "skipped"
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "maximise-security-through-pod-security-policies;prevent-a-deployment-from-running-with-the-hostnetwork-flag.;;2",
+                "keyword": "Scenario Outline",
+                "name": "Prevent a deployment from running with the hostNetwork flag.",
+                "description": "",
+                "line": 77,
+                "type": "scenario",
+                "tags": [
+                    {
+                        "name": "@kubernetes",
+                        "line": 1
+                    },
+                    {
+                        "name": "@pod_security_policy",
+                        "line": 2
+                    },
+                    {
+                        "name": "@CIS-5.2",
+                        "line": 3
+                    },
+                    {
+                        "name": "@preventative",
+                        "line": 65
+                    },
+                    {
+                        "name": "@CIS-5.2.4",
+                        "line": 65
+                    }
+                ],
+                "steps": [
+                    {
+                        "keyword": "Given ",
+                        "name": "a Kubernetes cluster exists which we can deploy into",
+                        "line": 77,
+                        "match": {
+                            "location": "k8s_probes.go:200"
+                        },
+                        "result": {
+                            "status": "passed",
+                            "duration": 0
+                        }
+                    },
+                    {
+                        "keyword": "And ",
+                        "name": "some system exists to prevent a Kubernetes deployment from running using the hostNetwork in an existing Kubernetes cluster",
+                        "line": 77,
+                        "match": {
+                            "location": "pod_security_policy.go:259"
+                        },
+                        "result": {
+                            "status": "failed",
+                            "error_message": "[ERROR] HostNetworkIsRestricted is NOT restricted (result: false)",
+                            "duration": 0
+                        }
+                    },
+                    {
+                        "keyword": "When ",
+                        "name": "a Kubernetes deployment is applied to an existing Kubernetes cluster",
+                        "line": 77,
+                        "match": {
+                            "location": "pod_security_policy.go:28"
+                        },
+                        "result": {
+                            "status": "skipped"
+                        }
+                    },
+                    {
+                        "keyword": "And ",
+                        "name": "hostNetwork request is marked \"True\" for the Kubernetes deployment",
+                        "line": 77,
+                        "match": {
+                            "location": "pod_security_policy.go:239"
+                        },
+                        "result": {
+                            "status": "skipped"
+                        }
+                    },
+                    {
+                        "keyword": "Then ",
+                        "name": "the operation will \"Fail\" with an error \"Containers with hostNetwork access can’t run\"",
+                        "line": 77,
+                        "match": {
+                            "location": "pod_security_policy.go:34"
+                        },
+                        "result": {
+                            "status": "skipped"
+                        }
+                    },
+                    {
+                        "keyword": "But ",
+                        "name": "I should not be able to perform a command that provides access to the host network namespace",
+                        "line": 77,
+                        "match": {
+                            "location": "pod_security_policy.go:269"
+                        },
+                        "result": {
+                            "status": "skipped"
+                        }
+                    },
+                    {
+                        "keyword": "And ",
+                        "name": "I should be able to perform an allowed command",
+                        "line": 77,
+                        "match": {
+                            "location": "pod_security_policy.go:44"
+                        },
+                        "result": {
+                            "status": "skipped"
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "maximise-security-through-pod-security-policies;prevent-a-deployment-from-running-with-the-hostnetwork-flag.;;3",
+                "keyword": "Scenario Outline",
+                "name": "Prevent a deployment from running with the hostNetwork flag.",
+                "description": "",
+                "line": 78,
+                "type": "scenario",
+                "tags": [
+                    {
+                        "name": "@kubernetes",
+                        "line": 1
+                    },
+                    {
+                        "name": "@pod_security_policy",
+                        "line": 2
+                    },
+                    {
+                        "name": "@CIS-5.2",
+                        "line": 3
+                    },
+                    {
+                        "name": "@preventative",
+                        "line": 65
+                    },
+                    {
+                        "name": "@CIS-5.2.4",
+                        "line": 65
+                    }
+                ],
+                "steps": [
+                    {
+                        "keyword": "Given ",
+                        "name": "a Kubernetes cluster exists which we can deploy into",
+                        "line": 78,
+                        "match": {
+                            "location": "k8s_probes.go:200"
+                        },
+                        "result": {
+                            "status": "passed",
+                            "duration": 0
+                        }
+                    },
+                    {
+                        "keyword": "And ",
+                        "name": "some system exists to prevent a Kubernetes deployment from running using the hostNetwork in an existing Kubernetes cluster",
+                        "line": 78,
+                        "match": {
+                            "location": "pod_security_policy.go:259"
+                        },
+                        "result": {
+                            "status": "failed",
+                            "error_message": "[ERROR] HostNetworkIsRestricted is NOT restricted (result: false)",
+                            "duration": 1605900
+                        }
+                    },
+                    {
+                        "keyword": "When ",
+                        "name": "a Kubernetes deployment is applied to an existing Kubernetes cluster",
+                        "line": 78,
+                        "match": {
+                            "location": "pod_security_policy.go:28"
+                        },
+                        "result": {
+                            "status": "skipped"
+                        }
+                    },
+                    {
+                        "keyword": "And ",
+                        "name": "hostNetwork request is marked \"False\" for the Kubernetes deployment",
+                        "line": 78,
+                        "match": {
+                            "location": "pod_security_policy.go:239"
+                        },
+                        "result": {
+                            "status": "skipped"
+                        }
+                    },
+                    {
+                        "keyword": "Then ",
+                        "name": "the operation will \"Succeed\" with an error \"No error would show\"",
+                        "line": 78,
+                        "match": {
+                            "location": "pod_security_policy.go:34"
+                        },
+                        "result": {
+                            "status": "skipped"
+                        }
+                    },
+                    {
+                        "keyword": "But ",
+                        "name": "I should not be able to perform a command that provides access to the host network namespace",
+                        "line": 78,
+                        "match": {
+                            "location": "pod_security_policy.go:269"
+                        },
+                        "result": {
+                            "status": "skipped"
+                        }
+                    },
+                    {
+                        "keyword": "And ",
+                        "name": "I should be able to perform an allowed command",
+                        "line": 78,
+                        "match": {
+                            "location": "pod_security_policy.go:44"
+                        },
+                        "result": {
+                            "status": "skipped"
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "maximise-security-through-pod-security-policies;prevent-a-deployment-from-running-with-the-hostnetwork-flag.;;4",
+                "keyword": "Scenario Outline",
+                "name": "Prevent a deployment from running with the hostNetwork flag.",
+                "description": "",
+                "line": 79,
+                "type": "scenario",
+                "tags": [
+                    {
+                        "name": "@kubernetes",
+                        "line": 1
+                    },
+                    {
+                        "name": "@pod_security_policy",
+                        "line": 2
+                    },
+                    {
+                        "name": "@CIS-5.2",
+                        "line": 3
+                    },
+                    {
+                        "name": "@preventative",
+                        "line": 65
+                    },
+                    {
+                        "name": "@CIS-5.2.4",
+                        "line": 65
+                    }
+                ],
+                "steps": [
+                    {
+                        "keyword": "Given ",
+                        "name": "a Kubernetes cluster exists which we can deploy into",
+                        "line": 79,
+                        "match": {
+                            "location": "k8s_probes.go:200"
+                        },
+                        "result": {
+                            "status": "passed",
+                            "duration": 0
+                        }
+                    },
+                    {
+                        "keyword": "And ",
+                        "name": "some system exists to prevent a Kubernetes deployment from running using the hostNetwork in an existing Kubernetes cluster",
+                        "line": 79,
+                        "match": {
+                            "location": "pod_security_policy.go:259"
+                        },
+                        "result": {
+                            "status": "failed",
+                            "error_message": "[ERROR] HostNetworkIsRestricted is NOT restricted (result: false)",
+                            "duration": 8017900
+                        }
+                    },
+                    {
+                        "keyword": "When ",
+                        "name": "a Kubernetes deployment is applied to an existing Kubernetes cluster",
+                        "line": 79,
+                        "match": {
+                            "location": "pod_security_policy.go:28"
+                        },
+                        "result": {
+                            "status": "skipped"
+                        }
+                    },
+                    {
+                        "keyword": "And ",
+                        "name": "hostNetwork request is marked \"Not defined\" for the Kubernetes deployment",
+                        "line": 79,
+                        "match": {
+                            "location": "pod_security_policy.go:239"
+                        },
+                        "result": {
+                            "status": "skipped"
+                        }
+                    },
+                    {
+                        "keyword": "Then ",
+                        "name": "the operation will \"Succeed\" with an error \"No error would show\"",
+                        "line": 79,
+                        "match": {
+                            "location": "pod_security_policy.go:34"
+                        },
+                        "result": {
+                            "status": "skipped"
+                        }
+                    },
+                    {
+                        "keyword": "But ",
+                        "name": "I should not be able to perform a command that provides access to the host network namespace",
+                        "line": 79,
+                        "match": {
+                            "location": "pod_security_policy.go:269"
+                        },
+                        "result": {
+                            "status": "skipped"
+                        }
+                    },
+                    {
+                        "keyword": "And ",
+                        "name": "I should be able to perform an allowed command",
+                        "line": 79,
+                        "match": {
+                            "location": "pod_security_policy.go:44"
+                        },
+                        "result": {
+                            "status": "skipped"
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "maximise-security-through-pod-security-policies;prevent-a-deployment-from-running-with-the-allowprivilegeescalation-flag;;2",
+                "keyword": "Scenario Outline",
+                "name": "Prevent a deployment from running with the allowPrivilegeEscalation flag",
+                "description": "",
+                "line": 93,
+                "type": "scenario",
+                "tags": [
+                    {
+                        "name": "@kubernetes",
+                        "line": 1
+                    },
+                    {
+                        "name": "@pod_security_policy",
+                        "line": 2
+                    },
+                    {
+                        "name": "@CIS-5.2",
+                        "line": 3
+                    },
+                    {
+                        "name": "@preventative",
+                        "line": 81
+                    },
+                    {
+                        "name": "@CIS-5.2.5",
+                        "line": 81
+                    }
+                ],
+                "steps": [
+                    {
+                        "keyword": "Given ",
+                        "name": "a Kubernetes cluster exists which we can deploy into",
+                        "line": 93,
+                        "match": {
+                            "location": "k8s_probes.go:200"
+                        },
+                        "result": {
+                            "status": "passed",
+                            "duration": 0
+                        }
+                    },
+                    {
+                        "keyword": "And ",
+                        "name": "some system exists to prevent a Kubernetes deployment from running using the allowPrivilegeEscalation in an existing Kubernetes cluster",
+                        "line": 93,
+                        "match": {
+                            "location": "pod_security_policy.go:300"
+                        },
+                        "result": {
+                            "status": "failed",
+                            "error_message": "[ERROR] PrivilegedEscalationIsRestricted is NOT restricted (result: false)",
+                            "duration": 1243400
+                        }
+                    },
+                    {
+                        "keyword": "When ",
+                        "name": "a Kubernetes deployment is applied to an existing Kubernetes cluster",
+                        "line": 93,
+                        "match": {
+                            "location": "pod_security_policy.go:28"
+                        },
+                        "result": {
+                            "status": "skipped"
+                        }
+                    },
+                    {
+                        "keyword": "And ",
+                        "name": "privileged escalation is marked \"True\" for the Kubernetes deployment",
+                        "line": 93,
+                        "match": {
+                            "location": "pod_security_policy.go:280"
+                        },
+                        "result": {
+                            "status": "skipped"
+                        }
+                    },
+                    {
+                        "keyword": "Then ",
+                        "name": "the operation will \"Fail\" with an error \"Containers cant run using the allowPrivilegeEscalation flag\"",
+                        "line": 93,
+                        "match": {
+                            "location": "pod_security_policy.go:34"
+                        },
+                        "result": {
+                            "status": "skipped"
+                        }
+                    },
+                    {
+                        "keyword": "But ",
+                        "name": "I should not be able to perform a command that requires privileged access",
+                        "line": 93,
+                        "match": {
+                            "location": "pod_security_policy.go:144"
+                        },
+                        "result": {
+                            "status": "skipped"
+                        }
+                    },
+                    {
+                        "keyword": "And ",
+                        "name": "I should be able to perform an allowed command",
+                        "line": 93,
+                        "match": {
+                            "location": "pod_security_policy.go:44"
+                        },
+                        "result": {
+                            "status": "skipped"
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "maximise-security-through-pod-security-policies;prevent-a-deployment-from-running-with-the-allowprivilegeescalation-flag;;3",
+                "keyword": "Scenario Outline",
+                "name": "Prevent a deployment from running with the allowPrivilegeEscalation flag",
+                "description": "",
+                "line": 94,
+                "type": "scenario",
+                "tags": [
+                    {
+                        "name": "@kubernetes",
+                        "line": 1
+                    },
+                    {
+                        "name": "@pod_security_policy",
+                        "line": 2
+                    },
+                    {
+                        "name": "@CIS-5.2",
+                        "line": 3
+                    },
+                    {
+                        "name": "@preventative",
+                        "line": 81
+                    },
+                    {
+                        "name": "@CIS-5.2.5",
+                        "line": 81
+                    }
+                ],
+                "steps": [
+                    {
+                        "keyword": "Given ",
+                        "name": "a Kubernetes cluster exists which we can deploy into",
+                        "line": 94,
+                        "match": {
+                            "location": "k8s_probes.go:200"
+                        },
+                        "result": {
+                            "status": "passed",
+                            "duration": 0
+                        }
+                    },
+                    {
+                        "keyword": "And ",
+                        "name": "some system exists to prevent a Kubernetes deployment from running using the allowPrivilegeEscalation in an existing Kubernetes cluster",
+                        "line": 94,
+                        "match": {
+                            "location": "pod_security_policy.go:300"
+                        },
+                        "result": {
+                            "status": "failed",
+                            "error_message": "[ERROR] PrivilegedEscalationIsRestricted is NOT restricted (result: false)",
+                            "duration": 1003900
+                        }
+                    },
+                    {
+                        "keyword": "When ",
+                        "name": "a Kubernetes deployment is applied to an existing Kubernetes cluster",
+                        "line": 94,
+                        "match": {
+                            "location": "pod_security_policy.go:28"
+                        },
+                        "result": {
+                            "status": "skipped"
+                        }
+                    },
+                    {
+                        "keyword": "And ",
+                        "name": "privileged escalation is marked \"False\" for the Kubernetes deployment",
+                        "line": 94,
+                        "match": {
+                            "location": "pod_security_policy.go:280"
+                        },
+                        "result": {
+                            "status": "skipped"
+                        }
+                    },
+                    {
+                        "keyword": "Then ",
+                        "name": "the operation will \"Succeed\" with an error \"No error would show\"",
+                        "line": 94,
+                        "match": {
+                            "location": "pod_security_policy.go:34"
+                        },
+                        "result": {
+                            "status": "skipped"
+                        }
+                    },
+                    {
+                        "keyword": "But ",
+                        "name": "I should not be able to perform a command that requires privileged access",
+                        "line": 94,
+                        "match": {
+                            "location": "pod_security_policy.go:144"
+                        },
+                        "result": {
+                            "status": "skipped"
+                        }
+                    },
+                    {
+                        "keyword": "And ",
+                        "name": "I should be able to perform an allowed command",
+                        "line": 94,
+                        "match": {
+                            "location": "pod_security_policy.go:44"
+                        },
+                        "result": {
+                            "status": "skipped"
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "maximise-security-through-pod-security-policies;prevent-a-deployment-from-running-with-the-allowprivilegeescalation-flag;;4",
+                "keyword": "Scenario Outline",
+                "name": "Prevent a deployment from running with the allowPrivilegeEscalation flag",
+                "description": "",
+                "line": 95,
+                "type": "scenario",
+                "tags": [
+                    {
+                        "name": "@kubernetes",
+                        "line": 1
+                    },
+                    {
+                        "name": "@pod_security_policy",
+                        "line": 2
+                    },
+                    {
+                        "name": "@CIS-5.2",
+                        "line": 3
+                    },
+                    {
+                        "name": "@preventative",
+                        "line": 81
+                    },
+                    {
+                        "name": "@CIS-5.2.5",
+                        "line": 81
+                    }
+                ],
+                "steps": [
+                    {
+                        "keyword": "Given ",
+                        "name": "a Kubernetes cluster exists which we can deploy into",
+                        "line": 95,
+                        "match": {
+                            "location": "k8s_probes.go:200"
+                        },
+                        "result": {
+                            "status": "passed",
+                            "duration": 0
+                        }
+                    },
+                    {
+                        "keyword": "And ",
+                        "name": "some system exists to prevent a Kubernetes deployment from running using the allowPrivilegeEscalation in an existing Kubernetes cluster",
+                        "line": 95,
+                        "match": {
+                            "location": "pod_security_policy.go:300"
+                        },
+                        "result": {
+                            "status": "failed",
+                            "error_message": "[ERROR] PrivilegedEscalationIsRestricted is NOT restricted (result: false)",
+                            "duration": 0
+                        }
+                    },
+                    {
+                        "keyword": "When ",
+                        "name": "a Kubernetes deployment is applied to an existing Kubernetes cluster",
+                        "line": 95,
+                        "match": {
+                            "location": "pod_security_policy.go:28"
+                        },
+                        "result": {
+                            "status": "skipped"
+                        }
+                    },
+                    {
+                        "keyword": "And ",
+                        "name": "privileged escalation is marked \"Not Defined\" for the Kubernetes deployment",
+                        "line": 95,
+                        "match": {
+                            "location": "pod_security_policy.go:280"
+                        },
+                        "result": {
+                            "status": "skipped"
+                        }
+                    },
+                    {
+                        "keyword": "Then ",
+                        "name": "the operation will \"Succeed\" with an error \"No error would show\"",
+                        "line": 95,
+                        "match": {
+                            "location": "pod_security_policy.go:34"
+                        },
+                        "result": {
+                            "status": "skipped"
+                        }
+                    },
+                    {
+                        "keyword": "But ",
+                        "name": "I should not be able to perform a command that requires privileged access",
+                        "line": 95,
+                        "match": {
+                            "location": "pod_security_policy.go:144"
+                        },
+                        "result": {
+                            "status": "skipped"
+                        }
+                    },
+                    {
+                        "keyword": "And ",
+                        "name": "I should be able to perform an allowed command",
+                        "line": 95,
+                        "match": {
+                            "location": "pod_security_policy.go:44"
+                        },
+                        "result": {
+                            "status": "skipped"
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "maximise-security-through-pod-security-policies;prevent-a-deployment-from-running-as-the-root-user;;2",
+                "keyword": "Scenario Outline",
+                "name": "Prevent a deployment from running as the root user",
+                "description": "",
+                "line": 109,
+                "type": "scenario",
+                "tags": [
+                    {
+                        "name": "@kubernetes",
+                        "line": 1
+                    },
+                    {
+                        "name": "@pod_security_policy",
+                        "line": 2
+                    },
+                    {
+                        "name": "@CIS-5.2",
+                        "line": 3
+                    },
+                    {
+                        "name": "@preventative",
+                        "line": 97
+                    },
+                    {
+                        "name": "@CIS-5.2.6",
+                        "line": 97
+                    }
+                ],
+                "steps": [
+                    {
+                        "keyword": "Given ",
+                        "name": "a Kubernetes cluster exists which we can deploy into",
+                        "line": 109,
+                        "match": {
+                            "location": "k8s_probes.go:200"
+                        },
+                        "result": {
+                            "status": "passed",
+                            "duration": 0
+                        }
+                    },
+                    {
+                        "keyword": "And ",
+                        "name": "some system exists to prevent a Kubernetes deployment from running as the root user in an existing Kubernetes cluster",
+                        "line": 109,
+                        "match": {
+                            "location": "pod_security_policy.go:332"
+                        },
+                        "result": {
+                            "status": "failed",
+                            "error_message": "[ERROR] RootUserIsRestricted is NOT restricted (result: false)",
+                            "duration": 893200
+                        }
+                    },
+                    {
+                        "keyword": "When ",
+                        "name": "a Kubernetes deployment is applied to an existing Kubernetes cluster",
+                        "line": 109,
+                        "match": {
+                            "location": "pod_security_policy.go:28"
+                        },
+                        "result": {
+                            "status": "skipped"
+                        }
+                    },
+                    {
+                        "keyword": "And ",
+                        "name": "the user requested is \"Root\" for the Kubernetes deployment",
+                        "line": 109,
+                        "match": {
+                            "location": "pod_security_policy.go:313"
+                        },
+                        "result": {
+                            "status": "skipped"
+                        }
+                    },
+                    {
+                        "keyword": "Then ",
+                        "name": "the operation will \"Fail\" with an error \"Containers cant run as root\"",
+                        "line": 109,
+                        "match": {
+                            "location": "pod_security_policy.go:34"
+                        },
+                        "result": {
+                            "status": "skipped"
+                        }
+                    },
+                    {
+                        "keyword": "And ",
+                        "name": "the Kubernetes deployment should run with a non-root UID",
+                        "line": 109,
+                        "match": {
+                            "location": "pod_security_policy.go:342"
+                        },
+                        "result": {
+                            "status": "skipped"
+                        }
+                    },
+                    {
+                        "keyword": "And ",
+                        "name": "I should be able to perform an allowed command",
+                        "line": 109,
+                        "match": {
+                            "location": "pod_security_policy.go:44"
+                        },
+                        "result": {
+                            "status": "skipped"
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "maximise-security-through-pod-security-policies;prevent-a-deployment-from-running-as-the-root-user;;3",
+                "keyword": "Scenario Outline",
+                "name": "Prevent a deployment from running as the root user",
+                "description": "",
+                "line": 110,
+                "type": "scenario",
+                "tags": [
+                    {
+                        "name": "@kubernetes",
+                        "line": 1
+                    },
+                    {
+                        "name": "@pod_security_policy",
+                        "line": 2
+                    },
+                    {
+                        "name": "@CIS-5.2",
+                        "line": 3
+                    },
+                    {
+                        "name": "@preventative",
+                        "line": 97
+                    },
+                    {
+                        "name": "@CIS-5.2.6",
+                        "line": 97
+                    }
+                ],
+                "steps": [
+                    {
+                        "keyword": "Given ",
+                        "name": "a Kubernetes cluster exists which we can deploy into",
+                        "line": 110,
+                        "match": {
+                            "location": "k8s_probes.go:200"
+                        },
+                        "result": {
+                            "status": "passed",
+                            "duration": 0
+                        }
+                    },
+                    {
+                        "keyword": "And ",
+                        "name": "some system exists to prevent a Kubernetes deployment from running as the root user in an existing Kubernetes cluster",
+                        "line": 110,
+                        "match": {
+                            "location": "pod_security_policy.go:332"
+                        },
+                        "result": {
+                            "status": "failed",
+                            "error_message": "[ERROR] RootUserIsRestricted is NOT restricted (result: false)",
+                            "duration": 7667300
+                        }
+                    },
+                    {
+                        "keyword": "When ",
+                        "name": "a Kubernetes deployment is applied to an existing Kubernetes cluster",
+                        "line": 110,
+                        "match": {
+                            "location": "pod_security_policy.go:28"
+                        },
+                        "result": {
+                            "status": "skipped"
+                        }
+                    },
+                    {
+                        "keyword": "And ",
+                        "name": "the user requested is \"Non-Root\" for the Kubernetes deployment",
+                        "line": 110,
+                        "match": {
+                            "location": "pod_security_policy.go:313"
+                        },
+                        "result": {
+                            "status": "skipped"
+                        }
+                    },
+                    {
+                        "keyword": "Then ",
+                        "name": "the operation will \"Succeed\" with an error \"\"",
+                        "line": 110,
+                        "match": {
+                            "location": "pod_security_policy.go:34"
+                        },
+                        "result": {
+                            "status": "skipped"
+                        }
+                    },
+                    {
+                        "keyword": "And ",
+                        "name": "the Kubernetes deployment should run with a non-root UID",
+                        "line": 110,
+                        "match": {
+                            "location": "pod_security_policy.go:342"
+                        },
+                        "result": {
+                            "status": "skipped"
+                        }
+                    },
+                    {
+                        "keyword": "And ",
+                        "name": "I should be able to perform an allowed command",
+                        "line": 110,
+                        "match": {
+                            "location": "pod_security_policy.go:44"
+                        },
+                        "result": {
+                            "status": "skipped"
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "maximise-security-through-pod-security-policies;prevent-a-deployment-from-running-as-the-root-user;;4",
+                "keyword": "Scenario Outline",
+                "name": "Prevent a deployment from running as the root user",
+                "description": "",
+                "line": 111,
+                "type": "scenario",
+                "tags": [
+                    {
+                        "name": "@kubernetes",
+                        "line": 1
+                    },
+                    {
+                        "name": "@pod_security_policy",
+                        "line": 2
+                    },
+                    {
+                        "name": "@CIS-5.2",
+                        "line": 3
+                    },
+                    {
+                        "name": "@preventative",
+                        "line": 97
+                    },
+                    {
+                        "name": "@CIS-5.2.6",
+                        "line": 97
+                    }
+                ],
+                "steps": [
+                    {
+                        "keyword": "Given ",
+                        "name": "a Kubernetes cluster exists which we can deploy into",
+                        "line": 111,
+                        "match": {
+                            "location": "k8s_probes.go:200"
+                        },
+                        "result": {
+                            "status": "passed",
+                            "duration": 0
+                        }
+                    },
+                    {
+                        "keyword": "And ",
+                        "name": "some system exists to prevent a Kubernetes deployment from running as the root user in an existing Kubernetes cluster",
+                        "line": 111,
+                        "match": {
+                            "location": "pod_security_policy.go:332"
+                        },
+                        "result": {
+                            "status": "failed",
+                            "error_message": "[ERROR] RootUserIsRestricted is NOT restricted (result: false)",
+                            "duration": 1010800
+                        }
+                    },
+                    {
+                        "keyword": "When ",
+                        "name": "a Kubernetes deployment is applied to an existing Kubernetes cluster",
+                        "line": 111,
+                        "match": {
+                            "location": "pod_security_policy.go:28"
+                        },
+                        "result": {
+                            "status": "skipped"
+                        }
+                    },
+                    {
+                        "keyword": "And ",
+                        "name": "the user requested is \"Not Defined\" for the Kubernetes deployment",
+                        "line": 111,
+                        "match": {
+                            "location": "pod_security_policy.go:313"
+                        },
+                        "result": {
+                            "status": "skipped"
+                        }
+                    },
+                    {
+                        "keyword": "Then ",
+                        "name": "the operation will \"Succeed\" with an error \"\"",
+                        "line": 111,
+                        "match": {
+                            "location": "pod_security_policy.go:34"
+                        },
+                        "result": {
+                            "status": "skipped"
+                        }
+                    },
+                    {
+                        "keyword": "And ",
+                        "name": "the Kubernetes deployment should run with a non-root UID",
+                        "line": 111,
+                        "match": {
+                            "location": "pod_security_policy.go:342"
+                        },
+                        "result": {
+                            "status": "skipped"
+                        }
+                    },
+                    {
+                        "keyword": "And ",
+                        "name": "I should be able to perform an allowed command",
+                        "line": 111,
+                        "match": {
+                            "location": "pod_security_policy.go:44"
+                        },
+                        "result": {
+                            "status": "skipped"
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "maximise-security-through-pod-security-policies;prevent-deployments-from-running-with-the-net_raw-capability.;;2",
+                "keyword": "Scenario Outline",
+                "name": "Prevent deployments from running with the NET_RAW capability.",
+                "description": "",
+                "line": 125,
+                "type": "scenario",
+                "tags": [
+                    {
+                        "name": "@kubernetes",
+                        "line": 1
+                    },
+                    {
+                        "name": "@pod_security_policy",
+                        "line": 2
+                    },
+                    {
+                        "name": "@CIS-5.2",
+                        "line": 3
+                    },
+                    {
+                        "name": "@preventitive",
+                        "line": 113
+                    },
+                    {
+                        "name": "@CIS-5.2.7",
+                        "line": 113
+                    }
+                ],
+                "steps": [
+                    {
+                        "keyword": "Given ",
+                        "name": "a Kubernetes cluster exists which we can deploy into",
+                        "line": 125,
+                        "match": {
+                            "location": "k8s_probes.go:200"
+                        },
+                        "result": {
+                            "status": "passed",
+                            "duration": 0
+                        }
+                    },
+                    {
+                        "keyword": "And ",
+                        "name": "some system exists to prevent a Kubernetes deployment from running with NET_RAW capability in an existing Kubernetes cluster",
+                        "line": 125,
+                        "match": {
+                            "location": "pod_security_policy.go:371"
+                        },
+                        "result": {
+                            "status": "failed",
+                            "error_message": "[ERROR] NETRAWIsRestricted is NOT restricted (result: false)",
+                            "duration": 0
+                        }
+                    },
+                    {
+                        "keyword": "When ",
+                        "name": "a Kubernetes deployment is applied to an existing Kubernetes cluster",
+                        "line": 125,
+                        "match": {
+                            "location": "pod_security_policy.go:28"
+                        },
+                        "result": {
+                            "status": "skipped"
+                        }
+                    },
+                    {
+                        "keyword": "And ",
+                        "name": "NET_RAW is marked \"True\" for the Kubernetes deployment",
+                        "line": 125,
+                        "match": {
+                            "location": "pod_security_policy.go:353"
+                        },
+                        "result": {
+                            "status": "skipped"
+                        }
+                    },
+                    {
+                        "keyword": "Then ",
+                        "name": "the operation will \"Fail\" with an error \"Containers cant run with NET_RAW capabilities\"",
+                        "line": 125,
+                        "match": {
+                            "location": "pod_security_policy.go:34"
+                        },
+                        "result": {
+                            "status": "skipped"
+                        }
+                    },
+                    {
+                        "keyword": "But ",
+                        "name": "I should not be able to perform a command that requires NET_RAW capability",
+                        "line": 125,
+                        "match": {
+                            "location": "pod_security_policy.go:381"
+                        },
+                        "result": {
+                            "status": "skipped"
+                        }
+                    },
+                    {
+                        "keyword": "And ",
+                        "name": "I should be able to perform an allowed command",
+                        "line": 125,
+                        "match": {
+                            "location": "pod_security_policy.go:44"
+                        },
+                        "result": {
+                            "status": "skipped"
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "maximise-security-through-pod-security-policies;prevent-deployments-from-running-with-the-net_raw-capability.;;3",
+                "keyword": "Scenario Outline",
+                "name": "Prevent deployments from running with the NET_RAW capability.",
+                "description": "",
+                "line": 126,
+                "type": "scenario",
+                "tags": [
+                    {
+                        "name": "@kubernetes",
+                        "line": 1
+                    },
+                    {
+                        "name": "@pod_security_policy",
+                        "line": 2
+                    },
+                    {
+                        "name": "@CIS-5.2",
+                        "line": 3
+                    },
+                    {
+                        "name": "@preventitive",
+                        "line": 113
+                    },
+                    {
+                        "name": "@CIS-5.2.7",
+                        "line": 113
+                    }
+                ],
+                "steps": [
+                    {
+                        "keyword": "Given ",
+                        "name": "a Kubernetes cluster exists which we can deploy into",
+                        "line": 126,
+                        "match": {
+                            "location": "k8s_probes.go:200"
+                        },
+                        "result": {
+                            "status": "passed",
+                            "duration": 503700
+                        }
+                    },
+                    {
+                        "keyword": "And ",
+                        "name": "some system exists to prevent a Kubernetes deployment from running with NET_RAW capability in an existing Kubernetes cluster",
+                        "line": 126,
+                        "match": {
+                            "location": "pod_security_policy.go:371"
+                        },
+                        "result": {
+                            "status": "failed",
+                            "error_message": "[ERROR] NETRAWIsRestricted is NOT restricted (result: false)",
+                            "duration": 10627400
+                        }
+                    },
+                    {
+                        "keyword": "When ",
+                        "name": "a Kubernetes deployment is applied to an existing Kubernetes cluster",
+                        "line": 126,
+                        "match": {
+                            "location": "pod_security_policy.go:28"
+                        },
+                        "result": {
+                            "status": "skipped"
+                        }
+                    },
+                    {
+                        "keyword": "And ",
+                        "name": "NET_RAW is marked \"False\" for the Kubernetes deployment",
+                        "line": 126,
+                        "match": {
+                            "location": "pod_security_policy.go:353"
+                        },
+                        "result": {
+                            "status": "skipped"
+                        }
+                    },
+                    {
+                        "keyword": "Then ",
+                        "name": "the operation will \"Succeed\" with an error \"\"",
+                        "line": 126,
+                        "match": {
+                            "location": "pod_security_policy.go:34"
+                        },
+                        "result": {
+                            "status": "skipped"
+                        }
+                    },
+                    {
+                        "keyword": "But ",
+                        "name": "I should not be able to perform a command that requires NET_RAW capability",
+                        "line": 126,
+                        "match": {
+                            "location": "pod_security_policy.go:381"
+                        },
+                        "result": {
+                            "status": "skipped"
+                        }
+                    },
+                    {
+                        "keyword": "And ",
+                        "name": "I should be able to perform an allowed command",
+                        "line": 126,
+                        "match": {
+                            "location": "pod_security_policy.go:44"
+                        },
+                        "result": {
+                            "status": "skipped"
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "maximise-security-through-pod-security-policies;prevent-deployments-from-running-with-the-net_raw-capability.;;4",
+                "keyword": "Scenario Outline",
+                "name": "Prevent deployments from running with the NET_RAW capability.",
+                "description": "",
+                "line": 127,
+                "type": "scenario",
+                "tags": [
+                    {
+                        "name": "@kubernetes",
+                        "line": 1
+                    },
+                    {
+                        "name": "@pod_security_policy",
+                        "line": 2
+                    },
+                    {
+                        "name": "@CIS-5.2",
+                        "line": 3
+                    },
+                    {
+                        "name": "@preventitive",
+                        "line": 113
+                    },
+                    {
+                        "name": "@CIS-5.2.7",
+                        "line": 113
+                    }
+                ],
+                "steps": [
+                    {
+                        "keyword": "Given ",
+                        "name": "a Kubernetes cluster exists which we can deploy into",
+                        "line": 127,
+                        "match": {
+                            "location": "k8s_probes.go:200"
+                        },
+                        "result": {
+                            "status": "passed",
+                            "duration": 0
+                        }
+                    },
+                    {
+                        "keyword": "And ",
+                        "name": "some system exists to prevent a Kubernetes deployment from running with NET_RAW capability in an existing Kubernetes cluster",
+                        "line": 127,
+                        "match": {
+                            "location": "pod_security_policy.go:371"
+                        },
+                        "result": {
+                            "status": "failed",
+                            "error_message": "[ERROR] NETRAWIsRestricted is NOT restricted (result: false)",
+                            "duration": 1043100
+                        }
+                    },
+                    {
+                        "keyword": "When ",
+                        "name": "a Kubernetes deployment is applied to an existing Kubernetes cluster",
+                        "line": 127,
+                        "match": {
+                            "location": "pod_security_policy.go:28"
+                        },
+                        "result": {
+                            "status": "skipped"
+                        }
+                    },
+                    {
+                        "keyword": "And ",
+                        "name": "NET_RAW is marked \"Not Defined\" for the Kubernetes deployment",
+                        "line": 127,
+                        "match": {
+                            "location": "pod_security_policy.go:353"
+                        },
+                        "result": {
+                            "status": "skipped"
+                        }
+                    },
+                    {
+                        "keyword": "Then ",
+                        "name": "the operation will \"Succeed\" with an error \"\"",
+                        "line": 127,
+                        "match": {
+                            "location": "pod_security_policy.go:34"
+                        },
+                        "result": {
+                            "status": "skipped"
+                        }
+                    },
+                    {
+                        "keyword": "But ",
+                        "name": "I should not be able to perform a command that requires NET_RAW capability",
+                        "line": 127,
+                        "match": {
+                            "location": "pod_security_policy.go:381"
+                        },
+                        "result": {
+                            "status": "skipped"
+                        }
+                    },
+                    {
+                        "keyword": "And ",
+                        "name": "I should be able to perform an allowed command",
+                        "line": 127,
+                        "match": {
+                            "location": "pod_security_policy.go:44"
+                        },
+                        "result": {
+                            "status": "skipped"
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "maximise-security-through-pod-security-policies;prevent-container-running-with-capabilities-beyond-the-default-set.;;2",
+                "keyword": "Scenario Outline",
+                "name": "Prevent container running with capabilities beyond the default set.",
+                "description": "",
+                "line": 141,
+                "type": "scenario",
+                "tags": [
+                    {
+                        "name": "@kubernetes",
+                        "line": 1
+                    },
+                    {
+                        "name": "@pod_security_policy",
+                        "line": 2
+                    },
+                    {
+                        "name": "@CIS-5.2",
+                        "line": 3
+                    },
+                    {
+                        "name": "@preventitive",
+                        "line": 129
+                    },
+                    {
+                        "name": "@CIS-5.2.8",
+                        "line": 129
+                    }
+                ],
+                "steps": [
+                    {
+                        "keyword": "Given ",
+                        "name": "a Kubernetes cluster exists which we can deploy into",
+                        "line": 141,
+                        "match": {
+                            "location": "k8s_probes.go:200"
+                        },
+                        "result": {
+                            "status": "passed",
+                            "duration": 0
+                        }
+                    },
+                    {
+                        "keyword": "And ",
+                        "name": "some system exists to prevent Kubernetes deployments with capabilities beyond the default set from being deployed to an existing kubernetes cluster",
+                        "line": 141,
+                        "match": {
+                            "location": "pod_security_policy.go:411"
+                        },
+                        "result": {
+                            "status": "passed",
+                            "duration": 0
+                        }
+                    },
+                    {
+                        "keyword": "When ",
+                        "name": "a Kubernetes deployment is applied to an existing Kubernetes cluster",
+                        "line": 141,
+                        "match": {
+                            "location": "pod_security_policy.go:28"
+                        },
+                        "result": {
+                            "status": "passed",
+                            "duration": 0
+                        }
+                    },
+                    {
+                        "keyword": "And ",
+                        "name": "additional capabilities \"ARE\" requested for the Kubernetes deployment",
+                        "line": 141,
+                        "match": {
+                            "location": "pod_security_policy.go:392"
+                        },
+                        "result": {
+                            "status": "failed",
+                            "error_message": "runtime error: invalid memory address or nil pointer dereference",
+                            "duration": 60130105900
+                        }
+                    },
+                    {
+                        "keyword": "Then ",
+                        "name": "the operation will \"Fail\" with an error \"Containers can't run with added capabilities\"",
+                        "line": 141,
+                        "match": {
+                            "location": "pod_security_policy.go:34"
+                        },
+                        "result": {
+                            "status": "skipped"
+                        }
+                    },
+                    {
+                        "keyword": "But ",
+                        "name": "I should not be able to perform a command that requires capabilities outside of the default set",
+                        "line": 141,
+                        "match": {
+                            "location": "pod_security_policy.go:421"
+                        },
+                        "result": {
+                            "status": "skipped"
+                        }
+                    },
+                    {
+                        "keyword": "And ",
+                        "name": "I should be able to perform an allowed command",
+                        "line": 141,
+                        "match": {
+                            "location": "pod_security_policy.go:44"
+                        },
+                        "result": {
+                            "status": "skipped"
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "maximise-security-through-pod-security-policies;prevent-container-running-with-capabilities-beyond-the-default-set.;;3",
+                "keyword": "Scenario Outline",
+                "name": "Prevent container running with capabilities beyond the default set.",
+                "description": "",
+                "line": 142,
+                "type": "scenario",
+                "tags": [
+                    {
+                        "name": "@kubernetes",
+                        "line": 1
+                    },
+                    {
+                        "name": "@pod_security_policy",
+                        "line": 2
+                    },
+                    {
+                        "name": "@CIS-5.2",
+                        "line": 3
+                    },
+                    {
+                        "name": "@preventitive",
+                        "line": 129
+                    },
+                    {
+                        "name": "@CIS-5.2.8",
+                        "line": 129
+                    }
+                ],
+                "steps": [
+                    {
+                        "keyword": "Given ",
+                        "name": "a Kubernetes cluster exists which we can deploy into",
+                        "line": 142,
+                        "match": {
+                            "location": "k8s_probes.go:200"
+                        },
+                        "result": {
+                            "status": "passed",
+                            "duration": 0
+                        }
+                    },
+                    {
+                        "keyword": "And ",
+                        "name": "some system exists to prevent Kubernetes deployments with capabilities beyond the default set from being deployed to an existing kubernetes cluster",
+                        "line": 142,
+                        "match": {
+                            "location": "pod_security_policy.go:411"
+                        },
+                        "result": {
+                            "status": "passed",
+                            "duration": 0
+                        }
+                    },
+                    {
+                        "keyword": "When ",
+                        "name": "a Kubernetes deployment is applied to an existing Kubernetes cluster",
+                        "line": 142,
+                        "match": {
+                            "location": "pod_security_policy.go:28"
+                        },
+                        "result": {
+                            "status": "passed",
+                            "duration": 0
+                        }
+                    },
+                    {
+                        "keyword": "And ",
+                        "name": "additional capabilities \"ARE NOT\" requested for the Kubernetes deployment",
+                        "line": 142,
+                        "match": {
+                            "location": "pod_security_policy.go:392"
+                        },
+                        "result": {
+                            "status": "failed",
+                            "error_message": "runtime error: invalid memory address or nil pointer dereference",
+                            "duration": 60116247400
+                        }
+                    },
+                    {
+                        "keyword": "Then ",
+                        "name": "the operation will \"Succeed\" with an error \"\"",
+                        "line": 142,
+                        "match": {
+                            "location": "pod_security_policy.go:34"
+                        },
+                        "result": {
+                            "status": "skipped"
+                        }
+                    },
+                    {
+                        "keyword": "But ",
+                        "name": "I should not be able to perform a command that requires capabilities outside of the default set",
+                        "line": 142,
+                        "match": {
+                            "location": "pod_security_policy.go:421"
+                        },
+                        "result": {
+                            "status": "skipped"
+                        }
+                    },
+                    {
+                        "keyword": "And ",
+                        "name": "I should be able to perform an allowed command",
+                        "line": 142,
+                        "match": {
+                            "location": "pod_security_policy.go:44"
+                        },
+                        "result": {
+                            "status": "skipped"
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "maximise-security-through-pod-security-policies;prevent-container-running-with-capabilities-beyond-the-default-set.;;4",
+                "keyword": "Scenario Outline",
+                "name": "Prevent container running with capabilities beyond the default set.",
+                "description": "",
+                "line": 143,
+                "type": "scenario",
+                "tags": [
+                    {
+                        "name": "@kubernetes",
+                        "line": 1
+                    },
+                    {
+                        "name": "@pod_security_policy",
+                        "line": 2
+                    },
+                    {
+                        "name": "@CIS-5.2",
+                        "line": 3
+                    },
+                    {
+                        "name": "@preventitive",
+                        "line": 129
+                    },
+                    {
+                        "name": "@CIS-5.2.8",
+                        "line": 129
+                    }
+                ],
+                "steps": [
+                    {
+                        "keyword": "Given ",
+                        "name": "a Kubernetes cluster exists which we can deploy into",
+                        "line": 143,
+                        "match": {
+                            "location": "k8s_probes.go:200"
+                        },
+                        "result": {
+                            "status": "passed",
+                            "duration": 0
+                        }
+                    },
+                    {
+                        "keyword": "And ",
+                        "name": "some system exists to prevent Kubernetes deployments with capabilities beyond the default set from being deployed to an existing kubernetes cluster",
+                        "line": 143,
+                        "match": {
+                            "location": "pod_security_policy.go:411"
+                        },
+                        "result": {
+                            "status": "passed",
+                            "duration": 0
+                        }
+                    },
+                    {
+                        "keyword": "When ",
+                        "name": "a Kubernetes deployment is applied to an existing Kubernetes cluster",
+                        "line": 143,
+                        "match": {
+                            "location": "pod_security_policy.go:28"
+                        },
+                        "result": {
+                            "status": "passed",
+                            "duration": 0
+                        }
+                    },
+                    {
+                        "keyword": "And ",
+                        "name": "additional capabilities \"Not Defined\" requested for the Kubernetes deployment",
+                        "line": 143,
+                        "match": {
+                            "location": "pod_security_policy.go:392"
+                        },
+                        "result": {
+                            "status": "failed",
+                            "error_message": "runtime error: invalid memory address or nil pointer dereference",
+                            "duration": 60128644800
+                        }
+                    },
+                    {
+                        "keyword": "Then ",
+                        "name": "the operation will \"Succeed\" with an error \"\"",
+                        "line": 143,
+                        "match": {
+                            "location": "pod_security_policy.go:34"
+                        },
+                        "result": {
+                            "status": "skipped"
+                        }
+                    },
+                    {
+                        "keyword": "But ",
+                        "name": "I should not be able to perform a command that requires capabilities outside of the default set",
+                        "line": 143,
+                        "match": {
+                            "location": "pod_security_policy.go:421"
+                        },
+                        "result": {
+                            "status": "skipped"
+                        }
+                    },
+                    {
+                        "keyword": "And ",
+                        "name": "I should be able to perform an allowed command",
+                        "line": 143,
+                        "match": {
+                            "location": "pod_security_policy.go:44"
+                        },
+                        "result": {
+                            "status": "skipped"
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "maximise-security-through-pod-security-policies;prevent-deployments-from-running-with-assigned-capabilities.;;2",
+                "keyword": "Scenario Outline",
+                "name": "Prevent deployments from running with assigned capabilities.",
+                "description": "",
+                "line": 157,
+                "type": "scenario",
+                "tags": [
+                    {
+                        "name": "@kubernetes",
+                        "line": 1
+                    },
+                    {
+                        "name": "@pod_security_policy",
+                        "line": 2
+                    },
+                    {
+                        "name": "@CIS-5.2",
+                        "line": 3
+                    },
+                    {
+                        "name": "@preventitive",
+                        "line": 145
+                    },
+                    {
+                        "name": "@CIS-5.2.9",
+                        "line": 145
+                    }
+                ],
+                "steps": [
+                    {
+                        "keyword": "Given ",
+                        "name": "a Kubernetes cluster exists which we can deploy into",
+                        "line": 157,
+                        "match": {
+                            "location": "k8s_probes.go:200"
+                        },
+                        "result": {
+                            "status": "passed",
+                            "duration": 0
+                        }
+                    },
+                    {
+                        "keyword": "And ",
+                        "name": "some system exists to prevent Kubernetes deployments with assigned capabilities from being deployed to an existing Kubernetes cluster",
+                        "line": 157,
+                        "match": {
+                            "location": "pod_security_policy.go:452"
+                        },
+                        "result": {
+                            "status": "failed",
+                            "error_message": "[ERROR] AssignedCapabilitiesAreRestricted is NOT restricted (result: false)",
+                            "duration": 1000700
+                        }
+                    },
+                    {
+                        "keyword": "When ",
+                        "name": "a Kubernetes deployment is applied to an existing Kubernetes cluster",
+                        "line": 157,
+                        "match": {
+                            "location": "pod_security_policy.go:28"
+                        },
+                        "result": {
+                            "status": "skipped"
+                        }
+                    },
+                    {
+                        "keyword": "And ",
+                        "name": "assigned capabilities \"ARE\" requested for the Kubernetes deployment",
+                        "line": 157,
+                        "match": {
+                            "location": "pod_security_policy.go:432"
+                        },
+                        "result": {
+                            "status": "skipped"
+                        }
+                    },
+                    {
+                        "keyword": "Then ",
+                        "name": "the operation will \"Fail\" with an error \"Containers with assigned capabilities can’t be deployed\"",
+                        "line": 157,
+                        "match": {
+                            "location": "pod_security_policy.go:34"
+                        },
+                        "result": {
+                            "status": "skipped"
+                        }
+                    },
+                    {
+                        "keyword": "But ",
+                        "name": "I should not be able to perform a command that requires any capabilities",
+                        "line": 157,
+                        "match": {
+                            "location": "pod_security_policy.go:462"
+                        },
+                        "result": {
+                            "status": "skipped"
+                        }
+                    },
+                    {
+                        "keyword": "And ",
+                        "name": "I should be able to perform an allowed command",
+                        "line": 157,
+                        "match": {
+                            "location": "pod_security_policy.go:44"
+                        },
+                        "result": {
+                            "status": "skipped"
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "maximise-security-through-pod-security-policies;prevent-deployments-from-running-with-assigned-capabilities.;;3",
+                "keyword": "Scenario Outline",
+                "name": "Prevent deployments from running with assigned capabilities.",
+                "description": "",
+                "line": 158,
+                "type": "scenario",
+                "tags": [
+                    {
+                        "name": "@kubernetes",
+                        "line": 1
+                    },
+                    {
+                        "name": "@pod_security_policy",
+                        "line": 2
+                    },
+                    {
+                        "name": "@CIS-5.2",
+                        "line": 3
+                    },
+                    {
+                        "name": "@preventitive",
+                        "line": 145
+                    },
+                    {
+                        "name": "@CIS-5.2.9",
+                        "line": 145
+                    }
+                ],
+                "steps": [
+                    {
+                        "keyword": "Given ",
+                        "name": "a Kubernetes cluster exists which we can deploy into",
+                        "line": 158,
+                        "match": {
+                            "location": "k8s_probes.go:200"
+                        },
+                        "result": {
+                            "status": "passed",
+                            "duration": 0
+                        }
+                    },
+                    {
+                        "keyword": "And ",
+                        "name": "some system exists to prevent Kubernetes deployments with assigned capabilities from being deployed to an existing Kubernetes cluster",
+                        "line": 158,
+                        "match": {
+                            "location": "pod_security_policy.go:452"
+                        },
+                        "result": {
+                            "status": "failed",
+                            "error_message": "[ERROR] AssignedCapabilitiesAreRestricted is NOT restricted (result: false)",
+                            "duration": 0
+                        }
+                    },
+                    {
+                        "keyword": "When ",
+                        "name": "a Kubernetes deployment is applied to an existing Kubernetes cluster",
+                        "line": 158,
+                        "match": {
+                            "location": "pod_security_policy.go:28"
+                        },
+                        "result": {
+                            "status": "skipped"
+                        }
+                    },
+                    {
+                        "keyword": "And ",
+                        "name": "assigned capabilities \"ARE NOT\" requested for the Kubernetes deployment",
+                        "line": 158,
+                        "match": {
+                            "location": "pod_security_policy.go:432"
+                        },
+                        "result": {
+                            "status": "skipped"
+                        }
+                    },
+                    {
+                        "keyword": "Then ",
+                        "name": "the operation will \"Succeed\" with an error \"\"",
+                        "line": 158,
+                        "match": {
+                            "location": "pod_security_policy.go:34"
+                        },
+                        "result": {
+                            "status": "skipped"
+                        }
+                    },
+                    {
+                        "keyword": "But ",
+                        "name": "I should not be able to perform a command that requires any capabilities",
+                        "line": 158,
+                        "match": {
+                            "location": "pod_security_policy.go:462"
+                        },
+                        "result": {
+                            "status": "skipped"
+                        }
+                    },
+                    {
+                        "keyword": "And ",
+                        "name": "I should be able to perform an allowed command",
+                        "line": 158,
+                        "match": {
+                            "location": "pod_security_policy.go:44"
+                        },
+                        "result": {
+                            "status": "skipped"
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "maximise-security-through-pod-security-policies;prevent-deployments-from-running-with-assigned-capabilities.;;4",
+                "keyword": "Scenario Outline",
+                "name": "Prevent deployments from running with assigned capabilities.",
+                "description": "",
+                "line": 159,
+                "type": "scenario",
+                "tags": [
+                    {
+                        "name": "@kubernetes",
+                        "line": 1
+                    },
+                    {
+                        "name": "@pod_security_policy",
+                        "line": 2
+                    },
+                    {
+                        "name": "@CIS-5.2",
+                        "line": 3
+                    },
+                    {
+                        "name": "@preventitive",
+                        "line": 145
+                    },
+                    {
+                        "name": "@CIS-5.2.9",
+                        "line": 145
+                    }
+                ],
+                "steps": [
+                    {
+                        "keyword": "Given ",
+                        "name": "a Kubernetes cluster exists which we can deploy into",
+                        "line": 159,
+                        "match": {
+                            "location": "k8s_probes.go:200"
+                        },
+                        "result": {
+                            "status": "passed",
+                            "duration": 0
+                        }
+                    },
+                    {
+                        "keyword": "And ",
+                        "name": "some system exists to prevent Kubernetes deployments with assigned capabilities from being deployed to an existing Kubernetes cluster",
+                        "line": 159,
+                        "match": {
+                            "location": "pod_security_policy.go:452"
+                        },
+                        "result": {
+                            "status": "failed",
+                            "error_message": "[ERROR] AssignedCapabilitiesAreRestricted is NOT restricted (result: false)",
+                            "duration": 0
+                        }
+                    },
+                    {
+                        "keyword": "When ",
+                        "name": "a Kubernetes deployment is applied to an existing Kubernetes cluster",
+                        "line": 159,
+                        "match": {
+                            "location": "pod_security_policy.go:28"
+                        },
+                        "result": {
+                            "status": "skipped"
+                        }
+                    },
+                    {
+                        "keyword": "And ",
+                        "name": "assigned capabilities \"Not defined\" requested for the Kubernetes deployment",
+                        "line": 159,
+                        "match": {
+                            "location": "pod_security_policy.go:432"
+                        },
+                        "result": {
+                            "status": "skipped"
+                        }
+                    },
+                    {
+                        "keyword": "Then ",
+                        "name": "the operation will \"Succeed\" with an error \"\"",
+                        "line": 159,
+                        "match": {
+                            "location": "pod_security_policy.go:34"
+                        },
+                        "result": {
+                            "status": "skipped"
+                        }
+                    },
+                    {
+                        "keyword": "But ",
+                        "name": "I should not be able to perform a command that requires any capabilities",
+                        "line": 159,
+                        "match": {
+                            "location": "pod_security_policy.go:462"
+                        },
+                        "result": {
+                            "status": "skipped"
+                        }
+                    },
+                    {
+                        "keyword": "And ",
+                        "name": "I should be able to perform an allowed command",
+                        "line": 159,
+                        "match": {
+                            "location": "pod_security_policy.go:44"
+                        },
+                        "result": {
+                            "status": "skipped"
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "maximise-security-through-pod-security-policies;prevent-deployments-from-accessing-unapproved-port-range;;2",
+                "keyword": "Scenario Outline",
+                "name": "Prevent deployments from accessing unapproved port range",
+                "description": "",
+                "line": 173,
+                "type": "scenario",
+                "tags": [
+                    {
+                        "name": "@kubernetes",
+                        "line": 1
+                    },
+                    {
+                        "name": "@pod_security_policy",
+                        "line": 2
+                    },
+                    {
+                        "name": "@CIS-5.2",
+                        "line": 3
+                    },
+                    {
+                        "name": "@preventitive",
+                        "line": 161
+                    },
+                    {
+                        "name": "@AZP-0.1",
+                        "line": 161
+                    }
+                ],
+                "steps": [
+                    {
+                        "keyword": "Given ",
+                        "name": "a Kubernetes cluster exists which we can deploy into",
+                        "line": 173,
+                        "match": {
+                            "location": "k8s_probes.go:200"
+                        },
+                        "result": {
+                            "status": "passed",
+                            "duration": 0
+                        }
+                    },
+                    {
+                        "keyword": "And ",
+                        "name": "some system exists to prevent Kubernetes deployments with unapproved port range from being deployed to an existing Kubernetes cluster",
+                        "line": 173,
+                        "match": {
+                            "location": "pod_security_policy.go:497"
+                        },
+                        "result": {
+                            "status": "passed",
+                            "duration": 0
+                        }
+                    },
+                    {
+                        "keyword": "When ",
+                        "name": "a Kubernetes deployment is applied to an existing Kubernetes cluster",
+                        "line": 173,
+                        "match": {
+                            "location": "pod_security_policy.go:28"
+                        },
+                        "result": {
+                            "status": "passed",
+                            "duration": 0
+                        }
+                    },
+                    {
+                        "keyword": "And ",
+                        "name": "an \"unapproved\" port range is requested for the Kubernetes deployment",
+                        "line": 173,
+                        "match": {
+                            "location": "pod_security_policy.go:473"
+                        },
+                        "result": {
+                            "status": "failed",
+                            "error_message": "runtime error: invalid memory address or nil pointer dereference",
+                            "duration": 60135441500
+                        }
+                    },
+                    {
+                        "keyword": "Then ",
+                        "name": "the operation will \"Fail\" with an error \"Cannot access unapproved port range\"",
+                        "line": 173,
+                        "match": {
+                            "location": "pod_security_policy.go:34"
+                        },
+                        "result": {
+                            "status": "skipped"
+                        }
+                    },
+                    {
+                        "keyword": "But ",
+                        "name": "I should not be able to perform a command that access an unapproved port range",
+                        "line": 173,
+                        "match": {
+                            "location": "pod_security_policy.go:507"
+                        },
+                        "result": {
+                            "status": "skipped"
+                        }
+                    },
+                    {
+                        "keyword": "And ",
+                        "name": "I should be able to perform an allowed command",
+                        "line": 173,
+                        "match": {
+                            "location": "pod_security_policy.go:44"
+                        },
+                        "result": {
+                            "status": "skipped"
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "maximise-security-through-pod-security-policies;prevent-deployments-from-accessing-unapproved-port-range;;3",
+                "keyword": "Scenario Outline",
+                "name": "Prevent deployments from accessing unapproved port range",
+                "description": "",
+                "line": 174,
+                "type": "scenario",
+                "tags": [
+                    {
+                        "name": "@kubernetes",
+                        "line": 1
+                    },
+                    {
+                        "name": "@pod_security_policy",
+                        "line": 2
+                    },
+                    {
+                        "name": "@CIS-5.2",
+                        "line": 3
+                    },
+                    {
+                        "name": "@preventitive",
+                        "line": 161
+                    },
+                    {
+                        "name": "@AZP-0.1",
+                        "line": 161
+                    }
+                ],
+                "steps": [
+                    {
+                        "keyword": "Given ",
+                        "name": "a Kubernetes cluster exists which we can deploy into",
+                        "line": 174,
+                        "match": {
+                            "location": "k8s_probes.go:200"
+                        },
+                        "result": {
+                            "status": "passed",
+                            "duration": 0
+                        }
+                    },
+                    {
+                        "keyword": "And ",
+                        "name": "some system exists to prevent Kubernetes deployments with unapproved port range from being deployed to an existing Kubernetes cluster",
+                        "line": 174,
+                        "match": {
+                            "location": "pod_security_policy.go:497"
+                        },
+                        "result": {
+                            "status": "passed",
+                            "duration": 0
+                        }
+                    },
+                    {
+                        "keyword": "When ",
+                        "name": "a Kubernetes deployment is applied to an existing Kubernetes cluster",
+                        "line": 174,
+                        "match": {
+                            "location": "pod_security_policy.go:28"
+                        },
+                        "result": {
+                            "status": "passed",
+                            "duration": 0
+                        }
+                    },
+                    {
+                        "keyword": "And ",
+                        "name": "an \"approved\" port range is requested for the Kubernetes deployment",
+                        "line": 174,
+                        "match": {
+                            "location": "pod_security_policy.go:473"
+                        },
+                        "result": {
+                            "status": "failed",
+                            "error_message": "runtime error: invalid memory address or nil pointer dereference",
+                            "duration": 60113732700
+                        }
+                    },
+                    {
+                        "keyword": "Then ",
+                        "name": "the operation will \"Succeed\" with an error \"\"",
+                        "line": 174,
+                        "match": {
+                            "location": "pod_security_policy.go:34"
+                        },
+                        "result": {
+                            "status": "skipped"
+                        }
+                    },
+                    {
+                        "keyword": "But ",
+                        "name": "I should not be able to perform a command that access an unapproved port range",
+                        "line": 174,
+                        "match": {
+                            "location": "pod_security_policy.go:507"
+                        },
+                        "result": {
+                            "status": "skipped"
+                        }
+                    },
+                    {
+                        "keyword": "And ",
+                        "name": "I should be able to perform an allowed command",
+                        "line": 174,
+                        "match": {
+                            "location": "pod_security_policy.go:44"
+                        },
+                        "result": {
+                            "status": "skipped"
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "maximise-security-through-pod-security-policies;prevent-deployments-from-accessing-unapproved-port-range;;4",
+                "keyword": "Scenario Outline",
+                "name": "Prevent deployments from accessing unapproved port range",
+                "description": "",
+                "line": 175,
+                "type": "scenario",
+                "tags": [
+                    {
+                        "name": "@kubernetes",
+                        "line": 1
+                    },
+                    {
+                        "name": "@pod_security_policy",
+                        "line": 2
+                    },
+                    {
+                        "name": "@CIS-5.2",
+                        "line": 3
+                    },
+                    {
+                        "name": "@preventitive",
+                        "line": 161
+                    },
+                    {
+                        "name": "@AZP-0.1",
+                        "line": 161
+                    }
+                ],
+                "steps": [
+                    {
+                        "keyword": "Given ",
+                        "name": "a Kubernetes cluster exists which we can deploy into",
+                        "line": 175,
+                        "match": {
+                            "location": "k8s_probes.go:200"
+                        },
+                        "result": {
+                            "status": "passed",
+                            "duration": 0
+                        }
+                    },
+                    {
+                        "keyword": "And ",
+                        "name": "some system exists to prevent Kubernetes deployments with unapproved port range from being deployed to an existing Kubernetes cluster",
+                        "line": 175,
+                        "match": {
+                            "location": "pod_security_policy.go:497"
+                        },
+                        "result": {
+                            "status": "passed",
+                            "duration": 0
+                        }
+                    },
+                    {
+                        "keyword": "When ",
+                        "name": "a Kubernetes deployment is applied to an existing Kubernetes cluster",
+                        "line": 175,
+                        "match": {
+                            "location": "pod_security_policy.go:28"
+                        },
+                        "result": {
+                            "status": "passed",
+                            "duration": 0
+                        }
+                    },
+                    {
+                        "keyword": "And ",
+                        "name": "an \"not defined\" port range is requested for the Kubernetes deployment",
+                        "line": 175,
+                        "match": {
+                            "location": "pod_security_policy.go:473"
+                        },
+                        "result": {
+                            "status": "failed",
+                            "error_message": "runtime error: invalid memory address or nil pointer dereference",
+                            "duration": 60119607200
+                        }
+                    },
+                    {
+                        "keyword": "Then ",
+                        "name": "the operation will \"Succeed\" with an error \"\"",
+                        "line": 175,
+                        "match": {
+                            "location": "pod_security_policy.go:34"
+                        },
+                        "result": {
+                            "status": "skipped"
+                        }
+                    },
+                    {
+                        "keyword": "But ",
+                        "name": "I should not be able to perform a command that access an unapproved port range",
+                        "line": 175,
+                        "match": {
+                            "location": "pod_security_policy.go:507"
+                        },
+                        "result": {
+                            "status": "skipped"
+                        }
+                    },
+                    {
+                        "keyword": "And ",
+                        "name": "I should be able to perform an allowed command",
+                        "line": 175,
+                        "match": {
+                            "location": "pod_security_policy.go:44"
+                        },
+                        "result": {
+                            "status": "skipped"
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "maximise-security-through-pod-security-policies;prevent-deployments-from-accessing-unapproved-volume-types;;2",
+                "keyword": "Scenario Outline",
+                "name": "Prevent deployments from accessing unapproved volume types",
+                "description": "",
+                "line": 189,
+                "type": "scenario",
+                "tags": [
+                    {
+                        "name": "@kubernetes",
+                        "line": 1
+                    },
+                    {
+                        "name": "@pod_security_policy",
+                        "line": 2
+                    },
+                    {
+                        "name": "@CIS-5.2",
+                        "line": 3
+                    },
+                    {
+                        "name": "@preventitive",
+                        "line": 177
+                    },
+                    {
+                        "name": "@AZP-0.2",
+                        "line": 177
+                    }
+                ],
+                "steps": [
+                    {
+                        "keyword": "Given ",
+                        "name": "a Kubernetes cluster exists which we can deploy into",
+                        "line": 189,
+                        "match": {
+                            "location": "k8s_probes.go:200"
+                        },
+                        "result": {
+                            "status": "passed",
+                            "duration": 0
+                        }
+                    },
+                    {
+                        "keyword": "And ",
+                        "name": "some system exists to prevent Kubernetes deployments with unapproved volume types from being deployed to an existing Kubernetes cluster",
+                        "line": 189,
+                        "match": {
+                            "location": "pod_security_policy.go:541"
+                        },
+                        "result": {
+                            "status": "passed",
+                            "duration": 995800
+                        }
+                    },
+                    {
+                        "keyword": "When ",
+                        "name": "a Kubernetes deployment is applied to an existing Kubernetes cluster",
+                        "line": 189,
+                        "match": {
+                            "location": "pod_security_policy.go:28"
+                        },
+                        "result": {
+                            "status": "passed",
+                            "duration": 0
+                        }
+                    },
+                    {
+                        "keyword": "And ",
+                        "name": "an \"unapproved\" volume type is requested for the Kubernetes deployment",
+                        "line": 189,
+                        "match": {
+                            "location": "pod_security_policy.go:518"
+                        },
+                        "result": {
+                            "status": "failed",
+                            "error_message": "runtime error: invalid memory address or nil pointer dereference",
+                            "duration": 60124144800
+                        }
+                    },
+                    {
+                        "keyword": "Then ",
+                        "name": "the operation will \"Fail\" with an error \"Cannot access unapproved volume type\"",
+                        "line": 189,
+                        "match": {
+                            "location": "pod_security_policy.go:34"
+                        },
+                        "result": {
+                            "status": "skipped"
+                        }
+                    },
+                    {
+                        "keyword": "But ",
+                        "name": "I should not be able to perform a command that accesses an unapproved volume type",
+                        "line": 189,
+                        "match": {
+                            "location": "pod_security_policy.go:552"
+                        },
+                        "result": {
+                            "status": "skipped"
+                        }
+                    },
+                    {
+                        "keyword": "And ",
+                        "name": "I should be able to perform an allowed command",
+                        "line": 189,
+                        "match": {
+                            "location": "pod_security_policy.go:44"
+                        },
+                        "result": {
+                            "status": "skipped"
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "maximise-security-through-pod-security-policies;prevent-deployments-from-accessing-unapproved-volume-types;;3",
+                "keyword": "Scenario Outline",
+                "name": "Prevent deployments from accessing unapproved volume types",
+                "description": "",
+                "line": 190,
+                "type": "scenario",
+                "tags": [
+                    {
+                        "name": "@kubernetes",
+                        "line": 1
+                    },
+                    {
+                        "name": "@pod_security_policy",
+                        "line": 2
+                    },
+                    {
+                        "name": "@CIS-5.2",
+                        "line": 3
+                    },
+                    {
+                        "name": "@preventitive",
+                        "line": 177
+                    },
+                    {
+                        "name": "@AZP-0.2",
+                        "line": 177
+                    }
+                ],
+                "steps": [
+                    {
+                        "keyword": "Given ",
+                        "name": "a Kubernetes cluster exists which we can deploy into",
+                        "line": 190,
+                        "match": {
+                            "location": "k8s_probes.go:200"
+                        },
+                        "result": {
+                            "status": "passed",
+                            "duration": 0
+                        }
+                    },
+                    {
+                        "keyword": "And ",
+                        "name": "some system exists to prevent Kubernetes deployments with unapproved volume types from being deployed to an existing Kubernetes cluster",
+                        "line": 190,
+                        "match": {
+                            "location": "pod_security_policy.go:541"
+                        },
+                        "result": {
+                            "status": "passed",
+                            "duration": 0
+                        }
+                    },
+                    {
+                        "keyword": "When ",
+                        "name": "a Kubernetes deployment is applied to an existing Kubernetes cluster",
+                        "line": 190,
+                        "match": {
+                            "location": "pod_security_policy.go:28"
+                        },
+                        "result": {
+                            "status": "passed",
+                            "duration": 0
+                        }
+                    },
+                    {
+                        "keyword": "And ",
+                        "name": "an \"approved\" volume type is requested for the Kubernetes deployment",
+                        "line": 190,
+                        "match": {
+                            "location": "pod_security_policy.go:518"
+                        },
+                        "result": {
+                            "status": "failed",
+                            "error_message": "runtime error: invalid memory address or nil pointer dereference",
+                            "duration": 60112524000
+                        }
+                    },
+                    {
+                        "keyword": "Then ",
+                        "name": "the operation will \"Succeed\" with an error \"\"",
+                        "line": 190,
+                        "match": {
+                            "location": "pod_security_policy.go:34"
+                        },
+                        "result": {
+                            "status": "skipped"
+                        }
+                    },
+                    {
+                        "keyword": "But ",
+                        "name": "I should not be able to perform a command that accesses an unapproved volume type",
+                        "line": 190,
+                        "match": {
+                            "location": "pod_security_policy.go:552"
+                        },
+                        "result": {
+                            "status": "skipped"
+                        }
+                    },
+                    {
+                        "keyword": "And ",
+                        "name": "I should be able to perform an allowed command",
+                        "line": 190,
+                        "match": {
+                            "location": "pod_security_policy.go:44"
+                        },
+                        "result": {
+                            "status": "skipped"
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "maximise-security-through-pod-security-policies;prevent-deployments-from-accessing-unapproved-volume-types;;4",
+                "keyword": "Scenario Outline",
+                "name": "Prevent deployments from accessing unapproved volume types",
+                "description": "",
+                "line": 191,
+                "type": "scenario",
+                "tags": [
+                    {
+                        "name": "@kubernetes",
+                        "line": 1
+                    },
+                    {
+                        "name": "@pod_security_policy",
+                        "line": 2
+                    },
+                    {
+                        "name": "@CIS-5.2",
+                        "line": 3
+                    },
+                    {
+                        "name": "@preventitive",
+                        "line": 177
+                    },
+                    {
+                        "name": "@AZP-0.2",
+                        "line": 177
+                    }
+                ],
+                "steps": [
+                    {
+                        "keyword": "Given ",
+                        "name": "a Kubernetes cluster exists which we can deploy into",
+                        "line": 191,
+                        "match": {
+                            "location": "k8s_probes.go:200"
+                        },
+                        "result": {
+                            "status": "passed",
+                            "duration": 0
+                        }
+                    },
+                    {
+                        "keyword": "And ",
+                        "name": "some system exists to prevent Kubernetes deployments with unapproved volume types from being deployed to an existing Kubernetes cluster",
+                        "line": 191,
+                        "match": {
+                            "location": "pod_security_policy.go:541"
+                        },
+                        "result": {
+                            "status": "passed",
+                            "duration": 0
+                        }
+                    },
+                    {
+                        "keyword": "When ",
+                        "name": "a Kubernetes deployment is applied to an existing Kubernetes cluster",
+                        "line": 191,
+                        "match": {
+                            "location": "pod_security_policy.go:28"
+                        },
+                        "result": {
+                            "status": "passed",
+                            "duration": 0
+                        }
+                    },
+                    {
+                        "keyword": "And ",
+                        "name": "an \"not defined\" volume type is requested for the Kubernetes deployment",
+                        "line": 191,
+                        "match": {
+                            "location": "pod_security_policy.go:518"
+                        },
+                        "result": {
+                            "status": "failed",
+                            "error_message": "runtime error: invalid memory address or nil pointer dereference",
+                            "duration": 60066630800
+                        }
+                    },
+                    {
+                        "keyword": "Then ",
+                        "name": "the operation will \"Succeed\" with an error \"\"",
+                        "line": 191,
+                        "match": {
+                            "location": "pod_security_policy.go:34"
+                        },
+                        "result": {
+                            "status": "skipped"
+                        }
+                    },
+                    {
+                        "keyword": "But ",
+                        "name": "I should not be able to perform a command that accesses an unapproved volume type",
+                        "line": 191,
+                        "match": {
+                            "location": "pod_security_policy.go:552"
+                        },
+                        "result": {
+                            "status": "skipped"
+                        }
+                    },
+                    {
+                        "keyword": "And ",
+                        "name": "I should be able to perform an allowed command",
+                        "line": 191,
+                        "match": {
+                            "location": "pod_security_policy.go:44"
+                        },
+                        "result": {
+                            "status": "skipped"
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "maximise-security-through-pod-security-policies;prevent-deployments-from-running-without-approved-seccomp-profile;;2",
+                "keyword": "Scenario Outline",
+                "name": "Prevent deployments from running without approved seccomp profile",
+                "description": "",
+                "line": 205,
+                "type": "scenario",
+                "tags": [
+                    {
+                        "name": "@kubernetes",
+                        "line": 1
+                    },
+                    {
+                        "name": "@pod_security_policy",
+                        "line": 2
+                    },
+                    {
+                        "name": "@CIS-5.2",
+                        "line": 3
+                    },
+                    {
+                        "name": "@preventitive",
+                        "line": 193
+                    },
+                    {
+                        "name": "@AZP-0.3",
+                        "line": 193
+                    }
+                ],
+                "steps": [
+                    {
+                        "keyword": "Given ",
+                        "name": "a Kubernetes cluster exists which we can deploy into",
+                        "line": 205,
+                        "match": {
+                            "location": "k8s_probes.go:200"
+                        },
+                        "result": {
+                            "status": "passed",
+                            "duration": 0
+                        }
+                    },
+                    {
+                        "keyword": "And ",
+                        "name": "some system exists to prevent Kubernetes deployments without approved seccomp profiles from being deployed to an existing Kubernetes cluster",
+                        "line": 205,
+                        "match": {
+                            "location": "pod_security_policy.go:584"
+                        },
+                        "result": {
+                            "status": "failed",
+                            "error_message": "[ERROR] SeccompProfilesAreRestricted is NOT restricted (result: false)",
+                            "duration": 1003900
+                        }
+                    },
+                    {
+                        "keyword": "When ",
+                        "name": "a Kubernetes deployment is applied to an existing Kubernetes cluster",
+                        "line": 205,
+                        "match": {
+                            "location": "pod_security_policy.go:28"
+                        },
+                        "result": {
+                            "status": "skipped"
+                        }
+                    },
+                    {
+                        "keyword": "And ",
+                        "name": "an \"unapproved\" seccomp profile is requested for the Kubernetes deployment",
+                        "line": 205,
+                        "match": {
+                            "location": "pod_security_policy.go:559"
+                        },
+                        "result": {
+                            "status": "skipped"
+                        }
+                    },
+                    {
+                        "keyword": "Then ",
+                        "name": "the operation will \"Fail\" with an error \"Cannot request unapproved seccomp profile\"",
+                        "line": 205,
+                        "match": {
+                            "location": "pod_security_policy.go:34"
+                        },
+                        "result": {
+                            "status": "skipped"
+                        }
+                    },
+                    {
+                        "keyword": "But ",
+                        "name": "I should not be able to perform a system call that is blocked by the seccomp profile",
+                        "line": 205,
+                        "match": {
+                            "location": "pod_security_policy.go:593"
+                        },
+                        "result": {
+                            "status": "skipped"
+                        }
+                    },
+                    {
+                        "keyword": "And ",
+                        "name": "I should be able to perform an allowed command",
+                        "line": 205,
+                        "match": {
+                            "location": "pod_security_policy.go:44"
+                        },
+                        "result": {
+                            "status": "skipped"
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "maximise-security-through-pod-security-policies;prevent-deployments-from-running-without-approved-seccomp-profile;;3",
+                "keyword": "Scenario Outline",
+                "name": "Prevent deployments from running without approved seccomp profile",
+                "description": "",
+                "line": 206,
+                "type": "scenario",
+                "tags": [
+                    {
+                        "name": "@kubernetes",
+                        "line": 1
+                    },
+                    {
+                        "name": "@pod_security_policy",
+                        "line": 2
+                    },
+                    {
+                        "name": "@CIS-5.2",
+                        "line": 3
+                    },
+                    {
+                        "name": "@preventitive",
+                        "line": 193
+                    },
+                    {
+                        "name": "@AZP-0.3",
+                        "line": 193
+                    }
+                ],
+                "steps": [
+                    {
+                        "keyword": "Given ",
+                        "name": "a Kubernetes cluster exists which we can deploy into",
+                        "line": 206,
+                        "match": {
+                            "location": "k8s_probes.go:200"
+                        },
+                        "result": {
+                            "status": "passed",
+                            "duration": 0
+                        }
+                    },
+                    {
+                        "keyword": "And ",
+                        "name": "some system exists to prevent Kubernetes deployments without approved seccomp profiles from being deployed to an existing Kubernetes cluster",
+                        "line": 206,
+                        "match": {
+                            "location": "pod_security_policy.go:584"
+                        },
+                        "result": {
+                            "status": "failed",
+                            "error_message": "[ERROR] SeccompProfilesAreRestricted is NOT restricted (result: false)",
+                            "duration": 1416200
+                        }
+                    },
+                    {
+                        "keyword": "When ",
+                        "name": "a Kubernetes deployment is applied to an existing Kubernetes cluster",
+                        "line": 206,
+                        "match": {
+                            "location": "pod_security_policy.go:28"
+                        },
+                        "result": {
+                            "status": "skipped"
+                        }
+                    },
+                    {
+                        "keyword": "And ",
+                        "name": "an \"approved\" seccomp profile is requested for the Kubernetes deployment",
+                        "line": 206,
+                        "match": {
+                            "location": "pod_security_policy.go:559"
+                        },
+                        "result": {
+                            "status": "skipped"
+                        }
+                    },
+                    {
+                        "keyword": "Then ",
+                        "name": "the operation will \"Succeed\" with an error \"no error\"",
+                        "line": 206,
+                        "match": {
+                            "location": "pod_security_policy.go:34"
+                        },
+                        "result": {
+                            "status": "skipped"
+                        }
+                    },
+                    {
+                        "keyword": "But ",
+                        "name": "I should not be able to perform a system call that is blocked by the seccomp profile",
+                        "line": 206,
+                        "match": {
+                            "location": "pod_security_policy.go:593"
+                        },
+                        "result": {
+                            "status": "skipped"
+                        }
+                    },
+                    {
+                        "keyword": "And ",
+                        "name": "I should be able to perform an allowed command",
+                        "line": 206,
+                        "match": {
+                            "location": "pod_security_policy.go:44"
+                        },
+                        "result": {
+                            "status": "skipped"
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "maximise-security-through-pod-security-policies;prevent-deployments-from-running-without-approved-seccomp-profile;;4",
+                "keyword": "Scenario Outline",
+                "name": "Prevent deployments from running without approved seccomp profile",
+                "description": "",
+                "line": 207,
+                "type": "scenario",
+                "tags": [
+                    {
+                        "name": "@kubernetes",
+                        "line": 1
+                    },
+                    {
+                        "name": "@pod_security_policy",
+                        "line": 2
+                    },
+                    {
+                        "name": "@CIS-5.2",
+                        "line": 3
+                    },
+                    {
+                        "name": "@preventitive",
+                        "line": 193
+                    },
+                    {
+                        "name": "@AZP-0.3",
+                        "line": 193
+                    }
+                ],
+                "steps": [
+                    {
+                        "keyword": "Given ",
+                        "name": "a Kubernetes cluster exists which we can deploy into",
+                        "line": 207,
+                        "match": {
+                            "location": "k8s_probes.go:200"
+                        },
+                        "result": {
+                            "status": "passed",
+                            "duration": 0
+                        }
+                    },
+                    {
+                        "keyword": "And ",
+                        "name": "some system exists to prevent Kubernetes deployments without approved seccomp profiles from being deployed to an existing Kubernetes cluster",
+                        "line": 207,
+                        "match": {
+                            "location": "pod_security_policy.go:584"
+                        },
+                        "result": {
+                            "status": "failed",
+                            "error_message": "[ERROR] SeccompProfilesAreRestricted is NOT restricted (result: false)",
+                            "duration": 9642600
+                        }
+                    },
+                    {
+                        "keyword": "When ",
+                        "name": "a Kubernetes deployment is applied to an existing Kubernetes cluster",
+                        "line": 207,
+                        "match": {
+                            "location": "pod_security_policy.go:28"
+                        },
+                        "result": {
+                            "status": "skipped"
+                        }
+                    },
+                    {
+                        "keyword": "And ",
+                        "name": "an \"undefined\" seccomp profile is requested for the Kubernetes deployment",
+                        "line": 207,
+                        "match": {
+                            "location": "pod_security_policy.go:559"
+                        },
+                        "result": {
+                            "status": "skipped"
+                        }
+                    },
+                    {
+                        "keyword": "Then ",
+                        "name": "the operation will \"Fail\" with an error \"Approved seccomp profile required\"",
+                        "line": 207,
+                        "match": {
+                            "location": "pod_security_policy.go:34"
+                        },
+                        "result": {
+                            "status": "skipped"
+                        }
+                    },
+                    {
+                        "keyword": "But ",
+                        "name": "I should not be able to perform a system call that is blocked by the seccomp profile",
+                        "line": 207,
+                        "match": {
+                            "location": "pod_security_policy.go:593"
+                        },
+                        "result": {
+                            "status": "skipped"
+                        }
+                    },
+                    {
+                        "keyword": "And ",
+                        "name": "I should be able to perform an allowed command",
+                        "line": 207,
+                        "match": {
+                            "location": "pod_security_policy.go:44"
+                        },
+                        "result": {
+                            "status": "skipped"
+                        }
+                    }
+                ]
+            }
+        ]
+    }
+]

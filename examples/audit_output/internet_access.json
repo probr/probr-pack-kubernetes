@@ -1,0 +1,379 @@
+{
+  "Name": "internet_access",
+  "PodsDestroyed": 0,
+  "ScenariosAttempted": 3,
+  "ScenariosSucceeded": 0,
+  "ScenariosFailed": 3,
+  "Result": "Failed",
+  "Scenarios": {
+    "1": {
+      "Name": "Test outgoing connectivity of a deployed pod",
+      "Result": "Failed",
+      "Tags": [
+        "@kubernetes",
+        "@internet_access",
+        "@csp.azure",
+        "@CCO:CHC2-SVD030"
+      ],
+      "Steps": {
+        "1": {
+          "Name": "aKubernetesClusterIsDeployed",
+          "Description": "Passes if Probr successfully connects to the specified cluster.",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": {
+            "KubeConfigPath": "C:\\Users\\eknight\\.kube\\config",
+            "KubeContext": ""
+          }
+        },
+        "2": {
+          "Name": "aPodIsDeployedInTheCluster",
+          "Description": "",
+          "Result": "Failed",
+          "Error": "context deadline exceeded",
+          "Payload": {
+            "Pod": {
+              "metadata": {
+                "name": "na-test-pod-271020-105545-8",
+                "namespace": "probr-network-access-test-ns",
+                "selfLink": "/api/v1/namespaces/probr-network-access-test-ns/pods/na-test-pod-271020-105545-8",
+                "uid": "b5d03141-54b8-4b95-a698-3f4891fe4624",
+                "resourceVersion": "1461762",
+                "creationTimestamp": "2020-10-27T14:55:44Z",
+                "labels": {
+                  "app": "demo"
+                },
+                "annotations": {
+                  "seccomp.security.alpha.kubernetes.io/pod": "runtime/default"
+                }
+              },
+              "spec": {
+                "volumes": [
+                  {
+                    "name": "default-token-cjrz8",
+                    "secret": {
+                      "secretName": "default-token-cjrz8",
+                      "defaultMode": 420
+                    }
+                  }
+                ],
+                "containers": [
+                  {
+                    "name": "na-test",
+                    "image": "curlimages/curl",
+                    "command": [
+                      "sleep",
+                      "3600"
+                    ],
+                    "resources": {},
+                    "volumeMounts": [
+                      {
+                        "name": "default-token-cjrz8",
+                        "readOnly": true,
+                        "mountPath": "/var/run/secrets/kubernetes.io/serviceaccount"
+                      }
+                    ],
+                    "terminationMessagePath": "/dev/termination-log",
+                    "terminationMessagePolicy": "File",
+                    "imagePullPolicy": "IfNotPresent",
+                    "securityContext": {
+                      "privileged": false,
+                      "allowPrivilegeEscalation": false
+                    }
+                  }
+                ],
+                "restartPolicy": "Always",
+                "terminationGracePeriodSeconds": 30,
+                "dnsPolicy": "ClusterFirst",
+                "serviceAccountName": "default",
+                "serviceAccount": "default",
+                "securityContext": {
+                  "runAsUser": 1000,
+                  "runAsGroup": 3000,
+                  "supplementalGroups": [
+                    1
+                  ],
+                  "fsGroup": 2000
+                },
+                "schedulerName": "default-scheduler",
+                "tolerations": [
+                  {
+                    "key": "node.kubernetes.io/not-ready",
+                    "operator": "Exists",
+                    "effect": "NoExecute",
+                    "tolerationSeconds": 300
+                  },
+                  {
+                    "key": "node.kubernetes.io/unreachable",
+                    "operator": "Exists",
+                    "effect": "NoExecute",
+                    "tolerationSeconds": 300
+                  }
+                ],
+                "priority": 0,
+                "enableServiceLinks": true
+              },
+              "status": {
+                "phase": "Pending",
+                "qosClass": "BestEffort"
+              }
+            },
+            "PodAudit": {
+              "PodName": "na-test-pod-271020-105545-8",
+              "Namespace": "probr-general-test-ns",
+              "ContainerName": "na-test",
+              "Image": "curlimages/curl",
+              "SecurityContext": null
+            }
+          }
+        }
+      }
+    },
+    "2": {
+      "Name": "Test outgoing connectivity of a deployed pod",
+      "Result": "Failed",
+      "Tags": [
+        "@kubernetes",
+        "@internet_access",
+        "@csp.azure",
+        "@CCO:CHC2-SVD030"
+      ],
+      "Steps": {
+        "1": {
+          "Name": "aKubernetesClusterIsDeployed",
+          "Description": "Passes if Probr successfully connects to the specified cluster.",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": {
+            "KubeConfigPath": "C:\\Users\\eknight\\.kube\\config",
+            "KubeContext": ""
+          }
+        },
+        "2": {
+          "Name": "aPodIsDeployedInTheCluster",
+          "Description": "",
+          "Result": "Failed",
+          "Error": "context deadline exceeded",
+          "Payload": {
+            "Pod": {
+              "metadata": {
+                "name": "na-test-pod-271020-105646-44",
+                "namespace": "probr-network-access-test-ns",
+                "selfLink": "/api/v1/namespaces/probr-network-access-test-ns/pods/na-test-pod-271020-105646-44",
+                "uid": "314ffe3c-e183-490d-b3a2-66c0f9901767",
+                "resourceVersion": "1461914",
+                "creationTimestamp": "2020-10-27T14:56:44Z",
+                "labels": {
+                  "app": "demo"
+                },
+                "annotations": {
+                  "seccomp.security.alpha.kubernetes.io/pod": "runtime/default"
+                }
+              },
+              "spec": {
+                "volumes": [
+                  {
+                    "name": "default-token-cjrz8",
+                    "secret": {
+                      "secretName": "default-token-cjrz8",
+                      "defaultMode": 420
+                    }
+                  }
+                ],
+                "containers": [
+                  {
+                    "name": "na-test",
+                    "image": "curlimages/curl",
+                    "command": [
+                      "sleep",
+                      "3600"
+                    ],
+                    "resources": {},
+                    "volumeMounts": [
+                      {
+                        "name": "default-token-cjrz8",
+                        "readOnly": true,
+                        "mountPath": "/var/run/secrets/kubernetes.io/serviceaccount"
+                      }
+                    ],
+                    "terminationMessagePath": "/dev/termination-log",
+                    "terminationMessagePolicy": "File",
+                    "imagePullPolicy": "IfNotPresent",
+                    "securityContext": {
+                      "privileged": false,
+                      "allowPrivilegeEscalation": false
+                    }
+                  }
+                ],
+                "restartPolicy": "Always",
+                "terminationGracePeriodSeconds": 30,
+                "dnsPolicy": "ClusterFirst",
+                "serviceAccountName": "default",
+                "serviceAccount": "default",
+                "securityContext": {
+                  "runAsUser": 1000,
+                  "runAsGroup": 3000,
+                  "supplementalGroups": [
+                    1
+                  ],
+                  "fsGroup": 2000
+                },
+                "schedulerName": "default-scheduler",
+                "tolerations": [
+                  {
+                    "key": "node.kubernetes.io/not-ready",
+                    "operator": "Exists",
+                    "effect": "NoExecute",
+                    "tolerationSeconds": 300
+                  },
+                  {
+                    "key": "node.kubernetes.io/unreachable",
+                    "operator": "Exists",
+                    "effect": "NoExecute",
+                    "tolerationSeconds": 300
+                  }
+                ],
+                "priority": 0,
+                "enableServiceLinks": true
+              },
+              "status": {
+                "phase": "Pending",
+                "qosClass": "BestEffort"
+              }
+            },
+            "PodAudit": {
+              "PodName": "na-test-pod-271020-105646-44",
+              "Namespace": "probr-general-test-ns",
+              "ContainerName": "na-test",
+              "Image": "curlimages/curl",
+              "SecurityContext": null
+            }
+          }
+        }
+      }
+    },
+    "3": {
+      "Name": "Test outgoing connectivity of a deployed pod",
+      "Result": "Failed",
+      "Tags": [
+        "@kubernetes",
+        "@internet_access",
+        "@csp.azure",
+        "@CCO:CHC2-SVD030"
+      ],
+      "Steps": {
+        "1": {
+          "Name": "aKubernetesClusterIsDeployed",
+          "Description": "Passes if Probr successfully connects to the specified cluster.",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": {
+            "KubeConfigPath": "C:\\Users\\eknight\\.kube\\config",
+            "KubeContext": ""
+          }
+        },
+        "2": {
+          "Name": "aPodIsDeployedInTheCluster",
+          "Description": "",
+          "Result": "Failed",
+          "Error": "context deadline exceeded",
+          "Payload": {
+            "Pod": {
+              "metadata": {
+                "name": "na-test-pod-271020-105746-63",
+                "namespace": "probr-network-access-test-ns",
+                "selfLink": "/api/v1/namespaces/probr-network-access-test-ns/pods/na-test-pod-271020-105746-63",
+                "uid": "d78925e0-b27f-455e-8a59-5c12a850de61",
+                "resourceVersion": "1462063",
+                "creationTimestamp": "2020-10-27T14:57:44Z",
+                "labels": {
+                  "app": "demo"
+                },
+                "annotations": {
+                  "seccomp.security.alpha.kubernetes.io/pod": "runtime/default"
+                }
+              },
+              "spec": {
+                "volumes": [
+                  {
+                    "name": "default-token-cjrz8",
+                    "secret": {
+                      "secretName": "default-token-cjrz8",
+                      "defaultMode": 420
+                    }
+                  }
+                ],
+                "containers": [
+                  {
+                    "name": "na-test",
+                    "image": "curlimages/curl",
+                    "command": [
+                      "sleep",
+                      "3600"
+                    ],
+                    "resources": {},
+                    "volumeMounts": [
+                      {
+                        "name": "default-token-cjrz8",
+                        "readOnly": true,
+                        "mountPath": "/var/run/secrets/kubernetes.io/serviceaccount"
+                      }
+                    ],
+                    "terminationMessagePath": "/dev/termination-log",
+                    "terminationMessagePolicy": "File",
+                    "imagePullPolicy": "IfNotPresent",
+                    "securityContext": {
+                      "privileged": false,
+                      "allowPrivilegeEscalation": false
+                    }
+                  }
+                ],
+                "restartPolicy": "Always",
+                "terminationGracePeriodSeconds": 30,
+                "dnsPolicy": "ClusterFirst",
+                "serviceAccountName": "default",
+                "serviceAccount": "default",
+                "securityContext": {
+                  "runAsUser": 1000,
+                  "runAsGroup": 3000,
+                  "supplementalGroups": [
+                    1
+                  ],
+                  "fsGroup": 2000
+                },
+                "schedulerName": "default-scheduler",
+                "tolerations": [
+                  {
+                    "key": "node.kubernetes.io/not-ready",
+                    "operator": "Exists",
+                    "effect": "NoExecute",
+                    "tolerationSeconds": 300
+                  },
+                  {
+                    "key": "node.kubernetes.io/unreachable",
+                    "operator": "Exists",
+                    "effect": "NoExecute",
+                    "tolerationSeconds": 300
+                  }
+                ],
+                "priority": 0,
+                "enableServiceLinks": true
+              },
+              "status": {
+                "phase": "Pending",
+                "qosClass": "BestEffort"
+              }
+            },
+            "PodAudit": {
+              "PodName": "na-test-pod-271020-105746-63",
+              "Namespace": "probr-general-test-ns",
+              "ContainerName": "na-test",
+              "Image": "curlimages/curl",
+              "SecurityContext": null
+            }
+          }
+        }
+      }
+    }
+  }
+}
