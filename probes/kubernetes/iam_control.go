@@ -5,7 +5,7 @@
 // invoked directly on the command line of via the Makefile (e.g. make clean-build).
 package k8s_probes
 
-//go:generate go-bindata.exe -pkg $GOPACKAGE -o assets/assets.go assets/yaml
+//go:generate go-bindata.exe -pkg $GOPACKAGE -o assets/iam/assets.go assets/iam/yaml probe_definitions/iamcontrol
 
 import (
 	"log"
@@ -293,7 +293,7 @@ func iamScenarioInitialize(ctx *godog.ScenarioContext) {
 	ps := scenarioState{}
 
 	ctx.BeforeScenario(func(s *godog.Scenario) {
-		ps.BeforeScenario(InternetAccess.String(), s)
+		ps.BeforeScenario(IAMControl.String(), s)
 	})
 
 	//general/all
@@ -322,7 +322,7 @@ func iamScenarioInitialize(ctx *godog.ScenarioContext) {
 	ctx.Step(`^the cluster has managed identity components deployed$`, ps.theClusterHasManagedIdentityComponentsDeployed)
 
 	ctx.AfterScenario(func(s *godog.Scenario, err error) {
-		iam.DeleteIAMProbePod(ps.podState.PodName, ps.useDefaultNS, InternetAccess.String())
+		iam.DeleteIAMProbePod(ps.podState.PodName, ps.useDefaultNS, IAMControl.String())
 		coreengine.LogScenarioEnd(s)
 	})
 }
