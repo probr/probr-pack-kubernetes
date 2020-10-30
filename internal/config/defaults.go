@@ -18,6 +18,7 @@ func setFromEnvOrDefaults(e *ConfigVars) {
 	e.set(&e.OutputType, "PROBR_OUTPUT_TYPE", "IO")
 	e.set(&e.CucumberDir, "PROBR_CUCUMBER_DIR", "cucumber_output")
 	e.set(&e.AuditDir, "PROBR_AUDIT_DIR", "audit_output")
+	e.set(&e.LogLevel, "PROBR_LOG_LEVEL", "ERROR")
 	e.set(&e.OverwriteHistoricalAudits, "OVERWRITE_AUDITS", "true")
 
 	e.set(&e.Images.Repository, "IMAGE_REPOSITORY", "docker.io")

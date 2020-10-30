@@ -20,6 +20,7 @@ type ConfigVars struct {
 	AuditDir                  string `yaml:"auditDir"`
 	SummaryEnabled            string `yaml:"summaryEnabled"`
 	AuditEnabled              string `yaml:"auditEnabled"`
+	LogLevel                  string `yaml:"logLevel"`
 	OverwriteHistoricalAudits string `yaml:"overwriteHistoricalAudits"`
 	Images                    struct {
 		Repository string `yaml:"repository"`
@@ -44,10 +45,10 @@ type ConfigVars struct {
 }
 
 type Probe struct {
-	Name          string  `yaml:"name"`
-	Excluded      bool    `yaml:"excluded"`
-	Justification string  `yaml:"justification"`
-	Scenarios        []Scenario `yaml:"scenarios"`
+	Name          string     `yaml:"name"`
+	Excluded      bool       `yaml:"excluded"`
+	Justification string     `yaml:"justification"`
+	Scenarios     []Scenario `yaml:"scenarios"`
 }
 
 type Scenario struct {
@@ -91,19 +92,18 @@ func (ctx *ConfigVars) HandleScenarioExclusions(e *Probe) {
 	}
 }
 
-func init() {
-	//create a defaulted config
-	Init("")
-}
-
 // Init will override config.Vars with the content retrieved from a filepath
 func Init(configPath string) error {
 	config, err := NewConfig(configPath)
+
 	if err != nil {
 		return err
 	}
 	Vars = config
 	setFromEnvOrDefaults(&Vars) // Set any values not retrieved from file
+
+	setLogFilter(Vars.LogLevel, os.Stderr) // Set the minimum log level obtained from Vars
+
 	return nil
 }
 
