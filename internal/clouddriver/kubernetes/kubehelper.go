@@ -16,6 +16,7 @@ import (
 
 	"github.com/citihub/probr/internal/config"
 	"github.com/citihub/probr/internal/summary"
+	"github.com/citihub/probr/internal/utils"
 
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -53,6 +54,7 @@ const (
 	PSPSeccompProfile
 	ImagePullError
 	Blocked
+	Unauthorized
 )
 
 func (r PodCreationErrorReason) String() string {
@@ -202,7 +204,7 @@ func GetKubeInstance() *Kube {
 func (k *Kube) ClusterIsDeployed() *bool {
 	kc, err := k.GetClient()
 	if err != nil {
-		log.Printf("[ERROR] Error raised when getting Kubernetes client: %v", err)
+		utils.ReformatError("Error raised when getting Kubernetes client: %v", err)
 		return nil
 	}
 

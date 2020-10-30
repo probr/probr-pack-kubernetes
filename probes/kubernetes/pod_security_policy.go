@@ -61,7 +61,6 @@ func (s *scenarioState) runControlProbe(cf func() (*bool, error), c string) erro
 
 	if err != nil {
 		err = utils.ReformatError("error determining Pod Security Policy: %v error: %v", c, err)
-		log.Print(err)
 		return err
 	}
 	if yesNo == nil {
@@ -87,7 +86,7 @@ func (s *scenarioState) runVerificationProbe(c kubernetes.PSPVerificationProbe) 
 		if err != nil {
 			//this is an error from trying to execute the command as opposed to
 			//the command itself returning an error
-			err = utils.ReformatError("error raised trying to execute verification command (%v) - %v", c.Cmd, err)
+			err = utils.ReformatError("Likely a misconfiguration error. Error raised trying to execute verification command (%v) - %v", c.Cmd, err)
 			log.Print(err)
 			return err
 		}
@@ -99,7 +98,7 @@ func (s *scenarioState) runVerificationProbe(c kubernetes.PSPVerificationProbe) 
 		if res.Err != nil && res.Internal {
 			//we have an error which was raised before reaching the cluster (i.e. it's "internal")
 			//this indicates that the command was not successfully executed
-			err = utils.ReformatError("error raised trying to execute verification command (%v)", c.Cmd)
+			err = utils.ReformatError("Likely an internal Probr error. Error raised trying to execute verification command (%v)", c.Cmd)
 			log.Print(err)
 			return err
 		}

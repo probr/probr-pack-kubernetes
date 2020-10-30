@@ -2,8 +2,12 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"log"
 	"os"
+	"time"
+
+	"github.com/briandowns/spinner"
 
 	"github.com/citihub/probr"
 	"github.com/citihub/probr/cmd/cli_flags"
@@ -23,11 +27,17 @@ func main() {
 	cli_flags.HandleFlags()
 	config.LogConfigState()
 
+	if config.Vars.LogLevel == "ERROR" {
+		// At this loglevel, Probr is often silent for long periods. Add a visual runtime indicator.
+		config.Spinner = spinner.New(spinner.CharSets[42], 500*time.Millisecond)
+		config.Spinner.Start()
+	}
+
 	//exec 'em all (for now!)
 	s, ts, err := probr.RunAllProbes()
 	if err != nil {
 		log.Printf("[ERROR] Error executing tests %v", err)
-		os.Exit(2) // Error code 1 is reserved for probe test failures, and should not fail in CI
+		exit(2) // Error code 1 is reserved for probe test failures, and should not fail in CI
 	}
 	log.Printf("[NOTICE] Overall test completion status: %v", s)
 	summary.State.SetProbrStatus()
@@ -36,12 +46,22 @@ func main() {
 		out, err := probr.GetAllProbeResults(ts)
 		if err != nil {
 			log.Printf("[ERROR] Experienced error getting test results: %v", s)
-			os.Exit(2) // Error code 1 is reserved for probe test failures, and should not fail in CI
+			exit(2) // Error code 1 is reserved for probe test failures, and should not fail in CI
 		}
 		if out == nil || len(out) == 0 {
-			log.Printf("[ERROR] Test results not written to file, possibly due to permissions on the specified output directory: %s", config.Vars.CucumberDir)
+			summary.State.Meta["cucumber directory error"] = fmt.Sprintf(
+				"Test results not written to file, possibly due to permissions on the specified output directory: %s",
+				config.Vars.CucumberDir,
+			)
 		}
 	}
 	summary.State.PrintSummary()
-	os.Exit(s)
+	exit(s)
+}
+
+func exit(status int) {
+	if config.Vars.LogLevel == "ERROR" {
+		config.Spinner.Stop()
+	}
+	os.Exit(status)
 }

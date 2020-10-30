@@ -7,6 +7,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/briandowns/spinner"
 	"gopkg.in/yaml.v2"
 )
 
@@ -59,6 +60,7 @@ type Scenario struct {
 
 // Vars is a singleton instance of ConfigVars
 var Vars ConfigVars
+var Spinner *spinner.Spinner
 
 // GetTags parses Tags with TagExclusions
 func (ctx *ConfigVars) GetTags() string {

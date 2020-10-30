@@ -91,7 +91,6 @@ func (s *scenarioState) thePodIsDeployedSuccessfully() error {
 	var err error
 	if s.podState.PodName == "" {
 		err = utils.ReformatError("pod was not deployed successfully - creation error: %v", s.podState.CreationError)
-		log.Print(err)
 	}
 
 	description := ""
@@ -198,7 +197,6 @@ func (s *scenarioState) theClusterHasManagedIdentityComponentsDeployed() error {
 
 	if err != nil {
 		err = utils.ReformatError("error raised when trying to retrieve pods %v", err)
-		log.Print(err)
 	} else {
 		//a "pass" is the prescence of a "mic*" pod(s)
 		//break on the first ...

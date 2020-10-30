@@ -140,9 +140,7 @@ func ProcessPodCreationResult(probe *summary.Probe, s *podState, pd *apiv1.Pod, 
 		}
 		//unexpected error
 		//in this case something unexpected has happened, return an error to cucumber
-		err = utils.ReformatError("error attempting to create POD: %v", err)
-		log.Print(err)
-		return err
+		return utils.ReformatError("error attempting to create POD: %v", err)
 	}
 
 	//No errors: pod creation may or may not have been expected.  This will be determined

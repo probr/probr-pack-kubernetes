@@ -4,7 +4,6 @@ package k8s_probes
 
 import (
 	"fmt"
-	"log"
 	"strings"
 
 	"github.com/citihub/probr/internal/clouddriver/kubernetes"
@@ -97,8 +96,7 @@ func (s *scenarioState) theKubernetesWebUIIsDisabled() error {
 	pl, err := kubernetes.GetKubeInstance().GetPods("kube-system")
 
 	if err != nil {
-		err = utils.ReformatError("error raised when trying to retrieve pods: %v", err)
-		log.Print(err)
+		err = utils.ReformatError("Probe step not run. Error raised when trying to retrieve pods: %v", err)
 	} else {
 		//a "pass" is the abscence of a "kubernetes-dashboard" pod
 		for _, v := range pl.Items {

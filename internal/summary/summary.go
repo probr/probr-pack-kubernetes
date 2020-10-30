@@ -11,14 +11,13 @@ import (
 )
 
 type SummaryState struct {
-	Meta                  map[string]interface{}
-	Status                string
-	ProbesPassed          int
-	ProbesFailed          int
-	ProbesSkipped         int
-	names_of_pods_created []string
-	ProbeTags             []config.Probe // config.Probe contains user-specified tagging options
-	Probes                map[string]*Probe
+	Meta          map[string]interface{}
+	Status        string
+	ProbesPassed  int
+	ProbesFailed  int
+	ProbesSkipped int
+	ProbeTags     []config.Probe // config.Probe contains user-specified tagging options
+	Probes        map[string]*Probe
 }
 
 var State SummaryState
@@ -26,7 +25,7 @@ var State SummaryState
 func init() {
 	State.Probes = make(map[string]*Probe)
 	State.Meta = make(map[string]interface{})
-	State.Meta["names_of_pods_created"] = new([]string)
+	State.Meta["names of pods created"] = []string{}
 }
 
 // PrintSummary will print the current Probes object state, formatted to JSON, if SummaryEnabled is not "false"
@@ -75,7 +74,7 @@ func (s *SummaryState) GetProbeLog(n string) *Probe {
 // LogPodName adds pod names to a list for user's debugging purposes
 func (s *SummaryState) LogPodName(n string) {
 	// A bit of effort is needed to keep this list in the generic "Meta"
-	pn := reflect.ValueOf(s.Meta["names_of_pods_created"])
+	pn := reflect.ValueOf(s.Meta["names of pods created"])
 	var items []interface{}
 	var result []string
 	for i := 0; i < pn.Len(); i++ {
@@ -90,7 +89,7 @@ func (s *SummaryState) LogPodName(n string) {
 		}
 		result = append(result, fmt.Sprintf("%v", record))
 	}
-	s.Meta["names_of_pods_created"] = result
+	s.Meta["names of pods created"] = result
 }
 
 func (s *SummaryState) initProbe(n string) {
@@ -131,5 +130,8 @@ func (s *SummaryState) completeProbe(e *Probe) {
 	} else {
 		e.Result = "Failed"
 		s.ProbesFailed = s.ProbesFailed + 1
+	}
+	if len(s.Meta["names of pods created"].([]string)) == 0 {
+		s.Meta["pod creation error"] = "An error has occurred while creating pods. This may be due to a configuration error in the cluster, or in the config that was passed in to Probr"
 	}
 }
