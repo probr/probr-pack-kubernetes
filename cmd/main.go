@@ -27,7 +27,7 @@ func main() {
 	cli_flags.HandleFlags()
 	config.LogConfigState()
 
-	if config.Vars.LogLevel == "ERROR" {
+	if showIndicator() {
 		// At this loglevel, Probr is often silent for long periods. Add a visual runtime indicator.
 		config.Spinner = spinner.New(spinner.CharSets[42], 500*time.Millisecond)
 		config.Spinner.Start()
@@ -57,6 +57,10 @@ func main() {
 	}
 	summary.State.PrintSummary()
 	exit(s)
+}
+
+func showIndicator() bool {
+	return (config.Vars.LogLevel == "ERROR" && !config.Vars.Silent)
 }
 
 func exit(status int) {

@@ -38,7 +38,8 @@ type ConfigVars struct {
 	Probes             []Probe  `yaml:"probes"`
 	SystemClusterRoles []string `yaml:"systemClusterRoles"`
 	Tags               string   `yaml:"tags"`
-	TagExclusions      []string // not from yaml
+	Silent             bool     // set by flags only
+	TagExclusions      []string // set programatically
 }
 
 type Probe struct {
