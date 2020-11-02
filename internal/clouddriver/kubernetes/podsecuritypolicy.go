@@ -140,18 +140,14 @@ func (psp *PSP) setenv() {
 	psp.probeContainer = defaultPSPProbeContainer
 	psp.probePodName = defaultPSPProbePodName
 
-	// image repository + busy box from config
+	// image repository from config
 	// but default if not supplied
-	i := config.Vars.Images.Repository
+	i := config.Vars.ImagesRepository
 	if len(i) < 1 {
 		i = defaultPSPImageRepository
 	}
-	b := config.Vars.Images.BusyBox
-	if len(b) < 1 {
-		b = defaultPSPProbeImage
-	}
 
-	psp.probeImage = i + "/" + b
+	psp.probeImage = i + "/" + defaultPSPProbeImage
 }
 
 // ClusterIsDeployed verifies that a suitable kubernetes cluster is deployed.
