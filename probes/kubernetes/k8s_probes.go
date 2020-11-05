@@ -104,6 +104,7 @@ func (s *scenarioState) BeforeScenario(probeName string, gs *godog.Scenario) {
 	if coreengine.TagsNotExcluded(gs.Tags) {
 		s.setup()
 		s.name = gs.Name
+		s.probe = summary.State.GetProbeLog(probeName)
 		s.audit = summary.State.GetProbeLog(probeName).InitializeAuditor(gs.Name, gs.Tags)
 		coreengine.LogScenarioStart(gs)
 	}
