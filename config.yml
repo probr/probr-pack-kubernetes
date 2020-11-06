@@ -1,4 +1,4 @@
-kubeConfig: .kube/config
+#kubeConfig: .kube/config
 auditEnabled: true
 auditDir: audit_output
 cucumberDir: cucumber_output
@@ -13,7 +13,7 @@ azure:
     locationDefault:
 probes: # this entire object can be left out if all tests are to be run
   - name: account_manager
-    excluded: false
+    excluded: true
     justification: "demo"
 
   - name: container_registry_access
@@ -23,10 +23,6 @@ probes: # this entire object can be left out if all tests are to be run
   - name: general
     excluded: false
     justification: "demo"
-    scenarios:
-      - name: CIS-5.6.3
-        excluded: false
-        justification: "scenario exclusion demo"
 
   - name: iam_control
     excluded: false
@@ -37,9 +33,5 @@ probes: # this entire object can be left out if all tests are to be run
     justification: "demo"
 
   - name: pod_security_policy
-    excluded: false
+    excluded: true
     justification: "demo"
-    scenarios:
-      - name: AZP-0.3
-        excluded: false
-        justification: "scenario exclusion demo"

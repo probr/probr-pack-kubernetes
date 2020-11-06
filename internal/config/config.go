@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"strings"
 
 	"github.com/briandowns/spinner"
 	"gopkg.in/yaml.v2"
@@ -43,13 +42,6 @@ type ConfigVars struct {
 }
 
 type Probe struct {
-	Name          string     `yaml:"name"`
-	Excluded      bool       `yaml:"excluded"`
-	Justification string     `yaml:"justification"`
-	Scenarios     []Scenario `yaml:"scenarios"`
-}
-
-type Scenario struct {
 	Name          string `yaml:"name"`
 	Excluded      bool   `yaml:"excluded"`
 	Justification string `yaml:"justification"`
@@ -61,13 +53,13 @@ var Spinner *spinner.Spinner
 
 // GetTags parses Tags with TagExclusions
 func (ctx *ConfigVars) GetTags() string {
+
 	for _, v := range ctx.Probes {
 		if v.Excluded {
 			ctx.HandleExclusion(v.Name, v.Justification)
-		} else {
-			ctx.HandleScenarioExclusions(&v)
 		}
 	}
+
 	return ctx.Tags
 }
 
@@ -78,17 +70,7 @@ func (ctx *ConfigVars) HandleExclusion(name, justification string) {
 	if justification == "" {
 		log.Fatalf("[ERROR] A justification must be provided for the tag exclusion '%s'", name)
 	}
-	r := "@" + name + ","
-	ctx.Tags = strings.Replace(ctx.Tags, r, "", -1)     // Remove exclusion from tags
 	ctx.TagExclusions = append(ctx.TagExclusions, name) // Add exclusion to list
-}
-
-func (ctx *ConfigVars) HandleScenarioExclusions(e *Probe) {
-	for _, v := range e.Scenarios {
-		if v.Excluded {
-			ctx.HandleExclusion(v.Name, v.Justification)
-		}
-	}
 }
 
 // Init will override config.Vars with the content retrieved from a filepath
