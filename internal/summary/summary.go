@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"log"
 	"path/filepath"
-	"reflect"
 
 	"github.com/citihub/probr/internal/config"
 )
@@ -73,23 +72,10 @@ func (s *SummaryState) GetProbeLog(n string) *Probe {
 
 // LogPodName adds pod names to a list for user's debugging purposes
 func (s *SummaryState) LogPodName(n string) {
-	// A bit of effort is needed to keep this list in the generic "Meta"
-	pn := reflect.ValueOf(s.Meta["names of pods created"])
-	var items []interface{}
-	var result []string
-	for i := 0; i < pn.Len(); i++ {
-		items = append(items, pn.Index(i).Interface())
-	}
-	for _, v := range items {
-		item := reflect.ValueOf(v)
-		var record []string
-		for i := 0; i < item.NumField(); i++ {
-			itm := item.Field(i).Interface()
-			record = append(record, fmt.Sprintf("%v", itm))
-		}
-		result = append(result, fmt.Sprintf("%v", record))
-	}
-	s.Meta["names of pods created"] = result
+	podNames := s.Meta["names of pods created"].([]string)
+	podNames = append(podNames, n)
+
+	s.Meta["names of pods created"] = podNames
 }
 
 func (s *SummaryState) initProbe(n string) {
