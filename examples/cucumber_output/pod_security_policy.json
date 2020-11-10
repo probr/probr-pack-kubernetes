@@ -1,6 +1,6 @@
 [
     {
-        "uri": "C:\\Users\\eknight\\dev\\probr\\probes\\kubernetes\\probe_definitions\\podsecuritypolicy\\pod-security-policy.feature",
+        "uri": "C:\\Users\\eknight\\dev\\probr\\probes\\kubernetes\\probe_specifications\\podsecuritypolicy\\pod-security-policy.feature",
         "id": "maximise-security-through-pod-security-policies",
         "keyword": "Feature",
         "name": "Maximise security through Pod Security Policies",

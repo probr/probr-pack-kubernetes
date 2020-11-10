@@ -5,7 +5,7 @@
 // invoked directly on the command line of via the Makefile (e.g. make clean-build).
 package k8s_probes
 
-//go:generate go-bindata.exe -pkg $GOPACKAGE -o assets/iam/assets.go assets/iam/yaml probe_definitions/iamcontrol
+//go:generate go-bindata.exe -pkg $GOPACKAGE -o assets/iam/assets.go assets/iam/yaml probe_specifications/iamcontrol
 
 import (
 	"log"

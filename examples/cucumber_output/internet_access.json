@@ -1,6 +1,6 @@
 [
     {
-        "uri": "C:\\Users\\eknight\\dev\\probr\\probes\\kubernetes\\probe_definitions\\internetaccess\\internet_access.feature",
+        "uri": "C:\\Users\\eknight\\dev\\probr\\probes\\kubernetes\\probe_specifications\\internetaccess\\internet_access.feature",
         "id": "egress-control-of-a-kubernetes-cluster",
         "keyword": "Feature",
         "name": "Egress control of a kubernetes cluster",

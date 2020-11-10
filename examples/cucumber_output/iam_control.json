@@ -1,6 +1,6 @@
 [
     {
-        "uri": "C:\\Users\\eknight\\dev\\probr\\probes\\kubernetes\\probe_definitions\\iamcontrol\\identity_and_access.feature",
+        "uri": "C:\\Users\\eknight\\dev\\probr\\probes\\kubernetes\\probe_specifications\\iamcontrol\\identity_and_access.feature",
         "id": "ensure-stringent-authentication-and-authorisation",
         "keyword": "Feature",
         "name": "Ensure stringent authentication and authorisation",

@@ -119,8 +119,8 @@ func (ps *ProbeStore) ExecAllProbes() (int, error) {
 		st, err := ps.ExecProbe(name)
 		summary.State.ProbeComplete(name)
 		if err != nil {
-			//log but continue with remaining tests
-			log.Printf("[ERROR] error executing test: %v", err)
+			//log but continue with remaining probe
+			log.Printf("[ERROR] error executing probe: %v", err)
 		}
 		if st > status {
 			status = st

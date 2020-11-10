@@ -1,6 +1,6 @@
 [
     {
-        "uri": "C:\\Users\\eknight\\dev\\probr\\probes\\kubernetes\\probe_definitions\\general\\general.feature",
+        "uri": "C:\\Users\\eknight\\dev\\probr\\probes\\kubernetes\\probe_specifications\\general\\general.feature",
         "id": "general-cluster-security-configurations",
         "keyword": "Feature",
         "name": "General Cluster Security Configurations",

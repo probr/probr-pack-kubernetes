@@ -1,7 +1,7 @@
 # Probes Engineering Notes
 
 This folder includes feature files and functionality associated with probes. A probe has functions defined to allow it to test the required control behaviour of a 'system feature', which is defined in a single BDD feature file.
-Probes are grouped into 'categories' and placed within a category folder. For example, the testing functionality for the 'container_registry_probe' is defined in the container_registry_probe.go file within the kubernetes folder, because it is part of the kubernetes category. The associated container_registry_access.feature file is located within the kubernetes/probe_definitions folder.
+Probes are grouped into 'categories' and placed within a category folder. For example, the testing functionality for the 'container_registry_probe' is defined in the container_registry_probe.go file within the kubernetes folder, because it is part of the kubernetes category. The associated container_registry_access.feature file is located within the kubernetes/probe_specifications folder.
 
 ## Feature Files
 

@@ -1,4 +1,4 @@
-#kubeConfig: .kube/config
+kubeConfig: .kube/config
 auditEnabled: true
 auditDir: audit_output
 cucumberDir: cucumber_output
@@ -33,5 +33,5 @@ probes: # this entire object can be left out if all tests are to be run
     justification: "demo"
 
   - name: pod_security_policy
-    excluded: true
+    excluded: false
     justification: "demo"

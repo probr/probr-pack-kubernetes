@@ -2,12 +2,9 @@ package coreengine
 
 import (
 	"bytes"
-	"fmt"
 	"io"
 	"log"
 	"os"
-	"path/filepath"
-	"strings"
 
 	"github.com/cucumber/godog"
 	"github.com/cucumber/godog/colors"
@@ -59,16 +56,11 @@ func inMemGodogProbeHandler(gd *GodogProbe) (int, *bytes.Buffer, error) {
 }
 
 func runTestSuite(o io.Writer, gd *GodogProbe) (int, error) {
-	f, err := getProbesPath(gd)
-	if err != nil {
-		return -2, err
-	}
-
 	tags := config.Vars.GetTags()
 	opts := godog.Options{
 		Format: "cucumber",
 		Output: colors.Colored(o),
-		Paths:  []string{f},
+		Paths:  []string{gd.FeaturePath},
 		Tags:   tags,
 	}
 
@@ -80,22 +72,4 @@ func runTestSuite(o io.Writer, gd *GodogProbe) (int, error) {
 	}.Run()
 
 	return status, nil
-}
-
-func getProbesPath(gd *GodogProbe) (string, error) {
-	r, err := getRootDir()
-	if err != nil {
-		return "", fmt.Errorf("unable to determine root directory - not able to perform tests")
-	}
-
-	if gd.FeaturePath != nil {
-		//if we've been given a feature path, add to root and return:
-		return filepath.Join(r, *gd.FeaturePath), nil
-	}
-
-	//otherwise derive it from the group and name data:
-	g := gd.ProbeDescriptor.Group.String()
-	group := strings.ReplaceAll(strings.ToLower(g), " ", "")
-	name := strings.ReplaceAll(gd.ProbeDescriptor.Name, "_", "")
-	return filepath.Join(r, "probes", group, "probe_definitions", name), nil
 }

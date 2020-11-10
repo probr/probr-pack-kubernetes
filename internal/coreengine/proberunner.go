@@ -23,7 +23,7 @@ type GodogProbe struct {
 	ProbeDescriptor     *ProbeDescriptor
 	ProbeInitializer    func(*godog.TestSuiteContext)
 	ScenarioInitializer func(*godog.ScenarioContext)
-	FeaturePath         *string
+	FeaturePath         string
 	Status              *ProbeStatus `json:"status,omitempty"`
 	Results             *bytes.Buffer
 }
