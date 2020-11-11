@@ -26,11 +26,11 @@ func SetContainerRegistryAccess(c kubernetes.ContainerRegistryAccess) {
 // CIS-6.1.3
 // Minimize cluster access to read-only
 func (s *scenarioState) iAmAuthorisedToPullFromAContainerRegistry() error {
-	pod, podAudit, err := cra.SetupContainerAccessProbePod(config.Vars.ImagesRepository)
+	pod, podAudit, err := cra.SetupContainerAccessProbePod(config.Vars.ContainerRegistry)
 
 	err = ProcessPodCreationResult(s.probe, &s.podState, pod, kubernetes.PSPContainerAllowedImages, err)
 
-	description := fmt.Sprintf("Creates a new pod using an image from %s. Passes if image successfully pulls and pod is built.", config.Vars.ImagesRepository)
+	description := fmt.Sprintf("Creates a new pod using an image from %s. Passes if image successfully pulls and pod is built.", config.Vars.ContainerRegistry)
 	payload := podPayload(pod, podAudit)
 	s.audit.AuditScenarioStep(description, payload, err)
 

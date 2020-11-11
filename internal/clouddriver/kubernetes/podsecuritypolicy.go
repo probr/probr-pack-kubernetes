@@ -64,11 +64,9 @@ const (
 	//default values.  Overrides can be supplied via the environment.
 	defaultPSPProbeNamespace = "probr-pod-security-test-ns"
 	//NOTE: either the above namespace needs to be added to the exclusion list on the
-	//container registry rule or busybox need to be available in the allowed (probably internal) registry
-	defaultPSPImageRepository = "docker.io"
-	defaultPSPProbeImage      = "busybox"
-	defaultPSPProbeContainer  = "psp-test"
-	defaultPSPProbePodName    = "psp-test-pod"
+	//container registry image needs to be available in the allowed (probably internal) registry
+	defaultPSPProbeContainer = "psp-test"
+	defaultPSPProbePodName   = "psp-test-pod"
 )
 
 // PodSecurityPolicy interface defines a set of methods to support the testing of Pod Security Policies.
@@ -140,14 +138,8 @@ func (psp *PSP) setenv() {
 	psp.probeContainer = defaultPSPProbeContainer
 	psp.probePodName = defaultPSPProbePodName
 
-	// image repository from config
-	// but default if not supplied
-	i := config.Vars.ImagesRepository
-	if len(i) < 1 {
-		i = defaultPSPImageRepository
-	}
-
-	psp.probeImage = i + "/" + defaultPSPProbeImage
+	// Extract registry and image info from config
+	psp.probeImage = config.Vars.ContainerRegistry + "/" + config.Vars.ProbeImage
 }
 
 // ClusterIsDeployed verifies that a suitable kubernetes cluster is deployed.

@@ -21,11 +21,9 @@ const (
 	//default values.  Overrides can be supplied via the environment.
 	defaultIAMProbeNamespace = "probr-rbac-test-ns"
 	//NOTE: either the above namespace needs to be added to the exclusion list on the
-	//container registry rule or busybox need to be available in the allowed (probably internal) registry
-	defaultIAMImageRepository = "curlimages"
-	defaultIAMProbeImage      = "curl"
-	defaultIAMProbeContainer  = "iam-test"
-	defaultIAMProbePodName    = "iam-test-pod"
+	//container registry rule or image need to be available in the allowed (probably internal) registry
+	defaultIAMProbeContainer = "iam-test"
+	defaultIAMProbePodName   = "iam-test-pod"
 )
 
 // IAMProbeCommand defines commands for use in testing IAM
@@ -85,17 +83,8 @@ func (i *IAM) setenv() {
 	i.probeContainer = defaultIAMProbeContainer
 	i.probePodName = defaultIAMProbePodName
 
-	// image repository + curl from config
-	// but default if not supplied
-	ig := config.Vars.ImagesRepository
-	//need to fudge for 'curl' as it's registered as curlimages/curl
-	//on docker, so if we've been given a repository from the config
-	//and it's 'docker.io' then ignore it and set default (curlimages)
-	if len(ig) < 1 || ig == "docker.io" {
-		ig = defaultIAMImageRepository
-	}
-
-	i.probeImage = ig + "/" + defaultIAMProbeImage
+	// Extract registry and image info from config
+	i.probeImage = config.Vars.ContainerRegistry + "/" + config.Vars.ProbeImage
 
 	i.testAzureIdentityBinding = "probr-specificns-aib"
 }

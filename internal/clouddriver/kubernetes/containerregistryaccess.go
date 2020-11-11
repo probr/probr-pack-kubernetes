@@ -3,12 +3,12 @@ package kubernetes
 import (
 	"strings"
 
+	"github.com/citihub/probr/internal/config"
 	apiv1 "k8s.io/api/core/v1"
 )
 
 const (
 	caNamespace   = "probr-container-access-test-ns"
-	caProbeImage   = "/busybox:latest"
 	caContainer   = "container-access-test"
 	caPodNameBase = "ca-test"
 )
@@ -48,8 +48,8 @@ func (c *CRA) ClusterIsDeployed() *bool {
 
 //SetupContainerAccessProbePod creates a pod with characteristics required for testing container access.
 func (c *CRA) SetupContainerAccessProbePod(r string) (*apiv1.Pod, *PodAudit, error) {
-	//full image is the repository + the caProbeImage
-	i := r + caProbeImage
+	//full image is the repository + the configured image
+	i := r + "/" + config.Vars.ProbeImage
 	pname := GenerateUniquePodName(caPodNameBase + "-" + strings.ReplaceAll(r, ".", "-"))
 	ns, cname := caNamespace, caContainer
 	// let caller handle result ...

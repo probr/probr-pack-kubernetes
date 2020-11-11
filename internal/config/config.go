@@ -22,7 +22,8 @@ type ConfigVars struct {
 	AuditEnabled              string `yaml:"auditEnabled"`
 	LogLevel                  string `yaml:"logLevel"`
 	OverwriteHistoricalAudits string `yaml:"overwriteHistoricalAudits"`
-	ImagesRepository          string `yaml:"imagesRepository"`
+	ContainerRegistry         string `yaml:"containerRegistry"`
+	ProbeImage                string `yaml:"probeImage"`
 	Azure                     struct {
 		SubscriptionID  string `yaml:"subscriptionID"`
 		ClientID        string `yaml:"clientID"`

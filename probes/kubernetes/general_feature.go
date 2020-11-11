@@ -13,11 +13,6 @@ import (
 	"github.com/cucumber/godog"
 )
 
-const (
-	// general feature container image
-	gfProbeImage = "busybox"
-)
-
 // BUG - This step doesn't run
 //@CIS-5.1.3
 func (s *scenarioState) iInspectTheThatAreConfigured(roleLevel string) error {
@@ -58,7 +53,7 @@ func (s *scenarioState) iShouldOnlyFindWildcardsInKnownAndAuthorisedConfiguratio
 func (s *scenarioState) iAttemptToCreateADeploymentWhichDoesNotHaveASecurityContext() error {
 	cname := "probr-general"
 	pod_name := kubernetes.GenerateUniquePodName(cname)
-	image := config.Vars.ImagesRepository + "/" + gfProbeImage
+	image := config.Vars.ContainerRegistry + "/" + config.Vars.ProbeImage
 
 	//create pod with nil security context
 	pod, podAudit, err := kubernetes.GetKubeInstance().CreatePod(pod_name, "probr-general-test-ns", cname, image, true, nil)
