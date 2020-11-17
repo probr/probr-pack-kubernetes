@@ -218,7 +218,7 @@ func (s *scenarioState) aKubernetesClusterIsDeployed() error {
 	payload := struct {
 		KubeConfigPath string
 		KubeContext    string
-	}{config.Vars.KubeConfigPath, config.Vars.KubeContext}
+	}{config.Vars.ServicePacks.Kubernetes.KubeConfigPath, config.Vars.ServicePacks.Kubernetes.KubeContext}
 	s.audit.AuditScenarioStep(description, payload, nil)
 
 	return nil

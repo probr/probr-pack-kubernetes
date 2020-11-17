@@ -1,37 +1,44 @@
-kubeConfig: .kube/config
-auditEnabled: true
-auditDir: audit_output
-cucumberDir: cucumber_output
-overwriteHistoricalAudits: true
-summaryEnabled: true
-imagesRepository:
-azure:
-    subscriptionID:
-    clientID:
-    clientSecret:
-    tenantID:
-    locationDefault:
-probes: # this entire object can be left out if all tests are to be run
-  - name: account_manager
-    excluded: true
-    justification: "demo"
+AuditEnabled: true
+AuditDir: audit_output
+CucumberDir: cucumber_output
+OverwriteHistoricalAudits: true
+SummaryEnabled: true
+ImagesRepository:
+ServicePacks:
+  Kubernetes:
+    KubeConfig: .kube/config
+    KubeContext:
+CloudProviders:
+  Azure:
+    SubscriptionID: 1234
+    ClientID:
+    ClientSecret:
+    TenantID:
+    LocationDefault:
+    Identity:
+      DefaultNamespaceAI:
+      DefaultNamespaceAIB:
+Probes: # this entire object can be left out if all tests are to be run
+  - Name: account_manager
+    Excluded: true
+    Justification: "demo"
 
-  - name: container_registry_access
-    excluded: false
-    justification: "demo"
+  - Name: container_registry_access
+    Excluded: false
+    Justification: "demo"
 
-  - name: general
-    excluded: false
-    justification: "demo"
+  - Name: general
+    Excluded: false
+    Justification: "demo"
 
-  - name: iam_control
-    excluded: false
-    justification: "demo"
+  - Name: iam_control
+    Excluded: false
+    Justification: "demo"
 
-  - name: internet_access
-    excluded: false
-    justification: "demo"
+  - Name: internet_access
+    Excluded: false
+    Justification: "demo"
 
-  - name: pod_security_policy
-    excluded: false
-    justification: "demo"
+  - Name: pod_security_policy
+    Excluded: false
+    Justification: "demo"

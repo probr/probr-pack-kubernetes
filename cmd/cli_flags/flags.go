@@ -104,10 +104,10 @@ func tagsHandler(v interface{}) {
 
 func kubeConfigHandler(v interface{}) {
 	if len(*v.(*string)) > 0 {
-		config.Vars.KubeConfigPath = *v.(*string)
+		config.Vars.ServicePacks.Kubernetes.KubeConfigPath = *v.(*string)
 		log.Printf("[NOTICE] Kubeconfig path has been overridden via command line")
 	}
-	if len(config.Vars.KubeConfigPath) == 0 {
+	if len(config.Vars.ServicePacks.Kubernetes.KubeConfigPath) == 0 {
 		log.Printf("[NOTICE] No kubeconfig path specified. Falling back to default paths.")
 	}
 }

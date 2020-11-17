@@ -518,7 +518,7 @@ func (k *Kube) ExecCommand(cmd, ns, pn *string) (s *CmdExecutionResult) {
 
 	log.Printf("[INFO] ExecCommand Request URL: %v", req.URL().String())
 
-	config, err := clientcmd.BuildConfigFromFlags("", config.Vars.KubeConfigPath)
+	config, err := clientcmd.BuildConfigFromFlags("", config.Vars.ServicePacks.Kubernetes.KubeConfigPath)
 	exec, err := remotecommand.NewSPDYExecutor(config, "POST", req.URL())
 	if err != nil {
 		return &CmdExecutionResult{Err: fmt.Errorf("error while creating Executor: %v", err), Internal: true}
@@ -795,7 +795,7 @@ func (k *Kube) skipSystemRole(m *v1.ObjectMeta) bool {
 	}
 
 	//next, check to see if the role name is on the list of system roles
-	for _, r := range config.Vars.SystemClusterRoles {
+	for _, r := range config.Vars.ServicePacks.Kubernetes.SystemClusterRoles {
 		//use a prefix check:
 		if strings.HasPrefix(m.Name, r) {
 			return true
@@ -1001,7 +1001,7 @@ func homeDir() string {
 }
 
 func getConfigPathFromEnv() string {
-	return config.Vars.KubeConfigPath
+	return config.Vars.ServicePacks.Kubernetes.KubeConfigPath
 }
 
 func logCmd(c *string, p *string, n *string) {

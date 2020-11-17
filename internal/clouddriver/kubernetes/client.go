@@ -14,7 +14,7 @@ import (
 	_ "k8s.io/client-go/plugin/pkg/client/auth"
 )
 
-//GetClient gets a client connection to the Kubernetes cluster specifed via config.Vars.KubeConfigPath
+//GetClient gets a client connection to the Kubernetes cluster specifed via config.Vars.ServicePacks.Kubernetes.KubeConfigPath
 func (k *Kube) GetClient() (*kubernetes.Clientset, error) {
 	k.clientMutex.Lock()
 	defer k.clientMutex.Unlock()
@@ -43,20 +43,20 @@ func getClientConfig() (*restclient.Config, error) {
 	// https://github.com/kubernetes/client-go/blob/5ab99756f65dbf324e5adf9bd020a20a024bad85/tools/clientcmd/client_config.go#L606
 
 	k := clientcmd.NewNonInteractiveDeferredLoadingClientConfig(
-		&clientcmd.ClientConfigLoadingRules{ExplicitPath: config.Vars.KubeConfigPath},
+		&clientcmd.ClientConfigLoadingRules{ExplicitPath: config.Vars.ServicePacks.Kubernetes.KubeConfigPath},
 		&clientcmd.ConfigOverrides{ClusterInfo: clientcmdapi.Cluster{Server: ""}})
 	rawConfig, _ := k.RawConfig()
-	if config.Vars.KubeContext == "" {
+	if config.Vars.ServicePacks.Kubernetes.KubeContext == "" {
 		log.Printf("[NOTICE] Initializing client with default context from provided config")
 	} else {
-		log.Printf("[NOTICE] Initializing kube config with non-default context: %v", config.Vars.KubeContext)
+		log.Printf("[NOTICE] Initializing kube config with non-default context: %v", config.Vars.ServicePacks.Kubernetes.KubeContext)
 		modifyContext(rawConfig)
 	}
 	return k.ClientConfig()
 }
 
 func modifyContext(rawConfig clientcmdapi.Config) {
-	ctx := config.Vars.KubeContext
+	ctx := config.Vars.ServicePacks.Kubernetes.KubeContext
 	if rawConfig.Contexts[ctx] == nil {
 		log.Fatalf("Required context does not exist in provided kubeconfig: %v", ctx)
 	}

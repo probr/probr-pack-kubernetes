@@ -165,7 +165,7 @@ func (p *AZSecurityPolicyProvider) getPolicies() (*map[string]*azPolicy, error) 
 		return &p.policiesByType, nil
 	}
 
-	s := config.Vars.Azure.SubscriptionID
+	s := config.Vars.CloudProviders.Azure.SubscriptionID
 	log.Printf("[INFO] Using Azure Sub: %v", s)
 
 	scope := "/subscriptions/" + s

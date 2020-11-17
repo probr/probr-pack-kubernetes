@@ -13,33 +13,47 @@ import (
 // ConfigVars contains all possible config vars
 type ConfigVars struct {
 	// NOTE: Env and Defaults are ONLY available if corresponding logic is added to defaults.go and getters.go
-	KubeConfigPath            string `yaml:"kubeConfig"`
-	KubeContext               string `yaml:"kubeContext"`
-	OutputType                string `yaml:"outputType"`
-	CucumberDir               string `yaml:"outputDir"`
-	AuditDir                  string `yaml:"auditDir"`
-	SummaryEnabled            string `yaml:"summaryEnabled"`
-	AuditEnabled              string `yaml:"auditEnabled"`
-	LogLevel                  string `yaml:"logLevel"`
-	OverwriteHistoricalAudits string `yaml:"overwriteHistoricalAudits"`
-	ContainerRegistry         string `yaml:"containerRegistry"`
-	ProbeImage                string `yaml:"probeImage"`
-	Azure                     struct {
-		SubscriptionID  string `yaml:"subscriptionID"`
-		ClientID        string `yaml:"clientID"`
-		ClientSecret    string `yaml:"clientSecret"`
-		TenantID        string `yaml:"tenantID"`
-		LocationDefault string `yaml:"locationDefault"`
-		Identity        struct {
-			DefaultNamespaceAI  string `yaml:"defaultNamespaceAI"`
-			DefaultNamespaceAIB string `yaml:"defaultNamespaceAIB"`
-		} `yaml:"azureIdentity"`
-	} `yaml:"azure"`
-	Probes             []Probe  `yaml:"probes"`
-	SystemClusterRoles []string `yaml:"systemClusterRoles"`
-	Tags               string   `yaml:"tags"`
-	Silent             bool     // set by flags only
-	TagExclusions      []string // set programatically
+	ServicePacks              servicePacks   `yaml:"ServicePacks"`
+	CloudProviders            cloudProviders `yaml:"CloudProviders"`
+	OutputType                string         `yaml:"OutputType"`
+	CucumberDir               string         `yaml:"CucumberDir"`
+	AuditDir                  string         `yaml:"AuditDir"`
+	SummaryEnabled            string         `yaml:"SummaryEnabled"`
+	AuditEnabled              string         `yaml:"AuditEnabled"`
+	LogLevel                  string         `yaml:"LogLevel"`
+	OverwriteHistoricalAudits string         `yaml:"OverwriteHistoricalAudits"`
+	ContainerRegistry         string         `yaml:"ContainerRegistry"`
+	ProbeImage                string         `yaml:"ProbeImage"`
+	Probes                    []Probe        `yaml:"Probes"`
+	Tags                      string         `yaml:"Tags"`
+	Silent                    bool           // set by flags only
+	TagExclusions             []string       // set programatically
+}
+
+type servicePacks struct {
+	Kubernetes kubernetes `yaml:"Kubernetes"`
+}
+
+type cloudProviders struct {
+	Azure azure `yaml:"Azure"`
+}
+
+type kubernetes struct {
+	KubeConfigPath     string   `yaml:"KubeConfig"`
+	KubeContext        string   `yaml:"KubeContext"`
+	SystemClusterRoles []string `yaml:"SystemClusterRoles"`
+}
+
+type azure struct {
+	SubscriptionID  string `yaml:"SubscriptionID"`
+	ClientID        string `yaml:"ClientID"`
+	ClientSecret    string `yaml:"ClientSecret"`
+	TenantID        string `yaml:"TenantID"`
+	LocationDefault string `yaml:"LocationDefault"`
+	Identity        struct {
+		DefaultNamespaceAI  string `yaml:"DefaultNamespaceAI"`
+		DefaultNamespaceAIB string `yaml:"DefaultNamespaceAIB"`
+	}
 }
 
 type Probe struct {
