@@ -1,112 +1,121 @@
 [
     {
-        "uri": "C:\\Users\\eknight\\dev\\probr\\probes\\kubernetes\\probe_specifications\\iamcontrol\\identity_and_access.feature",
-        "id": "ensure-stringent-authentication-and-authorisation",
+        "uri": "/probr/probes/kubernetes/probe_specifications/iam_control.feature",
+        "id": "least-privilege-authentication-and-authorisation",
         "keyword": "Feature",
-        "name": "Ensure stringent authentication and authorisation",
+        "name": "Least privilege authentication and authorisation",
         "description": "  As a Security Auditor\n  I want to ensure that stringent authentication and authorisation policies are applied to my organisation's Kubernetes clusters\n  So that only approve actors have ability to perform sensitive operations in order to prevent malicious attacks on my organization",
-        "line": 5,
+        "line": 6,
         "comments": [
             {
                 "value": "#There will be CIS control here, for now, straight into Azure AAD Managed Identity ...",
-                "line": 10
+                "line": 12
             }
         ],
         "tags": [
             {
-                "name": "@kubernetes",
+                "name": "@service/kubernetes",
                 "line": 1
             },
             {
-                "name": "@iam_control",
+                "name": "@csp/azure",
                 "line": 2
             },
             {
-                "name": "@CIS-6.8",
+                "name": "@control/family/iam",
                 "line": 3
             },
             {
-                "name": "@AZ-AAD-AI",
+                "name": "@standard/cis/6.8",
                 "line": 4
+            },
+            {
+                "name": "@standard/none/AZ-AAD-AI",
+                "line": 5
             }
         ],
         "elements": [
             {
-                "id": "ensure-stringent-authentication-and-authorisation;prevent-cross-namespace-azure-identities;;2",
+                "id": "least-privilege-authentication-and-authorisation;prevent-cross-namespace-azure-identities;;2",
                 "keyword": "Scenario Outline",
                 "name": "Prevent cross namespace Azure Identities",
                 "description": "",
-                "line": 21,
+                "line": 23,
                 "type": "scenario",
                 "tags": [
                     {
-                        "name": "@kubernetes",
+                        "name": "@service/kubernetes",
                         "line": 1
                     },
                     {
-                        "name": "@iam_control",
+                        "name": "@csp/azure",
                         "line": 2
                     },
                     {
-                        "name": "@CIS-6.8",
+                        "name": "@control/family/iam",
                         "line": 3
                     },
                     {
-                        "name": "@AZ-AAD-AI",
+                        "name": "@standard/cis/6.8",
                         "line": 4
                     },
                     {
-                        "name": "@preventative",
-                        "line": 12
+                        "name": "@standard/none/AZ-AAD-AI",
+                        "line": 5
                     },
                     {
-                        "name": "@AZ-AAD-AI-1.0",
-                        "line": 12
+                        "name": "@control/type/preventative",
+                        "line": 14
+                    },
+                    {
+                        "name": "@standard/none/AZ-AAD-AI-1.0",
+                        "line": 14
                     }
                 ],
                 "steps": [
                     {
                         "keyword": "Given ",
                         "name": "a Kubernetes cluster exists which we can deploy into",
-                        "line": 21,
+                        "line": 23,
                         "match": {
-                            "location": "k8s_probes.go:200"
+                            "location": "k8s_probes.go:210"
                         },
                         "result": {
                             "status": "passed",
-                            "duration": 13321000
+                            "duration": 24000
                         }
                     },
                     {
                         "keyword": "When ",
                         "name": "I create a simple pod in \"a non-default\" namespace assigned with that AzureIdentityBinding",
-                        "line": 21,
+                        "line": 23,
                         "match": {
-                            "location": "identity_and_access.go:56"
+                            "location": "iam_control.go:62"
                         },
                         "result": {
-                            "status": "failed",
-                            "error_message": "runtime error: invalid memory address or nil pointer dereference",
-                            "duration": 61117222000
+                            "status": "passed",
+                            "duration": 332947201
                         }
                     },
                     {
                         "keyword": "Then ",
                         "name": "the pod is deployed successfully",
-                        "line": 21,
+                        "line": 23,
                         "match": {
-                            "location": "identity_and_access.go:78"
+                            "location": "iam_control.go:85"
                         },
                         "result": {
-                            "status": "skipped"
+                            "status": "failed",
+                            "error_message": "[ERROR] pod was not deployed successfully - creation error: pod creation error: map[podcreation-error: psp-container-allowed-images:podcreation-error: psp-allowed-portrange] admission webhook \"validation.gatekeeper.sh\" denied the request: [denied by azurepolicy-container-allowed-images-d0318bd54c8157a6fe8c] Container image curlimages/curl for container demo has not been allowed.",
+                            "duration": 70602
                         }
                     },
                     {
                         "keyword": "But ",
                         "name": "an attempt to obtain an access token from that pod should \"Fail\"",
-                        "line": 21,
+                        "line": 23,
                         "match": {
-                            "location": "identity_and_access.go:107"
+                            "location": "iam_control.go:114"
                         },
                         "result": {
                             "status": "skipped"
@@ -115,81 +124,86 @@
                 ]
             },
             {
-                "id": "ensure-stringent-authentication-and-authorisation;prevent-cross-namespace-azure-identities;;3",
+                "id": "least-privilege-authentication-and-authorisation;prevent-cross-namespace-azure-identities;;3",
                 "keyword": "Scenario Outline",
                 "name": "Prevent cross namespace Azure Identities",
                 "description": "",
-                "line": 22,
+                "line": 24,
                 "type": "scenario",
                 "tags": [
                     {
-                        "name": "@kubernetes",
+                        "name": "@service/kubernetes",
                         "line": 1
                     },
                     {
-                        "name": "@iam_control",
+                        "name": "@csp/azure",
                         "line": 2
                     },
                     {
-                        "name": "@CIS-6.8",
+                        "name": "@control/family/iam",
                         "line": 3
                     },
                     {
-                        "name": "@AZ-AAD-AI",
+                        "name": "@standard/cis/6.8",
                         "line": 4
                     },
                     {
-                        "name": "@preventative",
-                        "line": 12
+                        "name": "@standard/none/AZ-AAD-AI",
+                        "line": 5
                     },
                     {
-                        "name": "@AZ-AAD-AI-1.0",
-                        "line": 12
+                        "name": "@control/type/preventative",
+                        "line": 14
+                    },
+                    {
+                        "name": "@standard/none/AZ-AAD-AI-1.0",
+                        "line": 14
                     }
                 ],
                 "steps": [
                     {
                         "keyword": "Given ",
                         "name": "a Kubernetes cluster exists which we can deploy into",
-                        "line": 22,
+                        "line": 24,
                         "match": {
-                            "location": "k8s_probes.go:200"
+                            "location": "k8s_probes.go:210"
                         },
                         "result": {
                             "status": "passed",
-                            "duration": 0
+                            "duration": 21201
                         }
                     },
                     {
                         "keyword": "When ",
                         "name": "I create a simple pod in \"the default\" namespace assigned with that AzureIdentityBinding",
-                        "line": 22,
+                        "line": 24,
                         "match": {
-                            "location": "identity_and_access.go:56"
+                            "location": "iam_control.go:62"
                         },
                         "result": {
-                            "status": "failed",
-                            "error_message": "runtime error: invalid memory address or nil pointer dereference",
-                            "duration": 60144196700
+                            "status": "passed",
+                            "duration": 141693269
                         }
                     },
                     {
                         "keyword": "Then ",
                         "name": "the pod is deployed successfully",
-                        "line": 22,
+                        "line": 24,
                         "match": {
-                            "location": "identity_and_access.go:78"
+                            "location": "iam_control.go:85"
                         },
                         "result": {
-                            "status": "skipped"
+                            "status": "failed",
+                            "error_message": "[ERROR] pod was not deployed successfully - creation error: pod creation error: map[podcreation-error: psp-container-allowed-images:podcreation-error: psp-allowed-users-groups] admission webhook \"validation.gatekeeper.sh\" denied the request: [denied by azurepolicy-container-allowed-images-d0318bd54c8157a6fe8c] Container image curlimages/curl for container demo has not been allowed.",
+                            "duration": 172805
                         }
                     },
                     {
                         "keyword": "But ",
                         "name": "an attempt to obtain an access token from that pod should \"Succeed\"",
-                        "line": 22,
+                        "line": 24,
                         "match": {
-                            "location": "identity_and_access.go:107"
+                            "location": "iam_control.go:114"
                         },
                         "result": {
                             "status": "skipped"
@@ -198,70 +212,74 @@
                 ]
             },
             {
-                "id": "ensure-stringent-authentication-and-authorisation;prevent-cross-namespace-azure-identity-bindings",
+                "id": "least-privilege-authentication-and-authorisation;prevent-cross-namespace-azure-identity-bindings",
                 "keyword": "Scenario",
                 "name": "Prevent cross namespace Azure Identity Bindings",
                 "description": "",
-                "line": 25,
+                "line": 27,
                 "type": "scenario",
                 "tags": [
                     {
-                        "name": "@kubernetes",
+                        "name": "@service/kubernetes",
                         "line": 1
                     },
                     {
-                        "name": "@iam_control",
+                        "name": "@csp/azure",
                         "line": 2
                     },
                     {
-                        "name": "@CIS-6.8",
+                        "name": "@control/family/iam",
                         "line": 3
                     },
                     {
-                        "name": "@AZ-AAD-AI",
+                        "name": "@standard/cis/6.8",
                         "line": 4
                     },
                     {
-                        "name": "@preventative",
-                        "line": 24
+                        "name": "@standard/none/AZ-AAD-AI",
+                        "line": 5
                     },
                     {
-                        "name": "@AZ-AAD-AI-1.1",
-                        "line": 24
+                        "name": "@control/type/preventative",
+                        "line": 26
+                    },
+                    {
+                        "name": "@standard/none/AZ-AAD-AI-1.1",
+                        "line": 26
                     }
                 ],
                 "steps": [
                     {
                         "keyword": "Given ",
                         "name": "a Kubernetes cluster exists which we can deploy into",
-                        "line": 26,
+                        "line": 28,
                         "match": {
-                            "location": "k8s_probes.go:200"
+                            "location": "k8s_probes.go:210"
                         },
                         "result": {
                             "status": "passed",
-                            "duration": 0
+                            "duration": 38401
                         }
                     },
                     {
                         "keyword": "And ",
                         "name": "the default namespace has an AzureIdentity",
-                        "line": 27,
+                        "line": 29,
                         "match": {
-                            "location": "identity_and_access.go:144"
+                            "location": "iam_control.go:154"
                         },
                         "result": {
                             "status": "failed",
                             "error_message": "[ERROR] AzureIdentity does not exist (result: false)",
-                            "duration": 43502600
+                            "duration": 37672188
                         }
                     },
                     {
                         "keyword": "When ",
                         "name": "I create an AzureIdentityBinding called \"probr-aib\" in a non-default namespace",
-                        "line": 28,
+                        "line": 30,
                         "match": {
-                            "location": "identity_and_access.go:155"
+                            "location": "iam_control.go:165"
                         },
                         "result": {
                             "status": "skipped"
@@ -270,9 +288,9 @@
                     {
                         "keyword": "And ",
                         "name": "I deploy a pod assigned with the \"probr-aib\" AzureIdentityBinding into the same namespace as the \"probr-aib\" AzureIdentityBinding",
-                        "line": 29,
+                        "line": 31,
                         "match": {
-                            "location": "identity_and_access.go:165"
+                            "location": "iam_control.go:175"
                         },
                         "result": {
                             "status": "skipped"
@@ -281,9 +299,9 @@
                     {
                         "keyword": "Then ",
                         "name": "the pod is deployed successfully",
-                        "line": 30,
+                        "line": 32,
                         "match": {
-                            "location": "identity_and_access.go:78"
+                            "location": "iam_control.go:85"
                         },
                         "result": {
                             "status": "skipped"
@@ -292,9 +310,9 @@
                     {
                         "keyword": "But ",
                         "name": "an attempt to obtain an access token from that pod should fail",
-                        "line": 31,
+                        "line": 33,
                         "match": {
-                            "location": "identity_and_access.go:96"
+                            "location": "iam_control.go:103"
                         },
                         "result": {
                             "status": "skipped"
@@ -303,86 +321,89 @@
                 ]
             },
             {
-                "id": "ensure-stringent-authentication-and-authorisation;prevent-access-to-aks-credentials-via-azure-identity-components",
+                "id": "least-privilege-authentication-and-authorisation;prevent-access-to-aks-credentials-via-azure-identity-components",
                 "keyword": "Scenario",
                 "name": "Prevent access to AKS credentials via Azure Identity Components",
                 "description": "",
-                "line": 34,
+                "line": 36,
                 "type": "scenario",
                 "tags": [
                     {
-                        "name": "@kubernetes",
+                        "name": "@service/kubernetes",
                         "line": 1
                     },
                     {
-                        "name": "@iam_control",
+                        "name": "@csp/azure",
                         "line": 2
                     },
                     {
-                        "name": "@CIS-6.8",
+                        "name": "@control/family/iam",
                         "line": 3
                     },
                     {
-                        "name": "@AZ-AAD-AI",
+                        "name": "@standard/cis/6.8",
                         "line": 4
                     },
                     {
-                        "name": "@preventative",
-                        "line": 33
+                        "name": "@standard/none/AZ-AAD-AI",
+                        "line": 5
                     },
                     {
-                        "name": "@AZ-AAD-AI-1.2",
-                        "line": 33
+                        "name": "@control/type/preventative",
+                        "line": 35
+                    },
+                    {
+                        "name": "@standard/none/AZ-AAD-AI-1.2",
+                        "line": 35
                     }
                 ],
                 "steps": [
                     {
                         "keyword": "Given ",
                         "name": "a Kubernetes cluster exists which we can deploy into",
-                        "line": 35,
+                        "line": 37,
                         "match": {
-                            "location": "k8s_probes.go:200"
+                            "location": "k8s_probes.go:210"
                         },
                         "result": {
                             "status": "passed",
-                            "duration": 123200
+                            "duration": 25701
                         }
                     },
                     {
                         "keyword": "And ",
                         "name": "the cluster has managed identity components deployed",
-                        "line": 36,
+                        "line": 38,
                         "match": {
-                            "location": "identity_and_access.go:183"
+                            "location": "iam_control.go:194"
                         },
                         "result": {
                             "status": "passed",
-                            "duration": 128833900
+                            "duration": 101219392
                         }
                     },
                     {
                         "keyword": "When ",
                         "name": "I execute the command \"cat /etc/kubernetes/azure.json\" against the MIC pod",
-                        "line": 37,
+                        "line": 39,
                         "match": {
-                            "location": "identity_and_access.go:211"
+                            "location": "iam_control.go:222"
                         },
                         "result": {
-                            "status": "passed",
-                            "duration": 685671700
+                            "status": "failed",
+                            "error_message": "[ERROR] error raised trying to execute verification command (cat /etc/kubernetes/azure.json)",
+                            "duration": 124290020
                         }
                     },
                     {
                         "keyword": "Then ",
                         "name": "Kubernetes should prevent me from running the command",
-                        "line": 38,
+                        "line": 40,
                         "match": {
-                            "location": "identity_and_access.go:239"
+                            "location": "iam_control.go:253"
                         },
                         "result": {
-                            "status": "failed",
-                            "error_message": "[ERROR] verification command was not blocked",
-                            "duration": 0
+                            "status": "skipped"
                         }
                     }
                 ]

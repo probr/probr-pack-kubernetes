@@ -2,17 +2,18 @@
   "Name": "general",
   "PodsDestroyed": 0,
   "ScenariosAttempted": 4,
-  "ScenariosSucceeded": 4,
-  "ScenariosFailed": 0,
-  "Result": "Success",
+  "ScenariosSucceeded": 3,
+  "ScenariosFailed": 1,
+  "Result": "Failed",
   "Scenarios": {
     "1": {
       "Name": "Minimise wildcards in Roles and Cluster Roles",
       "Result": "Passed",
       "Tags": [
-        "@kubernetes",
-        "@general",
-        "@CIS-5.1.3"
+        "@service/kubernetes",
+        "@control/family/general",
+        "@standard/cis/5.1.3",
+        "@control/type/preventative"
       ],
       "Steps": {
         "1": {
@@ -21,7 +22,7 @@
           "Result": "Passed",
           "Error": "",
           "Payload": {
-            "KubeConfigPath": "C:\\Users\\eknight\\.kube\\config",
+            "KubeConfigPath": "/root/.kube/config",
             "KubeContext": ""
           }
         },
@@ -38,9 +39,10 @@
       "Name": "Minimise wildcards in Roles and Cluster Roles",
       "Result": "Passed",
       "Tags": [
-        "@kubernetes",
-        "@general",
-        "@CIS-5.1.3"
+        "@service/kubernetes",
+        "@control/family/general",
+        "@standard/cis/5.1.3",
+        "@control/type/preventative"
       ],
       "Steps": {
         "1": {
@@ -49,7 +51,7 @@
           "Result": "Passed",
           "Error": "",
           "Payload": {
-            "KubeConfigPath": "C:\\Users\\eknight\\.kube\\config",
+            "KubeConfigPath": "/root/.kube/config",
             "KubeContext": ""
           }
         },
@@ -64,11 +66,12 @@
     },
     "3": {
       "Name": "Ensure Security Contexts are enforced",
-      "Result": "Passed",
+      "Result": "Failed",
       "Tags": [
-        "@kubernetes",
-        "@general",
-        "@CIS-5.6.3"
+        "@service/kubernetes",
+        "@control/family/general",
+        "@standard/cis/5.6.3",
+        "@control/type/preventative"
       ],
       "Steps": {
         "1": {
@@ -77,9 +80,117 @@
           "Result": "Passed",
           "Error": "",
           "Payload": {
-            "KubeConfigPath": "C:\\Users\\eknight\\.kube\\config",
+            "KubeConfigPath": "/root/.kube/config",
             "KubeContext": ""
           }
+        },
+        "2": {
+          "Name": "iAttemptToCreateADeploymentWhichDoesNotHaveASecurityContext",
+          "Description": "Attempts to create a deployment without a security context. Retains the status of the deployment in scenario state for following steps. Passes if created, or if an expected error is encountered.",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": {
+            "Pod": {
+              "metadata": {
+                "name": "probr-general-161120-214148-71",
+                "namespace": "probr-general-test-ns",
+                "selfLink": "/api/v1/namespaces/probr-general-test-ns/pods/probr-general-161120-214148-71",
+                "uid": "b612f450-d749-4199-aa4d-59b553dd3a1d",
+                "resourceVersion": "29785",
+                "creationTimestamp": "2020-11-16T21:41:49Z",
+                "labels": {
+                  "app": "demo"
+                },
+                "annotations": {
+                  "seccomp.security.alpha.kubernetes.io/pod": "runtime/default"
+                }
+              },
+              "spec": {
+                "volumes": [
+                  {
+                    "name": "default-token-lc5lg",
+                    "secret": {
+                      "secretName": "default-token-lc5lg",
+                      "defaultMode": 420
+                    }
+                  }
+                ],
+                "containers": [
+                  {
+                    "name": "probr-general",
+                    "image": "citihubprod.azurecr.io/citihub/probr-probe:latest",
+                    "command": [
+                      "sleep",
+                      "3600"
+                    ],
+                    "resources": {},
+                    "volumeMounts": [
+                      {
+                        "name": "default-token-lc5lg",
+                        "readOnly": true,
+                        "mountPath": "/var/run/secrets/kubernetes.io/serviceaccount"
+                      }
+                    ],
+                    "terminationMessagePath": "/dev/termination-log",
+                    "terminationMessagePolicy": "File",
+                    "imagePullPolicy": "IfNotPresent",
+                    "securityContext": {
+                      "privileged": false,
+                      "allowPrivilegeEscalation": false
+                    }
+                  }
+                ],
+                "restartPolicy": "Always",
+                "terminationGracePeriodSeconds": 30,
+                "dnsPolicy": "ClusterFirst",
+                "serviceAccountName": "default",
+                "serviceAccount": "default",
+                "securityContext": {
+                  "runAsUser": 1000,
+                  "runAsGroup": 3000,
+                  "supplementalGroups": [
+                    1
+                  ],
+                  "fsGroup": 2000
+                },
+                "schedulerName": "default-scheduler",
+                "tolerations": [
+                  {
+                    "key": "node.kubernetes.io/not-ready",
+                    "operator": "Exists",
+                    "effect": "NoExecute",
+                    "tolerationSeconds": 300
+                  },
+                  {
+                    "key": "node.kubernetes.io/unreachable",
+                    "operator": "Exists",
+                    "effect": "NoExecute",
+                    "tolerationSeconds": 300
+                  }
+                ],
+                "priority": 0,
+                "enableServiceLinks": true
+              },
+              "status": {
+                "phase": "Pending",
+                "qosClass": "BestEffort"
+              }
+            },
+            "PodAudit": {
+              "PodName": "probr-general-161120-214148-71",
+              "Namespace": "probr-general-test-ns",
+              "ContainerName": "probr-general",
+              "Image": "citihubprod.azurecr.io/citihub/probr-probe:latest",
+              "SecurityContext": null
+            }
+          }
+        },
+        "3": {
+          "Name": "theDeploymentIsRejected",
+          "Description": "Looks for a creation error on the current scenario state. Passes if error is found, because it should have been rejected.",
+          "Result": "Failed",
+          "Error": "pod probr-general-161120-214148-71 was created successfully. Test fail.",
+          "Payload": null
         }
       }
     },
@@ -87,9 +198,10 @@
       "Name": "Ensure Kubernetes Web UI is disabled",
       "Result": "Passed",
       "Tags": [
-        "@kubernetes",
-        "@general",
-        "@CIS-6.10.1"
+        "@service/kubernetes",
+        "@control/family/general",
+        "@standard/cis/6.10.1",
+        "@control/type/detective"
       ],
       "Steps": {
         "1": {
@@ -98,7 +210,7 @@
           "Result": "Passed",
           "Error": "",
           "Payload": {
-            "KubeConfigPath": "C:\\Users\\eknight\\.kube\\config",
+            "KubeConfigPath": "/root/.kube/config",
             "KubeContext": ""
           }
         },

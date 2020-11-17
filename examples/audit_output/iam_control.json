@@ -1,0 +1,159 @@
+{
+  "Name": "iam_control",
+  "PodsDestroyed": 0,
+  "ScenariosAttempted": 4,
+  "ScenariosSucceeded": 0,
+  "ScenariosFailed": 4,
+  "Result": "Failed",
+  "Scenarios": {
+    "1": {
+      "Name": "Prevent cross namespace Azure Identities",
+      "Result": "Failed",
+      "Tags": [
+        "@service/kubernetes",
+        "@csp/azure",
+        "@control/family/iam",
+        "@standard/cis/6.8",
+        "@standard/none/AZ-AAD-AI",
+        "@control/type/preventative",
+        "@standard/none/AZ-AAD-AI-1.0"
+      ],
+      "Steps": {
+        "1": {
+          "Name": "aKubernetesClusterIsDeployed",
+          "Description": "Passes if Probr successfully connects to the specified cluster.",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": {
+            "KubeConfigPath": "/root/.kube/config",
+            "KubeContext": ""
+          }
+        },
+        "2": {
+          "Name": "iCreateASimplePodInNamespaceAssignedWithThatAzureIdentityBinding",
+          "Description": "",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": null
+        },
+        "3": {
+          "Name": "thePodIsDeployedSuccessfully",
+          "Description": "",
+          "Result": "Failed",
+          "Error": "pod was not deployed successfully - creation error: pod creation error: map[podcreation-error: psp-container-allowed-images:podcreation-error: psp-allowed-portrange] admission webhook \"validation.gatekeeper.sh\" denied the request: [denied by azurepolicy-container-allowed-images-d0318bd54c8157a6fe8c] Container image curlimages/curl for container demo has not been allowed.",
+          "Payload": null
+        }
+      }
+    },
+    "2": {
+      "Name": "Prevent cross namespace Azure Identities",
+      "Result": "Failed",
+      "Tags": [
+        "@service/kubernetes",
+        "@csp/azure",
+        "@control/family/iam",
+        "@standard/cis/6.8",
+        "@standard/none/AZ-AAD-AI",
+        "@control/type/preventative",
+        "@standard/none/AZ-AAD-AI-1.0"
+      ],
+      "Steps": {
+        "1": {
+          "Name": "aKubernetesClusterIsDeployed",
+          "Description": "Passes if Probr successfully connects to the specified cluster.",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": {
+            "KubeConfigPath": "/root/.kube/config",
+            "KubeContext": ""
+          }
+        },
+        "2": {
+          "Name": "iCreateASimplePodInNamespaceAssignedWithThatAzureIdentityBinding",
+          "Description": "",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": null
+        },
+        "3": {
+          "Name": "thePodIsDeployedSuccessfully",
+          "Description": "",
+          "Result": "Failed",
+          "Error": "pod was not deployed successfully - creation error: pod creation error: map[podcreation-error: psp-container-allowed-images:podcreation-error: psp-allowed-users-groups] admission webhook \"validation.gatekeeper.sh\" denied the request: [denied by azurepolicy-container-allowed-images-d0318bd54c8157a6fe8c] Container image curlimages/curl for container demo has not been allowed.",
+          "Payload": null
+        }
+      }
+    },
+    "3": {
+      "Name": "Prevent cross namespace Azure Identity Bindings",
+      "Result": "Failed",
+      "Tags": [
+        "@service/kubernetes",
+        "@csp/azure",
+        "@control/family/iam",
+        "@standard/cis/6.8",
+        "@standard/none/AZ-AAD-AI",
+        "@control/type/preventative",
+        "@standard/none/AZ-AAD-AI-1.1"
+      ],
+      "Steps": {
+        "1": {
+          "Name": "aKubernetesClusterIsDeployed",
+          "Description": "Passes if Probr successfully connects to the specified cluster.",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": {
+            "KubeConfigPath": "/root/.kube/config",
+            "KubeContext": ""
+          }
+        },
+        "2": {
+          "Name": "theDefaultNamespaceHasAnAzureIdentity",
+          "Description": "",
+          "Result": "Failed",
+          "Error": "AzureIdentity does not exist (result: false)",
+          "Payload": null
+        }
+      }
+    },
+    "4": {
+      "Name": "Prevent access to AKS credentials via Azure Identity Components",
+      "Result": "Failed",
+      "Tags": [
+        "@service/kubernetes",
+        "@csp/azure",
+        "@control/family/iam",
+        "@standard/cis/6.8",
+        "@standard/none/AZ-AAD-AI",
+        "@control/type/preventative",
+        "@standard/none/AZ-AAD-AI-1.2"
+      ],
+      "Steps": {
+        "1": {
+          "Name": "aKubernetesClusterIsDeployed",
+          "Description": "Passes if Probr successfully connects to the specified cluster.",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": {
+            "KubeConfigPath": "/root/.kube/config",
+            "KubeContext": ""
+          }
+        },
+        "2": {
+          "Name": "theClusterHasManagedIdentityComponentsDeployed",
+          "Description": "",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": null
+        },
+        "3": {
+          "Name": "iExecuteTheCommandAgainstTheMICPod",
+          "Description": "",
+          "Result": "Failed",
+          "Error": "error raised trying to execute verification command (cat /etc/kubernetes/azure.json)",
+          "Payload": null
+        }
+      }
+    }
+  }
+}

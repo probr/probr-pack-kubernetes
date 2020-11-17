@@ -2,19 +2,22 @@
   "Name": "pod_security_policy",
   "PodsDestroyed": 0,
   "ScenariosAttempted": 36,
-  "ScenariosSucceeded": 9,
-  "ScenariosFailed": 27,
+  "ScenariosSucceeded": 25,
+  "ScenariosFailed": 11,
   "Result": "Failed",
   "Scenarios": {
     "1": {
       "Name": "Prevent a deployment from running with privileged access",
-      "Result": "Failed",
+      "Result": "Passed",
       "Tags": [
-        "@kubernetes",
-        "@pod_security_policy",
-        "@CIS-5.2",
-        "@preventative",
-        "@CIS-5.2.1"
+        "@service/kubernetes",
+        "@control/family/pod_security_policy",
+        "@csp/azure",
+        "@csp/aws",
+        "@csp/gcp",
+        "@standard/cis/5.2",
+        "@control/type/preventative",
+        "@standard/cis/5.2.1"
       ],
       "Steps": {
         "1": {
@@ -23,28 +26,59 @@
           "Result": "Passed",
           "Error": "",
           "Payload": {
-            "KubeConfigPath": "C:\\Users\\eknight\\.kube\\config",
+            "KubeConfigPath": "/root/.kube/config",
             "KubeContext": ""
           }
         },
         "2": {
           "Name": "someControlExistsToPreventPrivilegedAccessForKubernetesDeploymentsToAnActiveKubernetesCluster",
           "Description": "",
-          "Result": "Failed",
-          "Error": "PrivilegedAccessIsRestricted is NOT restricted (result: false)",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": null
+        },
+        "3": {
+          "Name": "privilegedAccessRequestIsMarkedForTheKubernetesDeployment",
+          "Description": "",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": null
+        },
+        "4": {
+          "Name": "theOperationWillWithAnError",
+          "Description": "",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": null
+        },
+        "5": {
+          "Name": "iShouldNotBeAbleToPerformACommandThatRequiresPrivilegedAccess",
+          "Description": "",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": null
+        },
+        "6": {
+          "Name": "performAllowedCommand",
+          "Description": "",
+          "Result": "Passed",
+          "Error": "",
           "Payload": null
         }
       }
     },
     "10": {
       "Name": "Prevent a deployment from running with the hostNetwork flag.",
-      "Result": "Failed",
+      "Result": "Passed",
       "Tags": [
-        "@kubernetes",
-        "@pod_security_policy",
-        "@CIS-5.2",
-        "@preventative",
-        "@CIS-5.2.4"
+        "@service/kubernetes",
+        "@control/family/pod_security_policy",
+        "@csp/azure",
+        "@csp/aws",
+        "@csp/gcp",
+        "@standard/cis/5.2",
+        "@control/type/preventative",
+        "@standard/cis/5.2.4"
       ],
       "Steps": {
         "1": {
@@ -53,28 +87,59 @@
           "Result": "Passed",
           "Error": "",
           "Payload": {
-            "KubeConfigPath": "C:\\Users\\eknight\\.kube\\config",
+            "KubeConfigPath": "/root/.kube/config",
             "KubeContext": ""
           }
         },
         "2": {
           "Name": "someSystemExistsToPreventAKubernetesDeploymentFromRunningUsingTheHostNetworkInAnExistingKubernetesCluster",
           "Description": "",
-          "Result": "Failed",
-          "Error": "HostNetworkIsRestricted is NOT restricted (result: false)",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": null
+        },
+        "3": {
+          "Name": "hostNetworkRequestIsMarkedForTheKubernetesDeployment",
+          "Description": "",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": null
+        },
+        "4": {
+          "Name": "theOperationWillWithAnError",
+          "Description": "",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": null
+        },
+        "5": {
+          "Name": "iShouldNotBeAbleToPerformACommandThatProvidesAccessToTheHostNetworkNamespace",
+          "Description": "",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": null
+        },
+        "6": {
+          "Name": "performAllowedCommand",
+          "Description": "",
+          "Result": "Passed",
+          "Error": "",
           "Payload": null
         }
       }
     },
     "11": {
       "Name": "Prevent a deployment from running with the hostNetwork flag.",
-      "Result": "Failed",
+      "Result": "Passed",
       "Tags": [
-        "@kubernetes",
-        "@pod_security_policy",
-        "@CIS-5.2",
-        "@preventative",
-        "@CIS-5.2.4"
+        "@service/kubernetes",
+        "@control/family/pod_security_policy",
+        "@csp/azure",
+        "@csp/aws",
+        "@csp/gcp",
+        "@standard/cis/5.2",
+        "@control/type/preventative",
+        "@standard/cis/5.2.4"
       ],
       "Steps": {
         "1": {
@@ -83,28 +148,59 @@
           "Result": "Passed",
           "Error": "",
           "Payload": {
-            "KubeConfigPath": "C:\\Users\\eknight\\.kube\\config",
+            "KubeConfigPath": "/root/.kube/config",
             "KubeContext": ""
           }
         },
         "2": {
           "Name": "someSystemExistsToPreventAKubernetesDeploymentFromRunningUsingTheHostNetworkInAnExistingKubernetesCluster",
           "Description": "",
-          "Result": "Failed",
-          "Error": "HostNetworkIsRestricted is NOT restricted (result: false)",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": null
+        },
+        "3": {
+          "Name": "hostNetworkRequestIsMarkedForTheKubernetesDeployment",
+          "Description": "",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": null
+        },
+        "4": {
+          "Name": "theOperationWillWithAnError",
+          "Description": "",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": null
+        },
+        "5": {
+          "Name": "iShouldNotBeAbleToPerformACommandThatProvidesAccessToTheHostNetworkNamespace",
+          "Description": "",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": null
+        },
+        "6": {
+          "Name": "performAllowedCommand",
+          "Description": "",
+          "Result": "Passed",
+          "Error": "",
           "Payload": null
         }
       }
     },
     "12": {
       "Name": "Prevent a deployment from running with the hostNetwork flag.",
-      "Result": "Failed",
+      "Result": "Passed",
       "Tags": [
-        "@kubernetes",
-        "@pod_security_policy",
-        "@CIS-5.2",
-        "@preventative",
-        "@CIS-5.2.4"
+        "@service/kubernetes",
+        "@control/family/pod_security_policy",
+        "@csp/azure",
+        "@csp/aws",
+        "@csp/gcp",
+        "@standard/cis/5.2",
+        "@control/type/preventative",
+        "@standard/cis/5.2.4"
       ],
       "Steps": {
         "1": {
@@ -113,15 +209,43 @@
           "Result": "Passed",
           "Error": "",
           "Payload": {
-            "KubeConfigPath": "C:\\Users\\eknight\\.kube\\config",
+            "KubeConfigPath": "/root/.kube/config",
             "KubeContext": ""
           }
         },
         "2": {
           "Name": "someSystemExistsToPreventAKubernetesDeploymentFromRunningUsingTheHostNetworkInAnExistingKubernetesCluster",
           "Description": "",
-          "Result": "Failed",
-          "Error": "HostNetworkIsRestricted is NOT restricted (result: false)",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": null
+        },
+        "3": {
+          "Name": "hostNetworkRequestIsMarkedForTheKubernetesDeployment",
+          "Description": "",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": null
+        },
+        "4": {
+          "Name": "theOperationWillWithAnError",
+          "Description": "",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": null
+        },
+        "5": {
+          "Name": "iShouldNotBeAbleToPerformACommandThatProvidesAccessToTheHostNetworkNamespace",
+          "Description": "",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": null
+        },
+        "6": {
+          "Name": "performAllowedCommand",
+          "Description": "",
+          "Result": "Passed",
+          "Error": "",
           "Payload": null
         }
       }
@@ -130,11 +254,14 @@
       "Name": "Prevent a deployment from running with the allowPrivilegeEscalation flag",
       "Result": "Failed",
       "Tags": [
-        "@kubernetes",
-        "@pod_security_policy",
-        "@CIS-5.2",
-        "@preventative",
-        "@CIS-5.2.5"
+        "@service/kubernetes",
+        "@control/family/pod_security_policy",
+        "@csp/azure",
+        "@csp/aws",
+        "@csp/gcp",
+        "@standard/cis/5.2",
+        "@control/type/preventative",
+        "@standard/cis/5.2.5"
       ],
       "Steps": {
         "1": {
@@ -143,28 +270,45 @@
           "Result": "Passed",
           "Error": "",
           "Payload": {
-            "KubeConfigPath": "C:\\Users\\eknight\\.kube\\config",
+            "KubeConfigPath": "/root/.kube/config",
             "KubeContext": ""
           }
         },
         "2": {
           "Name": "someSystemExistsToPreventAKubernetesDeploymentFromRunningUsingTheAllowPrivilegeEscalationInAnExistingKubernetesCluster",
           "Description": "",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": null
+        },
+        "3": {
+          "Name": "privilegedEscalationIsMarkedForTheKubernetesDeployment",
+          "Description": "",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": null
+        },
+        "4": {
+          "Name": "theOperationWillWithAnError",
+          "Description": "",
           "Result": "Failed",
-          "Error": "PrivilegedEscalationIsRestricted is NOT restricted (result: false)",
+          "Error": "pod not was created but failure reasons (map[podcreation-error: psp-container-no-privilege:podcreation-error: psp-container-no-privilege]) did not contain expected (podcreation-error: psp-container-no-privilege-escalation)- test failed",
           "Payload": null
         }
       }
     },
     "14": {
       "Name": "Prevent a deployment from running with the allowPrivilegeEscalation flag",
-      "Result": "Failed",
+      "Result": "Passed",
       "Tags": [
-        "@kubernetes",
-        "@pod_security_policy",
-        "@CIS-5.2",
-        "@preventative",
-        "@CIS-5.2.5"
+        "@service/kubernetes",
+        "@control/family/pod_security_policy",
+        "@csp/azure",
+        "@csp/aws",
+        "@csp/gcp",
+        "@standard/cis/5.2",
+        "@control/type/preventative",
+        "@standard/cis/5.2.5"
       ],
       "Steps": {
         "1": {
@@ -173,28 +317,59 @@
           "Result": "Passed",
           "Error": "",
           "Payload": {
-            "KubeConfigPath": "C:\\Users\\eknight\\.kube\\config",
+            "KubeConfigPath": "/root/.kube/config",
             "KubeContext": ""
           }
         },
         "2": {
           "Name": "someSystemExistsToPreventAKubernetesDeploymentFromRunningUsingTheAllowPrivilegeEscalationInAnExistingKubernetesCluster",
           "Description": "",
-          "Result": "Failed",
-          "Error": "PrivilegedEscalationIsRestricted is NOT restricted (result: false)",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": null
+        },
+        "3": {
+          "Name": "privilegedEscalationIsMarkedForTheKubernetesDeployment",
+          "Description": "",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": null
+        },
+        "4": {
+          "Name": "theOperationWillWithAnError",
+          "Description": "",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": null
+        },
+        "5": {
+          "Name": "iShouldNotBeAbleToPerformACommandThatRequiresPrivilegedAccess",
+          "Description": "",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": null
+        },
+        "6": {
+          "Name": "performAllowedCommand",
+          "Description": "",
+          "Result": "Passed",
+          "Error": "",
           "Payload": null
         }
       }
     },
     "15": {
       "Name": "Prevent a deployment from running with the allowPrivilegeEscalation flag",
-      "Result": "Failed",
+      "Result": "Passed",
       "Tags": [
-        "@kubernetes",
-        "@pod_security_policy",
-        "@CIS-5.2",
-        "@preventative",
-        "@CIS-5.2.5"
+        "@service/kubernetes",
+        "@control/family/pod_security_policy",
+        "@csp/azure",
+        "@csp/aws",
+        "@csp/gcp",
+        "@standard/cis/5.2",
+        "@control/type/preventative",
+        "@standard/cis/5.2.5"
       ],
       "Steps": {
         "1": {
@@ -203,28 +378,59 @@
           "Result": "Passed",
           "Error": "",
           "Payload": {
-            "KubeConfigPath": "C:\\Users\\eknight\\.kube\\config",
+            "KubeConfigPath": "/root/.kube/config",
             "KubeContext": ""
           }
         },
         "2": {
           "Name": "someSystemExistsToPreventAKubernetesDeploymentFromRunningUsingTheAllowPrivilegeEscalationInAnExistingKubernetesCluster",
           "Description": "",
-          "Result": "Failed",
-          "Error": "PrivilegedEscalationIsRestricted is NOT restricted (result: false)",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": null
+        },
+        "3": {
+          "Name": "privilegedEscalationIsMarkedForTheKubernetesDeployment",
+          "Description": "",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": null
+        },
+        "4": {
+          "Name": "theOperationWillWithAnError",
+          "Description": "",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": null
+        },
+        "5": {
+          "Name": "iShouldNotBeAbleToPerformACommandThatRequiresPrivilegedAccess",
+          "Description": "",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": null
+        },
+        "6": {
+          "Name": "performAllowedCommand",
+          "Description": "",
+          "Result": "Passed",
+          "Error": "",
           "Payload": null
         }
       }
     },
     "16": {
       "Name": "Prevent a deployment from running as the root user",
-      "Result": "Failed",
+      "Result": "Passed",
       "Tags": [
-        "@kubernetes",
-        "@pod_security_policy",
-        "@CIS-5.2",
-        "@preventative",
-        "@CIS-5.2.6"
+        "@service/kubernetes",
+        "@control/family/pod_security_policy",
+        "@csp/azure",
+        "@csp/aws",
+        "@csp/gcp",
+        "@standard/cis/5.2",
+        "@control/type/preventative",
+        "@standard/cis/5.2.6"
       ],
       "Steps": {
         "1": {
@@ -233,28 +439,59 @@
           "Result": "Passed",
           "Error": "",
           "Payload": {
-            "KubeConfigPath": "C:\\Users\\eknight\\.kube\\config",
+            "KubeConfigPath": "/root/.kube/config",
             "KubeContext": ""
           }
         },
         "2": {
           "Name": "someSystemExistsToPreventAKubernetesDeploymentFromRunningAsTheRootUserInAnExistingKubernetesCluster",
           "Description": "",
-          "Result": "Failed",
-          "Error": "RootUserIsRestricted is NOT restricted (result: false)",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": null
+        },
+        "3": {
+          "Name": "theUserRequestedIsForTheKubernetesDeployment",
+          "Description": "",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": null
+        },
+        "4": {
+          "Name": "theOperationWillWithAnError",
+          "Description": "",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": null
+        },
+        "5": {
+          "Name": "theKubernetesDeploymentShouldRunWithANonrootUID",
+          "Description": "",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": null
+        },
+        "6": {
+          "Name": "performAllowedCommand",
+          "Description": "",
+          "Result": "Passed",
+          "Error": "",
           "Payload": null
         }
       }
     },
     "17": {
       "Name": "Prevent a deployment from running as the root user",
-      "Result": "Failed",
+      "Result": "Passed",
       "Tags": [
-        "@kubernetes",
-        "@pod_security_policy",
-        "@CIS-5.2",
-        "@preventative",
-        "@CIS-5.2.6"
+        "@service/kubernetes",
+        "@control/family/pod_security_policy",
+        "@csp/azure",
+        "@csp/aws",
+        "@csp/gcp",
+        "@standard/cis/5.2",
+        "@control/type/preventative",
+        "@standard/cis/5.2.6"
       ],
       "Steps": {
         "1": {
@@ -263,28 +500,59 @@
           "Result": "Passed",
           "Error": "",
           "Payload": {
-            "KubeConfigPath": "C:\\Users\\eknight\\.kube\\config",
+            "KubeConfigPath": "/root/.kube/config",
             "KubeContext": ""
           }
         },
         "2": {
           "Name": "someSystemExistsToPreventAKubernetesDeploymentFromRunningAsTheRootUserInAnExistingKubernetesCluster",
           "Description": "",
-          "Result": "Failed",
-          "Error": "RootUserIsRestricted is NOT restricted (result: false)",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": null
+        },
+        "3": {
+          "Name": "theUserRequestedIsForTheKubernetesDeployment",
+          "Description": "",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": null
+        },
+        "4": {
+          "Name": "theOperationWillWithAnError",
+          "Description": "",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": null
+        },
+        "5": {
+          "Name": "theKubernetesDeploymentShouldRunWithANonrootUID",
+          "Description": "",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": null
+        },
+        "6": {
+          "Name": "performAllowedCommand",
+          "Description": "",
+          "Result": "Passed",
+          "Error": "",
           "Payload": null
         }
       }
     },
     "18": {
       "Name": "Prevent a deployment from running as the root user",
-      "Result": "Failed",
+      "Result": "Passed",
       "Tags": [
-        "@kubernetes",
-        "@pod_security_policy",
-        "@CIS-5.2",
-        "@preventative",
-        "@CIS-5.2.6"
+        "@service/kubernetes",
+        "@control/family/pod_security_policy",
+        "@csp/azure",
+        "@csp/aws",
+        "@csp/gcp",
+        "@standard/cis/5.2",
+        "@control/type/preventative",
+        "@standard/cis/5.2.6"
       ],
       "Steps": {
         "1": {
@@ -293,15 +561,43 @@
           "Result": "Passed",
           "Error": "",
           "Payload": {
-            "KubeConfigPath": "C:\\Users\\eknight\\.kube\\config",
+            "KubeConfigPath": "/root/.kube/config",
             "KubeContext": ""
           }
         },
         "2": {
           "Name": "someSystemExistsToPreventAKubernetesDeploymentFromRunningAsTheRootUserInAnExistingKubernetesCluster",
           "Description": "",
-          "Result": "Failed",
-          "Error": "RootUserIsRestricted is NOT restricted (result: false)",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": null
+        },
+        "3": {
+          "Name": "theUserRequestedIsForTheKubernetesDeployment",
+          "Description": "",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": null
+        },
+        "4": {
+          "Name": "theOperationWillWithAnError",
+          "Description": "",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": null
+        },
+        "5": {
+          "Name": "theKubernetesDeploymentShouldRunWithANonrootUID",
+          "Description": "",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": null
+        },
+        "6": {
+          "Name": "performAllowedCommand",
+          "Description": "",
+          "Result": "Passed",
+          "Error": "",
           "Payload": null
         }
       }
@@ -310,11 +606,14 @@
       "Name": "Prevent deployments from running with the NET_RAW capability.",
       "Result": "Failed",
       "Tags": [
-        "@kubernetes",
-        "@pod_security_policy",
-        "@CIS-5.2",
-        "@preventitive",
-        "@CIS-5.2.7"
+        "@service/kubernetes",
+        "@control/family/pod_security_policy",
+        "@csp/azure",
+        "@csp/aws",
+        "@csp/gcp",
+        "@standard/cis/5.2",
+        "@control/type/preventative",
+        "@standard/cis/5.2.7"
       ],
       "Steps": {
         "1": {
@@ -323,7 +622,7 @@
           "Result": "Passed",
           "Error": "",
           "Payload": {
-            "KubeConfigPath": "C:\\Users\\eknight\\.kube\\config",
+            "KubeConfigPath": "/root/.kube/config",
             "KubeContext": ""
           }
         },
@@ -338,13 +637,16 @@
     },
     "2": {
       "Name": "Prevent a deployment from running with privileged access",
-      "Result": "Failed",
+      "Result": "Passed",
       "Tags": [
-        "@kubernetes",
-        "@pod_security_policy",
-        "@CIS-5.2",
-        "@preventative",
-        "@CIS-5.2.1"
+        "@service/kubernetes",
+        "@control/family/pod_security_policy",
+        "@csp/azure",
+        "@csp/aws",
+        "@csp/gcp",
+        "@standard/cis/5.2",
+        "@control/type/preventative",
+        "@standard/cis/5.2.1"
       ],
       "Steps": {
         "1": {
@@ -353,15 +655,43 @@
           "Result": "Passed",
           "Error": "",
           "Payload": {
-            "KubeConfigPath": "C:\\Users\\eknight\\.kube\\config",
+            "KubeConfigPath": "/root/.kube/config",
             "KubeContext": ""
           }
         },
         "2": {
           "Name": "someControlExistsToPreventPrivilegedAccessForKubernetesDeploymentsToAnActiveKubernetesCluster",
           "Description": "",
-          "Result": "Failed",
-          "Error": "PrivilegedAccessIsRestricted is NOT restricted (result: false)",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": null
+        },
+        "3": {
+          "Name": "privilegedAccessRequestIsMarkedForTheKubernetesDeployment",
+          "Description": "",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": null
+        },
+        "4": {
+          "Name": "theOperationWillWithAnError",
+          "Description": "",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": null
+        },
+        "5": {
+          "Name": "iShouldNotBeAbleToPerformACommandThatRequiresPrivilegedAccess",
+          "Description": "",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": null
+        },
+        "6": {
+          "Name": "performAllowedCommand",
+          "Description": "",
+          "Result": "Passed",
+          "Error": "",
           "Payload": null
         }
       }
@@ -370,11 +700,14 @@
       "Name": "Prevent deployments from running with the NET_RAW capability.",
       "Result": "Failed",
       "Tags": [
-        "@kubernetes",
-        "@pod_security_policy",
-        "@CIS-5.2",
-        "@preventitive",
-        "@CIS-5.2.7"
+        "@service/kubernetes",
+        "@control/family/pod_security_policy",
+        "@csp/azure",
+        "@csp/aws",
+        "@csp/gcp",
+        "@standard/cis/5.2",
+        "@control/type/preventative",
+        "@standard/cis/5.2.7"
       ],
       "Steps": {
         "1": {
@@ -383,7 +716,7 @@
           "Result": "Passed",
           "Error": "",
           "Payload": {
-            "KubeConfigPath": "C:\\Users\\eknight\\.kube\\config",
+            "KubeConfigPath": "/root/.kube/config",
             "KubeContext": ""
           }
         },
@@ -400,11 +733,14 @@
       "Name": "Prevent deployments from running with the NET_RAW capability.",
       "Result": "Failed",
       "Tags": [
-        "@kubernetes",
-        "@pod_security_policy",
-        "@CIS-5.2",
-        "@preventitive",
-        "@CIS-5.2.7"
+        "@service/kubernetes",
+        "@control/family/pod_security_policy",
+        "@csp/azure",
+        "@csp/aws",
+        "@csp/gcp",
+        "@standard/cis/5.2",
+        "@control/type/preventative",
+        "@standard/cis/5.2.7"
       ],
       "Steps": {
         "1": {
@@ -413,7 +749,7 @@
           "Result": "Passed",
           "Error": "",
           "Payload": {
-            "KubeConfigPath": "C:\\Users\\eknight\\.kube\\config",
+            "KubeConfigPath": "/root/.kube/config",
             "KubeContext": ""
           }
         },
@@ -430,11 +766,14 @@
       "Name": "Prevent container running with capabilities beyond the default set.",
       "Result": "Passed",
       "Tags": [
-        "@kubernetes",
-        "@pod_security_policy",
-        "@CIS-5.2",
-        "@preventitive",
-        "@CIS-5.2.8"
+        "@service/kubernetes",
+        "@control/family/pod_security_policy",
+        "@csp/azure",
+        "@csp/aws",
+        "@csp/gcp",
+        "@standard/cis/5.2",
+        "@control/type/preventative",
+        "@standard/cis/5.2.8"
       ],
       "Steps": {
         "1": {
@@ -443,12 +782,40 @@
           "Result": "Passed",
           "Error": "",
           "Payload": {
-            "KubeConfigPath": "C:\\Users\\eknight\\.kube\\config",
+            "KubeConfigPath": "/root/.kube/config",
             "KubeContext": ""
           }
         },
         "2": {
           "Name": "someSystemExistsToPreventKubernetesDeploymentsWithCapabilitiesBeyondTheDefaultSetFromBeingDeployedToAnExistingKubernetesCluster",
+          "Description": "",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": null
+        },
+        "3": {
+          "Name": "additionalCapabilitiesForTheKubernetesDeployment",
+          "Description": "",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": null
+        },
+        "4": {
+          "Name": "theOperationWillWithAnError",
+          "Description": "",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": null
+        },
+        "5": {
+          "Name": "iShouldNotBeAbleToPerformACommandThatRequiresCapabilitiesOutsideOfTheDefaultSet",
+          "Description": "",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": null
+        },
+        "6": {
+          "Name": "performAllowedCommand",
           "Description": "",
           "Result": "Passed",
           "Error": "",
@@ -460,11 +827,14 @@
       "Name": "Prevent container running with capabilities beyond the default set.",
       "Result": "Passed",
       "Tags": [
-        "@kubernetes",
-        "@pod_security_policy",
-        "@CIS-5.2",
-        "@preventitive",
-        "@CIS-5.2.8"
+        "@service/kubernetes",
+        "@control/family/pod_security_policy",
+        "@csp/azure",
+        "@csp/aws",
+        "@csp/gcp",
+        "@standard/cis/5.2",
+        "@control/type/preventative",
+        "@standard/cis/5.2.8"
       ],
       "Steps": {
         "1": {
@@ -473,12 +843,40 @@
           "Result": "Passed",
           "Error": "",
           "Payload": {
-            "KubeConfigPath": "C:\\Users\\eknight\\.kube\\config",
+            "KubeConfigPath": "/root/.kube/config",
             "KubeContext": ""
           }
         },
         "2": {
           "Name": "someSystemExistsToPreventKubernetesDeploymentsWithCapabilitiesBeyondTheDefaultSetFromBeingDeployedToAnExistingKubernetesCluster",
+          "Description": "",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": null
+        },
+        "3": {
+          "Name": "additionalCapabilitiesForTheKubernetesDeployment",
+          "Description": "",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": null
+        },
+        "4": {
+          "Name": "theOperationWillWithAnError",
+          "Description": "",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": null
+        },
+        "5": {
+          "Name": "iShouldNotBeAbleToPerformACommandThatRequiresCapabilitiesOutsideOfTheDefaultSet",
+          "Description": "",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": null
+        },
+        "6": {
+          "Name": "performAllowedCommand",
           "Description": "",
           "Result": "Passed",
           "Error": "",
@@ -490,11 +888,14 @@
       "Name": "Prevent container running with capabilities beyond the default set.",
       "Result": "Passed",
       "Tags": [
-        "@kubernetes",
-        "@pod_security_policy",
-        "@CIS-5.2",
-        "@preventitive",
-        "@CIS-5.2.8"
+        "@service/kubernetes",
+        "@control/family/pod_security_policy",
+        "@csp/azure",
+        "@csp/aws",
+        "@csp/gcp",
+        "@standard/cis/5.2",
+        "@control/type/preventative",
+        "@standard/cis/5.2.8"
       ],
       "Steps": {
         "1": {
@@ -503,7 +904,7 @@
           "Result": "Passed",
           "Error": "",
           "Payload": {
-            "KubeConfigPath": "C:\\Users\\eknight\\.kube\\config",
+            "KubeConfigPath": "/root/.kube/config",
             "KubeContext": ""
           }
         },
@@ -513,18 +914,49 @@
           "Result": "Passed",
           "Error": "",
           "Payload": null
+        },
+        "3": {
+          "Name": "additionalCapabilitiesForTheKubernetesDeployment",
+          "Description": "",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": null
+        },
+        "4": {
+          "Name": "theOperationWillWithAnError",
+          "Description": "",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": null
+        },
+        "5": {
+          "Name": "iShouldNotBeAbleToPerformACommandThatRequiresCapabilitiesOutsideOfTheDefaultSet",
+          "Description": "",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": null
+        },
+        "6": {
+          "Name": "performAllowedCommand",
+          "Description": "",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": null
         }
       }
     },
     "25": {
       "Name": "Prevent deployments from running with assigned capabilities.",
-      "Result": "Failed",
+      "Result": "Passed",
       "Tags": [
-        "@kubernetes",
-        "@pod_security_policy",
-        "@CIS-5.2",
-        "@preventitive",
-        "@CIS-5.2.9"
+        "@service/kubernetes",
+        "@control/family/pod_security_policy",
+        "@csp/azure",
+        "@csp/aws",
+        "@csp/gcp",
+        "@standard/cis/5.2",
+        "@control/type/preventative",
+        "@standard/cis/5.2.9"
       ],
       "Steps": {
         "1": {
@@ -533,28 +965,59 @@
           "Result": "Passed",
           "Error": "",
           "Payload": {
-            "KubeConfigPath": "C:\\Users\\eknight\\.kube\\config",
+            "KubeConfigPath": "/root/.kube/config",
             "KubeContext": ""
           }
         },
         "2": {
           "Name": "someSystemExistsToPreventKubernetesDeploymentsWithAssignedCapabilitiesFromBeingDeployedToAnExistingKubernetesCluster",
           "Description": "",
-          "Result": "Failed",
-          "Error": "AssignedCapabilitiesAreRestricted is NOT restricted (result: false)",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": null
+        },
+        "3": {
+          "Name": "assignedCapabilitiesForTheKubernetesDeployment",
+          "Description": "",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": null
+        },
+        "4": {
+          "Name": "theOperationWillWithAnError",
+          "Description": "",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": null
+        },
+        "5": {
+          "Name": "iShouldNotBeAbleToPerformACommandThatRequiresAnyCapabilities",
+          "Description": "",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": null
+        },
+        "6": {
+          "Name": "performAllowedCommand",
+          "Description": "",
+          "Result": "Passed",
+          "Error": "",
           "Payload": null
         }
       }
     },
     "26": {
       "Name": "Prevent deployments from running with assigned capabilities.",
-      "Result": "Failed",
+      "Result": "Passed",
       "Tags": [
-        "@kubernetes",
-        "@pod_security_policy",
-        "@CIS-5.2",
-        "@preventitive",
-        "@CIS-5.2.9"
+        "@service/kubernetes",
+        "@control/family/pod_security_policy",
+        "@csp/azure",
+        "@csp/aws",
+        "@csp/gcp",
+        "@standard/cis/5.2",
+        "@control/type/preventative",
+        "@standard/cis/5.2.9"
       ],
       "Steps": {
         "1": {
@@ -563,28 +1026,59 @@
           "Result": "Passed",
           "Error": "",
           "Payload": {
-            "KubeConfigPath": "C:\\Users\\eknight\\.kube\\config",
+            "KubeConfigPath": "/root/.kube/config",
             "KubeContext": ""
           }
         },
         "2": {
           "Name": "someSystemExistsToPreventKubernetesDeploymentsWithAssignedCapabilitiesFromBeingDeployedToAnExistingKubernetesCluster",
           "Description": "",
-          "Result": "Failed",
-          "Error": "AssignedCapabilitiesAreRestricted is NOT restricted (result: false)",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": null
+        },
+        "3": {
+          "Name": "assignedCapabilitiesForTheKubernetesDeployment",
+          "Description": "",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": null
+        },
+        "4": {
+          "Name": "theOperationWillWithAnError",
+          "Description": "",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": null
+        },
+        "5": {
+          "Name": "iShouldNotBeAbleToPerformACommandThatRequiresAnyCapabilities",
+          "Description": "",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": null
+        },
+        "6": {
+          "Name": "performAllowedCommand",
+          "Description": "",
+          "Result": "Passed",
+          "Error": "",
           "Payload": null
         }
       }
     },
     "27": {
       "Name": "Prevent deployments from running with assigned capabilities.",
-      "Result": "Failed",
+      "Result": "Passed",
       "Tags": [
-        "@kubernetes",
-        "@pod_security_policy",
-        "@CIS-5.2",
-        "@preventitive",
-        "@CIS-5.2.9"
+        "@service/kubernetes",
+        "@control/family/pod_security_policy",
+        "@csp/azure",
+        "@csp/aws",
+        "@csp/gcp",
+        "@standard/cis/5.2",
+        "@control/type/preventative",
+        "@standard/cis/5.2.9"
       ],
       "Steps": {
         "1": {
@@ -593,15 +1087,43 @@
           "Result": "Passed",
           "Error": "",
           "Payload": {
-            "KubeConfigPath": "C:\\Users\\eknight\\.kube\\config",
+            "KubeConfigPath": "/root/.kube/config",
             "KubeContext": ""
           }
         },
         "2": {
           "Name": "someSystemExistsToPreventKubernetesDeploymentsWithAssignedCapabilitiesFromBeingDeployedToAnExistingKubernetesCluster",
           "Description": "",
-          "Result": "Failed",
-          "Error": "AssignedCapabilitiesAreRestricted is NOT restricted (result: false)",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": null
+        },
+        "3": {
+          "Name": "assignedCapabilitiesForTheKubernetesDeployment",
+          "Description": "",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": null
+        },
+        "4": {
+          "Name": "theOperationWillWithAnError",
+          "Description": "",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": null
+        },
+        "5": {
+          "Name": "iShouldNotBeAbleToPerformACommandThatRequiresAnyCapabilities",
+          "Description": "",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": null
+        },
+        "6": {
+          "Name": "performAllowedCommand",
+          "Description": "",
+          "Result": "Passed",
+          "Error": "",
           "Payload": null
         }
       }
@@ -610,11 +1132,14 @@
       "Name": "Prevent deployments from accessing unapproved port range",
       "Result": "Passed",
       "Tags": [
-        "@kubernetes",
-        "@pod_security_policy",
-        "@CIS-5.2",
-        "@preventitive",
-        "@AZP-0.1"
+        "@service/kubernetes",
+        "@control/family/pod_security_policy",
+        "@csp/azure",
+        "@csp/aws",
+        "@csp/gcp",
+        "@standard/cis/5.2",
+        "@control/type/preventative",
+        "@standard/none/psp-0.1"
       ],
       "Steps": {
         "1": {
@@ -623,12 +1148,40 @@
           "Result": "Passed",
           "Error": "",
           "Payload": {
-            "KubeConfigPath": "C:\\Users\\eknight\\.kube\\config",
+            "KubeConfigPath": "/root/.kube/config",
             "KubeContext": ""
           }
         },
         "2": {
           "Name": "someSystemExistsToPreventKubernetesDeploymentsWithUnapprovedPortRangeFromBeingDeployedToAnExistingKubernetesCluster",
+          "Description": "",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": null
+        },
+        "3": {
+          "Name": "anPortRangeIsRequestedForTheKubernetesDeployment",
+          "Description": "",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": null
+        },
+        "4": {
+          "Name": "theOperationWillWithAnError",
+          "Description": "",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": null
+        },
+        "5": {
+          "Name": "iShouldNotBeAbleToPerformACommandThatAccessAnUnapprovedPortRange",
+          "Description": "",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": null
+        },
+        "6": {
+          "Name": "performAllowedCommand",
           "Description": "",
           "Result": "Passed",
           "Error": "",
@@ -638,13 +1191,16 @@
     },
     "29": {
       "Name": "Prevent deployments from accessing unapproved port range",
-      "Result": "Passed",
+      "Result": "Failed",
       "Tags": [
-        "@kubernetes",
-        "@pod_security_policy",
-        "@CIS-5.2",
-        "@preventitive",
-        "@AZP-0.1"
+        "@service/kubernetes",
+        "@control/family/pod_security_policy",
+        "@csp/azure",
+        "@csp/aws",
+        "@csp/gcp",
+        "@standard/cis/5.2",
+        "@control/type/preventative",
+        "@standard/none/psp-0.1"
       ],
       "Steps": {
         "1": {
@@ -653,7 +1209,7 @@
           "Result": "Passed",
           "Error": "",
           "Payload": {
-            "KubeConfigPath": "C:\\Users\\eknight\\.kube\\config",
+            "KubeConfigPath": "/root/.kube/config",
             "KubeContext": ""
           }
         },
@@ -662,19 +1218,36 @@
           "Description": "",
           "Result": "Passed",
           "Error": "",
+          "Payload": null
+        },
+        "3": {
+          "Name": "anPortRangeIsRequestedForTheKubernetesDeployment",
+          "Description": "",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": null
+        },
+        "4": {
+          "Name": "theOperationWillWithAnError",
+          "Description": "",
+          "Result": "Failed",
+          "Error": "pod was not created - test failed: pod creation error: map[podcreation-error: psp-container-allowed-images:podcreation-error: psp-host-network] admission webhook \"validation.gatekeeper.sh\" denied the request: [denied by azurepolicy-container-allowed-images-d0318bd54c8157a6fe8c] Container image busybox for container sec-ctx-demo has not been allowed.",
           "Payload": null
         }
       }
     },
     "3": {
       "Name": "Prevent a deployment from running with privileged access",
-      "Result": "Failed",
+      "Result": "Passed",
       "Tags": [
-        "@kubernetes",
-        "@pod_security_policy",
-        "@CIS-5.2",
-        "@preventative",
-        "@CIS-5.2.1"
+        "@service/kubernetes",
+        "@control/family/pod_security_policy",
+        "@csp/azure",
+        "@csp/aws",
+        "@csp/gcp",
+        "@standard/cis/5.2",
+        "@control/type/preventative",
+        "@standard/cis/5.2.1"
       ],
       "Steps": {
         "1": {
@@ -683,28 +1256,59 @@
           "Result": "Passed",
           "Error": "",
           "Payload": {
-            "KubeConfigPath": "C:\\Users\\eknight\\.kube\\config",
+            "KubeConfigPath": "/root/.kube/config",
             "KubeContext": ""
           }
         },
         "2": {
           "Name": "someControlExistsToPreventPrivilegedAccessForKubernetesDeploymentsToAnActiveKubernetesCluster",
           "Description": "",
-          "Result": "Failed",
-          "Error": "PrivilegedAccessIsRestricted is NOT restricted (result: false)",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": null
+        },
+        "3": {
+          "Name": "privilegedAccessRequestIsMarkedForTheKubernetesDeployment",
+          "Description": "",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": null
+        },
+        "4": {
+          "Name": "theOperationWillWithAnError",
+          "Description": "",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": null
+        },
+        "5": {
+          "Name": "iShouldNotBeAbleToPerformACommandThatRequiresPrivilegedAccess",
+          "Description": "",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": null
+        },
+        "6": {
+          "Name": "performAllowedCommand",
+          "Description": "",
+          "Result": "Passed",
+          "Error": "",
           "Payload": null
         }
       }
     },
     "30": {
       "Name": "Prevent deployments from accessing unapproved port range",
-      "Result": "Passed",
+      "Result": "Failed",
       "Tags": [
-        "@kubernetes",
-        "@pod_security_policy",
-        "@CIS-5.2",
-        "@preventitive",
-        "@AZP-0.1"
+        "@service/kubernetes",
+        "@control/family/pod_security_policy",
+        "@csp/azure",
+        "@csp/aws",
+        "@csp/gcp",
+        "@standard/cis/5.2",
+        "@control/type/preventative",
+        "@standard/none/psp-0.1"
       ],
       "Steps": {
         "1": {
@@ -713,7 +1317,7 @@
           "Result": "Passed",
           "Error": "",
           "Payload": {
-            "KubeConfigPath": "C:\\Users\\eknight\\.kube\\config",
+            "KubeConfigPath": "/root/.kube/config",
             "KubeContext": ""
           }
         },
@@ -722,6 +1326,20 @@
           "Description": "",
           "Result": "Passed",
           "Error": "",
+          "Payload": null
+        },
+        "3": {
+          "Name": "anPortRangeIsRequestedForTheKubernetesDeployment",
+          "Description": "",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": null
+        },
+        "4": {
+          "Name": "theOperationWillWithAnError",
+          "Description": "",
+          "Result": "Failed",
+          "Error": "pod was not created - test failed: pod creation error: map[podcreation-error: psp-container-allowed-images:podcreation-error: psp-container-no-privilege] admission webhook \"validation.gatekeeper.sh\" denied the request: [denied by azurepolicy-container-allowed-images-d0318bd54c8157a6fe8c] Container image busybox for container sec-ctx-demo has not been allowed.",
           "Payload": null
         }
       }
@@ -730,11 +1348,14 @@
       "Name": "Prevent deployments from accessing unapproved volume types",
       "Result": "Passed",
       "Tags": [
-        "@kubernetes",
-        "@pod_security_policy",
-        "@CIS-5.2",
-        "@preventitive",
-        "@AZP-0.2"
+        "@service/kubernetes",
+        "@control/family/pod_security_policy",
+        "@csp/azure",
+        "@csp/aws",
+        "@csp/gcp",
+        "@standard/cis/5.2",
+        "@control/type/preventative",
+        "@standard/none/psp-0.2"
       ],
       "Steps": {
         "1": {
@@ -743,12 +1364,33 @@
           "Result": "Passed",
           "Error": "",
           "Payload": {
-            "KubeConfigPath": "C:\\Users\\eknight\\.kube\\config",
+            "KubeConfigPath": "/root/.kube/config",
             "KubeContext": ""
           }
         },
         "2": {
           "Name": "someSystemExistsToPreventKubernetesDeploymentsWithUnapprovedVolumeTypesFromBeingDeployedToAnExistingKubernetesCluster",
+          "Description": "",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": null
+        },
+        "3": {
+          "Name": "anVolumeTypeIsRequestedForTheKubernetesDeployment",
+          "Description": "",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": null
+        },
+        "4": {
+          "Name": "theOperationWillWithAnError",
+          "Description": "",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": null
+        },
+        "5": {
+          "Name": "performAllowedCommand",
           "Description": "",
           "Result": "Passed",
           "Error": "",
@@ -758,13 +1400,16 @@
     },
     "32": {
       "Name": "Prevent deployments from accessing unapproved volume types",
-      "Result": "Passed",
+      "Result": "Failed",
       "Tags": [
-        "@kubernetes",
-        "@pod_security_policy",
-        "@CIS-5.2",
-        "@preventitive",
-        "@AZP-0.2"
+        "@service/kubernetes",
+        "@control/family/pod_security_policy",
+        "@csp/azure",
+        "@csp/aws",
+        "@csp/gcp",
+        "@standard/cis/5.2",
+        "@control/type/preventative",
+        "@standard/none/psp-0.2"
       ],
       "Steps": {
         "1": {
@@ -773,7 +1418,7 @@
           "Result": "Passed",
           "Error": "",
           "Payload": {
-            "KubeConfigPath": "C:\\Users\\eknight\\.kube\\config",
+            "KubeConfigPath": "/root/.kube/config",
             "KubeContext": ""
           }
         },
@@ -783,18 +1428,35 @@
           "Result": "Passed",
           "Error": "",
           "Payload": null
+        },
+        "3": {
+          "Name": "anVolumeTypeIsRequestedForTheKubernetesDeployment",
+          "Description": "",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": null
+        },
+        "4": {
+          "Name": "theOperationWillWithAnError",
+          "Description": "",
+          "Result": "Failed",
+          "Error": "pod was not created - test failed: pod creation error: map[podcreation-error: psp-container-allowed-images:podcreation-error: psp-host-network] admission webhook \"validation.gatekeeper.sh\" denied the request: [denied by azurepolicy-container-allowed-images-d0318bd54c8157a6fe8c] Container image busybox for container sec-ctx-demo has not been allowed.",
+          "Payload": null
         }
       }
     },
     "33": {
       "Name": "Prevent deployments from accessing unapproved volume types",
-      "Result": "Passed",
+      "Result": "Failed",
       "Tags": [
-        "@kubernetes",
-        "@pod_security_policy",
-        "@CIS-5.2",
-        "@preventitive",
-        "@AZP-0.2"
+        "@service/kubernetes",
+        "@control/family/pod_security_policy",
+        "@csp/azure",
+        "@csp/aws",
+        "@csp/gcp",
+        "@standard/cis/5.2",
+        "@control/type/preventative",
+        "@standard/none/psp-0.2"
       ],
       "Steps": {
         "1": {
@@ -803,7 +1465,7 @@
           "Result": "Passed",
           "Error": "",
           "Payload": {
-            "KubeConfigPath": "C:\\Users\\eknight\\.kube\\config",
+            "KubeConfigPath": "/root/.kube/config",
             "KubeContext": ""
           }
         },
@@ -812,6 +1474,20 @@
           "Description": "",
           "Result": "Passed",
           "Error": "",
+          "Payload": null
+        },
+        "3": {
+          "Name": "anVolumeTypeIsRequestedForTheKubernetesDeployment",
+          "Description": "",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": null
+        },
+        "4": {
+          "Name": "theOperationWillWithAnError",
+          "Description": "",
+          "Result": "Failed",
+          "Error": "pod was not created - test failed: pod creation error: map[podcreation-error: psp-container-allowed-images:podcreation-error: psp-allowed-portrange] admission webhook \"validation.gatekeeper.sh\" denied the request: [denied by azurepolicy-container-allowed-images-d0318bd54c8157a6fe8c] Container image busybox for container sec-ctx-demo has not been allowed.",
           "Payload": null
         }
       }
@@ -820,11 +1496,14 @@
       "Name": "Prevent deployments from running without approved seccomp profile",
       "Result": "Failed",
       "Tags": [
-        "@kubernetes",
-        "@pod_security_policy",
-        "@CIS-5.2",
-        "@preventitive",
-        "@AZP-0.3"
+        "@service/kubernetes",
+        "@control/family/pod_security_policy",
+        "@csp/azure",
+        "@csp/aws",
+        "@csp/gcp",
+        "@standard/cis/5.2",
+        "@control/type/preventative",
+        "@standard/none/psp-0.3"
       ],
       "Steps": {
         "1": {
@@ -833,15 +1512,29 @@
           "Result": "Passed",
           "Error": "",
           "Payload": {
-            "KubeConfigPath": "C:\\Users\\eknight\\.kube\\config",
+            "KubeConfigPath": "/root/.kube/config",
             "KubeContext": ""
           }
         },
         "2": {
           "Name": "someSystemExistsToPreventKubernetesDeploymentsWithoutApprovedSeccompProfilesFromBeingDeployedToAnExistingKubernetesCluster",
           "Description": "",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": null
+        },
+        "3": {
+          "Name": "anSeccompProfileIsRequestedForTheKubernetesDeployment",
+          "Description": "",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": null
+        },
+        "4": {
+          "Name": "theOperationWillWithAnError",
+          "Description": "",
           "Result": "Failed",
-          "Error": "SeccompProfilesAreRestricted is NOT restricted (result: false)",
+          "Error": "pod  was created - test failed",
           "Payload": null
         }
       }
@@ -850,11 +1543,14 @@
       "Name": "Prevent deployments from running without approved seccomp profile",
       "Result": "Failed",
       "Tags": [
-        "@kubernetes",
-        "@pod_security_policy",
-        "@CIS-5.2",
-        "@preventitive",
-        "@AZP-0.3"
+        "@service/kubernetes",
+        "@control/family/pod_security_policy",
+        "@csp/azure",
+        "@csp/aws",
+        "@csp/gcp",
+        "@standard/cis/5.2",
+        "@control/type/preventative",
+        "@standard/none/psp-0.3"
       ],
       "Steps": {
         "1": {
@@ -863,15 +1559,36 @@
           "Result": "Passed",
           "Error": "",
           "Payload": {
-            "KubeConfigPath": "C:\\Users\\eknight\\.kube\\config",
+            "KubeConfigPath": "/root/.kube/config",
             "KubeContext": ""
           }
         },
         "2": {
           "Name": "someSystemExistsToPreventKubernetesDeploymentsWithoutApprovedSeccompProfilesFromBeingDeployedToAnExistingKubernetesCluster",
           "Description": "",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": null
+        },
+        "3": {
+          "Name": "anSeccompProfileIsRequestedForTheKubernetesDeployment",
+          "Description": "",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": null
+        },
+        "4": {
+          "Name": "theOperationWillWithAnError",
+          "Description": "",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": null
+        },
+        "5": {
+          "Name": "iShouldNotBeAbleToPerformASystemCallThatIsBlockedByTheSeccompProfile",
+          "Description": "",
           "Result": "Failed",
-          "Error": "SeccompProfilesAreRestricted is NOT restricted (result: false)",
+          "Error": "Likely an internal Probr error. Error raised trying to execute verification command (unshare)",
           "Payload": null
         }
       }
@@ -880,11 +1597,14 @@
       "Name": "Prevent deployments from running without approved seccomp profile",
       "Result": "Failed",
       "Tags": [
-        "@kubernetes",
-        "@pod_security_policy",
-        "@CIS-5.2",
-        "@preventitive",
-        "@AZP-0.3"
+        "@service/kubernetes",
+        "@control/family/pod_security_policy",
+        "@csp/azure",
+        "@csp/aws",
+        "@csp/gcp",
+        "@standard/cis/5.2",
+        "@control/type/preventative",
+        "@standard/none/psp-0.3"
       ],
       "Steps": {
         "1": {
@@ -893,28 +1613,45 @@
           "Result": "Passed",
           "Error": "",
           "Payload": {
-            "KubeConfigPath": "C:\\Users\\eknight\\.kube\\config",
+            "KubeConfigPath": "/root/.kube/config",
             "KubeContext": ""
           }
         },
         "2": {
           "Name": "someSystemExistsToPreventKubernetesDeploymentsWithoutApprovedSeccompProfilesFromBeingDeployedToAnExistingKubernetesCluster",
           "Description": "",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": null
+        },
+        "3": {
+          "Name": "anSeccompProfileIsRequestedForTheKubernetesDeployment",
+          "Description": "",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": null
+        },
+        "4": {
+          "Name": "theOperationWillWithAnError",
+          "Description": "",
           "Result": "Failed",
-          "Error": "SeccompProfilesAreRestricted is NOT restricted (result: false)",
+          "Error": "pod  was created - test failed",
           "Payload": null
         }
       }
     },
     "4": {
       "Name": "Prevent a deployment from running with the hostPID",
-      "Result": "Failed",
+      "Result": "Passed",
       "Tags": [
-        "@kubernetes",
-        "@pod_security_policy",
-        "@CIS-5.2",
-        "@preventative",
-        "@CIS-5.2.2"
+        "@service/kubernetes",
+        "@control/family/pod_security_policy",
+        "@csp/azure",
+        "@csp/aws",
+        "@csp/gcp",
+        "@standard/cis/5.2",
+        "@control/type/preventative",
+        "@standard/cis/5.2.2"
       ],
       "Steps": {
         "1": {
@@ -923,28 +1660,59 @@
           "Result": "Passed",
           "Error": "",
           "Payload": {
-            "KubeConfigPath": "C:\\Users\\eknight\\.kube\\config",
+            "KubeConfigPath": "/root/.kube/config",
             "KubeContext": ""
           }
         },
         "2": {
           "Name": "someSystemExistsToPreventAKubernetesContainerFromRunningUsingTheHostPIDOnTheActiveKubernetesCluster",
           "Description": "",
-          "Result": "Failed",
-          "Error": "HostPIDIsRestricted is NOT restricted (result: false)",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": null
+        },
+        "3": {
+          "Name": "hostPIDRequestIsMarkedForTheKubernetesDeployment",
+          "Description": "",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": null
+        },
+        "4": {
+          "Name": "theOperationWillWithAnError",
+          "Description": "",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": null
+        },
+        "5": {
+          "Name": "iShouldNotBeAbleToPerformACommandThatProvidesAccessToTheHostPIDNamespace",
+          "Description": "",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": null
+        },
+        "6": {
+          "Name": "performAllowedCommand",
+          "Description": "",
+          "Result": "Passed",
+          "Error": "",
           "Payload": null
         }
       }
     },
     "5": {
       "Name": "Prevent a deployment from running with the hostPID",
-      "Result": "Failed",
+      "Result": "Passed",
       "Tags": [
-        "@kubernetes",
-        "@pod_security_policy",
-        "@CIS-5.2",
-        "@preventative",
-        "@CIS-5.2.2"
+        "@service/kubernetes",
+        "@control/family/pod_security_policy",
+        "@csp/azure",
+        "@csp/aws",
+        "@csp/gcp",
+        "@standard/cis/5.2",
+        "@control/type/preventative",
+        "@standard/cis/5.2.2"
       ],
       "Steps": {
         "1": {
@@ -953,28 +1721,59 @@
           "Result": "Passed",
           "Error": "",
           "Payload": {
-            "KubeConfigPath": "C:\\Users\\eknight\\.kube\\config",
+            "KubeConfigPath": "/root/.kube/config",
             "KubeContext": ""
           }
         },
         "2": {
           "Name": "someSystemExistsToPreventAKubernetesContainerFromRunningUsingTheHostPIDOnTheActiveKubernetesCluster",
           "Description": "",
-          "Result": "Failed",
-          "Error": "HostPIDIsRestricted is NOT restricted (result: false)",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": null
+        },
+        "3": {
+          "Name": "hostPIDRequestIsMarkedForTheKubernetesDeployment",
+          "Description": "",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": null
+        },
+        "4": {
+          "Name": "theOperationWillWithAnError",
+          "Description": "",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": null
+        },
+        "5": {
+          "Name": "iShouldNotBeAbleToPerformACommandThatProvidesAccessToTheHostPIDNamespace",
+          "Description": "",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": null
+        },
+        "6": {
+          "Name": "performAllowedCommand",
+          "Description": "",
+          "Result": "Passed",
+          "Error": "",
           "Payload": null
         }
       }
     },
     "6": {
       "Name": "Prevent a deployment from running with the hostPID",
-      "Result": "Failed",
+      "Result": "Passed",
       "Tags": [
-        "@kubernetes",
-        "@pod_security_policy",
-        "@CIS-5.2",
-        "@preventative",
-        "@CIS-5.2.2"
+        "@service/kubernetes",
+        "@control/family/pod_security_policy",
+        "@csp/azure",
+        "@csp/aws",
+        "@csp/gcp",
+        "@standard/cis/5.2",
+        "@control/type/preventative",
+        "@standard/cis/5.2.2"
       ],
       "Steps": {
         "1": {
@@ -983,28 +1782,59 @@
           "Result": "Passed",
           "Error": "",
           "Payload": {
-            "KubeConfigPath": "C:\\Users\\eknight\\.kube\\config",
+            "KubeConfigPath": "/root/.kube/config",
             "KubeContext": ""
           }
         },
         "2": {
           "Name": "someSystemExistsToPreventAKubernetesContainerFromRunningUsingTheHostPIDOnTheActiveKubernetesCluster",
           "Description": "",
-          "Result": "Failed",
-          "Error": "HostPIDIsRestricted is NOT restricted (result: false)",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": null
+        },
+        "3": {
+          "Name": "hostPIDRequestIsMarkedForTheKubernetesDeployment",
+          "Description": "",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": null
+        },
+        "4": {
+          "Name": "theOperationWillWithAnError",
+          "Description": "",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": null
+        },
+        "5": {
+          "Name": "iShouldNotBeAbleToPerformACommandThatProvidesAccessToTheHostPIDNamespace",
+          "Description": "",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": null
+        },
+        "6": {
+          "Name": "performAllowedCommand",
+          "Description": "",
+          "Result": "Passed",
+          "Error": "",
           "Payload": null
         }
       }
     },
     "7": {
       "Name": "Prevent a deployment from running with the hostIPC flag.",
-      "Result": "Failed",
+      "Result": "Passed",
       "Tags": [
-        "@kubernetes",
-        "@pod_security_policy",
-        "@CIS-5.2",
-        "@preventative",
-        "@CIS-5.2.3"
+        "@service/kubernetes",
+        "@control/family/pod_security_policy",
+        "@csp/azure",
+        "@csp/aws",
+        "@csp/gcp",
+        "@standard/cis/5.2",
+        "@control/type/preventative",
+        "@standard/cis/5.2.3"
       ],
       "Steps": {
         "1": {
@@ -1013,28 +1843,59 @@
           "Result": "Passed",
           "Error": "",
           "Payload": {
-            "KubeConfigPath": "C:\\Users\\eknight\\.kube\\config",
+            "KubeConfigPath": "/root/.kube/config",
             "KubeContext": ""
           }
         },
         "2": {
           "Name": "someSystemExistsToPreventAKubernetesDeploymentFromRunningUsingTheHostIPCInAnExistingKubernetesCluster",
           "Description": "",
-          "Result": "Failed",
-          "Error": "HostIPCIsRestricted is NOT restricted (result: false)",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": null
+        },
+        "3": {
+          "Name": "hostIPCRequestIsMarkedForTheKubernetesDeployment",
+          "Description": "",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": null
+        },
+        "4": {
+          "Name": "theOperationWillWithAnError",
+          "Description": "",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": null
+        },
+        "5": {
+          "Name": "iShouldNotBeAbleToPerformACommandThatProvidesAccessToTheHostIPCNamespace",
+          "Description": "",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": null
+        },
+        "6": {
+          "Name": "performAllowedCommand",
+          "Description": "",
+          "Result": "Passed",
+          "Error": "",
           "Payload": null
         }
       }
     },
     "8": {
       "Name": "Prevent a deployment from running with the hostIPC flag.",
-      "Result": "Failed",
+      "Result": "Passed",
       "Tags": [
-        "@kubernetes",
-        "@pod_security_policy",
-        "@CIS-5.2",
-        "@preventative",
-        "@CIS-5.2.3"
+        "@service/kubernetes",
+        "@control/family/pod_security_policy",
+        "@csp/azure",
+        "@csp/aws",
+        "@csp/gcp",
+        "@standard/cis/5.2",
+        "@control/type/preventative",
+        "@standard/cis/5.2.3"
       ],
       "Steps": {
         "1": {
@@ -1043,28 +1904,59 @@
           "Result": "Passed",
           "Error": "",
           "Payload": {
-            "KubeConfigPath": "C:\\Users\\eknight\\.kube\\config",
+            "KubeConfigPath": "/root/.kube/config",
             "KubeContext": ""
           }
         },
         "2": {
           "Name": "someSystemExistsToPreventAKubernetesDeploymentFromRunningUsingTheHostIPCInAnExistingKubernetesCluster",
           "Description": "",
-          "Result": "Failed",
-          "Error": "HostIPCIsRestricted is NOT restricted (result: false)",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": null
+        },
+        "3": {
+          "Name": "hostIPCRequestIsMarkedForTheKubernetesDeployment",
+          "Description": "",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": null
+        },
+        "4": {
+          "Name": "theOperationWillWithAnError",
+          "Description": "",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": null
+        },
+        "5": {
+          "Name": "iShouldNotBeAbleToPerformACommandThatProvidesAccessToTheHostIPCNamespace",
+          "Description": "",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": null
+        },
+        "6": {
+          "Name": "performAllowedCommand",
+          "Description": "",
+          "Result": "Passed",
+          "Error": "",
           "Payload": null
         }
       }
     },
     "9": {
       "Name": "Prevent a deployment from running with the hostIPC flag.",
-      "Result": "Failed",
+      "Result": "Passed",
       "Tags": [
-        "@kubernetes",
-        "@pod_security_policy",
-        "@CIS-5.2",
-        "@preventative",
-        "@CIS-5.2.3"
+        "@service/kubernetes",
+        "@control/family/pod_security_policy",
+        "@csp/azure",
+        "@csp/aws",
+        "@csp/gcp",
+        "@standard/cis/5.2",
+        "@control/type/preventative",
+        "@standard/cis/5.2.3"
       ],
       "Steps": {
         "1": {
@@ -1073,15 +1965,43 @@
           "Result": "Passed",
           "Error": "",
           "Payload": {
-            "KubeConfigPath": "C:\\Users\\eknight\\.kube\\config",
+            "KubeConfigPath": "/root/.kube/config",
             "KubeContext": ""
           }
         },
         "2": {
           "Name": "someSystemExistsToPreventAKubernetesDeploymentFromRunningUsingTheHostIPCInAnExistingKubernetesCluster",
           "Description": "",
-          "Result": "Failed",
-          "Error": "HostIPCIsRestricted is NOT restricted (result: false)",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": null
+        },
+        "3": {
+          "Name": "hostIPCRequestIsMarkedForTheKubernetesDeployment",
+          "Description": "",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": null
+        },
+        "4": {
+          "Name": "theOperationWillWithAnError",
+          "Description": "",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": null
+        },
+        "5": {
+          "Name": "iShouldNotBeAbleToPerformACommandThatProvidesAccessToTheHostIPCNamespace",
+          "Description": "",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": null
+        },
+        "6": {
+          "Name": "performAllowedCommand",
+          "Description": "",
+          "Result": "Passed",
+          "Error": "",
           "Payload": null
         }
       }

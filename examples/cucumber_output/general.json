@@ -1,24 +1,24 @@
 [
     {
-        "uri": "C:\\Users\\eknight\\dev\\probr\\probes\\kubernetes\\probe_specifications\\general\\general.feature",
+        "uri": "/probr/probes/kubernetes/probe_specifications/general.feature",
         "id": "general-cluster-security-configurations",
         "keyword": "Feature",
         "name": "General Cluster Security Configurations",
-        "description": "  As a Security Auditor\n  I want to ensure that Kubernetes clusters have general security configurations in place\n  So that no general cluster vulnerabilities can be exploited ",
+        "description": "  As a Security Auditor\n  I want to ensure that Kubernetes clusters have general security configurations in place\n  So that no general cluster vulnerabilities can be exploited",
         "line": 3,
         "comments": [
             {
                 "value": "#TODO: should probably move 5.1.3 into the IAM section??",
-                "line": 8
+                "line": 9
             }
         ],
         "tags": [
             {
-                "name": "@kubernetes",
+                "name": "@service/kubernetes",
                 "line": 1
             },
             {
-                "name": "@general",
+                "name": "@control/family/general",
                 "line": 2
             }
         ],
@@ -28,58 +28,62 @@
                 "keyword": "Scenario Outline",
                 "name": "Minimise wildcards in Roles and Cluster Roles",
                 "description": "",
-                "line": 17,
+                "line": 19,
                 "type": "scenario",
                 "tags": [
                     {
-                        "name": "@kubernetes",
+                        "name": "@service/kubernetes",
                         "line": 1
                     },
                     {
-                        "name": "@general",
+                        "name": "@control/family/general",
                         "line": 2
                     },
                     {
-                        "name": "@CIS-5.1.3",
-                        "line": 9
+                        "name": "@standard/cis/5.1.3",
+                        "line": 10
+                    },
+                    {
+                        "name": "@control/type/preventative",
+                        "line": 11
                     }
                 ],
                 "steps": [
                     {
                         "keyword": "Given ",
                         "name": "a Kubernetes cluster is deployed",
-                        "line": 17,
+                        "line": 19,
                         "match": {
-                            "location": "k8s_probes.go:200"
+                            "location": "k8s_probes.go:210"
                         },
                         "result": {
                             "status": "passed",
-                            "duration": 0
+                            "duration": 4083229
                         }
                     },
                     {
                         "keyword": "When ",
                         "name": "I inspect the \"Roles\" that are configured",
-                        "line": 17,
+                        "line": 19,
                         "match": {
                             "location": "general_feature.go:18"
                         },
                         "result": {
                             "status": "passed",
-                            "duration": 25166000
+                            "duration": 202579389
                         }
                     },
                     {
                         "keyword": "Then ",
                         "name": "I should only find wildcards in known and authorised configurations",
-                        "line": 17,
+                        "line": 19,
                         "match": {
                             "location": "general_feature.go:38"
                         },
                         "result": {
                             "status": "failed",
                             "error_message": "interface conversion: interface {} is *[]v1.Role, not []interface {}",
-                            "duration": 0
+                            "duration": 267608
                         }
                     }
                 ]
@@ -89,58 +93,62 @@
                 "keyword": "Scenario Outline",
                 "name": "Minimise wildcards in Roles and Cluster Roles",
                 "description": "",
-                "line": 18,
+                "line": 20,
                 "type": "scenario",
                 "tags": [
                     {
-                        "name": "@kubernetes",
+                        "name": "@service/kubernetes",
                         "line": 1
                     },
                     {
-                        "name": "@general",
+                        "name": "@control/family/general",
                         "line": 2
                     },
                     {
-                        "name": "@CIS-5.1.3",
-                        "line": 9
+                        "name": "@standard/cis/5.1.3",
+                        "line": 10
+                    },
+                    {
+                        "name": "@control/type/preventative",
+                        "line": 11
                     }
                 ],
                 "steps": [
                     {
                         "keyword": "Given ",
                         "name": "a Kubernetes cluster is deployed",
-                        "line": 18,
+                        "line": 20,
                         "match": {
-                            "location": "k8s_probes.go:200"
+                            "location": "k8s_probes.go:210"
                         },
                         "result": {
                             "status": "passed",
-                            "duration": 0
+                            "duration": 32301
                         }
                     },
                     {
                         "keyword": "When ",
                         "name": "I inspect the \"Cluster Roles\" that are configured",
-                        "line": 18,
+                        "line": 20,
                         "match": {
                             "location": "general_feature.go:18"
                         },
                         "result": {
                             "status": "passed",
-                            "duration": 25402100
+                            "duration": 36719658
                         }
                     },
                     {
                         "keyword": "Then ",
                         "name": "I should only find wildcards in known and authorised configurations",
-                        "line": 18,
+                        "line": 20,
                         "match": {
                             "location": "general_feature.go:38"
                         },
                         "result": {
                             "status": "failed",
                             "error_message": "interface conversion: interface {} is *[]v1.ClusterRole, not []interface {}",
-                            "duration": 1016200
+                            "duration": 89703
                         }
                     }
                 ]
@@ -150,57 +158,62 @@
                 "keyword": "Scenario",
                 "name": "Ensure Security Contexts are enforced",
                 "description": "",
-                "line": 21,
+                "line": 24,
                 "type": "scenario",
                 "tags": [
                     {
-                        "name": "@kubernetes",
+                        "name": "@service/kubernetes",
                         "line": 1
                     },
                     {
-                        "name": "@general",
+                        "name": "@control/family/general",
                         "line": 2
                     },
                     {
-                        "name": "@CIS-5.6.3",
-                        "line": 20
+                        "name": "@standard/cis/5.6.3",
+                        "line": 22
+                    },
+                    {
+                        "name": "@control/type/preventative",
+                        "line": 23
                     }
                 ],
                 "steps": [
                     {
                         "keyword": "Given ",
                         "name": "a Kubernetes cluster is deployed",
-                        "line": 22,
+                        "line": 25,
                         "match": {
-                            "location": "k8s_probes.go:200"
+                            "location": "k8s_probes.go:210"
                         },
                         "result": {
                             "status": "passed",
-                            "duration": 0
+                            "duration": 19500
                         }
                     },
                     {
                         "keyword": "When ",
                         "name": "I attempt to create a deployment which does not have a Security Context",
-                        "line": 23,
+                        "line": 26,
                         "match": {
                             "location": "general_feature.go:53"
                         },
                         "result": {
-                            "status": "failed",
-                            "error_message": "runtime error: invalid memory address or nil pointer dereference",
-                            "duration": 60106603600
+                            "status": "passed",
+                            "duration": 10268883070
                         }
                     },
                     {
                         "keyword": "Then ",
                         "name": "the deployment is rejected",
-                        "line": 24,
+                        "line": 27,
                         "match": {
                             "location": "general_feature.go:69"
                         },
                         "result": {
-                            "status": "skipped"
+                            "status": "failed",
+                            "error_message": "[ERROR] pod probr-general-161120-214148-71 was created successfully. Test fail.",
+                            "duration": 61602
                         }
                     }
                 ]
@@ -210,57 +223,61 @@
                 "keyword": "Scenario",
                 "name": "Ensure Kubernetes Web UI is disabled",
                 "description": "",
-                "line": 27,
+                "line": 31,
                 "type": "scenario",
                 "tags": [
                     {
-                        "name": "@kubernetes",
+                        "name": "@service/kubernetes",
                         "line": 1
                     },
                     {
-                        "name": "@general",
+                        "name": "@control/family/general",
                         "line": 2
                     },
                     {
-                        "name": "@CIS-6.10.1",
-                        "line": 26
+                        "name": "@standard/cis/6.10.1",
+                        "line": 29
+                    },
+                    {
+                        "name": "@control/type/detective",
+                        "line": 30
                     }
                 ],
                 "steps": [
                     {
                         "keyword": "Given ",
                         "name": "a Kubernetes cluster is deployed",
-                        "line": 28,
+                        "line": 32,
                         "match": {
-                            "location": "k8s_probes.go:200"
+                            "location": "k8s_probes.go:210"
                         },
                         "result": {
                             "status": "passed",
-                            "duration": 0
+                            "duration": 40701
                         }
                     },
                     {
                         "keyword": "And ",
                         "name": "the Kubernetes Web UI is disabled",
-                        "line": 29,
+                        "line": 33,
                         "match": {
                             "location": "general_feature.go:94"
                         },
                         "result": {
                             "status": "passed",
-                            "duration": 66195300
+                            "duration": 102425330
                         }
                     },
                     {
                         "keyword": "Then ",
                         "name": "I should not be able to access the Kubernetes Web UI",
-                        "line": 30,
+                        "line": 34,
                         "match": {
                             "location": "general_feature.go:84"
                         },
                         "result": {
                             "status": "passed",
-                            "duration": 0
+                            "duration": 54002
                         }
                     }
                 ]

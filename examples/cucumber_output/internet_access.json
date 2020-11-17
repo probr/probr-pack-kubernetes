@@ -1,257 +1,311 @@
 [
     {
-        "uri": "C:\\Users\\eknight\\dev\\probr\\probes\\kubernetes\\probe_specifications\\internetaccess\\internet_access.feature",
-        "id": "egress-control-of-a-kubernetes-cluster",
+        "uri": "/probr/probes/kubernetes/probe_specifications/internet_access.feature",
+        "id": "control-egress-from-inside-of-a-kubernetes-cluster",
         "keyword": "Feature",
-        "name": "Egress control of a kubernetes cluster",
+        "name": "Control egress from inside of a Kubernetes cluster",
         "description": "  As a Security Auditor\n  I want to ensure that containers running inside Kubernetes clusters cannot directly access the Internet\n  So that Internet traffic can be inspected and controlled",
-        "line": 5,
+        "line": 8,
         "comments": [
             {
                 "value": "#  Rule: CHC2-SVD030 - protect cloud service network access by limiting access from the appropriate source network only",
-                "line": 10
+                "line": 14
             }
         ],
         "tags": [
             {
-                "name": "@kubernetes",
+                "name": "@service/kubernetes",
                 "line": 1
             },
             {
-                "name": "@internet_access",
+                "name": "@control/family/network",
                 "line": 2
             },
             {
-                "name": "@csp.azure",
+                "name": "@csp/azure",
                 "line": 3
             },
             {
-                "name": "@CCO:CHC2-SVD030",
+                "name": "@csp/aws",
                 "line": 4
+            },
+            {
+                "name": "@csp/gcp",
+                "line": 5
+            },
+            {
+                "name": "@csp/openshift",
+                "line": 6
+            },
+            {
+                "name": "@standard/citihub/CHC2-SVD030",
+                "line": 7
             }
         ],
         "elements": [
             {
-                "id": "egress-control-of-a-kubernetes-cluster;test-outgoing-connectivity-of-a-deployed-pod;;2",
+                "id": "control-egress-from-inside-of-a-kubernetes-cluster;test-outgoing-connectivity-of-a-deployed-pod;;2",
                 "keyword": "Scenario Outline",
                 "name": "Test outgoing connectivity of a deployed pod",
                 "description": "",
-                "line": 20,
+                "line": 24,
                 "type": "scenario",
                 "tags": [
                     {
-                        "name": "@kubernetes",
+                        "name": "@service/kubernetes",
                         "line": 1
                     },
                     {
-                        "name": "@internet_access",
+                        "name": "@control/family/network",
                         "line": 2
                     },
                     {
-                        "name": "@csp.azure",
+                        "name": "@csp/azure",
                         "line": 3
                     },
                     {
-                        "name": "@CCO:CHC2-SVD030",
+                        "name": "@csp/aws",
                         "line": 4
+                    },
+                    {
+                        "name": "@csp/gcp",
+                        "line": 5
+                    },
+                    {
+                        "name": "@csp/openshift",
+                        "line": 6
+                    },
+                    {
+                        "name": "@standard/citihub/CHC2-SVD030",
+                        "line": 7
                     }
                 ],
                 "steps": [
                     {
                         "keyword": "Given ",
                         "name": "a Kubernetes cluster is deployed",
-                        "line": 20,
+                        "line": 24,
                         "match": {
-                            "location": "k8s_probes.go:200"
+                            "location": "k8s_probes.go:210"
                         },
                         "result": {
                             "status": "passed",
-                            "duration": 2990700
+                            "duration": 56302
                         }
                     },
                     {
                         "keyword": "And ",
                         "name": "a pod is deployed in the cluster",
-                        "line": 20,
+                        "line": 24,
                         "match": {
-                            "location": "internet_access.go:27"
+                            "location": "internet_access.go:28"
                         },
                         "result": {
-                            "status": "failed",
-                            "error_message": "context deadline exceeded",
-                            "duration": 60297978000
+                            "status": "passed",
+                            "duration": 2173207440
                         }
                     },
                     {
                         "keyword": "When ",
                         "name": "a process inside the pod establishes a direct http(s) connection to \"www.google.com\"",
-                        "line": 20,
+                        "line": 24,
                         "match": {
-                            "location": "internet_access.go:54"
+                            "location": "internet_access.go:56"
                         },
                         "result": {
-                            "status": "skipped"
+                            "status": "passed",
+                            "duration": 703905300
                         }
                     },
                     {
                         "keyword": "Then ",
                         "name": "access is \"blocked\"",
-                        "line": 20,
+                        "line": 24,
                         "match": {
-                            "location": "internet_access.go:71"
+                            "location": "internet_access.go:74"
                         },
                         "result": {
-                            "status": "skipped"
+                            "status": "failed",
+                            "error_message": "[ERROR] got HTTP Status Code 200 - failed",
+                            "duration": 80202
                         }
                     }
                 ]
             },
             {
-                "id": "egress-control-of-a-kubernetes-cluster;test-outgoing-connectivity-of-a-deployed-pod;;3",
+                "id": "control-egress-from-inside-of-a-kubernetes-cluster;test-outgoing-connectivity-of-a-deployed-pod;;3",
                 "keyword": "Scenario Outline",
                 "name": "Test outgoing connectivity of a deployed pod",
                 "description": "",
-                "line": 21,
+                "line": 25,
                 "type": "scenario",
                 "tags": [
                     {
-                        "name": "@kubernetes",
+                        "name": "@service/kubernetes",
                         "line": 1
                     },
                     {
-                        "name": "@internet_access",
+                        "name": "@control/family/network",
                         "line": 2
                     },
                     {
-                        "name": "@csp.azure",
+                        "name": "@csp/azure",
                         "line": 3
                     },
                     {
-                        "name": "@CCO:CHC2-SVD030",
+                        "name": "@csp/aws",
                         "line": 4
+                    },
+                    {
+                        "name": "@csp/gcp",
+                        "line": 5
+                    },
+                    {
+                        "name": "@csp/openshift",
+                        "line": 6
+                    },
+                    {
+                        "name": "@standard/citihub/CHC2-SVD030",
+                        "line": 7
                     }
                 ],
                 "steps": [
                     {
                         "keyword": "Given ",
                         "name": "a Kubernetes cluster is deployed",
-                        "line": 21,
+                        "line": 25,
                         "match": {
-                            "location": "k8s_probes.go:200"
+                            "location": "k8s_probes.go:210"
                         },
                         "result": {
                             "status": "passed",
-                            "duration": 0
+                            "duration": 20500
                         }
                     },
                     {
                         "keyword": "And ",
                         "name": "a pod is deployed in the cluster",
-                        "line": 21,
+                        "line": 25,
                         "match": {
-                            "location": "internet_access.go:27"
+                            "location": "internet_access.go:28"
                         },
                         "result": {
-                            "status": "failed",
-                            "error_message": "context deadline exceeded",
-                            "duration": 60151629000
+                            "status": "passed",
+                            "duration": 32701
                         }
                     },
                     {
                         "keyword": "When ",
                         "name": "a process inside the pod establishes a direct http(s) connection to \"www.microsoft.com\"",
-                        "line": 21,
+                        "line": 25,
                         "match": {
-                            "location": "internet_access.go:54"
+                            "location": "internet_access.go:56"
                         },
                         "result": {
-                            "status": "skipped"
+                            "status": "passed",
+                            "duration": 620109958
                         }
                     },
                     {
                         "keyword": "Then ",
                         "name": "access is \"blocked\"",
-                        "line": 21,
+                        "line": 25,
                         "match": {
-                            "location": "internet_access.go:71"
+                            "location": "internet_access.go:74"
                         },
                         "result": {
-                            "status": "skipped"
+                            "status": "failed",
+                            "error_message": "[ERROR] got HTTP Status Code 200 - failed",
+                            "duration": 102403
                         }
                     }
                 ]
             },
             {
-                "id": "egress-control-of-a-kubernetes-cluster;test-outgoing-connectivity-of-a-deployed-pod;;4",
+                "id": "control-egress-from-inside-of-a-kubernetes-cluster;test-outgoing-connectivity-of-a-deployed-pod;;4",
                 "keyword": "Scenario Outline",
                 "name": "Test outgoing connectivity of a deployed pod",
                 "description": "",
-                "line": 22,
+                "line": 26,
                 "type": "scenario",
                 "tags": [
                     {
-                        "name": "@kubernetes",
+                        "name": "@service/kubernetes",
                         "line": 1
                     },
                     {
-                        "name": "@internet_access",
+                        "name": "@control/family/network",
                         "line": 2
                     },
                     {
-                        "name": "@csp.azure",
+                        "name": "@csp/azure",
                         "line": 3
                     },
                     {
-                        "name": "@CCO:CHC2-SVD030",
+                        "name": "@csp/aws",
                         "line": 4
+                    },
+                    {
+                        "name": "@csp/gcp",
+                        "line": 5
+                    },
+                    {
+                        "name": "@csp/openshift",
+                        "line": 6
+                    },
+                    {
+                        "name": "@standard/citihub/CHC2-SVD030",
+                        "line": 7
                     }
                 ],
                 "steps": [
                     {
                         "keyword": "Given ",
                         "name": "a Kubernetes cluster is deployed",
-                        "line": 22,
+                        "line": 26,
                         "match": {
-                            "location": "k8s_probes.go:200"
+                            "location": "k8s_probes.go:210"
                         },
                         "result": {
                             "status": "passed",
-                            "duration": 993300
+                            "duration": 20701
                         }
                     },
                     {
                         "keyword": "And ",
                         "name": "a pod is deployed in the cluster",
-                        "line": 22,
+                        "line": 26,
                         "match": {
-                            "location": "internet_access.go:27"
+                            "location": "internet_access.go:28"
                         },
                         "result": {
-                            "status": "failed",
-                            "error_message": "context deadline exceeded",
-                            "duration": 60167437600
+                            "status": "passed",
+                            "duration": 33801
                         }
                     },
                     {
                         "keyword": "When ",
                         "name": "a process inside the pod establishes a direct http(s) connection to \"www.ubuntu.com\"",
-                        "line": 22,
+                        "line": 26,
                         "match": {
-                            "location": "internet_access.go:54"
+                            "location": "internet_access.go:56"
                         },
                         "result": {
-                            "status": "skipped"
+                            "status": "passed",
+                            "duration": 1371484354
                         }
                     },
                     {
                         "keyword": "Then ",
                         "name": "access is \"blocked\"",
-                        "line": 22,
+                        "line": 26,
                         "match": {
-                            "location": "internet_access.go:71"
+                            "location": "internet_access.go:74"
                         },
                         "result": {
-                            "status": "skipped"
+                            "status": "failed",
+                            "error_message": "[ERROR] got HTTP Status Code 200 - failed",
+                            "duration": 71203
                         }
                     }
                 ]
