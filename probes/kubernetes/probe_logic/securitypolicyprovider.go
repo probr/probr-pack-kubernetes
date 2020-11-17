@@ -1,4 +1,4 @@
-package kubernetes
+package k8s_logic
 
 // SecurityPolicyProvider defines a set of methods for interograting the security policies set on the kubernetes cluster.
 type SecurityPolicyProvider interface {

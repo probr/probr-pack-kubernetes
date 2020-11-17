@@ -1,6 +1,6 @@
 // Package kubernetes provides functions for interacting with Kubernetes and
 // is built using the kubernetes client-go (https://github.com/kubernetes/client-go).
-package kubernetes
+package k8s_logic
 
 import (
 	"bytes"

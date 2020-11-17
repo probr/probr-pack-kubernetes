@@ -1,23 +1,24 @@
-package k8s_probes
+package kubernetes
 
 //go:generate go-bindata.exe -pkg $GOPACKAGE -o assets/assets.go assets/yaml
 
 import (
 	"log"
 
-	"github.com/citihub/probr/internal/clouddriver/kubernetes"
+	"github.com/cucumber/godog"
+
 	"github.com/citihub/probr/internal/coreengine"
 	"github.com/citihub/probr/internal/utils"
 	podsecuritypolicy "github.com/citihub/probr/probes/kubernetes/assets/podsecuritypolicy"
-	"github.com/cucumber/godog"
+	k8s_logic "github.com/citihub/probr/probes/kubernetes/probe_logic"
 )
 
 // PodSecurityPolicy is the section of the kubernetes package which provides the kubernetes interactions required to support
 // pod security policy
-var psp kubernetes.PodSecurityPolicy
+var psp k8s_logic.PodSecurityPolicy
 
 // SetPodSecurityPolicy allows injection of a specific PodSecurityPolicy helper.
-func SetPodSecurityPolicy(p kubernetes.PodSecurityPolicy) {
+func SetPodSecurityPolicy(p k8s_logic.PodSecurityPolicy) {
 	psp = p
 }
 
@@ -45,7 +46,7 @@ func (s *scenarioState) theOperationWillWithAnError(res, msg string) error {
 }
 
 func (s *scenarioState) performAllowedCommand() error {
-	err := s.runVerificationProbe(kubernetes.PSPVerificationProbe{Cmd: kubernetes.Ls, ExpectedExitCode: 0}) //'0' exit code as we expect this to succeed
+	err := s.runVerificationProbe(k8s_logic.PSPVerificationProbe{Cmd: k8s_logic.Ls, ExpectedExitCode: 0}) //'0' exit code as we expect this to succeed
 
 	description := ""
 	var payload interface{}
@@ -76,7 +77,7 @@ func (s *scenarioState) runControlProbe(cf func() (*bool, error), c string) erro
 	return nil
 }
 
-func (s *scenarioState) runVerificationProbe(c kubernetes.PSPVerificationProbe) error {
+func (s *scenarioState) runVerificationProbe(c k8s_logic.PSPVerificationProbe) error {
 
 	//check for lack of creation error, i.e. pod was created successfully
 	if s.podState.CreationError == nil {
@@ -134,7 +135,7 @@ func (s *scenarioState) privilegedAccessRequestIsMarkedForTheKubernetesDeploymen
 
 	pd, err := psp.CreatePODSettingSecurityContext(&pa, nil, nil)
 
-	err = ProcessPodCreationResult(s.probe, &s.podState, pd, kubernetes.PSPNoPrivilege, err)
+	err = ProcessPodCreationResult(s.probe, &s.podState, pd, k8s_logic.PSPNoPrivilege, err)
 
 	description := ""
 	var payload interface{}
@@ -154,7 +155,7 @@ func (s *scenarioState) someControlExistsToPreventPrivilegedAccessForKubernetesD
 }
 
 func (s *scenarioState) iShouldNotBeAbleToPerformACommandThatRequiresPrivilegedAccess() error {
-	err := s.runVerificationProbe(kubernetes.PSPVerificationProbe{Cmd: kubernetes.Chroot, ExpectedExitCode: 1})
+	err := s.runVerificationProbe(k8s_logic.PSPVerificationProbe{Cmd: k8s_logic.Chroot, ExpectedExitCode: 1})
 
 	description := ""
 	var payload interface{}
@@ -176,7 +177,7 @@ func (s *scenarioState) hostPIDRequestIsMarkedForTheKubernetesDeployment(hostPID
 
 	pd, err := psp.CreatePODSettingAttributes(&hostPID, nil, nil)
 
-	err = ProcessPodCreationResult(s.probe, &s.podState, pd, kubernetes.PSPHostNamespace, err)
+	err = ProcessPodCreationResult(s.probe, &s.podState, pd, k8s_logic.PSPHostNamespace, err)
 
 	description := ""
 	var payload interface{}
@@ -196,7 +197,7 @@ func (s *scenarioState) someSystemExistsToPreventAKubernetesContainerFromRunning
 }
 
 func (s *scenarioState) iShouldNotBeAbleToPerformACommandThatProvidesAccessToTheHostPIDNamespace() error {
-	err := s.runVerificationProbe(kubernetes.PSPVerificationProbe{Cmd: kubernetes.EnterHostPIDNS, ExpectedExitCode: 1})
+	err := s.runVerificationProbe(k8s_logic.PSPVerificationProbe{Cmd: k8s_logic.EnterHostPIDNS, ExpectedExitCode: 1})
 
 	description := ""
 	var payload interface{}
@@ -217,7 +218,7 @@ func (s *scenarioState) hostIPCRequestIsMarkedForTheKubernetesDeployment(hostIPC
 
 	pd, err := psp.CreatePODSettingAttributes(nil, &hostIPC, nil)
 
-	err = ProcessPodCreationResult(s.probe, &s.podState, pd, kubernetes.PSPHostNamespace, err)
+	err = ProcessPodCreationResult(s.probe, &s.podState, pd, k8s_logic.PSPHostNamespace, err)
 
 	description := ""
 	var payload interface{}
@@ -238,7 +239,7 @@ func (s *scenarioState) someSystemExistsToPreventAKubernetesDeploymentFromRunnin
 }
 
 func (s *scenarioState) iShouldNotBeAbleToPerformACommandThatProvidesAccessToTheHostIPCNamespace() error {
-	err := s.runVerificationProbe(kubernetes.PSPVerificationProbe{Cmd: kubernetes.EnterHostIPCNS, ExpectedExitCode: 1})
+	err := s.runVerificationProbe(k8s_logic.PSPVerificationProbe{Cmd: k8s_logic.EnterHostIPCNS, ExpectedExitCode: 1})
 
 	description := ""
 	var payload interface{}
@@ -259,7 +260,7 @@ func (s *scenarioState) hostNetworkRequestIsMarkedForTheKubernetesDeployment(hos
 
 	pd, err := psp.CreatePODSettingAttributes(nil, nil, &hostNetwork)
 
-	err = ProcessPodCreationResult(s.probe, &s.podState, pd, kubernetes.PSPHostNetwork, err)
+	err = ProcessPodCreationResult(s.probe, &s.podState, pd, k8s_logic.PSPHostNetwork, err)
 
 	description := ""
 	var payload interface{}
@@ -279,7 +280,7 @@ func (s *scenarioState) someSystemExistsToPreventAKubernetesDeploymentFromRunnin
 
 }
 func (s *scenarioState) iShouldNotBeAbleToPerformACommandThatProvidesAccessToTheHostNetworkNamespace() error {
-	err := s.runVerificationProbe(kubernetes.PSPVerificationProbe{Cmd: kubernetes.EnterHostNetworkNS, ExpectedExitCode: 1})
+	err := s.runVerificationProbe(k8s_logic.PSPVerificationProbe{Cmd: k8s_logic.EnterHostNetworkNS, ExpectedExitCode: 1})
 
 	description := ""
 	var payload interface{}
@@ -300,7 +301,7 @@ func (s *scenarioState) privilegedEscalationIsMarkedForTheKubernetesDeployment(p
 
 	pd, err := psp.CreatePODSettingSecurityContext(nil, &pa, nil)
 
-	err = ProcessPodCreationResult(s.probe, &s.podState, pd, kubernetes.PSPNoPrivilegeEscalation, err)
+	err = ProcessPodCreationResult(s.probe, &s.podState, pd, k8s_logic.PSPNoPrivilegeEscalation, err)
 
 	description := ""
 	var payload interface{}
@@ -332,7 +333,7 @@ func (s *scenarioState) theUserRequestedIsForTheKubernetesDeployment(requestedUs
 	}
 
 	pd, err := psp.CreatePODSettingSecurityContext(nil, nil, &runAsUser)
-	err = ProcessPodCreationResult(s.probe, &s.podState, pd, kubernetes.PSPAllowedUsersGroups, err)
+	err = ProcessPodCreationResult(s.probe, &s.podState, pd, k8s_logic.PSPAllowedUsersGroups, err)
 
 	description := ""
 	var payload interface{}
@@ -352,7 +353,7 @@ func (s *scenarioState) someSystemExistsToPreventAKubernetesDeploymentFromRunnin
 }
 
 func (s *scenarioState) theKubernetesDeploymentShouldRunWithANonrootUID() error {
-	err := s.runVerificationProbe(kubernetes.PSPVerificationProbe{Cmd: kubernetes.VerifyNonRootUID, ExpectedExitCode: 1})
+	err := s.runVerificationProbe(k8s_logic.PSPVerificationProbe{Cmd: k8s_logic.VerifyNonRootUID, ExpectedExitCode: 1})
 
 	description := ""
 	var payload interface{}
@@ -371,7 +372,7 @@ func (s *scenarioState) nETRAWIsMarkedForTheKubernetesDeployment(netRawRequested
 	}
 
 	pd, err := psp.CreatePODSettingCapabilities(&c)
-	err = ProcessPodCreationResult(s.probe, &s.podState, pd, kubernetes.PSPAllowedCapabilities, err)
+	err = ProcessPodCreationResult(s.probe, &s.podState, pd, k8s_logic.PSPAllowedCapabilities, err)
 
 	description := ""
 	var payload interface{}
@@ -391,7 +392,7 @@ func (s *scenarioState) someSystemExistsToPreventAKubernetesDeploymentFromRunnin
 }
 
 func (s *scenarioState) iShouldNotBeAbleToPerformACommandThatRequiresNETRAWCapability() error {
-	err := s.runVerificationProbe(kubernetes.PSPVerificationProbe{Cmd: kubernetes.NetRawProbe, ExpectedExitCode: 1})
+	err := s.runVerificationProbe(k8s_logic.PSPVerificationProbe{Cmd: k8s_logic.NetRawProbe, ExpectedExitCode: 1})
 
 	description := ""
 	var payload interface{}
@@ -411,7 +412,7 @@ func (s *scenarioState) additionalCapabilitiesForTheKubernetesDeployment(addCapa
 	}
 
 	pd, err := psp.CreatePODSettingCapabilities(&c)
-	err = ProcessPodCreationResult(s.probe, &s.podState, pd, kubernetes.PSPAllowedCapabilities, err)
+	err = ProcessPodCreationResult(s.probe, &s.podState, pd, k8s_logic.PSPAllowedCapabilities, err)
 
 	description := ""
 	var payload interface{}
@@ -431,7 +432,7 @@ func (s *scenarioState) someSystemExistsToPreventKubernetesDeploymentsWithCapabi
 }
 
 func (s *scenarioState) iShouldNotBeAbleToPerformACommandThatRequiresCapabilitiesOutsideOfTheDefaultSet() error {
-	err := s.runVerificationProbe(kubernetes.PSPVerificationProbe{Cmd: kubernetes.SpecialCapProbe, ExpectedExitCode: 2})
+	err := s.runVerificationProbe(k8s_logic.PSPVerificationProbe{Cmd: k8s_logic.SpecialCapProbe, ExpectedExitCode: 2})
 
 	description := ""
 	var payload interface{}
@@ -452,7 +453,7 @@ func (s *scenarioState) assignedCapabilitiesForTheKubernetesDeployment(assignCap
 	}
 
 	pd, err := psp.CreatePODSettingCapabilities(&c)
-	err = ProcessPodCreationResult(s.probe, &s.podState, pd, kubernetes.PSPAllowedCapabilities, err)
+	err = ProcessPodCreationResult(s.probe, &s.podState, pd, k8s_logic.PSPAllowedCapabilities, err)
 
 	description := ""
 	var payload interface{}
@@ -472,7 +473,7 @@ func (s *scenarioState) someSystemExistsToPreventKubernetesDeploymentsWithAssign
 }
 
 func (s *scenarioState) iShouldNotBeAbleToPerformACommandThatRequiresAnyCapabilities() error {
-	err := s.runVerificationProbe(kubernetes.PSPVerificationProbe{Cmd: kubernetes.SpecialCapProbe, ExpectedExitCode: 2})
+	err := s.runVerificationProbe(k8s_logic.PSPVerificationProbe{Cmd: k8s_logic.SpecialCapProbe, ExpectedExitCode: 2})
 
 	description := ""
 	var payload interface{}
@@ -495,7 +496,7 @@ func (s *scenarioState) anPortRangeIsRequestedForTheKubernetesDeployment(portRan
 
 	if err == nil {
 		pd, err := psp.CreatePodFromYaml(y)
-		err = ProcessPodCreationResult(s.probe, &s.podState, pd, kubernetes.PSPAllowedPortRange, err)
+		err = ProcessPodCreationResult(s.probe, &s.podState, pd, k8s_logic.PSPAllowedPortRange, err)
 	}
 
 	description := ""
@@ -517,7 +518,7 @@ func (s *scenarioState) someSystemExistsToPreventKubernetesDeploymentsWithUnappr
 }
 
 func (s *scenarioState) iShouldNotBeAbleToPerformACommandThatAccessAnUnapprovedPortRange() error {
-	err := s.runVerificationProbe(kubernetes.PSPVerificationProbe{Cmd: kubernetes.NetCat, ExpectedExitCode: 1})
+	err := s.runVerificationProbe(k8s_logic.PSPVerificationProbe{Cmd: k8s_logic.NetCat, ExpectedExitCode: 1})
 
 	description := ""
 	var payload interface{}
@@ -540,7 +541,7 @@ func (s *scenarioState) anVolumeTypeIsRequestedForTheKubernetesDeployment(volume
 
 	if err == nil {
 		pd, err := psp.CreatePodFromYaml(y)
-		err = ProcessPodCreationResult(s.probe, &s.podState, pd, kubernetes.PSPAllowedVolumeTypes, err)
+		err = ProcessPodCreationResult(s.probe, &s.podState, pd, k8s_logic.PSPAllowedVolumeTypes, err)
 	}
 
 	description := ""
@@ -583,7 +584,7 @@ func (s *scenarioState) anSeccompProfileIsRequestedForTheKubernetesDeployment(se
 
 	if err != nil {
 		pd, err := psp.CreatePodFromYaml(y)
-		err = ProcessPodCreationResult(s.probe, &s.podState, pd, kubernetes.PSPSeccompProfile, err)
+		err = ProcessPodCreationResult(s.probe, &s.podState, pd, k8s_logic.PSPSeccompProfile, err)
 	}
 
 	description := ""
@@ -603,7 +604,7 @@ func (s *scenarioState) someSystemExistsToPreventKubernetesDeploymentsWithoutApp
 	return err
 }
 func (s *scenarioState) iShouldNotBeAbleToPerformASystemCallThatIsBlockedByTheSeccompProfile() error {
-	err := s.runVerificationProbe(kubernetes.PSPVerificationProbe{Cmd: kubernetes.Unshare, ExpectedExitCode: 1})
+	err := s.runVerificationProbe(k8s_logic.PSPVerificationProbe{Cmd: k8s_logic.Unshare, ExpectedExitCode: 1})
 
 	description := ""
 	var payload interface{}
@@ -619,7 +620,7 @@ func pspProbeInitialize(ctx *godog.TestSuiteContext) {
 		//check dependancies ...
 		if psp == nil {
 			// not been given one so set default
-			psp = kubernetes.NewDefaultPSP()
+			psp = k8s_logic.NewDefaultPSP()
 		}
 		psp.CreateConfigMap()
 	})

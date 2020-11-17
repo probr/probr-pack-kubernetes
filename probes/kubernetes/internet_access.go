@@ -1,13 +1,14 @@
-package k8s_probes
+package kubernetes
 
 import (
 	"log"
 
-	"github.com/citihub/probr/internal/clouddriver/kubernetes"
-	"github.com/citihub/probr/internal/coreengine"
-	"github.com/citihub/probr/internal/utils"
 	"github.com/cucumber/godog"
 	apiv1 "k8s.io/api/core/v1"
+
+	"github.com/citihub/probr/internal/coreengine"
+	"github.com/citihub/probr/internal/utils"
+	k8s_logic "github.com/citihub/probr/probes/kubernetes/probe_logic"
 )
 
 var ia_ps scenarioState
@@ -18,16 +19,16 @@ func init() {
 
 // NetworkAccess is the section of the kubernetes package which provides the kubernetes interactions required to support
 // network access scenarios.
-var na kubernetes.NetworkAccess
+var na k8s_logic.NetworkAccess
 
 // SetNetworkAccess allows injection of a specific NetworkAccess helper.
-func SetNetworkAccess(n kubernetes.NetworkAccess) {
+func SetNetworkAccess(n k8s_logic.NetworkAccess) {
 	na = n
 }
 
 func (s *scenarioState) aPodIsDeployedInTheCluster() error {
 	var err error
-	var podAudit *kubernetes.PodAudit
+	var podAudit *k8s_logic.PodAudit
 	var pod *apiv1.Pod
 	if s.podName != "" {
 		//only one pod is needed for all scenarios in this probe
@@ -100,7 +101,7 @@ func iaProbeInitialize(ctx *godog.TestSuiteContext) {
 	//check dependancies ...
 	if na == nil {
 		// not been given one so set default
-		na = kubernetes.NewDefaultNA()
+		na = k8s_logic.NewDefaultNA()
 	}
 }
 

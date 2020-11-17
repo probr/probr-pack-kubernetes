@@ -1,23 +1,23 @@
 // Package containerregistryaccess provides the implementation required to execute the
 // feature based test cases described in the the 'events' directory.
-package k8s_probes
+package kubernetes
 
 import (
 	"fmt"
 
 	"github.com/cucumber/godog"
 
-	"github.com/citihub/probr/internal/clouddriver/kubernetes"
 	"github.com/citihub/probr/internal/config"
 	"github.com/citihub/probr/internal/coreengine"
+	k8s_logic "github.com/citihub/probr/probes/kubernetes/probe_logic"
 )
 
 // ContainerRegistryAccess is the section of the kubernetes package which provides the kubernetes interactions required to support
 // container registry scenarios.
-var cra kubernetes.ContainerRegistryAccess
+var cra k8s_logic.ContainerRegistryAccess
 
 // SetContainerRegistryAccess allows injection of ContainerRegistryAccess helper.
-func SetContainerRegistryAccess(c kubernetes.ContainerRegistryAccess) {
+func SetContainerRegistryAccess(c k8s_logic.ContainerRegistryAccess) {
 	cra = c
 }
 
@@ -28,7 +28,7 @@ func SetContainerRegistryAccess(c kubernetes.ContainerRegistryAccess) {
 func (s *scenarioState) iAmAuthorisedToPullFromAContainerRegistry() error {
 	pod, podAudit, err := cra.SetupContainerAccessProbePod(config.Vars.ContainerRegistry)
 
-	err = ProcessPodCreationResult(s.probe, &s.podState, pod, kubernetes.PSPContainerAllowedImages, err)
+	err = ProcessPodCreationResult(s.probe, &s.podState, pod, k8s_logic.PSPContainerAllowedImages, err)
 
 	description := fmt.Sprintf("Creates a new pod using an image from %s. Passes if image successfully pulls and pod is built.", config.Vars.ContainerRegistry)
 	payload := podPayload(pod, podAudit)
@@ -52,7 +52,7 @@ func (s *scenarioState) thePushRequestIsRejectedDueToAuthorization() error {
 func (s *scenarioState) aUserAttemptsToDeployAContainerFrom(auth string, registry string) error {
 	pod, podAudit, err := cra.SetupContainerAccessProbePod(registry)
 
-	err = ProcessPodCreationResult(s.probe, &s.podState, pod, kubernetes.PSPContainerAllowedImages, err)
+	err = ProcessPodCreationResult(s.probe, &s.podState, pod, k8s_logic.PSPContainerAllowedImages, err)
 
 	description := fmt.Sprintf("Attempts to deploy a container from %s. Retains pod creation result in scenario state. Passes so long as user is authorized to deploy containers.", registry)
 	payload := podPayload(pod, podAudit)
@@ -78,7 +78,7 @@ func craProbeInitialize(ctx *godog.TestSuiteContext) {
 	//check dependancies ...
 	if cra == nil {
 		// not been given one so set default
-		cra = kubernetes.NewDefaultCRA()
+		cra = k8s_logic.NewDefaultCRA()
 	}
 }
 

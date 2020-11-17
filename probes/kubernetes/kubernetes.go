@@ -1,4 +1,4 @@
-package k8s_probes
+package kubernetes
 
 import (
 	"log"
@@ -8,18 +8,18 @@ import (
 	packr "github.com/gobuffalo/packr/v2"
 	apiv1 "k8s.io/api/core/v1"
 
-	"github.com/citihub/probr/internal/clouddriver/kubernetes"
 	"github.com/citihub/probr/internal/config"
 	"github.com/citihub/probr/internal/coreengine"
 	"github.com/citihub/probr/internal/summary"
 	"github.com/citihub/probr/internal/utils"
+	k8s_logic "github.com/citihub/probr/probes/kubernetes/probe_logic"
 )
 
 // podState captures useful pod state data for use in a scenario's state.
 type podState struct {
 	PodName         string
-	CreationError   *kubernetes.PodCreationError
-	ExpectedReason  *kubernetes.PodCreationErrorReason
+	CreationError   *k8s_logic.PodCreationError
+	ExpectedReason  *k8s_logic.PodCreationErrorReason
 	CommandExitCode int
 }
 
@@ -124,7 +124,7 @@ func (s *scenarioState) setup() {
 
 // ProcessPodCreationResult is a convenince function to process the result of a pod creation attempt.
 // It records state information on the supplied state structure.
-func ProcessPodCreationResult(probe *summary.Probe, s *podState, pd *apiv1.Pod, expected kubernetes.PodCreationErrorReason, err error) error {
+func ProcessPodCreationResult(probe *summary.Probe, s *podState, pd *apiv1.Pod, expected k8s_logic.PodCreationErrorReason, err error) error {
 	//first check for errors:
 	if err != nil {
 		//check if we've got a partial pod creation
@@ -139,7 +139,7 @@ func ProcessPodCreationResult(probe *summary.Probe, s *podState, pd *apiv1.Pod, 
 		//check for known error type
 		//this means the pod has not been created for an expected reason and
 		//is a valid result if the test is addressing prevention of insecure pod creation
-		if e, ok := err.(*kubernetes.PodCreationError); ok {
+		if e, ok := err.(*k8s_logic.PodCreationError); ok {
 			s.CreationError = e
 			s.ExpectedReason = &expected
 			return nil
@@ -208,7 +208,7 @@ func AssertResult(s *podState, res, msg string) error {
 
 //general feature steps:
 func (s *scenarioState) aKubernetesClusterIsDeployed() error {
-	b := kubernetes.GetKubeInstance().ClusterIsDeployed()
+	b := k8s_logic.GetKubeInstance().ClusterIsDeployed()
 
 	if b == nil || !*b {
 		log.Fatalf("[ERROR] Kubernetes cluster is not deployed")
@@ -224,10 +224,10 @@ func (s *scenarioState) aKubernetesClusterIsDeployed() error {
 	return nil
 }
 
-func podPayload(pod *apiv1.Pod, podAudit *kubernetes.PodAudit) interface{} {
+func podPayload(pod *apiv1.Pod, podAudit *k8s_logic.PodAudit) interface{} {
 	return struct {
 		Pod      *apiv1.Pod
-		PodAudit *kubernetes.PodAudit
+		PodAudit *k8s_logic.PodAudit
 	}{
 		Pod:      pod,
 		PodAudit: podAudit,

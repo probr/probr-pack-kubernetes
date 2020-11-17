@@ -1,15 +1,15 @@
-package k8s_probes_test
+package kubernetes_test
 
 import (
 	"os"
 	"path/filepath"
 	"testing"
 
-	k8s_probes "github.com/citihub/probr/probes/kubernetes"
+	"github.com/citihub/probr/probes/kubernetes"
 )
 
 func TestSpecifications(t *testing.T) {
-	if k8s_probes.Specifications == nil {
+	if kubernetes.Specifications == nil {
 		t.Logf("Packr box for Specifications was not successfully created.")
 		t.Fail()
 	}
@@ -28,21 +28,21 @@ func TestSpecifications(t *testing.T) {
 		t.Fail()
 	}
 
-	if len(files) != len(k8s_probes.Specifications.List()) {
-		t.Logf("Files within probe specifications directory do not match the files in the packr box:\n %v\n\n%v", files, k8s_probes.Specifications.List())
+	if len(files) != len(kubernetes.Specifications.List()) {
+		t.Logf("Files within probe specifications directory do not match the files in the packr box:\n %v\n\n%v", files, kubernetes.Specifications.List())
 		t.Fail()
 	}
 }
 
 func TestProbes(t *testing.T) {
-	if len(k8s_probes.Probes) != len(k8s_probes.Specifications.List()) {
+	if len(kubernetes.Probes) != len(kubernetes.Specifications.List()) {
 		t.Log("The number of probes does not match the number of probe specifications")
 		t.Fail()
 	}
 }
 
 func TestGetGodogProbe(t *testing.T) {
-	p := k8s_probes.Probes[0].GetGodogProbe()
+	p := kubernetes.Probes[0].GetGodogProbe()
 	if p.ProbeDescriptor == nil {
 		t.Log("Probe Descriptor was not properly set")
 		t.Fail()

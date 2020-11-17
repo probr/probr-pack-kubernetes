@@ -3,7 +3,7 @@
 // via the 'go-bindata.exe' tool which is invoked via the 'go generate' tool.  It is important, therefore, that the
 //'go:generate' comment is present in order to include this package in the scope of the 'go generate' tool.  This can be
 // invoked directly on the command line of via the Makefile (e.g. make clean-build).
-package k8s_probes
+package kubernetes
 
 //go:generate go-bindata.exe -pkg $GOPACKAGE -o assets/iam/assets.go assets/iam/yaml probe_specifications/iamcontrol
 
@@ -11,20 +11,20 @@ import (
 	"log"
 	"strings"
 
-	"github.com/citihub/probr/internal/clouddriver/kubernetes"
-	"github.com/citihub/probr/internal/coreengine"
-	"github.com/citihub/probr/internal/utils"
 	"github.com/cucumber/godog"
 
+	"github.com/citihub/probr/internal/coreengine"
+	"github.com/citihub/probr/internal/utils"
 	iamassets "github.com/citihub/probr/probes/kubernetes/assets/iam"
+	k8s_logic "github.com/citihub/probr/probes/kubernetes/probe_logic"
 )
 
 // IdentityAccessManagement is the section of the kubernetes package which provides the kubernetes interactions required to support
 // identity access management scenarios.
-var iam kubernetes.IdentityAccessManagement
+var iam k8s_logic.IdentityAccessManagement
 
 // SetIAM allows injection of an IdentityAccessManagement helper.
-func SetIAM(i kubernetes.IdentityAccessManagement) {
+func SetIAM(i k8s_logic.IdentityAccessManagement) {
 	iam = i
 }
 
@@ -70,7 +70,7 @@ func (s *scenarioState) iCreateASimplePodInNamespaceAssignedWithThatAzureIdentit
 			s.useDefaultNS = true
 		}
 		pd, err := iam.CreateIAMProbePod(y, s.useDefaultNS)
-		err = ProcessPodCreationResult(s.probe, &s.podState, pd, kubernetes.UndefinedPodCreationErrorReason, err)
+		err = ProcessPodCreationResult(s.probe, &s.podState, pd, k8s_logic.UndefinedPodCreationErrorReason, err)
 	}
 
 	description := ""
@@ -180,7 +180,7 @@ func (s *scenarioState) iDeployAPodAssignedWithTheAzureIdentityBindingIntoTheSam
 		log.Print(err)
 	} else {
 		pd, err := iam.CreateIAMProbePod(y, false)
-		err = ProcessPodCreationResult(s.probe, &s.podState, pd, kubernetes.UndefinedPodCreationErrorReason, err)
+		err = ProcessPodCreationResult(s.probe, &s.podState, pd, k8s_logic.UndefinedPodCreationErrorReason, err)
 	}
 
 	description := ""
@@ -193,7 +193,7 @@ func (s *scenarioState) iDeployAPodAssignedWithTheAzureIdentityBindingIntoTheSam
 //AZ-AAD-AI-1.2
 func (s *scenarioState) theClusterHasManagedIdentityComponentsDeployed() error {
 	//look for the mic pods in the default ns
-	pl, err := kubernetes.GetKubeInstance().GetPods("")
+	pl, err := k8s_logic.GetKubeInstance().GetPods("")
 
 	if err != nil {
 		err = utils.ReformatError("error raised when trying to retrieve pods %v", err)
@@ -221,7 +221,7 @@ func (s *scenarioState) theClusterHasManagedIdentityComponentsDeployed() error {
 
 func (s *scenarioState) iExecuteTheCommandAgainstTheMICPod(arg1 string) error {
 
-	c := kubernetes.CatAzJSON
+	c := k8s_logic.CatAzJSON
 	res, err := iam.ExecuteVerificationCmd(s.podState.PodName, c, true)
 
 	if err != nil {
@@ -270,7 +270,7 @@ func iamProbeInitialize(ctx *godog.TestSuiteContext) {
 		//check dependancies ...
 		if iam == nil {
 			// not been given one so set default
-			iam = kubernetes.NewDefaultIAM()
+			iam = k8s_logic.NewDefaultIAM()
 		}
 		//setup AzureIdentity stuff ..??  Or should this be a pre-test setup
 		// psp.CreateConfigMap()
