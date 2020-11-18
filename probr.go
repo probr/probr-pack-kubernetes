@@ -2,19 +2,18 @@ package probr
 
 import (
 	"github.com/citihub/probr/internal/coreengine"
-	_ "github.com/citihub/probr/probes/clouddriver"
-	"github.com/citihub/probr/probes/kubernetes"
-	k8s_logic "github.com/citihub/probr/probes/kubernetes/probe_logic"
+	"github.com/citihub/probr/service_packs"
+	"github.com/citihub/probr/service_packs/kubernetes"
 )
 
 //TODO: revise when interface this bit up ...
-var kube = k8s_logic.GetKubeInstance()
+var kube = kubernetes.GetKubeInstance()
 
 func RunAllProbes() (int, *coreengine.ProbeStore, error) {
 	ts := coreengine.NewProbeStore() // get the test mgr
 
-	for _, probe := range kubernetes.Probes {
-		ts.AddProbe(probe.GetGodogProbe())
+	for _, probe := range service_packs.GetAllProbes() {
+		ts.AddProbe(probe)
 	}
 
 	s, err := ts.ExecAllProbes() // Executes all added (queued) tests

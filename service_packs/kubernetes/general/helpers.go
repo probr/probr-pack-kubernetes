@@ -1,0 +1,28 @@
+package general
+
+import (
+	"github.com/citihub/probr/internal/coreengine"
+	"github.com/citihub/probr/internal/summary"
+	"github.com/citihub/probr/service_packs/kubernetes"
+	"github.com/cucumber/godog"
+)
+
+type scenarioState struct {
+	name           string
+	audit          *summary.ScenarioAudit
+	probe          *summary.Probe
+	httpStatusCode int
+	podName        string
+	podState       kubernetes.PodState
+	useDefaultNS   bool
+	wildcardRoles  interface{}
+}
+
+func beforeScenario(s *scenarioState, probeName string, gs *godog.Scenario) {
+	if coreengine.TagsNotExcluded(gs.Tags) {
+		s.name = gs.Name
+		s.probe = summary.State.GetProbeLog(probeName)
+		s.audit = summary.State.GetProbeLog(probeName).InitializeAuditor(gs.Name, gs.Tags)
+		coreengine.LogScenarioStart(gs)
+	}
+}

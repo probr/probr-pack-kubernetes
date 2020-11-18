@@ -13,7 +13,7 @@ import (
 	"github.com/citihub/probr/cmd/cli_flags"
 	"github.com/citihub/probr/internal/config"
 	"github.com/citihub/probr/internal/summary"
-	k8s_logic "github.com/citihub/probr/probes/kubernetes/probe_logic"
+	"github.com/citihub/probr/service_packs/kubernetes"
 )
 
 var (
@@ -21,7 +21,7 @@ var (
 )
 
 //TODO: revise when interface this bit up ...
-var kube = k8s_logic.GetKubeInstance()
+var kube = kubernetes.GetKubeInstance()
 
 func main() {
 	cli_flags.HandleFlags()
