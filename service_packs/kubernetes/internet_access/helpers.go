@@ -43,7 +43,7 @@ const (
 // NetworkAccess defines functionality for supporting Network Access tests.
 type NetworkAccess interface {
 	ClusterIsDeployed() *bool
-	SetupNetworkAccessProbePod() (*apiv1.Pod, *kubernetes.PodAudit, error)
+	SetupNetworkAccessProbePod(probe *summary.Probe) (*apiv1.Pod, *kubernetes.PodAudit, error)
 	TeardownNetworkAccessProbePod(p *string, e string) error
 	AccessURL(pn *string, url *string) (int, error)
 }
@@ -93,10 +93,10 @@ func (n *NA) ClusterIsDeployed() *bool {
 }
 
 // SetupNetworkAccessProbePod creates a pod with characteristics required for testing network access.
-func (n *NA) SetupNetworkAccessProbePod() (*apiv1.Pod, *kubernetes.PodAudit, error) {
+func (n *NA) SetupNetworkAccessProbePod(probe *summary.Probe) (*apiv1.Pod, *kubernetes.PodAudit, error) {
 	pname, ns, cname, image := kubernetes.GenerateUniquePodName(n.probePodName), n.probeNamespace, n.probeContainer, n.probeImage
 	//let caller handle result:
-	return n.k.CreatePod(pname, ns, cname, image, true, nil)
+	return n.k.CreatePod(pname, ns, cname, image, true, nil, probe)
 }
 
 // TeardownNetworkAccessProbePod deletes the test pod with the given name.

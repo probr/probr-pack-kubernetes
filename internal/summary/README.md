@@ -75,21 +75,6 @@ os.Exit(s)
 
 Whenever Probr will create or destroy a pod, these counters should be called to update the probe accordingly.
 
-```
-if pd != nil {
-  s.PodName = pd.GetObjectMeta().GetName()
-  e.CountPodCreated()
-  summary.State.LogPodName(s.PodName)
-}
-```
-
-```
-if wait {
-  waitForDelete(c, ns, pname)
-}
-summary.State.GetProbeLog(probe).CountPodDestroyed()
-```
-
 **Probe.AuditScenarioStep**
 
 This function should be used every time a step in a scenario completes. `AuditScenarioStep` will automatically form the name of the step from the name of the function that called it. The name value provided will establish which scenario the step is a part of. The error (or nil) provided will dictate whether the test passes or fails.

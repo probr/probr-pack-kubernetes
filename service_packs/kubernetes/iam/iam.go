@@ -80,7 +80,7 @@ func (s *scenarioState) iCreateASimplePodInNamespaceAssignedWithThatAzureIdentit
 		if namespace == "the default" {
 			s.useDefaultNS = true
 		}
-		pd, err := iam.CreateIAMProbePod(y, s.useDefaultNS)
+		pd, err := iam.CreateIAMProbePod(y, s.useDefaultNS, s.probe)
 		err = kubernetes.ProcessPodCreationResult(s.probe, &s.podState, pd, kubernetes.UndefinedPodCreationErrorReason, err)
 	}
 
@@ -190,7 +190,7 @@ func (s *scenarioState) iDeployAPodAssignedWithTheAzureIdentityBindingIntoTheSam
 		err = utils.ReformatError("error reading yaml for test: %v", err)
 		log.Print(err)
 	} else {
-		pd, err := iam.CreateIAMProbePod(y, false)
+		pd, err := iam.CreateIAMProbePod(y, false, s.probe)
 		err = kubernetes.ProcessPodCreationResult(s.probe, &s.podState, pd, kubernetes.UndefinedPodCreationErrorReason, err)
 	}
 

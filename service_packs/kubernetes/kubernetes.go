@@ -66,8 +66,6 @@ func ProcessPodCreationResult(probe *summary.Probe, s *PodState, pd *apiv1.Pod, 
 		//in this case we need to hold onto the name so it can be deleted
 		if pd != nil {
 			s.PodName = pd.GetObjectMeta().GetName()
-			probe.CountPodCreated()
-			summary.State.LogPodName(s.PodName)
 		}
 
 		//check for known error type
@@ -93,8 +91,6 @@ func ProcessPodCreationResult(probe *summary.Probe, s *PodState, pd *apiv1.Pod, 
 	//if we've got this far, a pod was successfully created which could be
 	//valid for some tests
 	s.PodName = pd.GetObjectMeta().GetName()
-	probe.CountPodCreated()
-	summary.State.LogPodName(s.PodName)
 
 	//we're good
 	return nil

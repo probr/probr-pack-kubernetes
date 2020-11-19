@@ -205,11 +205,11 @@ func TestCreatePODSettingSecurityContext(t *testing.T) {
 		RunAsUser:                utils.Int64Ptr(2000),
 	}
 
-	mk.On("CreatePod", mock.Anything, mock.Anything, mock.Anything, mock.Anything, true, &sc).
+	mk.On("CreatePod", mock.Anything, mock.Anything, mock.Anything, mock.Anything, true, &sc, mock.Anything, mock.Anything).
 		Return(k.GetPodObject("n", "ns", "c", "i", &sc), nil).Once()
 
 	//privileged and privileged access true, runasuser 2000
-	p, err := psp.CreatePODSettingSecurityContext(utils.BoolPtr(true), utils.BoolPtr(true), utils.Int64Ptr(2000))
+	p, err := psp.CreatePODSettingSecurityContext(utils.BoolPtr(true), utils.BoolPtr(true), utils.Int64Ptr(2000), nil)
 
 	//don't expect an error
 	assert.Nil(t, err)
@@ -230,10 +230,10 @@ func TestCreatePODSettingSecurityContext(t *testing.T) {
 		AllowPrivilegeEscalation: utils.BoolPtr(true),
 		RunAsUser:                utils.Int64Ptr(1000),
 	}
-	mk.On("CreatePod", mock.Anything, mock.Anything, mock.Anything, mock.Anything, true, &sc).
+	mk.On("CreatePod", mock.Anything, mock.Anything, mock.Anything, mock.Anything, true, &sc, mock.Anything, mock.Anything).
 		Return(k.GetPodObject("n", "ns", "c", "i", &sc), nil).Once()
 
-	p, err = psp.CreatePODSettingSecurityContext(utils.BoolPtr(false), utils.BoolPtr(true), nil)
+	p, err = psp.CreatePODSettingSecurityContext(utils.BoolPtr(false), utils.BoolPtr(true), nil, nil)
 
 	//don't expect an error
 	assert.Nil(t, err)
@@ -259,11 +259,11 @@ func TestCreatePODSettingAttributes(t *testing.T) {
 	po := k.GetPodObject("n", "ns", "c", "i", nil)
 	mk.On("GetPodObject", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).
 		Return(po, nil)
-	mk.On("CreatePodFromObject", mock.Anything, mock.Anything, mock.Anything, mock.Anything).
+	mk.On("CreatePodFromObject", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).
 		Return(po, nil)
 
 	//hostPID, hostIPC & hostNetwork all true:
-	p, err := psp.CreatePODSettingAttributes(utils.BoolPtr(true), utils.BoolPtr(true), utils.BoolPtr(true))
+	p, err := psp.CreatePODSettingAttributes(utils.BoolPtr(true), utils.BoolPtr(true), utils.BoolPtr(true), nil)
 
 	//don't expect an error
 	assert.Nil(t, err)
@@ -278,7 +278,7 @@ func TestCreatePODSettingAttributes(t *testing.T) {
 	mk.AssertExpectations(t)
 
 	//hostPID, hostIPC & hostNetwork all false:
-	p, err = psp.CreatePODSettingAttributes(utils.BoolPtr(false), utils.BoolPtr(false), utils.BoolPtr(false))
+	p, err = psp.CreatePODSettingAttributes(utils.BoolPtr(false), utils.BoolPtr(false), utils.BoolPtr(false), nil)
 
 	//don't expect an error
 	assert.Nil(t, err)
@@ -293,7 +293,7 @@ func TestCreatePODSettingAttributes(t *testing.T) {
 	mk.AssertExpectations(t)
 
 	//hostPID, hostIPC & hostNetwork mixed:
-	p, err = psp.CreatePODSettingAttributes(utils.BoolPtr(false), utils.BoolPtr(true), nil)
+	p, err = psp.CreatePODSettingAttributes(utils.BoolPtr(false), utils.BoolPtr(true), nil, nil)
 
 	//don't expect an error
 	assert.Nil(t, err)
@@ -308,7 +308,7 @@ func TestCreatePODSettingAttributes(t *testing.T) {
 	mk.AssertExpectations(t)
 
 	//hostPID, hostIPC & hostNetwork all nil (should default to false):
-	p, err = psp.CreatePODSettingAttributes(nil, nil, nil)
+	p, err = psp.CreatePODSettingAttributes(nil, nil, nil, nil)
 
 	//don't expect an error
 	assert.Nil(t, err)
@@ -333,11 +333,11 @@ func TestCreatePODSettingCapabilities(t *testing.T) {
 	po := k.GetPodObject("n", "ns", "c", "i", nil)
 	mk.On("GetPodObject", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).
 		Return(po, nil)
-	mk.On("CreatePodFromObject", mock.Anything, mock.Anything, mock.Anything, mock.Anything).
+	mk.On("CreatePodFromObject", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).
 		Return(po, nil)
 
 	//no capabilities:
-	p, err := psp.CreatePODSettingCapabilities(nil)
+	p, err := psp.CreatePODSettingCapabilities(nil, nil)
 
 	//don't expect an error
 	assert.Nil(t, err)
@@ -354,7 +354,7 @@ func TestCreatePODSettingCapabilities(t *testing.T) {
 
 	//some capabilities:
 	c := []string{"NET_RAW"}
-	p, err = psp.CreatePODSettingCapabilities(&c)
+	p, err = psp.CreatePODSettingCapabilities(&c, nil)
 
 	//don't expect an error
 	assert.Nil(t, err)

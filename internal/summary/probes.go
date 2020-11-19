@@ -17,7 +17,8 @@ type Probe struct {
 }
 
 // CountPodCreated increments pods_created for probe
-func (e *Probe) CountPodCreated() {
+func (e *Probe) CountPodCreated(podName string) {
+	State.LogPodName(podName)
 	e.PodsCreated = e.PodsCreated + 1
 }
 

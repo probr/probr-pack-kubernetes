@@ -60,7 +60,7 @@ type IdentityAccessManagement interface {
 	AzureIdentityExists(useDefaultNS bool) (bool, error)
 	AzureIdentityBindingExists(useDefaultNS bool) (bool, error)
 	CreateAIB(y []byte, ai string, n string, ns string) (bool, error)
-	CreateIAMProbePod(y []byte, useDefaultNS bool) (*apiv1.Pod, error)
+	CreateIAMProbePod(y []byte, useDefaultNS bool, probe *summary.Probe) (*apiv1.Pod, error)
 	DeleteIAMProbePod(n string, useDefaultNS bool, e string) error
 	ExecuteVerificationCmd(pn string, cmd IAMProbeCommand, useDefaultNS bool) (*kubernetes.CmdExecutionResult, error)
 	GetAccessToken(pn string, useDefaultNS bool) (*string, error)
@@ -137,16 +137,6 @@ func (i *IAM) createFromYaml(y []byte, pname *string, ns *string, image *string,
 	}
 
 	log.Printf("unst is %v", unst)
-	// p := o.(*apiv1.Pod)
-	// //update the name to the one that's supplied
-	// p.SetName(*pname)
-	// //also update the image (which could have been supplied via the env)
-	// //(only expecting one container, but loop in case of many)
-	// for _, c := range p.Spec.Containers {
-	// 	c.Image = *image
-	// }
-
-	// return i.k.CreatePodFromObject(p, pname, ns, w)
 
 	c, _ := i.k.GetClient()
 
@@ -157,7 +147,6 @@ func (i *IAM) createFromYaml(y []byte, pname *string, ns *string, image *string,
 	}
 	c.CoreV1().Namespaces().Create(context.TODO(), &apiNS, metav1.CreateOptions{})
 
-	// r := c.CoreV1().RESTClient().Post().NamespaceIfScoped("test", true).Body(unst)
 	r := c.CoreV1().RESTClient().Post().Body(unst)
 
 	res := r.Do(context.TODO())
@@ -214,11 +203,11 @@ func (i *IAM) filteredRawResourceGrp(g string, k string, f string) (bool, error)
 }
 
 // CreateIAMProbePod creates a pod configured for IAM test cases.
-func (i *IAM) CreateIAMProbePod(y []byte, useDefaultNS bool) (*apiv1.Pod, error) {
+func (i *IAM) CreateIAMProbePod(y []byte, useDefaultNS bool, probe *summary.Probe) (*apiv1.Pod, error) {
 	n := kubernetes.GenerateUniquePodName(i.probePodName)
 
 	pod, err := i.k.CreatePodFromYaml(y, n, *i.getNamespace(useDefaultNS),
-		i.probeImage, *i.getAadPodIDBinding(useDefaultNS), true)
+		i.probeImage, *i.getAadPodIDBinding(useDefaultNS), true, probe)
 	return pod, err
 }
 

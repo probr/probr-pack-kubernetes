@@ -57,9 +57,9 @@ type azure struct {
 }
 
 type Probe struct {
-	Name          string `yaml:"name"`
-	Excluded      bool   `yaml:"excluded"`
-	Justification string `yaml:"justification"`
+	Name          string `yaml:"Name"`
+	Excluded      bool   `yaml:"Excluded"`
+	Justification string `yaml:"Justification"`
 }
 
 // Vars is a singleton instance of ConfigVars
@@ -68,13 +68,16 @@ var Spinner *spinner.Spinner
 
 // GetTags parses Tags with TagExclusions
 func (ctx *ConfigVars) GetTags() string {
-
-	for _, v := range ctx.Probes {
-		if v.Excluded {
-			ctx.HandleExclusion(v.Name, v.Justification)
+	if ctx.Tags == "" {
+		if len(ctx.Probes) > 0 {
+			log.Printf("[WARN] Exclusions are being ignored due to Tags being set.")
+		}
+		for _, v := range ctx.Probes {
+			if v.Excluded {
+				ctx.HandleExclusion(v.Name, v.Justification)
+			}
 		}
 	}
-
 	return ctx.Tags
 }
 

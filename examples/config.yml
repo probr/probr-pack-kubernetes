@@ -1,12 +1,13 @@
+# Empty and omitted keys will use default values
 AuditEnabled: true
 AuditDir: audit_output
 CucumberDir: cucumber_output
 OverwriteHistoricalAudits: true
 SummaryEnabled: true
-ImagesRepository:
+ContainerRegistry:
 ServicePacks:
   Kubernetes:
-    KubeConfig: .kube/config
+    KubeConfig:
     KubeContext:
 CloudProviders:
   Azure:
@@ -31,7 +32,7 @@ Probes: # this entire object can be left out if all tests are to be run
     Excluded: false
     Justification: "demo"
 
-  - Name: iam_control
+  - Name: iam
     Excluded: false
     Justification: "demo"
 

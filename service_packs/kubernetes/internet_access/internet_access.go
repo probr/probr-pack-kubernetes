@@ -45,7 +45,7 @@ func (s *scenarioState) aPodIsDeployedInTheCluster() error {
 		//only one pod is needed for all scenarios in this probe
 		log.Printf("[DEBUG] Pod %v has already been created - reusing the pod", s.podName)
 	} else {
-		pd, pa, e := na.SetupNetworkAccessProbePod()
+		pd, pa, e := na.SetupNetworkAccessProbePod(s.probe)
 		podAudit = pa
 		pod = pd
 		if e != nil {

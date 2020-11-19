@@ -9,7 +9,6 @@ import (
 	"math/rand"
 	"time"
 
-	"github.com/citihub/probr/internal/summary"
 	apiv1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
@@ -129,7 +128,7 @@ func defaultContainerSecurityContext() *apiv1.SecurityContext {
 	}
 }
 
-func waitForDelete(c *k8s.Clientset, ns *string, n *string, probeName string) error {
+func waitForDelete(c *k8s.Clientset, ns *string, n *string) error {
 
 	ps := c.CoreV1().Pods(*ns)
 
@@ -152,7 +151,6 @@ func waitForDelete(c *k8s.Clientset, ns *string, n *string, probeName string) er
 		log.Printf("[DEBUG] Watch Container status: %+v", p.Status.ContainerStatuses)
 
 		if e.Type == "DELETED" {
-			summary.State.GetProbeLog(probeName).CountPodDestroyed()
 			log.Printf("[INFO] DELETED probe received for pod %v", p.GetObjectMeta().GetName())
 			break
 		}

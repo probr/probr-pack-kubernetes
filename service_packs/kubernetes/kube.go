@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"github.com/citihub/probr/internal/config"
+	"github.com/citihub/probr/internal/summary"
 	"github.com/citihub/probr/internal/utils"
 
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -69,9 +70,9 @@ type Kubernetes interface {
 	ClusterIsDeployed() *bool
 	GetClient() (*kubernetes.Clientset, error)
 	GetPods(ns string) (*apiv1.PodList, error)
-	CreatePod(pname string, ns string, cname string, image string, w bool, sc *apiv1.SecurityContext) (*apiv1.Pod, *PodAudit, error)
-	CreatePodFromObject(p *apiv1.Pod, pname string, ns string, w bool) (*apiv1.Pod, error)
-	CreatePodFromYaml(y []byte, pname string, ns string, image string, aadpodidbinding string, w bool) (*apiv1.Pod, error)
+	CreatePod(pname string, ns string, cname string, image string, w bool, sc *apiv1.SecurityContext, probe *summary.Probe) (*apiv1.Pod, *PodAudit, error)
+	CreatePodFromObject(pod *apiv1.Pod, podName string, ns string, wait bool, probe *summary.Probe) (*apiv1.Pod, error)
+	CreatePodFromYaml(y []byte, pname string, ns string, image string, aadpodidbinding string, w bool, probe *summary.Probe) (*apiv1.Pod, error)
 	GetPodObject(pname string, ns string, cname string, image string, sc *apiv1.SecurityContext) *apiv1.Pod
 	ExecCommand(cmd, ns, pn *string) *CmdExecutionResult
 	DeletePod(pname *string, ns *string, w bool, e string) error
@@ -181,18 +182,18 @@ func (k *Kube) GetPods(ns string) (*apiv1.PodList, error) {
 
 // CreatePod creates a pod with the supplied parameters.  A true value for 'wait' indicates that
 // the function should wait (block) until the pod is in a running state.
-func (k *Kube) CreatePod(podName string, ns string, containerName string, image string, wait bool, sc *apiv1.SecurityContext) (*apiv1.Pod, *PodAudit, error) {
+func (k *Kube) CreatePod(podName string, ns string, containerName string, image string, wait bool, sc *apiv1.SecurityContext, probe *summary.Probe) (*apiv1.Pod, *PodAudit, error) {
 	//create Pod Objet ...
 	p := k.GetPodObject(podName, ns, containerName, image, sc)
 	audit := &PodAudit{podName, "probr-general-test-ns", containerName, image, sc}
 
-	pod, err := k.CreatePodFromObject(p, podName, ns, wait)
+	pod, err := k.CreatePodFromObject(p, podName, ns, wait, probe)
 	return pod, audit, err
 }
 
 // CreatePodFromYaml creates a pod for the supplied yaml.  A true value for 'w' indicates that the function
 // should wait (block) until the pod is in a running state.
-func (k *Kube) CreatePodFromYaml(y []byte, pname string, ns string, image string, aadpodidbinding string, w bool) (*apiv1.Pod, error) {
+func (k *Kube) CreatePodFromYaml(y []byte, pname string, ns string, image string, aadpodidbinding string, w bool, probe *summary.Probe) (*apiv1.Pod, error) {
 
 	decode := scheme.Codecs.UniversalDeserializer().Decode
 
@@ -216,18 +217,18 @@ func (k *Kube) CreatePodFromYaml(y []byte, pname string, ns string, image string
 		p.Labels["aadpodidbinding"] = aadpodidbinding
 	}
 
-	return k.CreatePodFromObject(p, pname, ns, w)
+	return k.CreatePodFromObject(p, pname, ns, w, probe)
 }
 
 // CreatePodFromObject creates a pod from the supplied pod object with the given pod name and namespace.  A true value for 'w' indicates that the function
 // should wait (block) until the pod is in a running state.
-func (k *Kube) CreatePodFromObject(p *apiv1.Pod, pname string, ns string, w bool) (*apiv1.Pod, error) {
-	if p == nil || pname == "" || ns == "" {
-		return nil, fmt.Errorf("one or more of pod (%v), podName (%v) or namespace (%v) is nil - cannot create POD", p, pname, ns)
+func (k *Kube) CreatePodFromObject(pod *apiv1.Pod, podName string, ns string, wait bool, probe *summary.Probe) (*apiv1.Pod, error) {
+	if pod == nil || podName == "" || ns == "" {
+		return nil, fmt.Errorf("one or more of pod (%v), podName (%v) or namespace (%v) is nil - cannot create POD", pod, podName, ns)
 	}
 
-	log.Printf("[INFO] Creating pod %v in namespace %v", pname, ns)
-	log.Printf("[DEBUG] Pod details: %+v", *p)
+	log.Printf("[INFO] Creating pod %v in namespace %v", podName, ns)
+	log.Printf("[DEBUG] Pod details: %+v", *pod)
 
 	c, err := k.GetClient()
 	if err != nil {
@@ -246,16 +247,16 @@ func (k *Kube) CreatePodFromObject(p *apiv1.Pod, pname string, ns string, w bool
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	res, err := pc.Create(ctx, p, metav1.CreateOptions{})
+	res, err := pc.Create(ctx, pod, metav1.CreateOptions{})
 	if err != nil {
 		if isAlreadyExists(err) {
-			log.Printf("[NOTICE] POD %v already exists. Returning existing.", pname)
-			res, _ := pc.Get(ctx, pname, metav1.GetOptions{})
+			log.Printf("[NOTICE] POD %v already exists. Returning existing.", podName)
+			res, _ := pc.Get(ctx, podName, metav1.GetOptions{})
 
 			//return it and nil out err
 			return res, nil
 		} else if isForbidden(err) {
-			log.Printf("[NOTICE] Creation of POD %v is forbidden: %v", pname, err)
+			log.Printf("[NOTICE] Creation of POD %v is forbidden: %v", podName, err)
 			//return a specific error:
 			return nil, &PodCreationError{err, *k.toPodCreationErrorCode(err)}
 		}
@@ -264,16 +265,14 @@ func (k *Kube) CreatePodFromObject(p *apiv1.Pod, pname string, ns string, w bool
 
 	log.Printf("[INFO] POD %q creation started.", res.GetObjectMeta().GetName())
 
-	if w {
-		//wait:
-		err = k.waitForPhase(apiv1.PodRunning, c, &ns, &pname)
+	if wait {
+		err = k.waitForPhase(apiv1.PodRunning, c, &ns, &podName)
 		if err != nil {
 			return res, err
 		}
 	}
-
+	probe.CountPodCreated(podName)
 	log.Printf("[INFO] POD %q creation completed. Pod is up and running.", res.GetObjectMeta().GetName())
-
 	return res, nil
 }
 
@@ -439,7 +438,12 @@ func (k *Kube) ExecCommand(cmd, ns, pn *string) (s *CmdExecutionResult) {
 
 // DeletePod deletes the given pod in the specified namespace.
 // Passing true for 'wait' causes the function to wait for pod deletion (not normally required).
-func (k *Kube) DeletePod(pname *string, ns *string, wait bool, probe string) error {
+func (k *Kube) DeletePod(podName *string, ns *string, wait bool, probeName string) error {
+	_, err := k.PodStatus(*podName, *ns)
+	if err != nil {
+		return err // If pod does not exist, it cannot be deleted
+	}
+
 	c, err := k.GetClient()
 	if err != nil {
 		return err
@@ -450,17 +454,31 @@ func (k *Kube) DeletePod(pname *string, ns *string, wait bool, probe string) err
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	err = pc.Delete(ctx, *pname, metav1.DeleteOptions{})
+	err = pc.Delete(ctx, *podName, metav1.DeleteOptions{})
 	if err != nil {
 		return err
 	}
 
 	if wait {
-		waitForDelete(c, ns, pname, probe)
+		waitForDelete(c, ns, podName)
 	}
-	log.Printf("[INFO] POD %v deleted.", *pname)
+	summary.State.GetProbeLog(probeName).CountPodDestroyed()
+	log.Printf("[INFO] POD %v deleted.", *podName)
 
 	return nil
+}
+
+func (k *Kube) PodStatus(name, ns string) (apiv1.PodStatus, error) {
+	client, err := k.GetClient()
+	if err != nil {
+		return apiv1.PodStatus{}, err
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	pod, err := client.CoreV1().Pods(ns).Get(ctx, name, metav1.GetOptions{})
+	return pod.Status, err
 }
 
 func (k *Kube) createNamespace(ns *string) (*apiv1.Namespace, error) {

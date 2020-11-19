@@ -100,11 +100,11 @@ type PodSecurityPolicy interface {
 	HostPortsAreRestricted() (*bool, error)
 	VolumeTypesAreRestricted() (*bool, error)
 	SeccompProfilesAreRestricted() (*bool, error)
-	CreatePODSettingSecurityContext(pr *bool, pe *bool, runAsUser *int64) (*apiv1.Pod, error)
-	CreatePODSettingAttributes(hostPID *bool, hostIPC *bool, hostNetwork *bool) (*apiv1.Pod, error)
-	CreatePODSettingCapabilities(c *[]string) (*apiv1.Pod, error)
-	CreatePodFromYaml(y []byte) (*apiv1.Pod, error)
-	ExecPSPProbeCmd(pName *string, cmd PSPProbeCommand) (*kubernetes.CmdExecutionResult, error)
+	CreatePODSettingSecurityContext(pr *bool, pe *bool, runAsUser *int64, probe *summary.Probe) (*apiv1.Pod, error)
+	CreatePODSettingAttributes(hostPID *bool, hostIPC *bool, hostNetwork *bool, probe *summary.Probe) (*apiv1.Pod, error)
+	CreatePODSettingCapabilities(c *[]string, probe *summary.Probe) (*apiv1.Pod, error)
+	CreatePodFromYaml(y []byte, probe *summary.Probe) (*apiv1.Pod, error)
+	ExecPSPProbeCmd(pName *string, cmd PSPProbeCommand, probe *summary.Probe) (*kubernetes.CmdExecutionResult, error)
 	TeardownPodSecurityProbe(p *string, e string) error
 	CreateConfigMap() error
 	DeleteConfigMap() error
@@ -468,7 +468,7 @@ func logAndReturn(t string, s bool, r bool, e error) (*bool, error) {
 // pr *bool - set the Privileged flag.  Defaults to false.
 // pe *bool - set the Allow Privileged Escalation flag.  Defaults to false.
 // runAsUser *int64 - set RunAsUser.  Defaults to 1000.
-func (psp *PSP) CreatePODSettingSecurityContext(pr *bool, pe *bool, runAsUser *int64) (*apiv1.Pod, error) {
+func (psp *PSP) CreatePODSettingSecurityContext(pr *bool, pe *bool, runAsUser *int64, probe *summary.Probe) (*apiv1.Pod, error) {
 	//default sensibly if not provided
 	//this needs to take account of rules around allowedPrivilegdEscalation and Privileged:
 	// cannot set `allowPrivilegeEscalation` to false and `privileged` to true
@@ -505,7 +505,7 @@ func (psp *PSP) CreatePODSettingSecurityContext(pr *bool, pe *bool, runAsUser *i
 	pname, ns, cname, image := kubernetes.GenerateUniquePodName(psp.probePodName), psp.probeNamespace, psp.probeContainer, psp.probeImage
 
 	//let caller handle ...
-	pod, _, err := psp.k.CreatePod(pname, ns, cname, image, true, &sc)
+	pod, _, err := psp.k.CreatePod(pname, ns, cname, image, true, &sc, probe)
 	return pod, err
 }
 
@@ -513,7 +513,7 @@ func (psp *PSP) CreatePODSettingSecurityContext(pr *bool, pe *bool, runAsUser *i
 // hostPID *bool - set the hostPID flag, defaults to false
 // hostIPC *bool - set the hostIPC flag, defaults to false
 // hostNetwork *bool - set the hostNetwork flag, defaults to false
-func (psp *PSP) CreatePODSettingAttributes(hostPID *bool, hostIPC *bool, hostNetwork *bool) (*apiv1.Pod, error) {
+func (psp *PSP) CreatePODSettingAttributes(hostPID *bool, hostIPC *bool, hostNetwork *bool, probe *summary.Probe) (*apiv1.Pod, error) {
 	//default sensibly if not provided
 	f := false
 	if hostPID == nil {
@@ -535,11 +535,11 @@ func (psp *PSP) CreatePODSettingAttributes(hostPID *bool, hostIPC *bool, hostNet
 	po.Spec.HostNetwork = *hostNetwork
 
 	// create from PO (and let caller handle ...)
-	return psp.k.CreatePodFromObject(po, pname, ns, true)
+	return psp.k.CreatePodFromObject(po, pname, ns, true, probe)
 }
 
 // CreatePODSettingCapabilities creates a pod with the supplied capabilities.
-func (psp *PSP) CreatePODSettingCapabilities(c *[]string) (*apiv1.Pod, error) {
+func (psp *PSP) CreatePODSettingCapabilities(c *[]string, probe *summary.Probe) (*apiv1.Pod, error) {
 	pname, ns, cname, image := kubernetes.GenerateUniquePodName(psp.probePodName), psp.probeNamespace, psp.probeContainer, psp.probeImage
 
 	// get the pod object and manipulate:
@@ -562,24 +562,24 @@ func (psp *PSP) CreatePODSettingCapabilities(c *[]string) (*apiv1.Pod, error) {
 	}
 
 	// create from PO (and let caller handle ...)
-	return psp.k.CreatePodFromObject(po, pname, ns, true)
+	return psp.k.CreatePodFromObject(po, pname, ns, true, probe)
 }
 
 // CreatePodFromYaml creates a pod from the supplied yaml.
-func (psp *PSP) CreatePodFromYaml(y []byte) (*apiv1.Pod, error) {
+func (psp *PSP) CreatePodFromYaml(y []byte, probe *summary.Probe) (*apiv1.Pod, error) {
 	pname := kubernetes.GenerateUniquePodName(psp.probePodName)
 
-	return psp.k.CreatePodFromYaml(y, pname, psp.probeNamespace, psp.probeImage, "", true)
+	return psp.k.CreatePodFromYaml(y, pname, psp.probeNamespace, psp.probeImage, "", true, probe)
 }
 
 // ExecPSPProbeCmd executes the given PSPProbeCommand against the supplied pod name.
-func (psp *PSP) ExecPSPProbeCmd(pName *string, cmd PSPProbeCommand) (*kubernetes.CmdExecutionResult, error) {
+func (psp *PSP) ExecPSPProbeCmd(pName *string, cmd PSPProbeCommand, probe *summary.Probe) (*kubernetes.CmdExecutionResult, error) {
 	var pn string
 	//if we've not been given a pod name, assume one needs to be created:
 	if pName == nil {
 		//want one without privileged access or escalation
 		f := false
-		p, err := psp.CreatePODSettingSecurityContext(&f, &f, nil)
+		p, err := psp.CreatePODSettingSecurityContext(&f, &f, nil, probe)
 
 		if err != nil {
 			return nil, err

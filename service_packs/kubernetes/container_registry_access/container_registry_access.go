@@ -37,7 +37,7 @@ func (s *scenarioState) aKubernetesClusterIsDeployed() error {
 // CIS-6.1.3
 // Minimize cluster access to read-only
 func (s *scenarioState) iAmAuthorisedToPullFromAContainerRegistry() error {
-	pod, podAudit, err := cra.SetupContainerAccessProbePod(config.Vars.ContainerRegistry)
+	pod, podAudit, err := cra.SetupContainerAccessProbePod(config.Vars.ContainerRegistry, s.probe)
 
 	err = kubernetes.ProcessPodCreationResult(s.probe, &s.podState, pod, kubernetes.PSPContainerAllowedImages, err)
 
@@ -61,7 +61,7 @@ func (s *scenarioState) thePushRequestIsRejectedDueToAuthorization() error {
 // CIS-6.1.4
 // Ensure only authorised container registries are allowed
 func (s *scenarioState) aUserAttemptsToDeployAContainerFrom(auth string, registry string) error {
-	pod, podAudit, err := cra.SetupContainerAccessProbePod(registry)
+	pod, podAudit, err := cra.SetupContainerAccessProbePod(registry, s.probe)
 
 	err = kubernetes.ProcessPodCreationResult(s.probe, &s.podState, pod, kubernetes.PSPContainerAllowedImages, err)
 
