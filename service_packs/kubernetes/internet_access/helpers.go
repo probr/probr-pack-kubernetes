@@ -84,7 +84,7 @@ func (n *NA) setup() {
 	n.probePodName = defaultNAProbePodName
 
 	// Extract registry and image info from config
-	n.probeImage = config.Vars.ContainerRegistry + "/" + config.Vars.ProbeImage
+	n.probeImage = config.Vars.AuthorisedContainerRegistry + "/" + config.Vars.ProbeImage
 }
 
 // ClusterIsDeployed verifies if a suitable cluster is deployed.

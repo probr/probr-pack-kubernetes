@@ -94,7 +94,7 @@ func (i *IAM) setenv() {
 	i.probePodName = defaultIAMProbePodName
 
 	// Extract registry and image info from config
-	i.probeImage = config.Vars.ContainerRegistry + "/" + config.Vars.ProbeImage
+	i.probeImage = config.Vars.AuthorisedContainerRegistry + "/" + config.Vars.ProbeImage
 
 	i.testAzureIdentityBinding = "probr-specificns-aib"
 }

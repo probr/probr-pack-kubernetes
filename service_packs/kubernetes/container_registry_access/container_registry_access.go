@@ -37,11 +37,11 @@ func (s *scenarioState) aKubernetesClusterIsDeployed() error {
 // CIS-6.1.3
 // Minimize cluster access to read-only
 func (s *scenarioState) iAmAuthorisedToPullFromAContainerRegistry() error {
-	pod, podAudit, err := cra.SetupContainerAccessProbePod(config.Vars.ContainerRegistry, s.probe)
+	pod, podAudit, err := cra.SetupContainerAccessProbePod(config.Vars.AuthorisedContainerRegistry, s.probe)
 
 	err = kubernetes.ProcessPodCreationResult(s.probe, &s.podState, pod, kubernetes.PSPContainerAllowedImages, err)
 
-	description := fmt.Sprintf("Creates a new pod using an image from %s. Passes if image successfully pulls and pod is built.", config.Vars.ContainerRegistry)
+	description := fmt.Sprintf("Creates a new pod using an image from %s. Passes if image successfully pulls and pod is built.", config.Vars.AuthorisedContainerRegistry)
 	payload := kubernetes.PodPayload{Pod: pod, PodAudit: podAudit}
 	s.audit.AuditScenarioStep(description, payload, err)
 
@@ -59,23 +59,46 @@ func (s *scenarioState) thePushRequestIsRejectedDueToAuthorization() error {
 }
 
 // CIS-6.1.4
-// Ensure only authorised container registries are allowed
-func (s *scenarioState) aUserAttemptsToDeployAContainerFrom(auth string, registry string) error {
-	pod, podAudit, err := cra.SetupContainerAccessProbePod(registry, s.probe)
+// Ensure deployment from unauthorised container registries is denied
+func (s *scenarioState) aUserAttemptsToDeployAuthorisedContainer() error {
+	pod, podAudit, err := cra.SetupContainerAccessProbePod(config.Vars.AuthorisedContainerRegistry, s.probe)
 
 	err = kubernetes.ProcessPodCreationResult(s.probe, &s.podState, pod, kubernetes.PSPContainerAllowedImages, err)
 
-	description := fmt.Sprintf("Attempts to deploy a container from %s. Retains pod creation result in scenario state. Passes so long as user is authorized to deploy containers.", registry)
+	description := fmt.Sprintf("Attempts to deploy a container from %s. Retains pod creation result in scenario state. Passes so long as user is authorized to deploy containers.", config.Vars.AuthorisedContainerRegistry)
 	payload := kubernetes.PodPayload{Pod: pod, PodAudit: podAudit}
 	s.audit.AuditScenarioStep(description, payload, err)
 
 	return err
 }
 
-func (s *scenarioState) theDeploymentAttemptIs(res string) error {
-	err := kubernetes.AssertResult(&s.podState, res, "")
+func (s *scenarioState) theDeploymentAttemptIsAllowed() error {
+	err := kubernetes.AssertResult(&s.podState, "allowed", "")
 
-	description := fmt.Sprintf("Asserts pod creation result in scenario state is %s.", res)
+	description := fmt.Sprintf("Asserts pod creation result in scenario state is denied.")
+	s.audit.AuditScenarioStep(description, nil, err)
+
+	return err
+}
+
+// CIS-6.1.5
+// Ensure deployment from authorised container registries is allowed
+func (s *scenarioState) aUserAttemptsToDeployUnauthorisedContainer() error {
+	pod, podAudit, err := cra.SetupContainerAccessProbePod(config.Vars.UnauthorisedContainerRegistry, s.probe)
+
+	err = kubernetes.ProcessPodCreationResult(s.probe, &s.podState, pod, kubernetes.PSPContainerAllowedImages, err)
+
+	description := fmt.Sprintf("Attempts to deploy a container from %s. Retains pod creation result in scenario state. Passes so long as user is authorized to deploy containers.", config.Vars.UnauthorisedContainerRegistry)
+	payload := kubernetes.PodPayload{Pod: pod, PodAudit: podAudit}
+	s.audit.AuditScenarioStep(description, payload, err)
+
+	return err
+}
+
+func (s *scenarioState) theDeploymentAttemptIsDenied() error {
+	err := kubernetes.AssertResult(&s.podState, "denied", "")
+
+	description := fmt.Sprintf("Asserts pod creation result in scenario state is denied.")
 	s.audit.AuditScenarioStep(description, nil, err)
 
 	return err
@@ -117,8 +140,12 @@ func (p ProbeStruct) ScenarioInitialize(ctx *godog.ScenarioContext) {
 	ctx.Step(`^the push request is rejected due to authorization$`, ps.thePushRequestIsRejectedDueToAuthorization)
 
 	//CIS-6.1.4
-	ctx.Step(`^a user attempts to deploy a container from "([^"]*)" registry "([^"]*)"$`, ps.aUserAttemptsToDeployAContainerFrom)
-	ctx.Step(`^the deployment attempt is "([^"]*)"$`, ps.theDeploymentAttemptIs)
+	ctx.Step(`^a user attempts to deploy a container from an authorised registry$`, ps.aUserAttemptsToDeployAuthorisedContainer)
+	ctx.Step(`^the deployment attempt is allowed$`, ps.theDeploymentAttemptIsAllowed)
+
+	//CIS-6.1.5
+	ctx.Step(`^a user attempts to deploy a container from an unauthorised registry$`, ps.aUserAttemptsToDeployUnauthorisedContainer)
+	ctx.Step(`^the deployment attempt is denied$`, ps.theDeploymentAttemptIsDenied)
 
 	ctx.AfterScenario(func(s *godog.Scenario, err error) {
 		cra.TeardownContainerAccessProbePod(&ps.podState.PodName, p.Name())

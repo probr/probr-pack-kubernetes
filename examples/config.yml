@@ -4,7 +4,8 @@ AuditDir: audit_output
 CucumberDir: cucumber_output
 OverwriteHistoricalAudits: true
 SummaryEnabled: true
-ContainerRegistry:
+AuthorisedContainerRegistry: citihubprod.azurecr.io
+UnauthorisedContainerRegistry: docker.io
 ServicePacks:
   Kubernetes:
     KubeConfig:
@@ -20,10 +21,6 @@ CloudProviders:
       DefaultNamespaceAI:
       DefaultNamespaceAIB:
 Probes: # this entire object can be left out if all tests are to be run
-  - Name: account_manager
-    Excluded: true
-    Justification: "demo"
-
   - Name: container_registry_access
     Excluded: false
     Justification: "demo"

@@ -13,21 +13,22 @@ import (
 // ConfigVars contains all possible config vars
 type ConfigVars struct {
 	// NOTE: Env and Defaults are ONLY available if corresponding logic is added to defaults.go and getters.go
-	ServicePacks              servicePacks   `yaml:"ServicePacks"`
-	CloudProviders            cloudProviders `yaml:"CloudProviders"`
-	OutputType                string         `yaml:"OutputType"`
-	CucumberDir               string         `yaml:"CucumberDir"`
-	AuditDir                  string         `yaml:"AuditDir"`
-	SummaryEnabled            string         `yaml:"SummaryEnabled"`
-	AuditEnabled              string         `yaml:"AuditEnabled"`
-	LogLevel                  string         `yaml:"LogLevel"`
-	OverwriteHistoricalAudits string         `yaml:"OverwriteHistoricalAudits"`
-	ContainerRegistry         string         `yaml:"ContainerRegistry"`
-	ProbeImage                string         `yaml:"ProbeImage"`
-	Probes                    []Probe        `yaml:"Probes"`
-	Tags                      string         `yaml:"Tags"`
-	Silent                    bool           // set by flags only
-	TagExclusions             []string       // set programatically
+	ServicePacks                  servicePacks   `yaml:"ServicePacks"`
+	CloudProviders                cloudProviders `yaml:"CloudProviders"`
+	OutputType                    string         `yaml:"OutputType"`
+	CucumberDir                   string         `yaml:"CucumberDir"`
+	AuditDir                      string         `yaml:"AuditDir"`
+	SummaryEnabled                string         `yaml:"SummaryEnabled"`
+	AuditEnabled                  string         `yaml:"AuditEnabled"`
+	LogLevel                      string         `yaml:"LogLevel"`
+	OverwriteHistoricalAudits     string         `yaml:"OverwriteHistoricalAudits"`
+	AuthorisedContainerRegistry   string         `yaml:"AuthorisedContainerRegistry"`
+	UnauthorisedContainerRegistry string         `yaml:"UnauthorisedContainerRegistry"`
+	ProbeImage                    string         `yaml:"ProbeImage"`
+	Probes                        []Probe        `yaml:"Probes"`
+	Tags                          string         `yaml:"Tags"`
+	Silent                        bool           // set by flags only
+	TagExclusions                 []string       // set programatically
 }
 
 type servicePacks struct {

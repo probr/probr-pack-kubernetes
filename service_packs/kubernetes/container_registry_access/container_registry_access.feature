@@ -14,16 +14,15 @@ Feature: Protect image container registries
     And I am authorised to pull from a container registry
     When I attempt to push to the container registry using the cluster identity
     Then the push request is rejected due to authorization
-    
-  @preventative @CIS-6.1.4
-  Scenario Outline: Ensure only authorised container registries are allowed
-    Given a Kubernetes cluster is deployed
-    When a user attempts to deploy a container from "<auth>" registry "<registry>"
-    Then the deployment attempt is "<result>"
 
-    Examples:
-      | auth          | registry          | result  |
-      | unauthorised  | docker.io         | denied  |
-      | unauthorised  | gcr.io            | denied  |
-      | authorised    | mcr.microsoft.com | allowed |
-      | authorised    | allowed-registry  | allowed |
+  @preventative @CIS-6.1.4
+  Scenario Outline: Ensure deployment from an authorised container registry is allowed
+    Given a Kubernetes cluster is deployed
+    When a user attempts to deploy a container from an authorised registry
+    Then the deployment attempt is allowed
+    
+  @preventative @CIS-6.1.5
+  Scenario Outline: Ensure deployment from an unauthorised container registry is denied
+    Given a Kubernetes cluster is deployed
+    When a user attempts to deploy a container from an unauthorised registry
+    Then the deployment attempt is denied
