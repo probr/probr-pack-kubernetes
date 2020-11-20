@@ -15,7 +15,7 @@ spec:
     emptyDir: {}
   containers:
   - name: sec-ctx-demo
-    image: busybox
+    image: citihub/probr-probe
     command: [ "sh", "-c", "sleep 1h" ]    
     ports:
     - containerPort: 8086

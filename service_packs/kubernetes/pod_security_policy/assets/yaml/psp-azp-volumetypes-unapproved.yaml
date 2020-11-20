@@ -16,7 +16,7 @@ spec:
       path: /var/log/pods
   containers:
   - name: sec-ctx-demo
-    image: busybox
+    image: citihub/probr-probe
     command: [ "sh", "-c", "sleep 1h" ]        
     volumeMounts:
     - name: unapproved-volume

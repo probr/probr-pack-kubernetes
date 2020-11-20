@@ -16,7 +16,7 @@ spec:
         name: test-config-map        
   containers:
   - name: sec-ctx-demo
-    image: busybox
+    image: citihub/probr-probe
     command: [ "sh", "-c", "sleep 1h" ]        
     volumeMounts:
     - name: approved-volume
