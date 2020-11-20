@@ -18,7 +18,6 @@ type ConfigVars struct {
 	OutputType                    string         `yaml:"OutputType"`
 	CucumberDir                   string         `yaml:"CucumberDir"`
 	AuditDir                      string         `yaml:"AuditDir"`
-	SummaryEnabled                string         `yaml:"SummaryEnabled"`
 	AuditEnabled                  string         `yaml:"AuditEnabled"`
 	LogLevel                      string         `yaml:"LogLevel"`
 	OverwriteHistoricalAudits     string         `yaml:"OverwriteHistoricalAudits"`
@@ -27,6 +26,7 @@ type ConfigVars struct {
 	ProbeImage                    string         `yaml:"ProbeImage"`
 	Probes                        []Probe        `yaml:"Probes"`
 	Tags                          string         `yaml:"Tags"`
+	NoSummary                     bool           // set by flags only
 	Silent                        bool           // set by flags only
 	TagExclusions                 []string       // set programatically
 }

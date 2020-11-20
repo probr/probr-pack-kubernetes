@@ -3,12 +3,11 @@ AuditEnabled: true
 AuditDir: audit_output
 CucumberDir: cucumber_output
 OverwriteHistoricalAudits: true
-SummaryEnabled: true
 AuthorisedContainerRegistry: citihubprod.azurecr.io
 UnauthorisedContainerRegistry: docker.io
 ServicePacks:
   Kubernetes:
-    KubeConfig:
+    KubeConfig: 
     KubeContext:
 CloudProviders:
   Azure:
@@ -30,13 +29,13 @@ Probes: # this entire object can be left out if all tests are to be run
     Justification: "demo"
 
   - Name: iam
-    Excluded: false
+    Excluded: true
     Justification: "demo"
 
   - Name: internet_access
-    Excluded: false
+    Excluded: true
     Justification: "demo"
 
   - Name: pod_security_policy
-    Excluded: false
+    Excluded: true
     Justification: "demo"

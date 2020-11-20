@@ -27,10 +27,10 @@ func init() {
 	State.Meta["names of pods created"] = []string{}
 }
 
-// PrintSummary will print the current Probes object state, formatted to JSON, if SummaryEnabled is not "false"
+// PrintSummary will print the current Probes object state, formatted to JSON, if NoSummary is not "true"
 func (s *SummaryState) PrintSummary() {
-	if config.Vars.SummaryEnabled == "false" {
-		log.Printf("[NOTICE] Summary Log suppressed by configuration SummaryEnabled=false.")
+	if config.Vars.NoSummary == true {
+		log.Printf("[NOTICE] Summary Log suppressed by configuration NoSummary=true.")
 	} else {
 		summary, _ := json.MarshalIndent(s, "", "  ")
 		fmt.Printf("%s", summary) // Summary output should not be handled by log levels
