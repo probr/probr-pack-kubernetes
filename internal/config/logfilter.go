@@ -9,7 +9,7 @@ import (
 )
 
 // Override the minmium log level.
-func setLogFilter(minLevel string, writer io.Writer) {
+func SetLogFilter(minLevel string, writer io.Writer) {
 	filter := &logutils.LevelFilter{
 		Levels:   []logutils.LogLevel{"DEBUG", "INFO", "NOTICE", "WARN", "ERROR"},
 		MinLevel: logutils.LogLevel(minLevel),

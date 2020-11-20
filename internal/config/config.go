@@ -26,6 +26,7 @@ type ConfigVars struct {
 	ProbeImage                    string         `yaml:"ProbeImage"`
 	Probes                        []Probe        `yaml:"Probes"`
 	Tags                          string         `yaml:"Tags"`
+	VarsFile                      string         // set by flags only
 	NoSummary                     bool           // set by flags only
 	Silent                        bool           // set by flags only
 	TagExclusions                 []string       // set programatically
@@ -102,7 +103,7 @@ func Init(configPath string) error {
 	Vars = config
 	setFromEnvOrDefaults(&Vars) // Set any values not retrieved from file
 
-	setLogFilter(Vars.LogLevel, os.Stderr) // Set the minimum log level obtained from Vars
+	SetLogFilter(Vars.LogLevel, os.Stderr) // Set the minimum log level obtained from Vars
 
 	return nil
 }

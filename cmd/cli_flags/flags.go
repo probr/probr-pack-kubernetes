@@ -3,6 +3,7 @@ package cli_flags
 import (
 	"flag"
 	"log"
+	"os"
 
 	"github.com/citihub/probr/internal/config"
 )
@@ -23,9 +24,9 @@ func (f Flag) executeHandler() {
 func HandleFlags() {
 
 	stringFlag("varsfile", "path to config file", varsFileHandler)
+	stringFlag("loglevel", "set log level", loglevelHandler)
 	stringFlag("kubeconfig", "kube config file", kubeConfigHandler)
 	stringFlag("cucumberdir", "cucumber output directory", cucumberDirHandler)
-	stringFlag("loglevel", "set log level", loglevelHandler)
 	stringFlag("tags", "feature tags to include or exclude", tagsHandler)
 	boolFlag("silent", "disable visual runtime indicator, useful for CI tasks", silentHandler)
 	boolFlag("nosummary", "switch off summary output", nosummaryHandler)
@@ -65,6 +66,7 @@ func varsFileHandler(v interface{}) {
 	if err != nil {
 		log.Fatalf("[ERROR] Could not create config from provided filepath: %v", v.(*string))
 	} else if len(*v.(*string)) > 0 {
+		config.Vars.VarsFile = *v.(*string)
 		log.Printf("[NOTICE] Config read from file '%v', but may still be overridden by CLI flags.", v.(*string))
 	} else {
 		log.Printf("[NOTICE] No configuration variables file specified. Using environment variabls and defaults only.")
@@ -82,6 +84,8 @@ func cucumberDirHandler(v interface{}) {
 // loglevelHandler validates provided value and sets output accordingly
 func loglevelHandler(v interface{}) {
 	if len(*v.(*string)) > 0 {
+		config.Vars.LogLevel = *v.(*string)
+		config.SetLogFilter(config.Vars.LogLevel, os.Stderr)
 		if (*v.(*string) != "DEBUG") && (*v.(*string) != "INFO") && (*v.(*string) != "NOTICE") && (*v.(*string) != "WARN") && (*v.(*string) != "ERROR") {
 			log.Fatalf("[ERROR] Unknown loglevel specified: %v. Must be one of 'DEBUG', 'INFO', 'NOTICE', 'WARN', 'ERROR'", v.(*string))
 		}

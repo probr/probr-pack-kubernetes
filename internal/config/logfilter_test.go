@@ -14,7 +14,7 @@ func tmpLogger(test_string, level string) bytes.Buffer {
 		log.SetOutput(os.Stderr) // Return to normal Stderr handling after function
 	}()
 	var buf bytes.Buffer
-	setLogFilter(level, &buf) // Intercept expected Stderr output
+	SetLogFilter(level, &buf) // Intercept expected Stderr output
 	log.Printf(test_string)
 	return buf
 }
