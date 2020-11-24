@@ -16,7 +16,7 @@ spec:
       path: /var/log/pods
   containers:
   - name: sec-ctx-demo
-    image: citihub/probr-probe
+    image: {{ probr-compatible-image }}
     command: [ "sh", "-c", "sleep 1h" ]        
     volumeMounts:
     - name: unapproved-volume

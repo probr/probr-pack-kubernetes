@@ -4,9 +4,9 @@ import (
 	"path/filepath"
 
 	"github.com/cucumber/godog"
-	"github.com/gobuffalo/packr/v2"
 
 	"github.com/citihub/probr/internal/coreengine"
+	"github.com/citihub/probr/internal/utils"
 	"github.com/citihub/probr/service_packs/kubernetes/container_registry_access"
 	"github.com/citihub/probr/service_packs/kubernetes/general"
 	"github.com/citihub/probr/service_packs/kubernetes/iam"
@@ -34,7 +34,7 @@ func init() {
 }
 
 func makeGodogProbe(pack string, p probe) *coreengine.GodogProbe {
-	box := packr.New(pack+p.Name(), filepath.Join(pack, p.Name())) // Establish static files for binary build
+	box := utils.BoxStaticFile(pack+p.Name(), pack, p.Name()) // Establish static files for binary build)
 	descriptor := coreengine.ProbeDescriptor{Group: coreengine.Kubernetes, Name: p.Name()}
 	path := filepath.Join(box.ResolutionDir, p.Name()+".feature")
 	return &coreengine.GodogProbe{

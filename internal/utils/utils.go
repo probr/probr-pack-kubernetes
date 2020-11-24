@@ -3,9 +3,19 @@ package utils
 
 import (
 	"fmt"
+	"io/ioutil"
+	"path/filepath"
 	"runtime"
 	"strings"
+
+	"github.com/gobuffalo/packr/v2"
 )
+
+var boxes map[string]*packr.Box
+
+func init() {
+	boxes = make(map[string]*packr.Box)
+}
 
 // BoolPtr returns a pointer to a bool
 func BoolPtr(b bool) *bool {
@@ -22,16 +32,19 @@ func Int64Ptr(i int64) *int64 {
 	return &i
 }
 
-// GetCallerName retrieves the name of the function prior to the location it is called
-func GetCallerName(up int) string {
-	f := make([]uintptr, 1)
-	runtime.Callers(up+2, f)                   // add full caller path to empty object
-	step := runtime.FuncForPC(f[0] - 1).Name() // get full caller path in string form
-	s := strings.Split(step, ".")              // split full caller path
-	return s[len(s)-1]                         // select last element from caller path
+// CallerName retrieves the name of the function prior to the location it is called
+func CallerName(up int) string {
+	s := strings.Split(CallerPath(up+1), ".") // split full caller path
+	return s[len(s)-1]                        // select last element from caller path
 }
 
-func GetCallerFileLine() (string, int) {
+func CallerPath(up int) string {
+	f := make([]uintptr, 1)
+	runtime.Callers(up+2, f)                  // add full caller path to empty object
+	return runtime.FuncForPC(f[0] - 1).Name() // get full caller path in string form
+}
+
+func CallerFileLine() (string, int) {
 	_, file, line, _ := runtime.Caller(2)
 	return file, line
 }
@@ -45,4 +58,29 @@ func ReformatError(e string, v ...interface{}) error {
 	s := fmt.Sprintf(b.String(), v...)
 
 	return fmt.Errorf(s)
+}
+
+func ReadStaticFile(path ...string) ([]byte, error) {
+	filename := path[len(path)-1]
+	dirpath := path[0:(len(path) - 1)]
+	boxName := strings.Join(dirpath[:], ".")
+	if boxes[boxName] == nil {
+		boxes[boxName] = BoxStaticFile(boxName, dirpath...) // Name the box after the file being read
+	}
+	filepath := filepath.Join(boxes[boxName].ResolutionDir, filename)
+	return ioutil.ReadFile(filepath)
+}
+
+func BoxStaticFile(boxName string, path ...string) *packr.Box {
+	return packr.New(boxName, filepath.Join(path...)) // Establish static files for binary build
+}
+
+func ReplaceBytesValue(b []byte, old string, new string) []byte {
+	newString := strings.Replace(string(b), old, new, -1)
+	return []byte(newString)
+}
+
+// Placeholder error in case function panics
+func PanicPrecaution() error {
+	return fmt.Errorf("This probe panicked and could not return a verbose error.")
 }

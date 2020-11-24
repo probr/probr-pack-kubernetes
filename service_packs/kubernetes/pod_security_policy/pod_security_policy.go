@@ -10,7 +10,6 @@ import (
 	"github.com/citihub/probr/internal/coreengine"
 	"github.com/citihub/probr/internal/utils"
 	"github.com/citihub/probr/service_packs/kubernetes"
-	psp_assets "github.com/citihub/probr/service_packs/kubernetes/pod_security_policy/assets"
 )
 
 type ProbeStruct struct{}
@@ -497,11 +496,13 @@ func (s *scenarioState) anPortRangeIsRequestedForTheKubernetesDeployment(portRan
 
 	var y []byte
 	var err error
+	description := ""
+	var payload interface{}
 
 	if portRange == "unapproved" {
-		y, err = psp_assets.Asset("assets/yaml/psp-azp-hostport-unapproved.yaml")
+		y, err = utils.ReadStaticFile(kubernetes.AssetsDir, "psp-azp-hostport-unapproved.yaml")
 	} else {
-		y, err = psp_assets.Asset("assets/yaml/psp-azp-hostport-approved.yaml")
+		y, err = utils.ReadStaticFile(kubernetes.AssetsDir, "psp-azp-hostport-approved.yaml")
 	}
 
 	if err == nil {
@@ -509,8 +510,6 @@ func (s *scenarioState) anPortRangeIsRequestedForTheKubernetesDeployment(portRan
 		err = kubernetes.ProcessPodCreationResult(s.probe, &s.podState, pd, kubernetes.PSPAllowedPortRange, err)
 	}
 
-	description := ""
-	var payload interface{}
 	s.audit.AuditScenarioStep(description, payload, err)
 
 	return err
@@ -542,11 +541,13 @@ func (s *scenarioState) anVolumeTypeIsRequestedForTheKubernetesDeployment(volume
 
 	var y []byte
 	var err error
+	description := ""
+	var payload interface{}
 
 	if volumeType == "unapproved" {
-		y, err = psp_assets.Asset("assets/yaml/psp-azp-volumetypes-unapproved.yaml")
+		y, err = utils.ReadStaticFile(kubernetes.AssetsDir, "psp-azp-volumetypes-unapproved.yaml")
 	} else {
-		y, err = psp_assets.Asset("assets/yaml/psp-azp-volumetypes-approved.yaml")
+		y, err = utils.ReadStaticFile(kubernetes.AssetsDir, "psp-azp-volumetypes-approved.yaml")
 	}
 
 	if err == nil {
@@ -554,8 +555,6 @@ func (s *scenarioState) anVolumeTypeIsRequestedForTheKubernetesDeployment(volume
 		err = kubernetes.ProcessPodCreationResult(s.probe, &s.podState, pd, kubernetes.PSPAllowedVolumeTypes, err)
 	}
 
-	description := ""
-	var payload interface{}
 	s.audit.AuditScenarioStep(description, payload, err)
 
 	return err
@@ -583,13 +582,15 @@ func (s *scenarioState) anSeccompProfileIsRequestedForTheKubernetesDeployment(se
 
 	var y []byte
 	var err error
+	description := ""
+	var payload interface{}
 
 	if seccompProfile == "unapproved" {
-		y, err = psp_assets.Asset("assets/yaml/psp-azp-seccomp-unapproved.yaml")
+		y, err = utils.ReadStaticFile(kubernetes.AssetsDir, "psp-azp-seccomp-unapproved.yaml")
 	} else if seccompProfile == "undefined" {
-		y, err = psp_assets.Asset("assets/yaml/psp-azp-seccomp-undefined.yaml")
+		y, err = utils.ReadStaticFile(kubernetes.AssetsDir, "psp-azp-seccomp-undefined.yaml")
 	} else if seccompProfile == "approved" {
-		y, err = psp_assets.Asset("assets/yaml/psp-azp-seccomp-approved.yaml")
+		y, err = utils.ReadStaticFile(kubernetes.AssetsDir, "psp-azp-seccomp-approved.yaml")
 	}
 
 	if err != nil {
@@ -597,8 +598,6 @@ func (s *scenarioState) anSeccompProfileIsRequestedForTheKubernetesDeployment(se
 		err = kubernetes.ProcessPodCreationResult(s.probe, &s.podState, pd, kubernetes.PSPSeccompProfile, err)
 	}
 
-	description := ""
-	var payload interface{}
 	s.audit.AuditScenarioStep(description, payload, err)
 
 	return err

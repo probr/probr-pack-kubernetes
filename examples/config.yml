@@ -29,13 +29,13 @@ Probes: # this entire object can be left out if all tests are to be run
     Justification: "demo"
 
   - Name: iam
-    Excluded: true
+    Excluded: false
     Justification: "demo"
 
   - Name: internet_access
-    Excluded: true
+    Excluded: false
     Justification: "demo"
 
   - Name: pod_security_policy
-    Excluded: true
+    Excluded: false
     Justification: "demo"

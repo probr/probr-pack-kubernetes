@@ -21,20 +21,20 @@ func tmpLogger(test_string, level string) bytes.Buffer {
 
 func bufferShouldLog(t *testing.T, test_string string, buf bytes.Buffer) {
 	if len(buf.String()) < len(test_string) {
-		file, line := utils.GetCallerFileLine()
-		t.Logf("%v:%v:%s: Test string was not written to logs as expected: '%s'", file, line, utils.GetCallerName(0), buf.String())
+		file, line := utils.CallerFileLine()
+		t.Logf("%v:%v:%s: Test string was not written to logs as expected: '%s'", file, line, utils.CallerName(0), buf.String())
 		t.Fail()
 	} else if len(buf.String()) == len(test_string) {
-		file, line := utils.GetCallerFileLine()
-		t.Logf("%v:%v:%s: Logger did not append timestamp to test string as expected: '%s'", file, line, utils.GetCallerName(0), buf.String())
+		file, line := utils.CallerFileLine()
+		t.Logf("%v:%v:%s: Logger did not append timestamp to test string as expected: '%s'", file, line, utils.CallerName(0), buf.String())
 		t.Fail()
 	}
 }
 
 func bufferShouldNotLog(t *testing.T, test_string string, buf bytes.Buffer) {
 	if len(buf.String()) > len(test_string) {
-		file, line := utils.GetCallerFileLine()
-		t.Logf("%v:%v:%s: Test string was written to logs, but not expected: '%s'", file, line, utils.GetCallerName(0), buf.String())
+		file, line := utils.CallerFileLine()
+		t.Logf("%v:%v:%s: Test string was written to logs, but not expected: '%s'", file, line, utils.CallerName(0), buf.String())
 		t.Fail()
 	}
 }

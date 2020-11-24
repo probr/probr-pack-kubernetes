@@ -12,7 +12,7 @@ spec:
     supplementalGroups: [ 1 ]      
   containers:
   - name: sec-ctx-demo
-    image: docker.io/alpine:latest
+    image: {{ probr-compatible-image }}
     command: [ "sh", "-c", "touch /tmp/healthy; sleep 1h" ]
     livenessProbe:
       exec:

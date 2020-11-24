@@ -59,7 +59,7 @@ func (e *ProbeAudit) Write() {
 func (p *ScenarioAudit) AuditScenarioStep(description string, payload interface{}, err error) {
 	// Initialize any empty objects
 	// Now do the actual probe summary
-	stepName := utils.GetCallerName(1)
+	stepName := utils.CallerName(1)
 	stepNumber := len(p.Steps) + 1
 	p.Steps[stepNumber] = &StepAudit{
 		Name:        stepName,

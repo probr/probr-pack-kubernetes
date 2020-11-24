@@ -194,10 +194,12 @@ func (k *Kube) CreatePod(podName string, ns string, containerName string, image 
 // CreatePodFromYaml creates a pod for the supplied yaml.  A true value for 'w' indicates that the function
 // should wait (block) until the pod is in a running state.
 func (k *Kube) CreatePodFromYaml(y []byte, pname string, ns string, image string, aadpodidbinding string, w bool, probe *summary.Probe) (*apiv1.Pod, error) {
-
-	decode := scheme.Codecs.UniversalDeserializer().Decode
-
-	o, _, _ := decode(y, nil, nil)
+	approvedImage := config.Vars.AuthorisedContainerRegistry + "/" + config.Vars.ProbeImage
+	podSpec := utils.ReplaceBytesValue(y, "{{ probr-compatible-image }}", approvedImage)
+	o, _, err := scheme.Codecs.UniversalDeserializer().Decode(podSpec, nil, nil)
+	if err != nil {
+		log.Printf("[ERROR] could not create pod from yaml asset: %v", err)
+	}
 
 	p := o.(*apiv1.Pod)
 	//update the name to the one that's supplied
@@ -216,7 +218,6 @@ func (k *Kube) CreatePodFromYaml(y []byte, pname string, ns string, image string
 		}
 		p.Labels["aadpodidbinding"] = aadpodidbinding
 	}
-
 	return k.CreatePodFromObject(p, pname, ns, w, probe)
 }
 
@@ -384,7 +385,7 @@ func (k *Kube) ExecCommand(cmd, ns, pn *string) (s *CmdExecutionResult) {
 	if cmd == nil {
 		return &CmdExecutionResult{Err: fmt.Errorf("command string is nil - nothing to execute"), Internal: true}
 	}
-	log.Printf("[NOTICE] Executing command: \"%v\" on POD '%v' in namespace '%v'", cmd, pn, ns)
+	log.Printf("[NOTICE] Executing command: \"%s\" on POD '%s' in namespace '%s'", *cmd, *pn, *ns)
 	c, err := k.GetClient()
 	if err != nil {
 		return &CmdExecutionResult{Err: err, Internal: true}
@@ -409,7 +410,7 @@ func (k *Kube) ExecCommand(cmd, ns, pn *string) (s *CmdExecutionResult) {
 
 	req.VersionedParams(&options, parameterCodec)
 
-	log.Printf("[INFO] ExecCommand Request URL: %v", req.URL().String())
+	log.Printf("[INFO] %s.%s: ExecCommand Request URL: %v", utils.CallerName(2), utils.CallerName(1), req.URL().String())
 
 	config, err := clientcmd.BuildConfigFromFlags("", config.Vars.ServicePacks.Kubernetes.KubeConfigPath)
 	exec, err := remotecommand.NewSPDYExecutor(config, "POST", req.URL())

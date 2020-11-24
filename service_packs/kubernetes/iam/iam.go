@@ -16,7 +16,6 @@ import (
 	"github.com/citihub/probr/internal/coreengine"
 	"github.com/citihub/probr/internal/utils"
 	"github.com/citihub/probr/service_packs/kubernetes"
-	iamassets "github.com/citihub/probr/service_packs/kubernetes/iam/assets"
 )
 
 type ProbeStruct struct{}
@@ -71,8 +70,10 @@ func (s *scenarioState) theDefaultNamespaceHasAnAzureIdentityBinding() error {
 }
 
 func (s *scenarioState) iCreateASimplePodInNamespaceAssignedWithThatAzureIdentityBinding(namespace string) error {
+	description := ""
+	var payload interface{}
 
-	y, err := iamassets.Asset("assets/yaml/iam-azi-test-aib-curl.yaml")
+	y, err := utils.ReadStaticFile(kubernetes.AssetsDir, "iam-azi-test-aib-curl.yaml")
 	if err != nil {
 		err = utils.ReformatError("error reading yaml for test: %v", err)
 		log.Print(err)
@@ -84,8 +85,6 @@ func (s *scenarioState) iCreateASimplePodInNamespaceAssignedWithThatAzureIdentit
 		err = kubernetes.ProcessPodCreationResult(s.probe, &s.podState, pd, kubernetes.UndefinedPodCreationErrorReason, err)
 	}
 
-	description := ""
-	var payload interface{}
 	s.audit.AuditScenarioStep(description, payload, err)
 
 	return err
@@ -184,8 +183,10 @@ func (s *scenarioState) iCreateAnAzureIdentityBindingCalledInANondefaultNamespac
 }
 
 func (s *scenarioState) iDeployAPodAssignedWithTheAzureIdentityBindingIntoTheSameNamespaceAsTheAzureIdentityBinding(arg1, arg2 string) error {
+	description := ""
+	var payload interface{}
 
-	y, err := iamassets.Asset("assets/yaml/iam-azi-test-aib-curl.yaml")
+	y, err := utils.ReadStaticFile(kubernetes.AssetsDir, "iam-azi-test-aib-curl.yaml")
 	if err != nil {
 		err = utils.ReformatError("error reading yaml for test: %v", err)
 		log.Print(err)
@@ -194,8 +195,6 @@ func (s *scenarioState) iDeployAPodAssignedWithTheAzureIdentityBindingIntoTheSam
 		err = kubernetes.ProcessPodCreationResult(s.probe, &s.podState, pd, kubernetes.UndefinedPodCreationErrorReason, err)
 	}
 
-	description := ""
-	var payload interface{}
 	s.audit.AuditScenarioStep(description, payload, err)
 
 	return err

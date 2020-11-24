@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: Pod
 metadata:
-  name: #IAMTEST#
+  name: IAMTEST
   labels:
     aadpodidbinding: #demo  #TODO: need to inject this
   annotations:
@@ -14,7 +14,7 @@ spec:
    supplementalGroups: [ 1 ]
   containers:
   - name: demo
-    image: curlimages/curl
+    image: {{ probr-compatible-image }}
     command: [ "sh", "-c", "sleep 1h" ]
     securityContext:
       allowPrivilegeEscalation: false

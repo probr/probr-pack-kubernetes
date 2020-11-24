@@ -2,6 +2,7 @@ package kubernetes
 
 import (
 	"log"
+	"path/filepath"
 
 	"github.com/cucumber/godog"
 	apiv1 "k8s.io/api/core/v1"
@@ -11,6 +12,8 @@ import (
 	"github.com/citihub/probr/internal/summary"
 	"github.com/citihub/probr/internal/utils"
 )
+
+var AssetsDir string
 
 // podState captures useful pod state data for use in a scenario's state.
 type PodState struct {
@@ -34,6 +37,10 @@ type scenarioState struct {
 type PodPayload struct {
 	Pod      *apiv1.Pod
 	PodAudit *PodAudit
+}
+
+func init() {
+	AssetsDir = filepath.Join("service_packs", "kubernetes", "assets")
 }
 
 //
