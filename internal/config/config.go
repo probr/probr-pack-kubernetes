@@ -13,23 +13,23 @@ import (
 // ConfigVars contains all possible config vars
 type ConfigVars struct {
 	// NOTE: Env and Defaults are ONLY available if corresponding logic is added to defaults.go and getters.go
-	ServicePacks                  servicePacks   `yaml:"ServicePacks"`
-	CloudProviders                cloudProviders `yaml:"CloudProviders"`
-	OutputType                    string         `yaml:"OutputType"`
-	CucumberDir                   string         `yaml:"CucumberDir"`
-	AuditDir                      string         `yaml:"AuditDir"`
-	AuditEnabled                  string         `yaml:"AuditEnabled"`
-	LogLevel                      string         `yaml:"LogLevel"`
-	OverwriteHistoricalAudits     string         `yaml:"OverwriteHistoricalAudits"`
-	AuthorisedContainerRegistry   string         `yaml:"AuthorisedContainerRegistry"`
-	UnauthorisedContainerRegistry string         `yaml:"UnauthorisedContainerRegistry"`
-	ProbeImage                    string         `yaml:"ProbeImage"`
-	Probes                        []Probe        `yaml:"Probes"`
-	Tags                          string         `yaml:"Tags"`
-	VarsFile                      string         // set by flags only
-	NoSummary                     bool           // set by flags only
-	Silent                        bool           // set by flags only
-	TagExclusions                 []string       // set programatically
+	ServicePacks                  servicePacks     `yaml:"ServicePacks"`
+	CloudProviders                cloudProviders   `yaml:"CloudProviders"`
+	OutputType                    string           `yaml:"OutputType"`
+	CucumberDir                   string           `yaml:"CucumberDir"`
+	AuditDir                      string           `yaml:"AuditDir"`
+	AuditEnabled                  string           `yaml:"AuditEnabled"`
+	LogLevel                      string           `yaml:"LogLevel"`
+	OverwriteHistoricalAudits     string           `yaml:"OverwriteHistoricalAudits"`
+	AuthorisedContainerRegistry   string           `yaml:"AuthorisedContainerRegistry"`
+	UnauthorisedContainerRegistry string           `yaml:"UnauthorisedContainerRegistry"`
+	ProbeImage                    string           `yaml:"ProbeImage"`
+	ProbeExclusions               []ProbeExclusion `yaml:"ProbeExclusions"`
+	TagExclusions                 []string         `yaml:"TagExclusions"`
+	Tags                          string           // set by flags
+	VarsFile                      string           // set by flags only
+	NoSummary                     bool             // set by flags only
+	Silent                        bool             // set by flags only
 }
 
 type servicePacks struct {
@@ -58,7 +58,7 @@ type azure struct {
 	}
 }
 
-type Probe struct {
+type ProbeExclusion struct {
 	Name          string `yaml:"Name"`
 	Excluded      bool   `yaml:"Excluded"`
 	Justification string `yaml:"Justification"`
@@ -68,29 +68,23 @@ type Probe struct {
 var Vars ConfigVars
 var Spinner *spinner.Spinner
 
-// GetTags parses Tags with TagExclusions
+// GetTags returns Tags, prioritising command line parameter over vars file
 func (ctx *ConfigVars) GetTags() string {
 	if ctx.Tags == "" {
-		if len(ctx.Probes) > 0 {
-			log.Printf("[WARN] Exclusions are being ignored due to Tags being set.")
-		}
-		for _, v := range ctx.Probes {
-			if v.Excluded {
-				ctx.HandleExclusion(v.Name, v.Justification)
-			}
-		}
+		ctx.handleTagExclusions() // only process tag exclusions from vars file if not supplied via the command line
 	}
 	return ctx.Tags
 }
 
-func (ctx *ConfigVars) HandleExclusion(name, justification string) {
-	if name == "" {
-		return
+// Handle tag exclusions provided via the config vars file
+func (ctx *ConfigVars) handleTagExclusions() {
+	for _, tag := range ctx.TagExclusions {
+		if ctx.Tags == "" {
+			ctx.Tags = "~@" + tag
+		} else {
+			ctx.Tags = fmt.Sprintf("%s && ~@%s", ctx.Tags, tag)
+		}
 	}
-	if justification == "" {
-		log.Fatalf("[ERROR] A justification must be provided for the tag exclusion '%s'", name)
-	}
-	ctx.TagExclusions = append(ctx.TagExclusions, name) // Add exclusion to list
 }
 
 // Init will override config.Vars with the content retrieved from a filepath
@@ -133,6 +127,10 @@ func NewConfig(c string) (ConfigVars, error) {
 	if err := d.Decode(&config); err != nil {
 		return config, err
 	}
+
+	// Validate the probe exclusions
+	config.validateProbeExclusions()
+
 	return config, nil
 }
 
@@ -146,6 +144,17 @@ func ValidateConfigPath(path string) error {
 		return fmt.Errorf("'%s' is a directory, not a normal file", path)
 	}
 	return nil
+}
+
+// Check that probe exclusions are justified
+func (ctx *ConfigVars) validateProbeExclusions() {
+	for _, v := range ctx.ProbeExclusions {
+		if v.Excluded {
+			if v.Justification == "" {
+				log.Fatalf("[ERROR] A justification must be provided for the probe exclusion '%s'", v.Name)
+			}
+		}
+	}
 }
 
 func LogConfigState() {

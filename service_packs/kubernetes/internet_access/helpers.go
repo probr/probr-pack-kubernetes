@@ -25,12 +25,10 @@ type scenarioState struct {
 }
 
 func beforeScenario(s *scenarioState, probeName string, gs *godog.Scenario) {
-	if coreengine.TagsNotExcluded(gs.Tags) {
-		s.name = gs.Name
-		s.probe = summary.State.GetProbeLog(probeName)
-		s.audit = summary.State.GetProbeLog(probeName).InitializeAuditor(gs.Name, gs.Tags)
-		coreengine.LogScenarioStart(gs)
-	}
+	s.name = gs.Name
+	s.probe = summary.State.GetProbeLog(probeName)
+	s.audit = summary.State.GetProbeLog(probeName).InitializeAuditor(gs.Name, gs.Tags)
+	coreengine.LogScenarioStart(gs)
 }
 
 const (

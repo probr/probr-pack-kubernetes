@@ -15,7 +15,6 @@ type SummaryState struct {
 	ProbesPassed  int
 	ProbesFailed  int
 	ProbesSkipped int
-	ProbeTags     []config.Probe // config.Probe contains user-specified tagging options
 	Probes        map[string]*Probe
 }
 
@@ -44,8 +43,8 @@ func (s *SummaryState) SetProbrStatus() {
 	} else {
 		s.Status = fmt.Sprintf("Complete - %v of %v Probes Failed", s.ProbesFailed, (len(s.Probes) - s.ProbesSkipped))
 	}
-	if config.Vars.Probes != nil {
-		s.Meta["probe_tags_from_config"] = config.Vars.Probes
+	if config.Vars.ProbeExclusions != nil {
+		s.Meta["probe_tags_from_config"] = config.Vars.ProbeExclusions
 	}
 }
 

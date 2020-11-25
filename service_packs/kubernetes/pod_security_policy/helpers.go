@@ -122,12 +122,10 @@ type PSP struct {
 }
 
 func beforeScenario(s *scenarioState, probeName string, gs *godog.Scenario) {
-	if coreengine.TagsNotExcluded(gs.Tags) {
-		s.name = gs.Name
-		s.probe = summary.State.GetProbeLog(probeName)
-		s.audit = summary.State.GetProbeLog(probeName).InitializeAuditor(gs.Name, gs.Tags)
-		coreengine.LogScenarioStart(gs)
-	}
+	s.name = gs.Name
+	s.probe = summary.State.GetProbeLog(probeName)
+	s.audit = summary.State.GetProbeLog(probeName).InitializeAuditor(gs.Name, gs.Tags)
+	coreengine.LogScenarioStart(gs)
 }
 
 // NewPSP creates a new PSP using the supplied kubernetes instance and collection of SecurityPolicyProviders.

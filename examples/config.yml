@@ -19,7 +19,7 @@ CloudProviders:
     Identity:
       DefaultNamespaceAI:
       DefaultNamespaceAIB:
-Probes: # this entire object can be left out if all tests are to be run
+ProbeExclusions: # allows specific probes to be disabled by name
   - Name: container_registry_access
     Excluded: false
     Justification: "demo"
@@ -37,5 +37,7 @@ Probes: # this entire object can be left out if all tests are to be run
     Justification: "demo"
 
   - Name: pod_security_policy
-    Excluded: false
+    Excluded: true
     Justification: "demo"
+TagExclusions: # allows specific controls/scenarios to be disabled via tags
+  - CIS-6.1.4

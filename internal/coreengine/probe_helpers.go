@@ -8,7 +8,6 @@ import (
 	"strings"
 
 	"github.com/cucumber/godog"
-	"github.com/cucumber/messages-go/v10"
 
 	"github.com/citihub/probr/internal/config"
 )
@@ -82,15 +81,4 @@ func scenarioString(st bool, s *godog.Scenario) string {
 	}
 	b.WriteString(").")
 	return b.String()
-}
-
-func TagsNotExcluded(tags []*messages.Pickle_PickleTag) bool {
-	for _, exclusion := range config.Vars.TagExclusions {
-		for _, tag := range tags {
-			if tag.Name == "@"+exclusion {
-				return false
-			}
-		}
-	}
-	return true
 }

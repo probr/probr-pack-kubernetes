@@ -10,7 +10,6 @@ require (
 	github.com/briandowns/spinner v1.11.1
 	github.com/cucumber/godog v0.10.0
 	github.com/cucumber/messages-go/v10 v10.0.3
-	github.com/gobuffalo/packr v1.30.1 // indirect
 	github.com/gobuffalo/packr/v2 v2.5.1
 	github.com/golang/protobuf v1.3.3 // indirect
 	github.com/hashicorp/logutils v1.0.0

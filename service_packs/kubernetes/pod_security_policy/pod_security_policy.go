@@ -41,6 +41,9 @@ func (s *scenarioState) aKubernetesClusterIsDeployed() error {
 func (s *scenarioState) aKubernetesDeploymentIsAppliedToAnExistingKubernetesCluster() error {
 
 	//TODO: not sure this step is adding value ... return "pass" for now ...
+	description := "Pending Implementation"
+	var payload interface{}
+	s.audit.AuditScenarioStep(description, payload, nil)
 	return nil
 }
 

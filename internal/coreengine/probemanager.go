@@ -132,16 +132,16 @@ func (ps *ProbeStore) ExecAllProbes() (int, error) {
 func (pd *ProbeDescriptor) isExcluded() bool {
 	v := []string{pd.Name, pd.Group.String()} // iterable name & group strings
 	for _, r := range v {
-		if tagIsExcluded(r) {
+		if probeIsExcluded(r) {
 			return true
 		}
 	}
 	return false
 }
 
-func tagIsExcluded(tag string) bool {
-	for _, exclusion := range config.Vars.TagExclusions {
-		if tag == exclusion {
+func probeIsExcluded(name string) bool {
+	for _, exclusion := range config.Vars.ProbeExclusions {
+		if exclusion.Excluded && name == exclusion.Name {
 			return true
 		}
 	}

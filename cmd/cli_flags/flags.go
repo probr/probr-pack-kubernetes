@@ -98,9 +98,6 @@ func tagsHandler(v interface{}) {
 		config.Vars.Tags = *v.(*string)
 		log.Printf("[NOTICE] tags have been added via command line.")
 	}
-	if len(config.Vars.GetTags()) == 0 {
-		log.Printf("[NOTICE] No tags specified.")
-	}
 }
 
 func kubeConfigHandler(v interface{}) {

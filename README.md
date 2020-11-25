@@ -114,6 +114,17 @@ Variables that are specific to a cloud service provider and can be configured in
 |Azure.AzureIdentity.DefaultNamespaceAI|Azure namespace|no|yes|DEFAULT_NS_AZURE_IDENTITY|probr-defaultns-ai|
 |Azure.AzureIdentity.DefaultNamespaceAIB|Azure namespace|no|yes|DEFAULT_NS_AZURE_IDENTITY_BINDING|probr-defaultns-aib|
 
+### Probes Configuration Variables
+
+Variables used to configure which probes and their associated controls & scenarios are to be run. Probes can be excluded via the ProbeExclusions config file variable. Specific controls/scenarios can be excluded via the TagExclusions config file variable.
+Tags may also be specified via a command line parameter to control which tagged probes/controls/scenarios are to be run. This takes precedence over the TagExclusions variable
+
+| Variable | Description | CLI Flag | VarsFile | Env Var | Default |
+|---|---|---|---|---|---|
+|Tags|Specify tags for probes/controls/scenarios to be included or excluded|yes|no| | |
+|ProbeExclusions|Specify names of probes to be excluded and provide justification|no|yes| | |
+|TagExclusions|Specify the tags for controls/scenarios to be excluded|no|yes| | |
+
 ## Development & Contributing
 
 Please see the [contributing docs](https://github.com/citihub/probr/blob/master/CONTRIBUTING.md) for information on how to develop and contribute to this repository as either a maintainer or open source contributor (the same rules apply for both).
