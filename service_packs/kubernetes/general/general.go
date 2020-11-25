@@ -6,6 +6,9 @@ import (
 	"fmt"
 	"strings"
 
+	rbacv1 "k8s.io/api/rbac/v1"
+	v1 "k8s.io/api/rbac/v1"
+
 	"github.com/cucumber/godog"
 
 	"github.com/citihub/probr/internal/config"
@@ -49,7 +52,18 @@ func (s *scenarioState) iInspectTheThatAreConfigured(roleLevel string) error {
 func (s *scenarioState) iShouldOnlyFindWildcardsInKnownAndAuthorisedConfigurations() error {
 	//we strip out system/known entries in the cluster roles & roles call
 	var err error
-	wildcardCount := len(s.wildcardRoles.([]interface{}))
+	var wildcardCount int
+	//	wildcardCount := len(s.wildcardRoles.([]interface{}))
+	switch s.wildcardRoles.(type) {
+	case *[]v1.Role:
+		wildCardRoles := s.wildcardRoles.(*[]rbacv1.Role)
+		wildcardCount = len(*wildCardRoles)
+	case *[]v1.ClusterRole:
+		wildCardRoles := s.wildcardRoles.(*[]rbacv1.ClusterRole)
+		wildcardCount = len(*wildCardRoles)
+	default:
+	}
+
 	if wildcardCount > 0 {
 		err = utils.ReformatError("roles exist with wildcarded resources")
 	}
