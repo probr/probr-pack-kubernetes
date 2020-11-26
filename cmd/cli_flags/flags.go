@@ -64,7 +64,7 @@ func boolFlag(name string, usage string, handler flagHandlerFunc) {
 func varsFileHandler(v interface{}) {
 	err := config.Init(*v.(*string))
 	if err != nil {
-		log.Fatalf("[ERROR] Could not create config from provided filepath: %v", v.(*string))
+		log.Fatalf("[ERROR] error returned from config.Init: %v", err)
 	} else if len(*v.(*string)) > 0 {
 		config.Vars.VarsFile = *v.(*string)
 		log.Printf("[NOTICE] Config read from file '%v', but may still be overridden by CLI flags.", v.(*string))
