@@ -34,7 +34,7 @@ func init() {
 }
 
 func makeGodogProbe(pack string, p probe) *coreengine.GodogProbe {
-	box := utils.BoxStaticFile(pack+p.Name(), pack, p.Name()) // Establish static files for binary build)
+	box := utils.BoxStaticFile(pack+p.Name(), "service_packs", pack, p.Name()) // Establish static files for binary build
 	descriptor := coreengine.ProbeDescriptor{Group: coreengine.Kubernetes, Name: p.Name()}
 	path := filepath.Join(box.ResolutionDir, p.Name()+".feature")
 	return &coreengine.GodogProbe{
