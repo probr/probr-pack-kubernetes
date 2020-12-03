@@ -31,7 +31,7 @@ type ScenarioAudit struct {
 
 type StepAudit struct {
 	Name        string
-	Description string      // Long-form exlanation of anything happening in the step
+	Description string      // Long-form explanation of anything happening in the step
 	Result      string      // Passed / Failed
 	Error       string      // Log the error text
 	Payload     interface{} // Handles any values that are sent across the network

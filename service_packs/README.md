@@ -17,7 +17,7 @@ written, please review the
 
 Each control that is to be validated takes the form of a Cucumber _scenario_.
 A _scenario_ is executed as a sequence of _steps_- each of which is described
-in the feature file as an english language statement, begining with a reserved
+in the feature file as an english language statement, beginning with a reserved
 word (Given, And, When, Then). The functions that define each step can be found
 in the `.go` file that has the name of the associated probe. (For example,
 "container registry access" steps are defined in `container_registry_access.go`)

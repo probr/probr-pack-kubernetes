@@ -14,7 +14,7 @@ import (
 	_ "k8s.io/client-go/plugin/pkg/client/auth"
 )
 
-//GetClient gets a client connection to the Kubernetes cluster specifed via config.Vars.ServicePacks.Kubernetes.KubeConfigPath
+//GetClient gets a client connection to the Kubernetes cluster specified via config.Vars.ServicePacks.Kubernetes.KubeConfigPath
 func (k *Kube) GetClient() (*k8s.Clientset, error) {
 	k.clientMutex.Lock()
 	defer k.clientMutex.Unlock()

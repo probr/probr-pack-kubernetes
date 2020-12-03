@@ -23,7 +23,7 @@ func TestGetOutputPath(t *testing.T) {
 	var file *os.File
 	d := "test_output_dir"
 	f := "test_file"
-	desired_file := filepath.Join(d, f) + ".json"
+	desiredFile := filepath.Join(d, f) + ".json"
 	defer func() {
 		// Cleanup test assets
 		file.Close()
@@ -34,14 +34,14 @@ func TestGetOutputPath(t *testing.T) {
 
 		// Swallow any panics and print a verbose error message
 		if err := recover(); err != nil {
-			t.Logf("Panicked when trying to create directory or file: '%s'", desired_file)
+			t.Logf("Panicked when trying to create directory or file: '%s'", desiredFile)
 			t.Fail()
 		}
 	}()
 	config.Vars.CucumberDir = d
 	file, _ = getOutputPath(f)
-	if desired_file != file.Name() {
-		t.Logf("Desired filepath '%s' does not match '%s'", desired_file, file.Name())
+	if desiredFile != file.Name() {
+		t.Logf("Desired filepath '%s' does not match '%s'", desiredFile, file.Name())
 		t.Fail()
 	}
 }
@@ -51,16 +51,16 @@ func TestScenarioString(t *testing.T) {
 
 	// Start scenario
 	s := scenarioString(true, gs)
-	s_contains_string := strings.Contains(s, "Start")
-	if !s_contains_string {
+	sContainsString := strings.Contains(s, "Start")
+	if !sContainsString {
 		t.Logf("Test string does not contain 'Start'")
 		t.Fail()
 	}
 
 	// End scenario
 	s = scenarioString(false, gs)
-	s_contains_string = strings.Contains(s, "End")
-	if !s_contains_string {
+	sContainsString = strings.Contains(s, "End")
+	if !sContainsString {
 		t.Logf("Test string does not contain 'End'")
 		t.Fail()
 	}

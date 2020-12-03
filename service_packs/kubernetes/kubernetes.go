@@ -61,7 +61,7 @@ func (s *scenarioState) setup() {
 	s.useDefaultNS = false
 }
 
-// ProcessPodCreationResult is a convenince function to process the result of a pod creation attempt.
+// ProcessPodCreationResult is a convenience function to process the result of a pod creation attempt.
 // It records state information on the supplied state structure.
 func ProcessPodCreationResult(probe *summary.Probe, s *PodState, pd *apiv1.Pod, expected PodCreationErrorReason, err error) error {
 	//first check for errors:
@@ -102,7 +102,7 @@ func ProcessPodCreationResult(probe *summary.Probe, s *PodState, pd *apiv1.Pod, 
 }
 
 // AssertResult evaluate the state in the context of the expected condition, e.g. if expected is "fail",
-// then the expecation is that a creation error will be present.
+// then the expectation is that a creation error will be present.
 func AssertResult(s *PodState, res, msg string) error {
 
 	if res == "Fail" || res == "denied" {

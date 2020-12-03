@@ -117,14 +117,14 @@ func (s *scenarioState) runVerificationProbe(c VerificationProbe) error {
 		}
 
 		//we've managed to execution against the cluster.  This may have failed due to pod security, but this
-		//is still a 'sucessful' execution.  The exit code of the command needs to be verified against expected
+		//is still a 'successful' execution.  The exit code of the command needs to be verified against expected
 		//check the result against expected:
 		if res.Code == c.ExpectedExitCode {
 			//then as expected, test passes
 			return nil
 		}
 		//else it's a fail:
-		return utils.ReformatError("exit code %d from verification commnad %q did not match expected %d",
+		return utils.ReformatError("exit code %d from verification command %q did not match expected %d",
 			res.Code, c.Cmd, c.ExpectedExitCode)
 	}
 
@@ -633,7 +633,7 @@ func (p ProbeStruct) Name() string {
 // test handler as part of the init() function.
 func (p ProbeStruct) ProbeInitialize(ctx *godog.TestSuiteContext) {
 	ctx.BeforeSuite(func() {
-		//check dependancies ...
+		//check dependencies ...
 		if psp == nil {
 			// not been given one so set default
 			psp = NewDefaultPSP()

@@ -12,7 +12,7 @@ import (
 	"github.com/citihub/probr/internal/config"
 )
 
-// GodogProbeHandler is a general implmentation of ProbeHandlerFunc.  Based on the
+// GodogProbeHandler is a general implementation of ProbeHandlerFunc.  Based on the
 // output type, the test will either be executed using an in-memory or file output.  In
 // both cases, the handler uses the data supplied in GodogProbe to call the underlying
 // GoDog test suite.

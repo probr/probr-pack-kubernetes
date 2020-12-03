@@ -468,7 +468,7 @@ func logAndReturn(t string, s bool, r bool, e error) (*bool, error) {
 // runAsUser *int64 - set RunAsUser.  Defaults to 1000.
 func (psp *PSP) CreatePODSettingSecurityContext(pr *bool, pe *bool, runAsUser *int64, probe *summary.Probe) (*apiv1.Pod, error) {
 	//default sensibly if not provided
-	//this needs to take account of rules around allowedPrivilegdEscalation and Privileged:
+	//this needs to take account of rules around allowedPrivilegedEscalation and Privileged:
 	// cannot set `allowPrivilegeEscalation` to false and `privileged` to true
 	f := false
 	if pr == nil {

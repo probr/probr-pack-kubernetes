@@ -2,12 +2,12 @@
 Feature: Ensure that secrets are stored as files instead of environment variables
 
 As a Cloud Security Admin
-I want to ensure that secret files are stored as seperate files instead of as environment variables
+I want to ensure that secret files are stored as separate files instead of as environment variables
 So that my organization can ensure that secrets are not easily discovered by reviewing the network logs
 
 Rule: ...
 
-@preventitive
+@preventative
 Scenario Outline: Prevent secrets from being stored as environmental variables
 Given an active Kubernetes cluster exists
 And Some system exists to detect how and when secrets are being defined

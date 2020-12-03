@@ -61,7 +61,7 @@
                     },
                     {
                         "keyword": "Then ",
-                        "name": "a resouce deployment will \"Succeed\" with the message \"Success\"",
+                        "name": "a resource deployment will \"Succeed\" with the message \"Success\"",
                         "line": 16,
                         "match": {
                             "location": "C:\\Users\\eknight\\dev\\probr\\probes\\clouddriver\\probe_specifications\\accountmanager\\account-manager.feature:12"
@@ -126,7 +126,7 @@
                     },
                     {
                         "keyword": "Then ",
-                        "name": "a resouce deployment will \"Fail\" with the message \"Cannot connect to account using supplied credential\"",
+                        "name": "a resource deployment will \"Fail\" with the message \"Cannot connect to account using supplied credential\"",
                         "line": 17,
                         "match": {
                             "location": "C:\\Users\\eknight\\dev\\probr\\probes\\clouddriver\\probe_specifications\\accountmanager\\account-manager.feature:12"

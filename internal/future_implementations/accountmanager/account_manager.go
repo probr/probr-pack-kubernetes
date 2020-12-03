@@ -11,7 +11,7 @@ import (
 //(as it will be utilised from the "test" file and the "test handler")
 
 // PENDING IMPLEMENTATION
-func aResouceCanBeDeployedIntoTheAccountUsingTheLinkedCredential(arg1, arg2 string) error {
+func aResourceCanBeDeployedIntoTheAccountUsingTheLinkedCredential(arg1, arg2 string) error {
 	// return godog.ErrPending
 	log.Printf("[INFO] *** THEN: resource can be deployed ACCOUNT: %v | *** CREDENTIAL: %v \n", arg1, arg2)
 	return nil
@@ -46,7 +46,7 @@ func iLinkTheCredentialToTheAccount(arg1, arg2 string) error {
 }
 
 // PENDING IMPLEMENTATION
-func aResouceDeploymentWillWithTheMessage(arg1, arg2 string) error {
+func aResourceDeploymentWillWithTheMessage(arg1, arg2 string) error {
 	log.Printf("[INFO] *** THEN: %v %v", arg1, arg2)
 	return nil
 }
@@ -60,10 +60,10 @@ func amProbeInitialize(ctx *godog.TestSuiteContext) {
 func amScenarioInitialize(ctx *godog.ScenarioContext) {
 	ctx.BeforeScenario(func(*godog.Scenario) {}) //nothing for now
 
-	ctx.Step(`^a resouce can be deployed into the "([^"]*)" Account using the linked "([^"]*)" Credential$`, aResouceCanBeDeployedIntoTheAccountUsingTheLinkedCredential)
+	ctx.Step(`^a resource can be deployed into the "([^"]*)" Account using the linked "([^"]*)" Credential$`, aResourceCanBeDeployedIntoTheAccountUsingTheLinkedCredential)
 	ctx.Step(`^"([^"]*)" Credential with access to the "([^"]*)" Account is already configured in the system$`, credentialWithAccessToTheAccountIsAlreadyConfiguredInTheSystem)
 	ctx.Step(`^I add the "([^"]*)" Account details to the system$`, iAddTheAccountDetailsToTheSystem)
 	ctx.Step(`^I am configuring a "([^"]*)" Account$`, iAmConfiguringAAccount)
 	ctx.Step(`^I link the "([^"]*)" Credential to the "([^"]*)" Account$`, iLinkTheCredentialToTheAccount)
-	ctx.Step(`^a resouce deployment will "([^"]*)" with the message "([^"]*)"$`, aResouceDeploymentWillWithTheMessage)
+	ctx.Step(`^a resource deployment will "([^"]*)" with the message "([^"]*)"$`, aResourceDeploymentWillWithTheMessage)
 }

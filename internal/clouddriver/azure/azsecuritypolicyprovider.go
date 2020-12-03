@@ -41,7 +41,7 @@ const (
 var azPolicyUUIDToProbrPolicy = make(map[string]string)
 
 func init() {
-	//TODO: should really map these to types, but not sure of the how important this is, ie. is it sufficent to say "some polices"?
+	//TODO: should really map these to types, but not sure of the how important this is, ie. is it sufficient to say "some polices"?
 	azPolicyUUIDToProbrPolicy["/providers/Microsoft.Authorization/policySetDefinitions/42b8ef37-b724-4e24-bbc8-7a7708edfe00"] = azPSPLinuxRestricted
 	azPolicyUUIDToProbrPolicy["/providers/Microsoft.Authorization/policyDefinitions/febd0533-8e55-448f-b837-bd0e06f16469"] = azPSPContainerImage
 	azPolicyUUIDToProbrPolicy["/providers/Microsoft.Authorization/policyDefinitions/1c6e92c9-99f0-4e55-9cf2-0c234dc48f99"] = azPSPContainerPrivilegeEscalation
@@ -199,7 +199,7 @@ func (p *AZSecurityPolicyProvider) getPolicies() (*map[string]*azPolicy, error) 
 		t, exists := azPolicyUUIDToProbrPolicy[*azp.uuid]
 		if !exists {
 			//set t to a default type
-			t = "AZPSPUnkown"
+			t = "AZPSPUnknown"
 		}
 
 		p.policiesByType[t] = &azp

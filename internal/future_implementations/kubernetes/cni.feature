@@ -10,7 +10,7 @@ Rule: ...
 
     @preventative
     Scenario Outline: Ensure that the CNI supports Network Policies
-        Given a created kubernetes cluster has a working CNI which can be intereacted with
+        Given a created kubernetes cluster has a working CNI which can be interacted with
         When a kubernetes cluster is created 
         And and the cluster's CNI has Network Policies <Network Policy Used>
         Then the cluster's creation will <Result> with an error <Error Message>

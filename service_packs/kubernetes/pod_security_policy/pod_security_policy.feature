@@ -3,7 +3,7 @@
 @CIS-5.2
 Feature: Maximise security through Pod Security Policies
 
-As a Cloud Security Adminministrator
+As a Cloud Security Administrator
 I want to ensure that a stringent set of Pod Security Policies are present
 So that a policy of least privilege can be enforced in order to prevent malicious attacks on my organization
 
@@ -26,7 +26,7 @@ So that a policy of least privilege can be enforced in order to prevent maliciou
 
 		Examples: 
 			| privileged access requested | RESULT        | ERRORMESSAGE							     |
-			| True                        | Fail          | Containers with privileged access can’t run  |
+			| True                        | Fail          | Containers with privileged access can't run  |
 			| False                       | Succeed       | No error would show                          |
 			| Not Defined                 | Succeed       | No error would show                          |
 	
@@ -58,7 +58,7 @@ So that a policy of least privilege can be enforced in order to prevent maliciou
 
 		Examples:
 			| hostIPC access is requested | RESULT   | ERRORMESSAGE                        |
-			| True                        | Fail     | Containers with hostIPC access can’t run |
+			| True                        | Fail     | Containers with hostIPC access can't run |
 			| False                       | Succeed  | No error would show                      |
 			| Not defined                 | Succeed  | No error would show                      |
 
@@ -74,7 +74,7 @@ So that a policy of least privilege can be enforced in order to prevent maliciou
 
 		Examples:
 			| hostNetwork access is requested | RESULT   | ERRORMESSAGE |
-			| True                        	  | Fail     | Containers with hostNetwork access can’t run |
+			| True                        	  | Fail     | Containers with hostNetwork access can't run |
 			| False                           | Succeed  | No error would show                      |
 			| Not defined                     | Succeed  | No error would show                      |
 
@@ -110,7 +110,7 @@ So that a policy of least privilege can be enforced in order to prevent maliciou
 			| Non-Root       | Succeed       |                             |
 			| Not Defined    | Succeed       |                             |
 
-	@preventitive @CIS-5.2.7
+	@preventative @CIS-5.2.7
 	Scenario Outline: Prevent deployments from running with the NET_RAW capability.
 		Given a Kubernetes cluster exists which we can deploy into
 		And some system exists to prevent a Kubernetes deployment from running with NET_RAW capability in an existing Kubernetes cluster
@@ -126,7 +126,7 @@ So that a policy of least privilege can be enforced in order to prevent maliciou
 			| False                       | Succeed       |                                               |
 			| Not Defined                 | Succeed       |                                               |
 
-	@preventitive @CIS-5.2.8
+	@preventative @CIS-5.2.8
 	Scenario Outline: Prevent container running with capabilities beyond the default set.
 		Given a Kubernetes cluster exists which we can deploy into
 		And some system exists to prevent Kubernetes deployments with capabilities beyond the default set from being deployed to an existing kubernetes cluster
@@ -142,7 +142,7 @@ So that a policy of least privilege can be enforced in order to prevent maliciou
 			| ARE NOT       | Succeed       |                                              |
 			| Not Defined   | Succeed       |                                              |
 
-	@preventitive @CIS-5.2.9
+	@preventative @CIS-5.2.9
     Scenario Outline: Prevent deployments from running with assigned capabilities.
         Given a Kubernetes cluster exists which we can deploy into
 		And some system exists to prevent Kubernetes deployments with assigned capabilities from being deployed to an existing Kubernetes cluster
@@ -154,11 +154,11 @@ So that a policy of least privilege can be enforced in order to prevent maliciou
 
     	Examples: 
         	| requested 	| RESULT   | ERRORMESSAGE                                            |
-        	| ARE           | Fail     | Containers with assigned capabilities can’t be deployed |
+        	| ARE           | Fail     | Containers with assigned capabilities can't be deployed |
         	| ARE NOT       | Succeed  |                                                         |
 			| Not defined   | Succeed  |                                                         |
 
-	# @preventitive @AZP-0.1
+	# @preventative @AZP-0.1
 	# Scenario Outline: Prevent deployments from accessing unapproved port range
 	# 	Given a Kubernetes cluster exists which we can deploy into
 	# 	And some system exists to prevent Kubernetes deployments with unapproved port range from being deployed to an existing Kubernetes cluster
@@ -174,7 +174,7 @@ So that a policy of least privilege can be enforced in order to prevent maliciou
 	# 		| approved		| Succeed	|									  	|
 	# 		| not defined	| Succeed	|										|
 	
-	@preventitive @AZP-0.2
+	@preventative @AZP-0.2
 	Scenario Outline: Prevent deployments from accessing unapproved volume types
 		Given a Kubernetes cluster exists which we can deploy into
 		And some system exists to prevent Kubernetes deployments with unapproved volume types from being deployed to an existing Kubernetes cluster
@@ -190,7 +190,7 @@ So that a policy of least privilege can be enforced in order to prevent maliciou
 			| approved		| Succeed	|									  	|
 			| not defined	| Succeed	|										|
 	
-	@preventitive @AZP-0.3
+	@preventative @AZP-0.3
 	Scenario Outline: Prevent deployments from running without approved seccomp profile
 		Given a Kubernetes cluster exists which we can deploy into
 		And some system exists to prevent Kubernetes deployments without approved seccomp profiles from being deployed to an existing Kubernetes cluster

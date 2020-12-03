@@ -57,7 +57,7 @@ func (r PodCreationErrorReason) String() string {
 // PodCreationError encapsulates the underlying pod creation error along with a map of platform agnostic
 // PodCreationErrorReason codes.  Note that there could be more that one PodCreationErrorReason.  For
 // example a pod may fail due to a 'psp-container-no-privilege' error and 'psp-host-network', in which
-// case there would be two entires in the ReasonCodes map.
+// case there would be two entries in the ReasonCodes map.
 type PodCreationError struct {
 	err         error
 	ReasonCodes map[PodCreationErrorReason]*PodCreationErrorReason

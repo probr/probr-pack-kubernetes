@@ -54,12 +54,12 @@ func getOutputPath(t string) (*os.File, error) {
 	return os.Create(filepath.Join(config.Vars.CucumberDir, fn))
 }
 
-// LogScenarioStart logs the name and tags associtated with the supplied scenario.
+// LogScenarioStart logs the name and tags associated with the supplied scenario.
 func LogScenarioStart(s *godog.Scenario) {
 	log.Print(scenarioString(true, s))
 }
 
-// LogScenarioEnd logs the name and tags associtated with the supplied scenario.
+// LogScenarioEnd logs the name and tags associated with the supplied scenario.
 func LogScenarioEnd(s *godog.Scenario) {
 	log.Print(scenarioString(false, s))
 }

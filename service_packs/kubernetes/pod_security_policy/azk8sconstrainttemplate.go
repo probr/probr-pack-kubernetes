@@ -9,7 +9,7 @@ import (
 
 //AzK8sConstraintTemplate captures the Azure specific constraint templates that are the result of applying
 //an Azure Policy which can be used to support PodSecurityPolicy like behaviour.
-//Implements securitypolicyprovider and is the prefered way of determining constraints on
+//Implements securitypolicyprovider and is the preferred way of determining constraints on
 //an AKS cluster.
 type AzK8sConstraintTemplate struct {
 	k kubernetes.Kubernetes

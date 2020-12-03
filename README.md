@@ -23,7 +23,7 @@ The following elements are required to get started with Probr:
 - **Option 1** - Download the latest Probr package by clicking the corresponding asset on our [release page](https://github.com/citihub/probr/releases).
 - **Option 2** - You may build the edge version of Probr by using `go build -o probr.exe cmd/main.go` from the source code. This may also be necessary if an executable compatible with your system is not available in on the release page.
 
-*Note: The usage docs refer to the executable as `probr` or `probr.exe` interchangably. Use the former for unix/linux systems, and the latter package if you are working in Windows.*
+*Note: The usage docs refer to the executable as `probr` or `probr.exe` interchangeably. Use the former for unix/linux systems, and the latter package if you are working in Windows.*
 
 ### CLI Usage
 
@@ -87,7 +87,7 @@ These are general configuration variables.
 |AuditEnabled|Flag to switch on audit log|no|yes|PROBR_AUDIT_ENABLED|true|
 |AuditDir|Path to audit dir|no|yes|PROBR_AUDIT_DIR|audit_output|
 |OverwriteHistoricalAudits|Flag to allow audit overwriting|no|yes|OVERWRITE_AUDITS|true|
-|ContainerRegistry|Probe image container regsitry|no|yes|PROBR_CONTAINER_REGISTRY|docker.io|
+|ContainerRegistry|Probe image container registry|no|yes|PROBR_CONTAINER_REGISTRY|docker.io|
 |ProbeImage|Probe image name|no|probeImage|PROBR_PROBE_IMAGE|citihub/probr-probe|
 
 ### Service Pack Configuration Variables

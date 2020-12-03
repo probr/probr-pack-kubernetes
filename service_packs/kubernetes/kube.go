@@ -183,7 +183,7 @@ func (k *Kube) GetPods(ns string) (*apiv1.PodList, error) {
 // CreatePod creates a pod with the supplied parameters.  A true value for 'wait' indicates that
 // the function should wait (block) until the pod is in a running state.
 func (k *Kube) CreatePod(podName string, ns string, containerName string, image string, wait bool, sc *apiv1.SecurityContext, probe *summary.Probe) (*apiv1.Pod, *PodAudit, error) {
-	//create Pod Objet ...
+	//create Pod Object ...
 	p := k.GetPodObject(podName, ns, containerName, image, sc)
 	audit := &PodAudit{podName, "probr-general-test-ns", containerName, image, sc}
 
@@ -617,7 +617,7 @@ func (k *Kube) GetRawResourcesByGrp(g string) (*K8SJSON, error) {
 }
 
 // GetClusterRolesByResource returns a collection of cluster roles filtered by
-// the supplied resouce type.
+// the supplied resource type.
 func (k *Kube) GetClusterRolesByResource(r string) (*[]rbacv1.ClusterRole, error) {
 	var crs []rbacv1.ClusterRole
 
@@ -639,7 +639,7 @@ func (k *Kube) GetClusterRolesByResource(r string) (*[]rbacv1.ClusterRole, error
 }
 
 // GetRolesByResource returns a collection of roles filtered by
-// the supplied resouce type.
+// the supplied resource type.
 func (k *Kube) GetRolesByResource(r string) (*[]rbacv1.Role, error) {
 	var ros []rbacv1.Role
 
@@ -706,7 +706,7 @@ func (k *Kube) skipSystemRole(m *v1.ObjectMeta) bool {
 	return false
 }
 
-// GetClusterRoles retrives all cluster roles associated with the active cluster.
+// GetClusterRoles retrieves all cluster roles associated with the active cluster.
 func (k *Kube) GetClusterRoles() (*rbacv1.ClusterRoleList, error) {
 	c, err := k.GetClient()
 	if err != nil {
@@ -721,7 +721,7 @@ func (k *Kube) GetClusterRoles() (*rbacv1.ClusterRoleList, error) {
 	return cr.List(ctx, metav1.ListOptions{LabelSelector: "gatekeeper.sh/system!=yes"})
 }
 
-//GetRoles retrives all roles associated with the active cluster.
+//GetRoles retrieves all roles associated with the active cluster.
 func (k *Kube) GetRoles() (*rbacv1.RoleList, error) {
 	c, err := k.GetClient()
 	if err != nil {
@@ -835,7 +835,7 @@ func (k *Kube) podInErrorState(p *apiv1.Pod) (bool, *PodCreationError) {
 				pcErr := make(map[PodCreationErrorReason]*PodCreationErrorReason, 1)
 
 				pcErr[pe] = &pe
-				return true, &PodCreationError{fmt.Errorf("Giving up waiting on pod %v . Error reason: %v", n, r), pcErr}
+				return true, &PodCreationError{fmt.Errorf("giving up waiting on pod %v . Error reason: %v", n, r), pcErr}
 			}
 		}
 	}

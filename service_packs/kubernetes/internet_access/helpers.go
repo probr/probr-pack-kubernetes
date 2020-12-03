@@ -33,7 +33,7 @@ func beforeScenario(s *scenarioState, probeName string, gs *godog.Scenario) {
 
 const (
 	//default values.  Overrides can be set via the environment.
-	defaultNAProbeNamespace = "probr-network-access-test-ns" //this needs to be set up as an exculsion in the image registry policy
+	defaultNAProbeNamespace = "probr-network-access-test-ns" //this needs to be set up as an exclusion in the image registry policy
 	defaultNAProbeContainer = "na-test"
 	defaultNAProbePodName   = "na-test-pod"
 )

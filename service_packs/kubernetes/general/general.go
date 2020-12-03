@@ -77,11 +77,11 @@ func (s *scenarioState) iShouldOnlyFindWildcardsInKnownAndAuthorisedConfiguratio
 //@CIS-5.6.3
 func (s *scenarioState) iAttemptToCreateADeploymentWhichDoesNotHaveASecurityContext() error {
 	cname := "probr-general"
-	pod_name := kubernetes.GenerateUniquePodName(cname)
+	podName := kubernetes.GenerateUniquePodName(cname)
 	image := config.Vars.AuthorisedContainerRegistry + "/" + config.Vars.ProbeImage
 
 	//create pod with nil security context
-	pod, podAudit, err := kubernetes.GetKubeInstance().CreatePod(pod_name, "probr-general-test-ns", cname, image, true, nil, s.probe)
+	pod, podAudit, err := kubernetes.GetKubeInstance().CreatePod(podName, "probr-general-test-ns", cname, image, true, nil, s.probe)
 
 	err = kubernetes.ProcessPodCreationResult(s.probe, &s.podState, pod, kubernetes.UndefinedPodCreationErrorReason, err)
 
@@ -123,7 +123,7 @@ func (s *scenarioState) theKubernetesWebUIIsDisabled() error {
 	if err != nil {
 		err = utils.ReformatError("Probe step not run. Error raised when trying to retrieve pods: %v", err)
 	} else {
-		//a "pass" is the abscence of a "kubernetes-dashboard" pod
+		//a "pass" is the absence of a "kubernetes-dashboard" pod
 		for _, v := range pl.Items {
 			if strings.HasPrefix(v.Name, "kubernetes-dashboard") {
 				err = utils.ReformatError("kubernetes-dashboard pod found (%v) - test fail", v.Name)

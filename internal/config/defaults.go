@@ -44,26 +44,26 @@ func homeDir() string {
 }
 
 // set fetches the env var or sets the default value as needed for the specified field from ConfigVars
-func (e *ConfigVars) set(field interface{}, var_name string, default_value interface{}) {
+func (e *ConfigVars) set(field interface{}, varName string, defaultValue interface{}) {
 	switch v := field.(type) {
 	default:
-		log.Fatalf("unexpected type for %v, %T", var_name, v)
+		log.Fatalf("unexpected type for %v, %T", varName, v)
 	case *string:
 		if *field.(*string) == "" {
-			*field.(*string) = os.Getenv(var_name)
+			*field.(*string) = os.Getenv(varName)
 		}
 		if *field.(*string) == "" {
-			*field.(*string) = default_value.(string)
+			*field.(*string) = defaultValue.(string)
 		}
 	case *[]string:
 		if len(*field.(*[]string)) == 0 {
-			t := os.Getenv(var_name) // if []string, env var should be comma separated values
+			t := os.Getenv(varName) // if []string, env var should be comma separated values
 			if len(t) > 0 {
 				*field.(*[]string) = append(*field.(*[]string), strings.Split(t, ",")...)
 			}
 		}
 		if len(*field.(*[]string)) == 0 {
-			*field.(*[]string) = default_value.([]string)
+			*field.(*[]string) = defaultValue.([]string)
 		}
 	}
 

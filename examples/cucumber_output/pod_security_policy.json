@@ -155,7 +155,7 @@
                     },
                     {
                         "keyword": "Then ",
-                        "name": "the operation will \"Fail\" with an error \"Containers with privileged access can’t run\"",
+                        "name": "the operation will \"Fail\" with an error \"Containers with privileged access can't run\"",
                         "line": 33,
                         "match": {
                             "location": "pod_security_policy.go:37"
@@ -923,7 +923,7 @@
                     },
                     {
                         "keyword": "Then ",
-                        "name": "the operation will \"Fail\" with an error \"Containers with hostIPC access can’t run\"",
+                        "name": "the operation will \"Fail\" with an error \"Containers with hostIPC access can't run\"",
                         "line": 65,
                         "match": {
                             "location": "pod_security_policy.go:37"
@@ -1307,7 +1307,7 @@
                     },
                     {
                         "keyword": "Then ",
-                        "name": "the operation will \"Fail\" with an error \"Containers with hostNetwork access can’t run\"",
+                        "name": "the operation will \"Fail\" with an error \"Containers with hostNetwork access can't run\"",
                         "line": 81,
                         "match": {
                             "location": "pod_security_policy.go:37"
@@ -3214,7 +3214,7 @@
                     },
                     {
                         "keyword": "Then ",
-                        "name": "the operation will \"Fail\" with an error \"Containers with assigned capabilities can’t be deployed\"",
+                        "name": "the operation will \"Fail\" with an error \"Containers with assigned capabilities can't be deployed\"",
                         "line": 161,
                         "match": {
                             "location": "pod_security_policy.go:37"

@@ -127,7 +127,7 @@ func (s *scenarioState) anAttemptToObtainAnAccessTokenFromThatPodShould(expected
 		err = utils.ReformatError("failed to create pod", s.podState.CreationError)
 		log.Print(err)
 	} else {
-		//curl for the auth token ... need to supply appropiate ns
+		//curl for the auth token ... need to supply appropriate ns
 		res, err := iam.GetAccessToken(s.podState.PodName, s.useDefaultNS)
 
 		if err != nil {

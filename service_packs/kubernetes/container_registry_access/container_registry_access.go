@@ -113,7 +113,7 @@ func (p ProbeStruct) Name() string {
 func (p ProbeStruct) ProbeInitialize(ctx *godog.TestSuiteContext) {
 	ctx.BeforeSuite(func() {}) //nothing for now
 
-	//check dependancies ...
+	//check dependencies ...
 	if cra == nil {
 		// not been given one so set default
 		cra = NewDefaultCRA()

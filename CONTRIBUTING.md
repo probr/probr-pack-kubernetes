@@ -4,7 +4,7 @@ We'd love to accept your patches and contributions to this project. There are ju
 
 ## Code of Conduct
 
-Participation in this project comes under the [Contributor Covenant Code of Conduct](conduct)
+Participation in this project comes under the [Contributor Covenant Code of Conduct](./CODE_OF_CONDUCT.md)
 
 ## Code Submission
 
@@ -41,7 +41,7 @@ Probr uses Github Actions for all CI tasks. You may review the existing workflow
 
 ## Logging
 
-Probr is extremely dependent on clean and clear logs for it's success. Please follow the [Log Filter Guidelines](logs) to add useful logs to your code.
+Probr is extremely dependent on clean and clear logs for its success. Please follow the [Log Filter Guidelines](internal/config/README.md) to add useful logs to your code.
 
 [conduct]: https://github.com/citihub/probr/blob/master/code-of-conduct.md
 [logs]: https://github.com/citihub/probr/blob/master/internal/config/README.md

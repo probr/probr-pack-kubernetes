@@ -2,12 +2,12 @@
 Feature: Make sure that pods, containers and volumes have configured security contexts
 
 As a Cloud Security Admin
-I want to ensure that my pods, containers and columes have configued security contexts
+I want to ensure that my pods, containers and volumes have configured security contexts
 So that my organization kubernetes cluster has the right operating system on their containers
 
 Rule: ...
 
-@preventitive
+@preventative
 Scenario Outline: Prevent pods and containers from running if the security contexts hasn't been configured
 Given an active kubernetes cluster exists which we can make changes to
 And some system exists to detect when a pod attempts to run without configuring security contexts

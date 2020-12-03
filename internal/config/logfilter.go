@@ -8,7 +8,7 @@ import (
 	"github.com/hashicorp/logutils"
 )
 
-// Override the minmium log level.
+// Override the minimum log level.
 func SetLogFilter(minLevel string, writer io.Writer) {
 	filter := &logutils.LevelFilter{
 		Levels:   []logutils.LogLevel{"DEBUG", "INFO", "NOTICE", "WARN", "ERROR"},

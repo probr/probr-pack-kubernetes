@@ -113,7 +113,7 @@ func (p ProbeStruct) ProbeInitialize(ctx *godog.TestSuiteContext) {
 		na.TeardownNetworkAccessProbePod(&ia_ps.podName, p.Name())
 	})
 
-	//check dependancies ...
+	//check dependencies ...
 	if na == nil {
 		// not been given one so set default
 		na = NewDefaultNA()

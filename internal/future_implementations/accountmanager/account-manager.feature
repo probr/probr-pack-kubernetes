@@ -9,7 +9,7 @@ Feature: Cloud Driver Account Manager
     And "<Cloud Credential>" Credential with access to the "<Cloud Account>" Account is already configured in the system
     When I add the "<Cloud Account>" Account details to the system
     And I link the "<Cloud Credential>" Credential to the "<Cloud Account>" Account
-    Then a resouce deployment will "<Result>" with the message "<Error Description>"
+    Then a resource deployment will "<Result>" with the message "<Error Description>"
 
     Examples:
       | Cloud Account | Cloud Credential | Result  | Error Description                                   |

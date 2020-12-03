@@ -82,5 +82,5 @@ func ReplaceBytesValue(b []byte, old string, new string) []byte {
 
 // Placeholder error in case function panics
 func PanicPrecaution() error {
-	return fmt.Errorf("This probe panicked and could not return a verbose error.")
+	return fmt.Errorf("this probe panicked and could not return a verbose error")
 }

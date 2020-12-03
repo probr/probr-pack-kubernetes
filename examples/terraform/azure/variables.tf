@@ -5,7 +5,7 @@ variable "prefix" {
 
 variable "resource_group_name" {
     default     = "resource-group"
-    description = "K8s resource group. Should recieve prefix."
+    description = "K8s resource group. Should receive prefix."
 }
 
 variable "location" {
@@ -15,7 +15,7 @@ variable "location" {
 
 variable "cluster_name" {
     default     = "cluster"
-    description = "K8s cluster. Should recieve prefix."
+    description = "K8s cluster. Should receive prefix."
 }
 
 variable "kube_config" {

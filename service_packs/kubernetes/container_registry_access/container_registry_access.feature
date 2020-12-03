@@ -9,20 +9,20 @@ Feature: Protect image container registries
   #Rule: CHC2-APPDEV135 - Ensure software release and deployment is managed through a formal, controlled process
 
   @preventative @CIS-6.1.3
-  Scenario Outline: Ensure container image registries are read-only
+  Scenario: Ensure container image registries are read-only
     Given a Kubernetes cluster is deployed
     And I am authorised to pull from a container registry
     When I attempt to push to the container registry using the cluster identity
     Then the push request is rejected due to authorization
 
   @preventative @CIS-6.1.4
-  Scenario Outline: Ensure deployment from an authorised container registry is allowed
+  Scenario: Ensure deployment from an authorised container registry is allowed
     Given a Kubernetes cluster is deployed
     When a user attempts to deploy a container from an authorised registry
     Then the deployment attempt is allowed
     
   @preventative @CIS-6.1.5
-  Scenario Outline: Ensure deployment from an unauthorised container registry is denied
+  Scenario: Ensure deployment from an unauthorised container registry is denied
     Given a Kubernetes cluster is deployed
     When a user attempts to deploy a container from an unauthorised registry
     Then the deployment attempt is denied

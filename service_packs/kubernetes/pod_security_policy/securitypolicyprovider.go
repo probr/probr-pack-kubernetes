@@ -1,6 +1,6 @@
 package pod_security_policy
 
-// SecurityPolicyProvider defines a set of methods for interograting the security policies set on the kubernetes cluster.
+// SecurityPolicyProvider defines a set of methods for interrogating the security policies set on the kubernetes cluster.
 type SecurityPolicyProvider interface {
 	HasSecurityPolicies() (*bool, error)
 	HasPrivilegedAccessRestriction() (*bool, error)

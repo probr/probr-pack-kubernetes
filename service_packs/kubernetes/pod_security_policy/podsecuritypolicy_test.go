@@ -345,7 +345,7 @@ func TestCreatePODSettingCapabilities(t *testing.T) {
 	assert.NotNil(t, p)
 	//only expect one container
 	assert.Equal(t, 1, len(p.Spec.Containers))
-	//don't expect any capabilites, and container sec context should be non-nil though
+	//don't expect any capabilities, and container sec context should be non-nil though
 	assert.NotNil(t, p.Spec.Containers[0].SecurityContext)
 	assert.Nil(t, p.Spec.Containers[0].SecurityContext.Capabilities)
 	mk.AssertNumberOfCalls(t, "GetPodObject", 1)
@@ -362,7 +362,7 @@ func TestCreatePODSettingCapabilities(t *testing.T) {
 	assert.NotNil(t, p)
 	//only expect one container
 	assert.Equal(t, 1, len(p.Spec.Containers))
-	//don't expect any capabilites, and container sec context should be non-nil though
+	//don't expect any capabilities, and container sec context should be non-nil though
 	assert.NotNil(t, p.Spec.Containers[0].SecurityContext)
 	assert.NotNil(t, p.Spec.Containers[0].SecurityContext.Capabilities)
 	//expect one capability

@@ -33,7 +33,7 @@ if pd != nil {
 
 **SummaryStateStruct.GetProbeLog**
 
-Many summarys will be made directly to probes. In order to do so, the probe must first be retrieved by name. In the example below, the probe is being stored alongside other test context information for easy access during execution.
+Many summaries will be made directly to probes. In order to do so, the probe must first be retrieved by name. In the example below, the probe is being stored alongside other test context information for easy access during execution.
 
 ```
 	ctx.BeforeScenario(func(s *godog.Scenario) {
