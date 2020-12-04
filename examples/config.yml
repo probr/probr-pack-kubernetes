@@ -21,23 +21,23 @@ CloudProviders:
       DefaultNamespaceAIB:
 ProbeExclusions: # allows specific probes to be disabled by name
   - Name: container_registry_access
-    Excluded: false
+    Excluded: true
     Justification: "demo"
 
   - Name: general
-    Excluded: false
+    Excluded: true
     Justification: "demo"
 
   - Name: iam
-    Excluded: false
+    Excluded: true
     Justification: "demo"
 
   - Name: internet_access
-    Excluded: false
+    Excluded: true
     Justification: "demo"
 
   - Name: pod_security_policy
-    Excluded: true
+    Excluded: false
     Justification: "demo"
 TagExclusions: # allows specific controls/scenarios to be disabled via tags
   - CIS-6.1.4

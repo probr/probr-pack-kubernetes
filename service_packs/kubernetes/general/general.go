@@ -83,7 +83,7 @@ func (s *scenarioState) iAttemptToCreateADeploymentWhichDoesNotHaveASecurityCont
 	//create pod with nil security context
 	pod, podAudit, err := kubernetes.GetKubeInstance().CreatePod(podName, "probr-general-test-ns", cname, image, true, nil, s.probe)
 
-	err = kubernetes.ProcessPodCreationResult(s.probe, &s.podState, pod, kubernetes.UndefinedPodCreationErrorReason, err)
+	err = kubernetes.ProcessPodCreationResult(&s.podState, pod, kubernetes.UndefinedPodCreationErrorReason, err)
 
 	description := "Attempts to create a deployment without a security context. Retains the status of the deployment in scenario state for following steps. Passes if created, or if an expected error is encountered."
 	payload := kubernetes.PodPayload{Pod: pod, PodAudit: podAudit}

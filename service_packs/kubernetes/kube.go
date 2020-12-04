@@ -113,7 +113,7 @@ func GetKubeInstance() *Kube {
 		instance.cspErrorToProbrCreationError["azurepolicy-container-no-privilege"] = PSPNoPrivilege
 		instance.cspErrorToProbrCreationError["securityContext.privileged: Invalid value: true"] = PSPNoPrivilege
 
-		instance.cspErrorToProbrCreationError["azurepolicy-psp-container-no-privilege-escalation"] = PSPNoPrivilegeEscalation
+		instance.cspErrorToProbrCreationError["azurepolicy-psp-container-no-privilege-esc"] = PSPNoPrivilegeEscalation
 		instance.cspErrorToProbrCreationError["securityContext.allowPrivilegeEscalation: Invalid value: true"] = PSPNoPrivilegeEscalation
 
 		instance.cspErrorToProbrCreationError["azurepolicy-psp-allowed-users-groups"] = PSPAllowedUsersGroups
@@ -198,7 +198,7 @@ func (k *Kube) CreatePodFromYaml(y []byte, pname string, ns string, image string
 	podSpec := utils.ReplaceBytesValue(y, "{{ probr-compatible-image }}", approvedImage)
 	o, _, err := scheme.Codecs.UniversalDeserializer().Decode(podSpec, nil, nil)
 	if err != nil {
-		log.Printf("[ERROR] could not create pod from yaml asset: %v", err)
+		log.Printf("[ERROR] %s: could not create pod from yaml asset, %v", utils.CallerName(2), err)
 	}
 
 	p := o.(*apiv1.Pod)

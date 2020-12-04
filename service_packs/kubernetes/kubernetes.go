@@ -63,22 +63,22 @@ func (s *scenarioState) setup() {
 
 // ProcessPodCreationResult is a convenience function to process the result of a pod creation attempt.
 // It records state information on the supplied state structure.
-func ProcessPodCreationResult(probe *summary.Probe, s *PodState, pd *apiv1.Pod, expected PodCreationErrorReason, err error) error {
+func ProcessPodCreationResult(state *PodState, pd *apiv1.Pod, expected PodCreationErrorReason, err error) error {
 	//first check for errors:
 	if err != nil {
 		//check if we've got a partial pod creation
 		//e.g. pod was created but didn't get to "running" state
 		//in this case we need to hold onto the name so it can be deleted
 		if pd != nil {
-			s.PodName = pd.GetObjectMeta().GetName()
+			state.PodName = pd.GetObjectMeta().GetName()
 		}
 
 		//check for known error type
 		//this means the pod has not been created for an expected reason and
 		//is a valid result if the test is addressing prevention of insecure pod creation
 		if e, ok := err.(*PodCreationError); ok {
-			s.CreationError = e
-			s.ExpectedReason = &expected
+			state.CreationError = e
+			state.ExpectedReason = &expected
 			return nil
 		}
 		//unexpected error
@@ -95,7 +95,7 @@ func ProcessPodCreationResult(probe *summary.Probe, s *PodState, pd *apiv1.Pod, 
 
 	//if we've got this far, a pod was successfully created which could be
 	//valid for some tests
-	s.PodName = pd.GetObjectMeta().GetName()
+	state.PodName = pd.GetObjectMeta().GetName()
 
 	//we're good
 	return nil
@@ -115,7 +115,7 @@ func AssertResult(s *PodState, res, msg string) error {
 		_, exists := s.CreationError.ReasonCodes[*s.ExpectedReason]
 		if !exists {
 			//also a fail:
-			return utils.ReformatError("pod not was created but failure reasons (%v) did not contain expected (%v)- test failed",
+			return utils.ReformatError("pod was not created but failure reasons (%v) did not contain expected (%v)- test failed",
 				s.CreationError.ReasonCodes, s.ExpectedReason)
 		}
 

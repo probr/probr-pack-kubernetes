@@ -82,7 +82,7 @@ func (s *scenarioState) iCreateASimplePodInNamespaceAssignedWithThatAzureIdentit
 			s.useDefaultNS = true
 		}
 		pd, err := iam.CreateIAMProbePod(y, s.useDefaultNS, s.probe)
-		err = kubernetes.ProcessPodCreationResult(s.probe, &s.podState, pd, kubernetes.UndefinedPodCreationErrorReason, err)
+		err = kubernetes.ProcessPodCreationResult(&s.podState, pd, kubernetes.UndefinedPodCreationErrorReason, err)
 	}
 
 	s.audit.AuditScenarioStep(description, payload, err)
@@ -192,7 +192,7 @@ func (s *scenarioState) iDeployAPodAssignedWithTheAzureIdentityBindingIntoTheSam
 		log.Print(err)
 	} else {
 		pd, err := iam.CreateIAMProbePod(y, false, s.probe)
-		err = kubernetes.ProcessPodCreationResult(s.probe, &s.podState, pd, kubernetes.UndefinedPodCreationErrorReason, err)
+		err = kubernetes.ProcessPodCreationResult(&s.podState, pd, kubernetes.UndefinedPodCreationErrorReason, err)
 	}
 
 	s.audit.AuditScenarioStep(description, payload, err)

@@ -39,7 +39,7 @@ func (s *scenarioState) aKubernetesClusterIsDeployed() error {
 func (s *scenarioState) iAmAuthorisedToPullFromAContainerRegistry() error {
 	pod, podAudit, err := cra.SetupContainerAccessProbePod(config.Vars.AuthorisedContainerRegistry, s.probe)
 
-	err = kubernetes.ProcessPodCreationResult(s.probe, &s.podState, pod, kubernetes.PSPContainerAllowedImages, err)
+	err = kubernetes.ProcessPodCreationResult(&s.podState, pod, kubernetes.PSPContainerAllowedImages, err)
 
 	description := fmt.Sprintf("Creates a new pod using an image from %s. Passes if image successfully pulls and pod is built.", config.Vars.AuthorisedContainerRegistry)
 	payload := kubernetes.PodPayload{Pod: pod, PodAudit: podAudit}
@@ -63,7 +63,7 @@ func (s *scenarioState) thePushRequestIsRejectedDueToAuthorization() error {
 func (s *scenarioState) aUserAttemptsToDeployAuthorisedContainer() error {
 	pod, podAudit, err := cra.SetupContainerAccessProbePod(config.Vars.AuthorisedContainerRegistry, s.probe)
 
-	err = kubernetes.ProcessPodCreationResult(s.probe, &s.podState, pod, kubernetes.PSPContainerAllowedImages, err)
+	err = kubernetes.ProcessPodCreationResult(&s.podState, pod, kubernetes.PSPContainerAllowedImages, err)
 
 	description := fmt.Sprintf("Attempts to deploy a container from %s. Retains pod creation result in scenario state. Passes so long as user is authorized to deploy containers.", config.Vars.AuthorisedContainerRegistry)
 	payload := kubernetes.PodPayload{Pod: pod, PodAudit: podAudit}
@@ -86,7 +86,7 @@ func (s *scenarioState) theDeploymentAttemptIsAllowed() error {
 func (s *scenarioState) aUserAttemptsToDeployUnauthorisedContainer() error {
 	pod, podAudit, err := cra.SetupContainerAccessProbePod(config.Vars.UnauthorisedContainerRegistry, s.probe)
 
-	err = kubernetes.ProcessPodCreationResult(s.probe, &s.podState, pod, kubernetes.PSPContainerAllowedImages, err)
+	err = kubernetes.ProcessPodCreationResult(&s.podState, pod, kubernetes.PSPContainerAllowedImages, err)
 
 	description := fmt.Sprintf("Attempts to deploy a container from %s. Retains pod creation result in scenario state. Passes so long as user is authorized to deploy containers.", config.Vars.UnauthorisedContainerRegistry)
 	payload := kubernetes.PodPayload{Pod: pod, PodAudit: podAudit}
