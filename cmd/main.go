@@ -43,11 +43,7 @@ func main() {
 	summary.State.SetProbrStatus()
 
 	if config.Vars.OutputType == "IO" {
-		out, err := probr.GetAllProbeResults(ts)
-		if err != nil {
-			log.Printf("[ERROR] Experienced error getting test results: %v", s)
-			exit(2) // Error code 1 is reserved for probe test failures, and should not fail in CI
-		}
+		out := probr.GetAllProbeResults(ts)
 		if out == nil || len(out) == 0 {
 			summary.State.Meta["cucumber directory error"] = fmt.Sprintf(
 				"Test results not written to file, possibly due to permissions on the specified output directory: %s",
@@ -60,7 +56,7 @@ func main() {
 }
 
 func showIndicator() bool {
-	return (config.Vars.LogLevel == "ERROR" && !config.Vars.Silent)
+	return config.Vars.LogLevel == "ERROR" && !config.Vars.Silent
 }
 
 func exit(status int) {

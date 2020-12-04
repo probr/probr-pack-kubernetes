@@ -47,7 +47,7 @@ func getRootDir() (string, error) {
 // plus the test name supplied
 func getOutputPath(t string) (*os.File, error) {
 
-	os.Mkdir(config.Vars.CucumberDir, os.ModeDir)
+	_ = os.Mkdir(config.Vars.CucumberDir, 0755)
 
 	//filename is test name (supplied) + .json
 	fn := t + ".json"

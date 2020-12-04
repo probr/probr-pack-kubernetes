@@ -161,3 +161,8 @@ func LogConfigState() {
 	s, _ := json.MarshalIndent(Vars, "", "  ")
 	log.Printf("[NOTICE] Config State: %s", s)
 }
+
+func AuditDir() string {
+	_ = os.Mkdir(Vars.AuditDir, 0755)
+	return Vars.AuditDir
+}
