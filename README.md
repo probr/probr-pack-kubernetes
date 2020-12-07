@@ -125,6 +125,95 @@ Tags may also be specified via a command line parameter to control which tagged 
 |ProbeExclusions|Specify names of probes to be excluded and provide justification|no|yes| | |
 |TagExclusions|Specify the tags for controls/scenarios to be excluded|no|yes| | |
 
+## Tagging
+
+A variety of tagging options are available to help you specify which probes should be included or excluded at runtime.
+
+In the bullet-point lists below, each relationship level is represented by a `/` in the tag name. Examples are below the list of tags. 
+
+The available tags are as follows:
+
+**Service Packs**
+
+These tags describe `service_pack/probe/scenario` in progressive detail.
+
+The first layer of the tag (`@probes`) is only an identifier, and serves no purpose by itself.
+
+- probes
+  - kubernetes
+    - container_registry_access
+      - `PROBR_VERSION`.`SCENARIO_ID`
+    - iam
+      - `PROBR_VERSION`.`SCENARIO_ID`
+    - internet_access
+      - `PROBR_VERSION`.`SCENARIO_ID`
+    - general
+      - `PROBR_VERSION`.`SCENARIO_ID`
+    - pod_security_policy
+      - `PROBR_VERSION`.`SCENARIO_ID`
+
+_Examples:_
+
+```
+@probes/kubernetes  # all k8s probes and scenarios
+@probes/kubernetes/iam  # scenarios for the k8s/iam prbe
+@probes/kubernetes/pod_security_policy/1.0  # scenario 0 from the v1 Probr release
+```
+
+**Categories**
+
+These "category" tags may target probes or scenarios with categorical similarities across multiple service packs. The first layer of the tag (`@category`) is only an identifier, and serves no purpose by itself.
+
+- category
+  - pod_security_policy
+  - internet_access
+  - iam
+
+_Examples:_
+
+```
+@category/internet_access # targets internet access related probes from all service packs
+```
+
+**Standards**
+
+These "standard" tags target probes and scenarios that validate a specific standard or control. The first layer of the tag (`@standard`) is only an identifier, and serves no purpose by itself.
+
+Standards such as CIS can be drilled down by adding a `.` to drill down in accordance with the control identifiers.
+
+- standard
+  - cis
+    - gke
+      - `see description and examples`
+  - citihub
+      - `control ID`
+
+_Examples:_
+
+```
+@standard/cis  # targets all CIS-compatible probes and scenarios
+@standard/cis/gke  # as above, but only targets CIS GKE probes and scenarios
+@standard/cis/gke/5  # as above, refined to a specific control
+@standard/cis/gke/5.2  # More refined CIS control targeting
+@standard/cis/gke/5.2.3  # More refined CIS control targeting
+@standard/citihub/CHC2-IAM105  # targets probes related to this Citihub control
+```
+
+**Cloud Service Providers**
+Some generalized probes target all providers, but others are only useful for specific providers. The first layer of the tag (`@csp`) is only an identifier, and serves no purpose by itself.
+
+- csp
+  - any
+  - aws
+  - azure
+  - gke
+  - openshift
+
+```
+@csp/any  # targets only probes and scenarios that are cloud agnostic
+@csp/gke  # targets only GKE-compatible probes and scanarios
+```
+
 ## Development & Contributing
 
 Please see the [contributing docs](https://github.com/citihub/probr/blob/master/CONTRIBUTING.md) for information on how to develop and contribute to this repository as either a maintainer or open source contributor (the same rules apply for both).
