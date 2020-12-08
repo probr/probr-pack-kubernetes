@@ -29,7 +29,7 @@ ProbeExclusions: # allows specific probes to be disabled by name
     Justification: "demo"
 
   - Name: iam
-    Excluded: true
+    Excluded: false
     Justification: "demo"
 
   - Name: internet_access
@@ -37,7 +37,8 @@ ProbeExclusions: # allows specific probes to be disabled by name
     Justification: "demo"
 
   - Name: pod_security_policy
-    Excluded: false
+    Excluded: true
     Justification: "demo"
 TagExclusions: # allows specific controls/scenarios to be disabled via tags
-  - CIS-6.1.4
+  - AZ-AAD-AI-1.0  
+  - AZ-AAD-AI-1.2

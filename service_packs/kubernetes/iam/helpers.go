@@ -12,12 +12,13 @@ import (
 	"github.com/citihub/probr/internal/summary"
 	"github.com/citihub/probr/service_packs/kubernetes"
 	"github.com/cucumber/godog"
-	"k8s.io/client-go/kubernetes/scheme"
+
+	aibv1 "github.com/Azure/aad-pod-identity/pkg/apis/aadpodidentity"
 
 	apiv1 "k8s.io/api/core/v1"
 
+	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
 )
 
@@ -59,7 +60,7 @@ func (c IAMProbeCommand) String() string {
 type IdentityAccessManagement interface {
 	AzureIdentityExists(useDefaultNS bool) (bool, error)
 	AzureIdentityBindingExists(useDefaultNS bool) (bool, error)
-	CreateAIB(y []byte, ai string, n string, ns string) (bool, error)
+	CreateAIB() error
 	CreateIAMProbePod(y []byte, useDefaultNS bool, probe *summary.Probe) (*apiv1.Pod, error)
 	DeleteIAMProbePod(n string, useDefaultNS bool, e string) error
 	ExecuteVerificationCmd(pn string, cmd IAMProbeCommand, useDefaultNS bool) (*kubernetes.CmdExecutionResult, error)
@@ -75,7 +76,9 @@ type IAM struct {
 	probeContainer string
 	probePodName   string
 
-	testAzureIdentityBinding string
+	azureIdentityBinding  string
+	azureIdentityName     string
+	azureIdentitySelector string
 }
 
 // NewDefaultIAM creates a new IAM instance using the default kubernetes provider.
@@ -88,6 +91,7 @@ func NewDefaultIAM() *IAM {
 }
 
 func (i *IAM) setenv() {
+
 	//just default these for now (not sure we'll ever want to supply):
 	i.probeNamespace = defaultIAMProbeNamespace
 	i.probeContainer = defaultIAMProbeContainer
@@ -96,76 +100,73 @@ func (i *IAM) setenv() {
 	// Extract registry and image info from config
 	i.probeImage = config.Vars.AuthorisedContainerRegistry + "/" + config.Vars.ProbeImage
 
-	i.testAzureIdentityBinding = "probr-specificns-aib"
+	// Set the Azure Identity vars
+	// azureIdentityBinding - name of AzureIdentityBinding
+	// azureIdentityName - name of the AzureIdentity
+	// azureIdentitySelector - to allow selection of the binding on pod creation
+	i.azureIdentityBinding = "probr-aib"
+	i.azureIdentityName = "probr-probe"
+	i.azureIdentitySelector = "aadpodidbinding"
 }
 
-//CreateAIB creates an AzureIdentityBinding to the supplied AzureIdentity
-//ai - name of the AzureIdentity
-//n - name of AzureIdentityBinding
-//ns - namespace in which to create the AIB
-func (i *IAM) CreateAIB(y []byte, ai string, n string, ns string) (bool, error) {
+// creates an AzureIdentityBinding object to a specified AzureIdentity in a specified non-default namespace
+func (i *IAM) createAIBObject() runtime.Object {
+	// Create an AIB object and assign attributes using input parameters
+	aib := aibv1.AzureIdentityBinding{}
 
-	i.createFromYaml(y, nil, &ns, nil, false)
-	return false, nil
+	aib.TypeMeta.Kind = "AzureIdentityBinding"
+	aib.TypeMeta.APIVersion = "aadpodidentity.k8s.io/v1"
+	aib.ObjectMeta.Name = i.azureIdentityBinding
+	aib.ObjectMeta.Namespace = i.probeNamespace
+	aib.Spec.AzureIdentity = i.azureIdentityName
+	aib.Spec.Selector = i.azureIdentitySelector
+
+	// Copy into a runtime.Object which is required for the api request
+	runtimeAib := aib.DeepCopyObject()
+
+	return runtimeAib
 }
 
-func (i *IAM) createFromYaml(y []byte, pname *string, ns *string, image *string, w bool) (*apiv1.Pod, error) {
+// CreateAIB creates an AzureIdentityBinding in the cluster
+func (i *IAM) CreateAIB() error {
 
-	// g := schema.GroupVersionKind{
-	// 	Group:   "aadpodidentity.k8s.io",
-	// 	Kind:    "AzureIdentityBinding",
-	// 	Version: "v1",
-	// }
-
-	sch := runtime.NewScheme()
-	// sch.Recognizes(g)
-	_ = scheme.AddToScheme(sch)
-
-	// decode := serializer.NewCodecFactory(sch).UniversalDeserializer().Decode
-	// decode := scheme.Codecs.UniversalDeserializer().Decode
-
-	codec := scheme.Codecs.LegacyCodec(scheme.Scheme.PrioritizedVersionsAllGroups()...)
-
-	unst := unstructured.Unstructured{}
-	err := runtime.DecodeInto(codec, y, &unst)
-
-	// o, k, err := decode(y, &g, nil)
-
-	if err != nil {
-		log.Printf("error: %v", err)
-		return nil, err
-	}
-
-	log.Printf("unst is %v", unst)
-
+	// Obtain the kubernetes cluster client connection
 	c, _ := i.k.GetClient()
 
-	apiNS := apiv1.Namespace{
-		ObjectMeta: metav1.ObjectMeta{
-			Name: "test",
-		},
-	}
+	// Create an runtime AIB object and assign attributes using input parameters
+	runtimeAib := i.createAIBObject()
+
+	// Create the namespace
+	apiNS := apiv1.Namespace{}
+	apiNS.ObjectMeta.Name = i.probeNamespace
 	c.CoreV1().Namespaces().Create(context.TODO(), &apiNS, metav1.CreateOptions{})
 
-	r := c.CoreV1().RESTClient().Post().Body(unst)
+	// set the api path for the aadpodidentity package which include the azureidentitybindings custom resource definition
+	apiPath := "apis/aadpodidentity.k8s.io/v1"
 
-	res := r.Do(context.TODO())
-	log.Printf("[DEBUG] RAW Result: %+v", res)
+	//	Create a rest api client Post request object
+	request := c.CoreV1().RESTClient().Post().AbsPath(apiPath).Namespace(i.probeNamespace).Resource("azureidentitybindings").Body(runtimeAib)
 
-	if res.Error() != nil {
-		return nil, res.Error()
+	//	Call the api to execute the Post request and create the AIB in the cluster
+	response := request.Do(context.TODO())
+	log.Printf("[DEBUG] RAW Result: %+v", response)
+
+	//	Handle response error - ignore the error if the AIB already exists
+	if (response.Error() != nil) && (!errors.IsAlreadyExists(response.Error())) {
+		log.Printf("[DEBUG] AIB creation Error: %+v", response.Error())
+		return response.Error()
 	}
 
-	b, _ := res.Raw()
+	b, _ := response.Raw()
 	bs := string(b)
-	log.Printf("[DEBUG] STRING result: %v", bs)
+	log.Printf("[DEBUG] STRING result: %+v", bs)
 
 	j := kubernetes.K8SJSON{}
 	json.Unmarshal(b, &j)
 
 	log.Printf("[DEBUG] JSON result: %+v", j)
 
-	return nil, nil
+	return nil
 }
 
 // AzureIdentityExists gets the AzureIdentityBindings and filter for namespace (if supplied)
@@ -278,7 +279,7 @@ func (i *IAM) getAadPodIDBinding(useDefaultNS bool) *string {
 	} else {
 		//if not the default namespace, then we are testing a specific
 		//identity binding set up as part of the probr run.
-		b = i.testAzureIdentityBinding
+		b = i.azureIdentityBinding
 	}
 
 	return &b
