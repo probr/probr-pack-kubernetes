@@ -174,7 +174,7 @@ func (i *IAM) AzureIdentityExists(useDefaultNS bool) (bool, error) {
 	//need to make a 'raw' call to get the AIBs
 	//the AIB's are in the API group: "apis/aadpodidentity.k8s.io/v1/azureidentity"
 
-	return i.filteredRawResourceGrp("apis/aadpodidentity.k8s.io/v1/azureidentities", "namespace", *i.getNamespace(useDefaultNS))
+	return i.filteredRawResourceGrp("apis/aadpodidentity.k8s.io/v1/azureidentities", "namespace", i.getNamespace(useDefaultNS))
 }
 
 // AzureIdentityBindingExists gets the AzureIdentityBindings and filter for namespace (if supplied)
@@ -182,7 +182,7 @@ func (i *IAM) AzureIdentityBindingExists(useDefaultNS bool) (bool, error) {
 	//need to make a 'raw' call to get the AIBs
 	//the AIB's are in the API group: "apis/aadpodidentity.k8s.io/v1/azureidentitybindings"
 
-	return i.filteredRawResourceGrp("apis/aadpodidentity.k8s.io/v1/azureidentitybindings", "namespace", *i.getNamespace(useDefaultNS))
+	return i.filteredRawResourceGrp("apis/aadpodidentity.k8s.io/v1/azureidentitybindings", "namespace", i.getNamespace(useDefaultNS))
 }
 
 func (i *IAM) filteredRawResourceGrp(g string, k string, f string) (bool, error) {
@@ -207,20 +207,21 @@ func (i *IAM) filteredRawResourceGrp(g string, k string, f string) (bool, error)
 func (i *IAM) CreateIAMProbePod(y []byte, useDefaultNS bool, probe *summary.Probe) (*apiv1.Pod, error) {
 	n := kubernetes.GenerateUniquePodName(i.probePodName)
 
-	pod, err := i.k.CreatePodFromYaml(y, n, *i.getNamespace(useDefaultNS),
+	pod, err := i.k.CreatePodFromYaml(y, n, i.getNamespace(useDefaultNS),
 		i.probeImage, *i.getAadPodIDBinding(useDefaultNS), true, probe)
 	return pod, err
 }
 
 // DeleteIAMProbePod deletes the IAM test pod with the supplied name.
 func (i *IAM) DeleteIAMProbePod(n string, useDefaultNS bool, e string) error {
-	return i.k.DeletePod(&n, i.getNamespace(useDefaultNS), false, e) //don't worry about waiting
+	return i.k.DeletePod(n, i.getNamespace(useDefaultNS), e) //don't worry about waiting
 }
 
 // ExecuteVerificationCmd executes a verification command against the supplied pod name.
 func (i *IAM) ExecuteVerificationCmd(pn string, cmd IAMProbeCommand, useDefaultNS bool) (*kubernetes.CmdExecutionResult, error) {
 	c := cmd.String()
-	res := i.k.ExecCommand(&c, i.getNamespace(useDefaultNS), &pn)
+	ns := i.getNamespace(useDefaultNS)
+	res := i.k.ExecCommand(&c, &ns, &pn)
 
 	log.Printf("[NOTICE] ExecuteVerificationCmd: %v stdout: %v exit code: %v (error: %v)", cmd, res.Stdout, res.Code, res.Err)
 
@@ -251,15 +252,11 @@ func (i *IAM) GetAccessToken(pn string, useDefaultNS bool) (*string, error) {
 	return &a.AccessToken, nil
 }
 
-func (i *IAM) getNamespace(useDefaultNS bool) *string {
-	var ns string
+func (i *IAM) getNamespace(useDefaultNS bool) string {
 	if useDefaultNS {
-		ns = "default"
-	} else {
-		ns = i.probeNamespace
+		return "default"
 	}
-
-	return &ns
+	return i.probeNamespace
 }
 
 func (i *IAM) getAadPodIDBinding(useDefaultNS bool) *string {

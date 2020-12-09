@@ -128,9 +128,9 @@ func defaultContainerSecurityContext() *apiv1.SecurityContext {
 	}
 }
 
-func waitForDelete(c *k8s.Clientset, ns *string, n *string) error {
-
-	ps := c.CoreV1().Pods(*ns)
+func waitForDelete(c *k8s.Clientset, ns string, n string) error {
+	// Currently unused, not deleting yet in case it is useful elsewhere
+	ps := c.CoreV1().Pods(ns)
 
 	w, err := ps.Watch(context.Background(), metav1.ListOptions{})
 
@@ -138,7 +138,7 @@ func waitForDelete(c *k8s.Clientset, ns *string, n *string) error {
 		return err
 	}
 
-	log.Printf("[INFO] *** Waiting for DELETE on pod %v ...", *n)
+	log.Printf("[INFO] *** Waiting for DELETE on pod %v ...", n)
 
 	for e := range w.ResultChan() {
 		log.Printf("[DEBUG] Watch Probe Type: %v", e.Type)
@@ -157,7 +157,7 @@ func waitForDelete(c *k8s.Clientset, ns *string, n *string) error {
 
 	}
 
-	log.Printf("[INFO] *** Completed waiting for DELETE on pod %v", *n)
+	log.Printf("[INFO] *** Completed waiting for DELETE on pod %v", n)
 
 	return nil
 }

@@ -59,7 +59,7 @@ func (m *KubeMock) ExecCommand(cmd, ns, pn *string) *CmdExecutionResult {
 	a := m.Called()
 	return a.Get(0).(*CmdExecutionResult)
 }
-func (m *KubeMock) DeletePod(pname *string, ns *string, w bool, e string) error {
+func (m *KubeMock) DeletePod(pname string, ns string, e string) error {
 	x := m.Called().Error(0)
 	return x
 }

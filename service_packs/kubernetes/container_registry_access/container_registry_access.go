@@ -148,7 +148,7 @@ func (p ProbeStruct) ScenarioInitialize(ctx *godog.ScenarioContext) {
 	ctx.Step(`^the deployment attempt is denied$`, ps.theDeploymentAttemptIsDenied)
 
 	ctx.AfterScenario(func(s *godog.Scenario, err error) {
-		cra.TeardownContainerAccessProbePod(&ps.podState.PodName, p.Name())
+		cra.TeardownContainerAccessProbePod(ps.podState.PodName, p.Name())
 
 		coreengine.LogScenarioEnd(s)
 	})

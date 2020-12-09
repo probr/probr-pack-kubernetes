@@ -105,7 +105,7 @@ type PodSecurityPolicy interface {
 	CreatePODSettingCapabilities(c *[]string, probe *summary.Probe) (*apiv1.Pod, error)
 	CreatePodFromYaml(y []byte, probe *summary.Probe) (*apiv1.Pod, error)
 	ExecPSPProbeCmd(pName *string, cmd PSPProbeCommand, probe *summary.Probe) (*kubernetes.CmdExecutionResult, error)
-	TeardownPodSecurityProbe(p *string, e string) error
+	TeardownPodSecurityProbe(p string, e string) error
 	CreateConfigMap() error
 	DeleteConfigMap() error
 }
@@ -616,9 +616,8 @@ func (psp *PSP) DeleteConfigMap() error {
 }
 
 // TeardownPodSecurityProbe deletes the given pod name in the PSP test namespace.
-func (psp *PSP) TeardownPodSecurityProbe(p *string, e string) error {
-	ns := psp.probeNamespace
-	err := psp.k.DeletePod(p, &ns, false, e) //don't worry about waiting
+func (psp *PSP) TeardownPodSecurityProbe(p string, e string) error {
+	err := psp.k.DeletePod(p, psp.probeNamespace, e) //don't worry about waiting
 	return err
 }
 

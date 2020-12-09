@@ -110,7 +110,7 @@ func (p ProbeStruct) ProbeInitialize(ctx *godog.TestSuiteContext) {
 	ctx.BeforeSuite(func() {}) //nothing for now
 
 	ctx.AfterSuite(func() {
-		na.TeardownNetworkAccessProbePod(&ia_ps.podName, p.Name())
+		na.TeardownNetworkAccessProbePod(ia_ps.podName, p.Name())
 	})
 
 	//check dependencies ...

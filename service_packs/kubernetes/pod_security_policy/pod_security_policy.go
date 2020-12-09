@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"path/filepath"
+
 	"github.com/cucumber/godog"
 
 	"github.com/citihub/probr/internal/coreengine"
@@ -318,13 +319,13 @@ func (s *scenarioState) privilegedEscalationIsMarkedForTheKubernetesDeployment(p
 		pd, err := psp.CreatePodFromYaml(yaml, s.probe)
 		err = kubernetes.ProcessPodCreationResult(&s.podState, pd, kubernetes.PSPNoPrivilegeEscalation, err)
 	}
-	payload := struct{
-        PrivilegedEscalationRequested string
-        PodSpecPath string
-    }{ 
-        privilegedEscalationRequested,
-        filepath.Join(kubernetes.AssetsDir, "psp-azp-privileges.yaml"),
-    }
+	payload := struct {
+		PrivilegedEscalationRequested string
+		PodSpecPath                   string
+	}{
+		privilegedEscalationRequested,
+		filepath.Join(kubernetes.AssetsDir, "psp-azp-privileges.yaml"),
+	}
 	s.audit.AuditScenarioStep(description, payload, err)
 
 	return err
@@ -733,7 +734,7 @@ func (p ProbeStruct) ScenarioInitialize(ctx *godog.ScenarioContext) {
 	ctx.Step(`^I should be able to perform an allowed command$`, ps.performAllowedCommand)
 
 	ctx.AfterScenario(func(s *godog.Scenario, err error) {
-		psp.TeardownPodSecurityProbe(&ps.podState.PodName, p.Name())
+		psp.TeardownPodSecurityProbe(ps.podState.PodName, p.Name())
 		ps.podState.PodName = ""
 		ps.podState.CreationError = nil
 		coreengine.LogScenarioEnd(s)

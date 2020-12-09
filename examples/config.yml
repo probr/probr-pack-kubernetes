@@ -21,11 +21,11 @@ CloudProviders:
       DefaultNamespaceAIB:
 ProbeExclusions: # allows specific probes to be disabled by name
   - Name: container_registry_access
-    Excluded: true
+    Excluded: false
     Justification: "demo"
 
   - Name: general
-    Excluded: true
+    Excluded: false
     Justification: "demo"
 
   - Name: iam
@@ -33,7 +33,7 @@ ProbeExclusions: # allows specific probes to be disabled by name
     Justification: "demo"
 
   - Name: internet_access
-    Excluded: true
+    Excluded: false
     Justification: "demo"
 
   - Name: pod_security_policy
