@@ -7,8 +7,28 @@ AuthorisedContainerRegistry: citihubprod.azurecr.io
 UnauthorisedContainerRegistry: docker.io
 ServicePacks:
   Kubernetes:
+    Excluded: false
     KubeConfig: 
     KubeContext:
+    AuthorisedContainerRegistry: citihubprod.azurecr.io
+    UnauthorisedContainerRegistry: docker.io
+    ProbeImage: citihub/probr-probe
+    ProbeExclusions: # allows specific probes to be disabled by name
+      - Name: container_registry_access
+        Excluded: false
+        Justification: "demo"
+      - Name: general
+        Excluded: false
+        Justification: "demo"
+      - Name: iam
+        Excluded: false
+        Justification: "demo"
+      - Name: internet_access
+        Excluded: false
+        Justification: "demo"
+      - Name: pod_security_policy
+        Excluded: false
+        Justification: "demo"
 CloudProviders:
   Azure:
     SubscriptionID: 1234
@@ -19,26 +39,6 @@ CloudProviders:
     Identity:
       DefaultNamespaceAI:
       DefaultNamespaceAIB:
-ProbeExclusions: # allows specific probes to be disabled by name
-  - Name: container_registry_access
-    Excluded: false
-    Justification: "demo"
-
-  - Name: general
-    Excluded: false
-    Justification: "demo"
-
-  - Name: iam
-    Excluded: false
-    Justification: "demo"
-
-  - Name: internet_access
-    Excluded: false
-    Justification: "demo"
-
-  - Name: pod_security_policy
-    Excluded: true
-    Justification: "demo"
 TagExclusions: # allows specific controls/scenarios to be disabled via tags
   - AZ-AAD-AI-1.0  
   - AZ-AAD-AI-1.2

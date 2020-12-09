@@ -161,7 +161,7 @@ func (psp *PSP) setenv() {
 	psp.probePodName = defaultPSPProbePodName
 
 	// Extract registry and image info from config
-	psp.probeImage = config.Vars.AuthorisedContainerRegistry + "/" + config.Vars.ProbeImage
+	psp.probeImage = config.Vars.ServicePacks.Kubernetes.AuthorisedContainerRegistry + "/" + config.Vars.ServicePacks.Kubernetes.ProbeImage
 }
 
 // ClusterIsDeployed verifies that a suitable kubernetes cluster is deployed.

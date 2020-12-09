@@ -8,7 +8,6 @@ import (
 	"log"
 	"sync"
 
-	"github.com/citihub/probr/internal/config"
 	"github.com/citihub/probr/internal/summary"
 )
 
@@ -69,14 +68,7 @@ func (ps *ProbeStore) AddProbe(probe *GodogProbe) {
 	ps.Lock.Lock()
 	defer ps.Lock.Unlock()
 
-	var status ProbeStatus
-	if probe.ProbeDescriptor.isExcluded() {
-		status = Excluded
-	} else {
-		status = Pending
-	}
-
-	//add the test
+	status := Pending
 	probe.Status = &status
 	ps.Probes[probe.ProbeDescriptor.Name] = probe
 
@@ -127,23 +119,4 @@ func (ps *ProbeStore) ExecAllProbes() (int, error) {
 		}
 	}
 	return status, err
-}
-
-func (pd *ProbeDescriptor) isExcluded() bool {
-	v := []string{pd.Name, pd.Group.String()} // iterable name & group strings
-	for _, r := range v {
-		if probeIsExcluded(r) {
-			return true
-		}
-	}
-	return false
-}
-
-func probeIsExcluded(name string) bool {
-	for _, exclusion := range config.Vars.ProbeExclusions {
-		if exclusion.Excluded && name == exclusion.Name {
-			return true
-		}
-	}
-	return false
 }

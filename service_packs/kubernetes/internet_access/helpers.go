@@ -82,7 +82,7 @@ func (n *NA) setup() {
 	n.probePodName = defaultNAProbePodName
 
 	// Extract registry and image info from config
-	n.probeImage = config.Vars.AuthorisedContainerRegistry + "/" + config.Vars.ProbeImage
+	n.probeImage = config.Vars.ServicePacks.Kubernetes.AuthorisedContainerRegistry + "/" + config.Vars.ServicePacks.Kubernetes.ProbeImage
 }
 
 // ClusterIsDeployed verifies if a suitable cluster is deployed.

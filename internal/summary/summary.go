@@ -43,9 +43,6 @@ func (s *SummaryState) SetProbrStatus() {
 	} else {
 		s.Status = fmt.Sprintf("Complete - %v of %v Probes Failed", s.ProbesFailed, (len(s.Probes) - s.ProbesSkipped))
 	}
-	if config.Vars.ProbeExclusions != nil {
-		s.Meta["probe_tags_from_config"] = config.Vars.ProbeExclusions
-	}
 }
 
 // LogProbeMeta accepts a test name with a key and value to insert to the meta logs for that test. Overwrites key if already present.

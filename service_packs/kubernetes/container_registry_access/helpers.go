@@ -64,7 +64,7 @@ func (c *CRA) ClusterIsDeployed() *bool {
 //SetupContainerAccessProbePod creates a pod with characteristics required for testing container access.
 func (c *CRA) SetupContainerAccessProbePod(r string, probe *summary.Probe) (*apiv1.Pod, *kubernetes.PodAudit, error) {
 	//full image is the repository + the configured image
-	i := r + "/" + config.Vars.ProbeImage
+	i := r + "/" + config.Vars.ServicePacks.Kubernetes.ProbeImage
 	pname := kubernetes.GenerateUniquePodName(caPodNameBase + "-" + strings.ReplaceAll(r, ".", "-"))
 	ns, cname := caNamespace, caContainer
 	// let caller handle result ...
