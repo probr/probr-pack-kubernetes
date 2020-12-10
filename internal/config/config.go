@@ -5,65 +5,12 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strings"
 
 	"github.com/briandowns/spinner"
+	"github.com/citihub/probr/internal/utils"
 	"gopkg.in/yaml.v2"
 )
-
-// ConfigVars contains all possible config vars
-type ConfigVars struct {
-	// NOTE: Env and Defaults are ONLY available if corresponding logic is added to defaults.go and getters.go
-	ServicePacks              servicePacks   `yaml:"ServicePacks"`
-	CloudProviders            cloudProviders `yaml:"CloudProviders"`
-	OutputType                string         `yaml:"OutputType"`
-	CucumberDir               string         `yaml:"CucumberDir"`
-	AuditDir                  string         `yaml:"AuditDir"`
-	AuditEnabled              string         `yaml:"AuditEnabled"`
-	LogLevel                  string         `yaml:"LogLevel"`
-	OverwriteHistoricalAudits string         `yaml:"OverwriteHistoricalAudits"`
-	TagExclusions             []string       `yaml:"TagExclusions"`
-	Tags                      string         // set by flags
-	VarsFile                  string         // set by flags only
-	NoSummary                 bool           // set by flags only
-	Silent                    bool           // set by flags only
-}
-
-type servicePacks struct {
-	Kubernetes kubernetes `yaml:"Kubernetes"`
-}
-
-type cloudProviders struct {
-	Azure azure `yaml:"Azure"`
-}
-
-type kubernetes struct {
-	Excluded                      bool             `yaml:"Excluded"`
-	KubeConfigPath                string           `yaml:"KubeConfig"`
-	KubeContext                   string           `yaml:"KubeContext"`
-	SystemClusterRoles            []string         `yaml:"SystemClusterRoles"`
-	AuthorisedContainerRegistry   string           `yaml:"AuthorisedContainerRegistry"`
-	UnauthorisedContainerRegistry string           `yaml:"UnauthorisedContainerRegistry"`
-	ProbeImage                    string           `yaml:"ProbeImage"`
-	ProbeExclusions               []ProbeExclusion `yaml:"ProbeExclusions"`
-}
-
-type azure struct {
-	SubscriptionID  string `yaml:"SubscriptionID"`
-	ClientID        string `yaml:"ClientID"`
-	ClientSecret    string `yaml:"ClientSecret"`
-	TenantID        string `yaml:"TenantID"`
-	LocationDefault string `yaml:"LocationDefault"`
-	Identity        struct {
-		DefaultNamespaceAI  string `yaml:"DefaultNamespaceAI"`
-		DefaultNamespaceAIB string `yaml:"DefaultNamespaceAIB"`
-	}
-}
-
-type ProbeExclusion struct {
-	Name          string `yaml:"Name"`
-	Excluded      bool   `yaml:"Excluded"`
-	Justification string `yaml:"Justification"`
-}
 
 // Vars is a singleton instance of ConfigVars
 var Vars ConfigVars
@@ -90,15 +37,18 @@ func (ctx *ConfigVars) handleTagExclusions() {
 
 // Init will override config.Vars with the content retrieved from a filepath
 func Init(configPath string) error {
+	log.Printf("[NOTICE] Initialized by %s", utils.CallerName(1))
 	config, err := NewConfig(configPath)
 
 	if err != nil {
+		log.Printf("[ERROR] %v", err)
 		return err
 	}
 	Vars = config
 	setFromEnvOrDefaults(&Vars) // Set any values not retrieved from file
 
 	SetLogFilter(Vars.LogLevel, os.Stderr) // Set the minimum log level obtained from Vars
+	Vars.handleConfigFileExclusions()
 
 	return nil
 }
@@ -150,6 +100,63 @@ func LogConfigState() {
 }
 
 func AuditDir() string {
-	_ = os.Mkdir(Vars.AuditDir, 0755)
+	_ = os.Mkdir(Vars.AuditDir, 0755) // Creates if not already existing
 	return Vars.AuditDir
+}
+
+func (ctx *ConfigVars) handleConfigFileExclusions() {
+	if ctx.ServicePacks.Kubernetes.isExcluded() {
+		ctx.addExclusion("probes/kubernetes")
+	} else {
+		ctx.handleProbeExclusions("kubernetes", ctx.ServicePacks.Kubernetes.Probes)
+	}
+}
+
+func (ctx *ConfigVars) handleProbeExclusions(packName string, probes []Probe) {
+	for _, probe := range probes {
+		if probe.isExcluded() {
+			ctx.addExclusion(fmt.Sprintf("probes/%s/%s", packName, probe.Name))
+		} else {
+			for _, scenario := range probe.Scenarios {
+				if scenario.isExcluded() {
+					ctx.addExclusion(fmt.Sprintf("probes/%s/%s/%s", packName, probe.Name, scenario.Name))
+				}
+			}
+		}
+	}
+}
+
+func (ctx *ConfigVars) addExclusion(tag string) {
+	if len(ctx.Tags) > 0 {
+		ctx.Tags = ctx.Tags + " && "
+	}
+	ctx.Tags = fmt.Sprintf("%s~@%s", ctx.Tags, tag)
+}
+
+// Log and return exclusion configuration
+func (k Kubernetes) isExcluded() bool {
+	if k.Excluded != "" {
+		log.Printf("[NOTICE] Excluding Kubernetes service pack. Justification: %s", k.Excluded)
+		return true
+	}
+	log.Printf("[NOTICE] Kubernetes service pack included.")
+	return false
+}
+
+// Log and return exclusion configuration
+func (p Probe) isExcluded() bool {
+	if p.Excluded != "" {
+		log.Printf("[NOTICE] Excluding %s probe. Justification: %s", strings.Replace(p.Name, "_", " ", -1), p.Excluded)
+		return true
+	}
+	return false
+}
+
+// Log and return exclusion configuration
+func (s Scenario) isExcluded() bool {
+	if s.Excluded != "" {
+		log.Printf("[NOTICE] Excluding scenario '%s'. Justification: %s", s.Name, s.Excluded)
+		return true
+	}
+	return false
 }

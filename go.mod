@@ -12,14 +12,10 @@ require (
 	github.com/cucumber/godog v0.10.0
 	github.com/cucumber/messages-go/v10 v10.0.3
 	github.com/gobuffalo/packr/v2 v2.5.1
-	github.com/google/gops v0.3.13 // indirect
-	github.com/gophercloud/gophercloud v0.1.0 // indirect
 	github.com/hashicorp/logutils v1.0.0
 	github.com/stretchr/testify v1.6.1
 	gopkg.in/yaml.v2 v2.2.8
 	k8s.io/api v0.19.2
 	k8s.io/apimachinery v0.19.2
 	k8s.io/client-go v0.19.2
-	k8s.io/klog v1.0.0 // indirect
-	sigs.k8s.io/structured-merge-diff/v3 v3.0.0 // indirect
 )

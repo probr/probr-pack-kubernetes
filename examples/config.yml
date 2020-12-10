@@ -3,32 +3,22 @@ AuditEnabled: true
 AuditDir: audit_output
 CucumberDir: cucumber_output
 OverwriteHistoricalAudits: true
-AuthorisedContainerRegistry: citihubprod.azurecr.io
-UnauthorisedContainerRegistry: docker.io
 ServicePacks:
   Kubernetes:
-    Excluded: false
+    Excluded: # "justification" # any non-empty value here will exclude all elements within the service pack
     KubeConfig: 
     KubeContext:
     AuthorisedContainerRegistry: citihubprod.azurecr.io
     UnauthorisedContainerRegistry: docker.io
     ProbeImage: citihub/probr-probe
-    ProbeExclusions: # allows specific probes to be disabled by name
-      - Name: container_registry_access
-        Excluded: false
-        Justification: "demo"
-      - Name: general
-        Excluded: false
-        Justification: "demo"
-      - Name: iam
-        Excluded: false
-        Justification: "demo"
-      - Name: internet_access
-        Excluded: false
-        Justification: "demo"
+    Probes: # allows this pack's probes to be disabled by name
       - Name: pod_security_policy
-        Excluded: false
-        Justification: "demo"
+        Excluded: "Excluded to demonstrate probe exclusion"
+      - Name: container_registry_access
+        Scenarios: # allows this probe's scenarios to be disabled using their probe tag value
+          - Name: "1.0"
+            Excluded: "Excluded to demonstrate scenario exclusion"
+
 CloudProviders:
   Azure:
     SubscriptionID: 1234
@@ -39,6 +29,5 @@ CloudProviders:
     Identity:
       DefaultNamespaceAI:
       DefaultNamespaceAIB:
-TagExclusions: # allows specific controls/scenarios to be disabled via tags
-  - AZ-AAD-AI-1.0  
-  - AZ-AAD-AI-1.2
+Tags: # allows user to create their own string of tag inclusions and/or exclusions
+TagExclusions: # allows specific controls/scenarios to be disabled via a list of tags
