@@ -11,21 +11,22 @@ Feature: Ensure stringent authentication and authorisation
     @probes/kubernetes/iam/AZ-AAD-AI-1.0 @control_type/preventative @csp/azure
     Scenario Outline: Prevent cross namespace Azure Identities
         Given a Kubernetes cluster exists which we can deploy into
-        When I create a simple pod in "<namespace>" namespace assigned with that AzureIdentityBinding
+        And an AzureIdentityBinding called "probr-aib" exists in the namespace called "default"
+        When I create a simple pod in "<NAMESPACE>" namespace assigned with the "probr-aib" AzureIdentityBinding
         Then the pod is deployed successfully
         But an attempt to obtain an access token from that pod should "<RESULT>"
 
         Examples:
-			| namespace     | RESULT  |
-			| a non-default | Fail    |
+			| NAMESPACE     | RESULT  |
+			| the probr     | Fail    |
 			| the default   | Succeed |
 
     @probes/kubernetes/iam/AZ-AAD-AI-1.1 @control_type/preventative @csp/azure
     Scenario: Prevent cross namespace Azure Identity Bindings
         Given a Kubernetes cluster exists which we can deploy into
-        And the default namespace has an AzureIdentity
-        When I create an AzureIdentityBinding called "probr-aib" in a non-default namespace
-        And I deploy a pod assigned with the "probr-aib" AzureIdentityBinding into the same namespace as the "probr-aib" AzureIdentityBinding
+        And the namespace called "default" has an AzureIdentity called "probr-probe"
+        When I create an AzureIdentityBinding called "probr-aib" in the Probr namespace bound to the "probr-probe" AzureIdentity
+        And I deploy a pod assigned with the "probr-aib" AzureIdentityBinding into the Probr namespace
         Then the pod is deployed successfully
         But an attempt to obtain an access token from that pod should fail
 

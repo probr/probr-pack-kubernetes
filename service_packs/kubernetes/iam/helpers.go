@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
-	"strings"
 
 	"github.com/citihub/probr/internal/config"
 	"github.com/citihub/probr/internal/coreengine"
@@ -58,10 +57,10 @@ func (c IAMProbeCommand) String() string {
 
 // IdentityAccessManagement encapsulates functionality for querying and probing Identity and Access Management setup.
 type IdentityAccessManagement interface {
-	AzureIdentityExists(useDefaultNS bool) (bool, error)
-	AzureIdentityBindingExists(useDefaultNS bool) (bool, error)
-	CreateAIB() error
-	CreateIAMProbePod(y []byte, useDefaultNS bool, probe *summary.Probe) (*apiv1.Pod, error)
+	AzureIdentityExists(namespace, aiName string) (bool, error)
+	AzureIdentityBindingExists(namespace, aibName string) (bool, error)
+	CreateAIB(useDefaultNS bool, aibName, aiName string) error
+	CreateIAMProbePod(y []byte, useDefaultNS bool, aibName string, probe *summary.Probe) (*apiv1.Pod, error)
 	DeleteIAMProbePod(n string, useDefaultNS bool, e string) error
 	ExecuteVerificationCmd(pn string, cmd IAMProbeCommand, useDefaultNS bool) (*kubernetes.CmdExecutionResult, error)
 	GetAccessToken(pn string, useDefaultNS bool) (*string, error)
@@ -76,8 +75,6 @@ type IAM struct {
 	probeContainer string
 	probePodName   string
 
-	azureIdentityBinding  string
-	azureIdentityName     string
 	azureIdentitySelector string
 }
 
@@ -101,24 +98,20 @@ func (i *IAM) setenv() {
 	i.probeImage = config.Vars.ServicePacks.Kubernetes.AuthorisedContainerRegistry + "/" + config.Vars.ServicePacks.Kubernetes.ProbeImage
 
 	// Set the Azure Identity vars
-	// azureIdentityBinding - name of AzureIdentityBinding
-	// azureIdentityName - name of the AzureIdentity
 	// azureIdentitySelector - to allow selection of the binding on pod creation
-	i.azureIdentityBinding = "probr-aib"
-	i.azureIdentityName = "probr-probe"
 	i.azureIdentitySelector = "aadpodidbinding"
 }
 
 // creates an AzureIdentityBinding object to a specified AzureIdentity in a specified non-default namespace
-func (i *IAM) createAIBObject() runtime.Object {
+func (i *IAM) createAIBObject(namespace, aibName, aiName string) runtime.Object {
 	// Create an AIB object and assign attributes using input parameters
 	aib := aibv1.AzureIdentityBinding{}
 
 	aib.TypeMeta.Kind = "AzureIdentityBinding"
 	aib.TypeMeta.APIVersion = "aadpodidentity.k8s.io/v1"
-	aib.ObjectMeta.Name = i.azureIdentityBinding
-	aib.ObjectMeta.Namespace = i.probeNamespace
-	aib.Spec.AzureIdentity = i.azureIdentityName
+	aib.ObjectMeta.Namespace = namespace
+	aib.ObjectMeta.Name = aibName
+	aib.Spec.AzureIdentity = aiName
 	aib.Spec.Selector = i.azureIdentitySelector
 
 	// Copy into a runtime.Object which is required for the api request
@@ -128,24 +121,27 @@ func (i *IAM) createAIBObject() runtime.Object {
 }
 
 // CreateAIB creates an AzureIdentityBinding in the cluster
-func (i *IAM) CreateAIB() error {
+func (i *IAM) CreateAIB(useDefaultNS bool, aibName, aiName string) error {
 
 	// Obtain the kubernetes cluster client connection
 	c, _ := i.k.GetClient()
+	namespace := i.getNamespace(useDefaultNS)
+
+	if !useDefaultNS {
+		// Create the non-default namespace (will succeed if the ns already exists)
+		apiNS := apiv1.Namespace{}
+		apiNS.ObjectMeta.Name = namespace
+		c.CoreV1().Namespaces().Create(context.TODO(), &apiNS, metav1.CreateOptions{})
+	}
 
 	// Create an runtime AIB object and assign attributes using input parameters
-	runtimeAib := i.createAIBObject()
-
-	// Create the namespace
-	apiNS := apiv1.Namespace{}
-	apiNS.ObjectMeta.Name = i.probeNamespace
-	c.CoreV1().Namespaces().Create(context.TODO(), &apiNS, metav1.CreateOptions{})
+	runtimeAib := i.createAIBObject(namespace, aibName, aiName)
 
 	// set the api path for the aadpodidentity package which include the azureidentitybindings custom resource definition
 	apiPath := "apis/aadpodidentity.k8s.io/v1"
 
 	//	Create a rest api client Post request object
-	request := c.CoreV1().RESTClient().Post().AbsPath(apiPath).Namespace(i.probeNamespace).Resource("azureidentitybindings").Body(runtimeAib)
+	request := c.CoreV1().RESTClient().Post().AbsPath(apiPath).Namespace(namespace).Resource("azureidentitybindings").Body(runtimeAib)
 
 	//	Call the api to execute the Post request and create the AIB in the cluster
 	response := request.Do(context.TODO())
@@ -170,31 +166,30 @@ func (i *IAM) CreateAIB() error {
 }
 
 // AzureIdentityExists gets the AzureIdentityBindings and filter for namespace (if supplied)
-func (i *IAM) AzureIdentityExists(useDefaultNS bool) (bool, error) {
+func (i *IAM) AzureIdentityExists(namespace, aiName string) (bool, error) {
 	//need to make a 'raw' call to get the AIBs
 	//the AIB's are in the API group: "apis/aadpodidentity.k8s.io/v1/azureidentity"
 
-	return i.filteredRawResourceGrp("apis/aadpodidentity.k8s.io/v1/azureidentities", "namespace", i.getNamespace(useDefaultNS))
+	return i.filteredRawResourceGrp("apis/aadpodidentity.k8s.io/v1/azureidentities", namespace, aiName)
 }
 
 // AzureIdentityBindingExists gets the AzureIdentityBindings and filter for namespace (if supplied)
-func (i *IAM) AzureIdentityBindingExists(useDefaultNS bool) (bool, error) {
+func (i *IAM) AzureIdentityBindingExists(namespace, aibName string) (bool, error) {
 	//need to make a 'raw' call to get the AIBs
 	//the AIB's are in the API group: "apis/aadpodidentity.k8s.io/v1/azureidentitybindings"
 
-	return i.filteredRawResourceGrp("apis/aadpodidentity.k8s.io/v1/azureidentitybindings", "namespace", i.getNamespace(useDefaultNS))
+	return i.filteredRawResourceGrp("apis/aadpodidentity.k8s.io/v1/azureidentitybindings", namespace, aibName)
 }
 
-func (i *IAM) filteredRawResourceGrp(g string, k string, f string) (bool, error) {
-	j, err := i.k.GetRawResourcesByGrp(g)
+func (i *IAM) filteredRawResourceGrp(apiGroup string, namespace string, resourceName string) (bool, error) {
+	j, err := i.k.GetRawResourcesByGrp(apiGroup)
 
 	if err != nil {
 		return false, err
 	}
 
 	for _, r := range j.Items {
-		n := r.Metadata[k]
-		if strings.HasPrefix(n, f) {
+		if (r.Metadata["namespace"] == namespace) && (r.Metadata["name"] == resourceName) {
 			return true, nil
 		}
 	}
@@ -204,11 +199,11 @@ func (i *IAM) filteredRawResourceGrp(g string, k string, f string) (bool, error)
 }
 
 // CreateIAMProbePod creates a pod configured for IAM test cases.
-func (i *IAM) CreateIAMProbePod(y []byte, useDefaultNS bool, probe *summary.Probe) (*apiv1.Pod, error) {
+func (i *IAM) CreateIAMProbePod(y []byte, useDefaultNS bool, aibName string, probe *summary.Probe) (*apiv1.Pod, error) {
 	n := kubernetes.GenerateUniquePodName(i.probePodName)
 
 	pod, err := i.k.CreatePodFromYaml(y, n, i.getNamespace(useDefaultNS),
-		i.probeImage, *i.getAadPodIDBinding(useDefaultNS), true, probe)
+		i.probeImage, *i.getAadPodIDBinding(useDefaultNS, aibName), true, probe)
 	return pod, err
 }
 
@@ -259,7 +254,7 @@ func (i *IAM) getNamespace(useDefaultNS bool) string {
 	return i.probeNamespace
 }
 
-func (i *IAM) getAadPodIDBinding(useDefaultNS bool) *string {
+func (i *IAM) getAadPodIDBinding(useDefaultNS bool, aibName string) *string {
 	//return the value for the following pod label
 	// labels:
 	// 	aadpodidbinding:
@@ -276,7 +271,7 @@ func (i *IAM) getAadPodIDBinding(useDefaultNS bool) *string {
 	} else {
 		//if not the default namespace, then we are testing a specific
 		//identity binding set up as part of the probr run.
-		b = i.azureIdentityBinding
+		b = aibName
 	}
 
 	return &b

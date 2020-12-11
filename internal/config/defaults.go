@@ -29,8 +29,8 @@ func setFromEnvOrDefaults(e *ConfigVars) {
 	e.set(&e.CloudProviders.Azure.ClientSecret, "AZURE_CLIENT_SECRET", "")
 	e.set(&e.CloudProviders.Azure.TenantID, "AZURE_TENANT_ID", "")
 	e.set(&e.CloudProviders.Azure.LocationDefault, "AZURE_LOCATION_DEFAULT", "")
-	e.set(&e.CloudProviders.Azure.Identity.DefaultNamespaceAI, "DEFAULT_NS_AZURE_IDENTITY", "probr-defaultns-ai")
-	e.set(&e.CloudProviders.Azure.Identity.DefaultNamespaceAIB, "DEFAULT_NS_AZURE_IDENTITY_BINDING", "probr-defaultns-aib")
+	e.set(&e.CloudProviders.Azure.Identity.DefaultNamespaceAI, "DEFAULT_NS_AZURE_IDENTITY", "probr-probe")
+	e.set(&e.CloudProviders.Azure.Identity.DefaultNamespaceAIB, "DEFAULT_NS_AZURE_IDENTITY_BINDING", "probr-aib")
 }
 
 func getDefaultKubeConfigPath() string {

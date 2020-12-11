@@ -25,14 +25,6 @@ func TestSetEnv(t *testing.T) {
 		t.Logf("probeImage not set")
 		t.Fail()
 	}
-	if i.azureIdentityBinding == "" {
-		t.Logf("azureIdentityBinding not set")
-		t.Fail()
-	}
-	if i.azureIdentityName == "" {
-		t.Logf("azureIdentityName not set")
-		t.Fail()
-	}
 	if i.azureIdentitySelector == "" {
 		t.Logf("azureIdentitySelector not set")
 		t.Fail()
@@ -45,7 +37,10 @@ func TestCreateAIBObject(t *testing.T) {
 	i := &IAM{}
 	i.setenv()
 
-	runtimeAib := i.createAIBObject()
+	namespace := "default"
+	aibName := "testAib"
+	aiName := "testAi"
+	runtimeAib := i.createAIBObject(namespace, aibName, aiName)
 
 	// Check returned type
 	_, typeCastOK := runtimeAib.(runtime.Object)
