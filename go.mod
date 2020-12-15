@@ -5,8 +5,10 @@ go 1.14
 require (
 	github.com/Azure/aad-pod-identity v1.7.0
 	github.com/Azure/azure-sdk-for-go v44.2.0+incompatible
+	github.com/Azure/azure-storage-blob-go v0.12.0
+	github.com/Azure/go-autorest/autorest v0.11.0
 	github.com/Azure/go-autorest/autorest/azure/auth v0.5.0
-	github.com/Azure/go-autorest/autorest/to v0.4.0 // indirect
+	github.com/Azure/go-autorest/autorest/to v0.4.0
 	github.com/Azure/go-autorest/autorest/validation v0.3.0 // indirect
 	github.com/briandowns/spinner v1.11.1
 	github.com/cucumber/godog v0.10.0

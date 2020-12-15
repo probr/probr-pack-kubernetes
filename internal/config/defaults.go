@@ -25,10 +25,11 @@ func setFromEnvOrDefaults(e *ConfigVars) {
 	e.set(&e.ServicePacks.Kubernetes.UnauthorisedContainerRegistry, "PROBR_UNAUTHORISED_REGISTRY", "")
 	e.set(&e.ServicePacks.Kubernetes.ProbeImage, "PROBR_PROBE_IMAGE", "citihub/probr-probe")
 
+	e.set(&e.CloudProviders.Azure.SubscriptionID, "AZURE_SUBSCRIPTION_ID", "")
+	e.set(&e.CloudProviders.Azure.Location, "AZURE_LOCATION", "")
 	e.set(&e.CloudProviders.Azure.ClientID, "AZURE_CLIENT_ID", "")
 	e.set(&e.CloudProviders.Azure.ClientSecret, "AZURE_CLIENT_SECRET", "")
 	e.set(&e.CloudProviders.Azure.TenantID, "AZURE_TENANT_ID", "")
-	e.set(&e.CloudProviders.Azure.LocationDefault, "AZURE_LOCATION_DEFAULT", "")
 	e.set(&e.CloudProviders.Azure.Identity.DefaultNamespaceAI, "DEFAULT_NS_AZURE_IDENTITY", "probr-probe")
 	e.set(&e.CloudProviders.Azure.Identity.DefaultNamespaceAIB, "DEFAULT_NS_AZURE_IDENTITY_BINDING", "probr-aib")
 }

@@ -20,15 +20,10 @@ type ConfigVars struct {
 
 type ServicePacks struct {
 	Kubernetes Kubernetes `yaml:"Kubernetes"`
-}
-
-type ServicePack struct {
-	Excluded string
-	Probes   []Probe
+	Storage    Storage    `yaml:"Storage"`
 }
 
 type Kubernetes struct {
-	ServicePack
 	Excluded                      string   `yaml:"Excluded"`
 	Probes                        []Probe  `yaml:"Probes"`
 	KubeConfigPath                string   `yaml:"KubeConfig"`
@@ -37,6 +32,11 @@ type Kubernetes struct {
 	AuthorisedContainerRegistry   string   `yaml:"AuthorisedContainerRegistry"`
 	UnauthorisedContainerRegistry string   `yaml:"UnauthorisedContainerRegistry"`
 	ProbeImage                    string   `yaml:"ProbeImage"`
+}
+
+type Storage struct {
+	Excluded string  `yaml:"Excluded"`
+	Probes   []Probe `yaml:"Probes"`
 }
 
 type Probe struct {
@@ -57,10 +57,11 @@ type CloudProviders struct {
 type Azure struct {
 	Excluded        string `yaml:"Excluded"`
 	SubscriptionID  string `yaml:"SubscriptionID"`
+	Location        string `yaml:"Location"`
 	ClientID        string `yaml:"ClientID"`
 	ClientSecret    string `yaml:"ClientSecret"`
 	TenantID        string `yaml:"TenantID"`
-	LocationDefault string `yaml:"LocationDefault"`
+	ManagementGroup string `yaml:"ManagementGroup"`
 	Identity        struct {
 		DefaultNamespaceAI  string `yaml:"DefaultNamespaceAI"`
 		DefaultNamespaceAIB string `yaml:"DefaultNamespaceAIB"`

@@ -5,7 +5,7 @@ CucumberDir: cucumber_output
 OverwriteHistoricalAudits: true
 ServicePacks:
   Kubernetes:
-    Excluded: # "justification" # any non-empty value here will exclude all elements within the service pack
+    Excluded: "demo" # "justification" # any non-empty value here will exclude all elements within the service pack
     KubeConfig: 
     KubeContext:
     AuthorisedContainerRegistry: citihubprod.azurecr.io
@@ -18,14 +18,23 @@ ServicePacks:
         Scenarios: # allows this probe's scenarios to be disabled using their probe tag value
           - Name: "1.0"
             Excluded: "Excluded to demonstrate scenario exclusion"
-
+  Storage:
+    Excluded: # "justification" # any non-empty value here will exclude all elements within the service pack
+    Probes: # allows this pack's probes to be disabled by name
+      - Name: access_whitelisting
+        Excluded:
+      - Name: encryption_in_flight
+        Scenarios: # allows this probe's scenarios to be disabled using their probe tag value
+        - Name: "1.1"
+          Excluded:
 CloudProviders:
   Azure:
-    SubscriptionID: 1234
+    TenantID:
+    SubscriptionID:
     ClientID:
     ClientSecret:
-    TenantID:
-    LocationDefault:
+    ManagementGroup:
+    Location:
     Identity:
       DefaultNamespaceAI:
       DefaultNamespaceAIB:

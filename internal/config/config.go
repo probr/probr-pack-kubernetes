@@ -110,6 +110,11 @@ func (ctx *ConfigVars) handleConfigFileExclusions() {
 	} else {
 		ctx.handleProbeExclusions("kubernetes", ctx.ServicePacks.Kubernetes.Probes)
 	}
+	if ctx.ServicePacks.Storage.isExcluded() {
+		ctx.addExclusion("probes/storage")
+	} else {
+		ctx.handleProbeExclusions("storage", ctx.ServicePacks.Storage.Probes)
+	}
 }
 
 func (ctx *ConfigVars) handleProbeExclusions(packName string, probes []Probe) {
@@ -140,6 +145,16 @@ func (k Kubernetes) isExcluded() bool {
 		return true
 	}
 	log.Printf("[NOTICE] Kubernetes service pack included.")
+	return false
+}
+
+// Log and return exclusion configuration
+func (k Storage) isExcluded() bool {
+	if k.Excluded != "" {
+		log.Printf("[NOTICE] Excluding Storage service pack. Justification: %s", k.Excluded)
+		return true
+	}
+	log.Printf("[NOTICE] Storage service pack included.")
 	return false
 }
 
