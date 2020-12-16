@@ -5,7 +5,7 @@ CucumberDir: cucumber_output
 OverwriteHistoricalAudits: true
 ServicePacks:
   Kubernetes:
-    Excluded: "demo" # "justification" # any non-empty value here will exclude all elements within the service pack
+    Excluded: # "justification" # any non-empty value here will exclude all elements within the service pack
     KubeConfig: 
     KubeContext:
     AuthorisedContainerRegistry: citihubprod.azurecr.io
@@ -19,7 +19,7 @@ ServicePacks:
           - Name: "1.0"
             Excluded: "Excluded to demonstrate scenario exclusion"
   Storage:
-    Excluded: # "justification" # any non-empty value here will exclude all elements within the service pack
+    Excluded: "not required" # "justification" # any non-empty value here will exclude all elements within the service pack
     Probes: # allows this pack's probes to be disabled by name
       - Name: access_whitelisting
         Excluded:

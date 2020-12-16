@@ -19,11 +19,6 @@ type scenarioState struct {
 	name  string
 	audit *summary.ScenarioAudit
 	probe *summary.Probe
-	//	httpStatusCode int
-	//	podName        string
-	//	podState       kubernetes.PodState
-	//	useDefaultNS   bool
-	//	wildcardRoles  interface{}
 }
 
 // EncryptionAtRestAzure azure implementation of the encryption in flight for Object Storage feature

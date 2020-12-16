@@ -12,8 +12,8 @@ import (
 	"github.com/cucumber/godog"
 
 	"github.com/citihub/probr/internal/azureutil"
-	"github.com/citihub/probr/internal/azureutil/group"
 	"github.com/citihub/probr/internal/azureutil/policy"
+	"github.com/citihub/probr/internal/config"
 	"github.com/citihub/probr/internal/coreengine"
 	"github.com/citihub/probr/internal/summary"
 	"github.com/citihub/probr/service_packs/storage"
@@ -34,11 +34,6 @@ type scenarioState struct {
 	name  string
 	audit *summary.ScenarioAudit
 	probe *summary.Probe
-	//	httpStatusCode int
-	//	podName        string
-	//	podState       kubernetes.PodState
-	//	useDefaultNS   bool
-	//	wildcardRoles  interface{}
 }
 
 type accessWhitelistingAzure struct {
@@ -48,40 +43,37 @@ type accessWhitelistingAzure struct {
 	bucketName                string
 	storageAccount            azureStorage.Account
 	runningErr                error
+	resourceGroupName         string
 }
 
 var state accessWhitelistingAzure
 
 func (state *accessWhitelistingAzure) setup() {
 
-	log.Println("[DEBUG] Setting up 'accessWhitelistingAzure'")
+	log.Println("[DEBUG] Setting up \"AccessWhitelistingAzure\"")
 	state.ctx = context.Background()
 
-	state.policyAssignmentMgmtGroup = azureutil.ManagementGroup()
-	if state.policyAssignmentMgmtGroup == "" {
-		log.Printf("[NOTICE] Mgmt Group config variable is not defined. Policy assignment check against subscription")
-	}
-
-	state.tags = map[string]*string{
-		"project": to.StringPtr("CICD"),
-		"env":     to.StringPtr("test"),
-		"tier":    to.StringPtr("internal"),
-	}
-
-	_, err := group.CreateWithTags(state.ctx, azureutil.ResourceGroup(), state.tags)
-	if err != nil {
-		log.Fatalf("failed to create group: %v\n", err.Error())
-	}
-
-	log.Printf("[DEBUG] Created Resource Group: %v", azureutil.ResourceGroup())
 }
 
 func (state *accessWhitelistingAzure) teardown() {
-	err := group.Cleanup(state.ctx)
-	if err != nil {
-		log.Fatalf("Failed to teardown: %v\n", err.Error())
-	}
+
 	log.Println("[DEBUG] Teardown completed")
+}
+
+// PENDING IMPLEMENTATION
+func (state *accessWhitelistingAzure) anAzureResourceGroupExists() error {
+
+	// check the resource group has been configured
+	if config.Vars.CloudProviders.Azure.ResourceGroup == "" {
+		log.Printf("[ERROR] Azure resource group config var not set")
+	} else {
+		log.Printf("[NOTICE] Azure resource group config var is %s", config.Vars.CloudProviders.Azure.ResourceGroup)
+	}
+	state.resourceGroupName = config.Vars.CloudProviders.Azure.ResourceGroup
+
+	// Check the resource group exists in the specified azure subscription
+
+	return nil
 }
 
 func (state *accessWhitelistingAzure) checkPolicyAssigned() error {
@@ -129,7 +121,7 @@ func (state *accessWhitelistingAzure) createWithWhitelist(ipRange string) error 
 		}
 	}
 
-	state.storageAccount, state.runningErr = storage.CreateWithNetworkRuleSet(state.ctx, state.bucketName, azureutil.ResourceGroup(), state.tags, true, &networkRuleSet)
+	state.storageAccount, state.runningErr = storage.CreateWithNetworkRuleSet(state.ctx, state.bucketName, state.resourceGroupName, state.tags, true, &networkRuleSet)
 	return nil
 }
 
@@ -226,6 +218,7 @@ func (p ProbeStruct) ScenarioInitialize(ctx *godog.ScenarioContext) {
 	})
 
 	ctx.Step(`^the CSP provides a whitelisting capability for Object Storage containers$`, state.cspSupportsWhitelisting)
+	ctx.Step(`^a specified azure resource group exists$`, state.anAzureResourceGroupExists)
 	ctx.Step(`^we examine the Object Storage container in environment variable "([^"]*)"$`, state.examineStorageContainer)
 	ctx.Step(`^whitelisting is configured with the given IP address range or an endpoint$`, state.whitelistingIsConfigured)
 	ctx.Step(`^security controls that Prevent Object Storage from being created without network source address whitelisting are applied$`, state.checkPolicyAssigned)

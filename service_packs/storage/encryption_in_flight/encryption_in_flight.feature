@@ -12,7 +12,7 @@ Feature: Object Storage Encryption in Flight
 
     @probes/storage/encryption_in_flight/1.0 @control_type/preventative @csp/azure
     Scenario Outline: Prevent Creation of Object Storage Without Encryption in Flight
-      Given security controls that restrict data from being unencrypted in flight
+      Given a specified azure resource group exists
       When we provision an Object Storage bucket
       And http access is "<HTTP Option>"
       And https access is "<HTTPS Option>"

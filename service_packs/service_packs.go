@@ -12,6 +12,9 @@ import (
 	"github.com/citihub/probr/service_packs/kubernetes/iam"
 	"github.com/citihub/probr/service_packs/kubernetes/internet_access"
 	"github.com/citihub/probr/service_packs/kubernetes/pod_security_policy"
+	"github.com/citihub/probr/service_packs/storage/access_whitelisting"
+	"github.com/citihub/probr/service_packs/storage/encryption_at_rest"
+	"github.com/citihub/probr/service_packs/storage/encryption_in_flight"
 )
 
 type probe interface {
@@ -30,6 +33,11 @@ func init() {
 		pod_security_policy.Probe,
 		internet_access.Probe,
 		iam.Probe,
+	}
+	packs["storage"] = []probe{
+		encryption_in_flight.Probe,
+		encryption_at_rest.Probe,
+		access_whitelisting.Probe,
 	}
 }
 
