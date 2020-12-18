@@ -13,10 +13,6 @@ func TestSetEnv(t *testing.T) {
 	i := &IAM{}
 	i.setenv()
 
-	if i.probeNamespace == "" {
-		t.Logf("probeNamespace not set")
-		t.Fail()
-	}
 	if i.probePodName == "" {
 		t.Logf("probePodName not set")
 		t.Fail()

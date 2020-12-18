@@ -12,7 +12,6 @@ import (
 )
 
 const (
-	caNamespace   = "probr-container-access-test-ns"
 	caContainer   = "container-access-test"
 	caPodNameBase = "ca-test"
 )
@@ -66,14 +65,14 @@ func (c *CRA) SetupContainerAccessProbePod(r string, probe *summary.Probe) (*api
 	//full image is the repository + the configured image
 	i := r + "/" + config.Vars.ServicePacks.Kubernetes.ProbeImage
 	pname := kubernetes.GenerateUniquePodName(caPodNameBase + "-" + strings.ReplaceAll(r, ".", "-"))
-	ns, cname := caNamespace, caContainer
+	ns, cname := kubernetes.Namespace, caContainer
 	// let caller handle result ...
 	return c.k.CreatePod(pname, ns, cname, i, true, nil, probe)
 }
 
 //TeardownContainerAccessProbePod deletes the supplied test pod in the container registry access namespace.
 func (c *CRA) TeardownContainerAccessProbePod(p string, e string) error {
-	err := c.k.DeletePod(p, caNamespace, e) //don't worry about waiting
+	err := c.k.DeletePod(p, kubernetes.Namespace, e) //don't worry about waiting
 	return err
 }
 

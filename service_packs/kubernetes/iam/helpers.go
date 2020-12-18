@@ -34,9 +34,6 @@ type scenarioState struct {
 
 const (
 	//default values.  Overrides can be supplied via the environment.
-	defaultIAMProbeNamespace = "probr-rbac-test-ns"
-	//NOTE: either the above namespace needs to be added to the exclusion list on the
-	//container registry rule or image need to be available in the allowed (probably internal) registry
 	defaultIAMProbeContainer = "iam-test"
 	defaultIAMProbePodName   = "iam-test-pod"
 )
@@ -70,7 +67,6 @@ type IdentityAccessManagement interface {
 type IAM struct {
 	k kubernetes.Kubernetes
 
-	probeNamespace string
 	probeImage     string
 	probeContainer string
 	probePodName   string
@@ -90,7 +86,6 @@ func NewDefaultIAM() *IAM {
 func (i *IAM) setenv() {
 
 	//just default these for now (not sure we'll ever want to supply):
-	i.probeNamespace = defaultIAMProbeNamespace
 	i.probeContainer = defaultIAMProbeContainer
 	i.probePodName = defaultIAMProbePodName
 
@@ -216,7 +211,7 @@ func (i *IAM) DeleteIAMProbePod(n string, useDefaultNS bool, e string) error {
 func (i *IAM) ExecuteVerificationCmd(pn string, cmd IAMProbeCommand, useDefaultNS bool) (*kubernetes.CmdExecutionResult, error) {
 	c := cmd.String()
 	ns := i.getNamespace(useDefaultNS)
-	res := i.k.ExecCommand(&c, &ns, &pn)
+	res := i.k.ExecCommand(c, ns, &pn)
 
 	log.Printf("[NOTICE] ExecuteVerificationCmd: %v stdout: %v exit code: %v (error: %v)", cmd, res.Stdout, res.Code, res.Err)
 
@@ -251,7 +246,7 @@ func (i *IAM) getNamespace(useDefaultNS bool) string {
 	if useDefaultNS {
 		return "default"
 	}
-	return i.probeNamespace
+	return kubernetes.Namespace
 }
 
 func (i *IAM) getAadPodIDBinding(useDefaultNS bool, aibName string) *string {

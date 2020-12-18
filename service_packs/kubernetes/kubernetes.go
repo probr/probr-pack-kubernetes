@@ -34,6 +34,10 @@ type scenarioState struct {
 	wildcardRoles  interface{}
 }
 
+const (
+	Namespace = "probr-general-test-ns"
+)
+
 type PodPayload struct {
 	Pod      *apiv1.Pod
 	PodAudit *PodAudit

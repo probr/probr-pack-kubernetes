@@ -76,8 +76,6 @@ func (c PSPProbeCommand) String() string {
 }
 
 const (
-	//default values.  Overrides can be supplied via the environment.
-	defaultPSPProbeNamespace = "probr-pod-security-test-ns"
 	//NOTE: either the above namespace needs to be added to the exclusion list on the
 	//container registry image needs to be available in the allowed (probably internal) registry
 	defaultPSPProbeContainer = "psp-test"
@@ -115,7 +113,6 @@ type PSP struct {
 	k                       kubernetes.Kubernetes
 	securityPolicyProviders *[]SecurityPolicyProvider
 
-	probeNamespace string
 	probeImage     string
 	probeContainer string
 	probePodName   string
@@ -156,7 +153,6 @@ func NewDefaultPSP() *PSP {
 func (psp *PSP) setenv() {
 
 	//just default these for now (not sure we'll ever want to supply):
-	psp.probeNamespace = defaultPSPProbeNamespace
 	psp.probeContainer = defaultPSPProbeContainer
 	psp.probePodName = defaultPSPProbePodName
 
@@ -500,7 +496,7 @@ func (psp *PSP) CreatePODSettingSecurityContext(pr *bool, pe *bool, runAsUser *i
 		RunAsUser:                runAsUser,
 	}
 
-	pname, ns, cname, image := kubernetes.GenerateUniquePodName(psp.probePodName), psp.probeNamespace, psp.probeContainer, psp.probeImage
+	pname, ns, cname, image := kubernetes.GenerateUniquePodName(psp.probePodName), kubernetes.Namespace, psp.probeContainer, psp.probeImage
 
 	//let caller handle ...
 	pod, _, err := psp.k.CreatePod(pname, ns, cname, image, true, &sc, probe)
@@ -524,7 +520,7 @@ func (psp *PSP) CreatePODSettingAttributes(hostPID *bool, hostIPC *bool, hostNet
 		hostNetwork = &f
 	}
 
-	pname, ns, cname, image := kubernetes.GenerateUniquePodName(psp.probePodName), psp.probeNamespace, psp.probeContainer, psp.probeImage
+	pname, ns, cname, image := kubernetes.GenerateUniquePodName(psp.probePodName), kubernetes.Namespace, psp.probeContainer, psp.probeImage
 
 	// get the pod object and manipulate:
 	po := psp.k.GetPodObject(pname, ns, cname, image, nil)
@@ -538,7 +534,7 @@ func (psp *PSP) CreatePODSettingAttributes(hostPID *bool, hostIPC *bool, hostNet
 
 // CreatePODSettingCapabilities creates a pod with the supplied capabilities.
 func (psp *PSP) CreatePODSettingCapabilities(c *[]string, probe *summary.Probe) (*apiv1.Pod, error) {
-	pname, ns, cname, image := kubernetes.GenerateUniquePodName(psp.probePodName), psp.probeNamespace, psp.probeContainer, psp.probeImage
+	pname, ns, cname, image := kubernetes.GenerateUniquePodName(psp.probePodName), kubernetes.Namespace, psp.probeContainer, psp.probeImage
 
 	// get the pod object and manipulate:
 	po := psp.k.GetPodObject(pname, ns, cname, image, nil)
@@ -567,7 +563,7 @@ func (psp *PSP) CreatePODSettingCapabilities(c *[]string, probe *summary.Probe) 
 func (psp *PSP) CreatePodFromYaml(y []byte, probe *summary.Probe) (*apiv1.Pod, error) {
 	pname := kubernetes.GenerateUniquePodName(psp.probePodName)
 
-	return psp.k.CreatePodFromYaml(y, pname, psp.probeNamespace, psp.probeImage, "", true, probe)
+	return psp.k.CreatePodFromYaml(y, pname, kubernetes.Namespace, psp.probeImage, "", true, probe)
 }
 
 // ExecPSPProbeCmd executes the given PSPProbeCommand against the supplied pod name.
@@ -589,8 +585,7 @@ func (psp *PSP) ExecPSPProbeCmd(pName *string, cmd PSPProbeCommand, probe *summa
 	}
 
 	c := cmd.String()
-	ns := psp.probeNamespace
-	res := psp.k.ExecCommand(&c, &ns, &pn)
+	res := psp.k.ExecCommand(c, kubernetes.Namespace, &pn)
 
 	log.Printf("[INFO] ExecPSPProbeCmd: %v stdout: %v exit code: %v (error: %v)", cmd, res.Stdout, res.Code, res.Err)
 
@@ -601,7 +596,7 @@ func (psp *PSP) ExecPSPProbeCmd(pName *string, cmd PSPProbeCommand, probe *summa
 func (psp *PSP) CreateConfigMap() error {
 	//set up anything that may be required for testing
 	//1. config map
-	_, err := psp.k.CreateConfigMap(utils.StringPtr("test-config-map"), &psp.probeNamespace)
+	_, err := psp.k.CreateConfigMap(utils.StringPtr("test-config-map"), kubernetes.Namespace)
 
 	if err != nil {
 		log.Printf("[NOTICE] Failed to create test config map: %v", err)
@@ -612,12 +607,12 @@ func (psp *PSP) CreateConfigMap() error {
 
 // DeleteConfigMap deletes the config map supporting the PSP testing.
 func (psp *PSP) DeleteConfigMap() error {
-	return psp.k.DeleteConfigMap(utils.StringPtr("test-config-map"), &psp.probeNamespace)
+	return psp.k.DeleteConfigMap("test-config-map")
 }
 
 // TeardownPodSecurityProbe deletes the given pod name in the PSP test namespace.
 func (psp *PSP) TeardownPodSecurityProbe(p string, e string) error {
-	err := psp.k.DeletePod(p, psp.probeNamespace, e) //don't worry about waiting
+	err := psp.k.DeletePod(p, kubernetes.Namespace, e) //don't worry about waiting
 	return err
 }
 

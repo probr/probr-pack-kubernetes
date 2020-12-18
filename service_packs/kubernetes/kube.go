@@ -74,11 +74,11 @@ type Kubernetes interface {
 	CreatePodFromObject(pod *apiv1.Pod, podName string, ns string, wait bool, probe *summary.Probe) (*apiv1.Pod, error)
 	CreatePodFromYaml(y []byte, pname string, ns string, image string, aadpodidbinding string, w bool, probe *summary.Probe) (*apiv1.Pod, error)
 	GetPodObject(pname string, ns string, cname string, image string, sc *apiv1.SecurityContext) *apiv1.Pod
-	ExecCommand(cmd, ns, pn *string) *CmdExecutionResult
+	ExecCommand(cmd string, ns string, pn *string) *CmdExecutionResult
 	DeletePod(pname string, ns string, e string) error
 	DeleteNamespace(ns *string) error
-	CreateConfigMap(n *string, ns *string) (*apiv1.ConfigMap, error)
-	DeleteConfigMap(n *string, ns *string) error
+	CreateConfigMap(n *string, ns string) (*apiv1.ConfigMap, error)
+	DeleteConfigMap(name string) error
 	GetConstraintTemplates(prefix string) (*map[string]interface{}, error)
 	GetRawResourcesByGrp(g string) (*K8SJSON, error)
 	GetClusterRolesByResource(r string) (*[]rbacv1.ClusterRole, error)
@@ -316,25 +316,25 @@ func (k *Kube) GetPodObject(pname string, ns string, cname string, image string,
 }
 
 // CreateConfigMap creates a config map with the supplied name in the given namespace.
-func (k *Kube) CreateConfigMap(n *string, ns *string) (*apiv1.ConfigMap, error) {
+func (k *Kube) CreateConfigMap(n *string, ns string) (*apiv1.ConfigMap, error) {
 	c, err := k.GetClient()
 	if err != nil {
 		return nil, err
 	}
 
 	//create the namespace for the POD (noOp if already present)
-	_, err = k.createNamespace(ns)
+	_, err = k.createNamespace(&ns)
 	if err != nil {
 		return nil, err
 	}
 
 	//now do config map ...
-	cms := c.CoreV1().ConfigMaps(*ns)
+	cms := c.CoreV1().ConfigMaps(ns)
 
 	cm := apiv1.ConfigMap{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      *n,
-			Namespace: *ns,
+			Namespace: ns,
 			Labels: map[string]string{
 				"app": "demo",
 			},
@@ -360,40 +360,40 @@ func (k *Kube) CreateConfigMap(n *string, ns *string) (*apiv1.ConfigMap, error) 
 }
 
 // DeleteConfigMap deletes the named config map in the given namespace.
-func (k *Kube) DeleteConfigMap(n *string, ns *string) error {
+func (k *Kube) DeleteConfigMap(name string) error {
 	c, err := k.GetClient()
 	if err != nil {
 		return err
 	}
 
-	cms := c.CoreV1().ConfigMaps(*ns)
+	cms := c.CoreV1().ConfigMaps(Namespace)
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	err = cms.Delete(ctx, *n, metav1.DeleteOptions{})
+	err = cms.Delete(ctx, name, metav1.DeleteOptions{})
 	if err != nil {
 		return err
 	}
 
-	log.Printf("[INFO] ConfigMap %v deleted.", *n)
+	log.Printf("[INFO] ConfigMap %v deleted.", name)
 
 	return nil
 }
 
 // ExecCommand executes the supplied command on the given pod name in the specified namespace.
-func (k *Kube) ExecCommand(cmd, ns, pn *string) (s *CmdExecutionResult) {
-	if cmd == nil {
+func (k *Kube) ExecCommand(cmd string, ns string, pn *string) (s *CmdExecutionResult) {
+	if cmd == "" {
 		return &CmdExecutionResult{Err: fmt.Errorf("command string is nil - nothing to execute"), Internal: true}
 	}
-	log.Printf("[NOTICE] Executing command: \"%s\" on POD '%s' in namespace '%s'", *cmd, *pn, *ns)
+	log.Printf("[NOTICE] Executing command: \"%s\" on POD '%s' in namespace '%s'", cmd, *pn, ns)
 	c, err := k.GetClient()
 	if err != nil {
 		return &CmdExecutionResult{Err: err, Internal: true}
 	}
 
 	req := c.CoreV1().RESTClient().Post().Resource("pods").
-		Name(*pn).Namespace(*ns).SubResource("exec")
+		Name(*pn).Namespace(ns).SubResource("exec")
 
 	scheme := runtime.NewScheme()
 	if err := apiv1.AddToScheme(scheme); err != nil {
@@ -402,7 +402,7 @@ func (k *Kube) ExecCommand(cmd, ns, pn *string) (s *CmdExecutionResult) {
 
 	parameterCodec := runtime.NewParameterCodec(scheme)
 	options := apiv1.PodExecOptions{
-		Command: strings.Fields(*cmd),
+		Command: strings.Fields(cmd),
 		// Container: containerName, //specify if more than one container
 		Stdout: true,
 		Stderr: true,

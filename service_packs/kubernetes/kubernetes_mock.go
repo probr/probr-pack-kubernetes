@@ -55,7 +55,7 @@ func (m *KubeMock) GetPodObject(pname string, ns string, cname string, image str
 	p := m.Called().Get(0).(*apiv1.Pod)
 	return p
 }
-func (m *KubeMock) ExecCommand(cmd, ns, pn *string) *CmdExecutionResult {
+func (m *KubeMock) ExecCommand(cmd string, ns string, pn *string) *CmdExecutionResult {
 	a := m.Called()
 	return a.Get(0).(*CmdExecutionResult)
 }
@@ -67,12 +67,12 @@ func (m *KubeMock) DeleteNamespace(ns *string) error {
 	e := m.Called().Error(0)
 	return e
 }
-func (m *KubeMock) CreateConfigMap(n *string, ns *string) (*apiv1.ConfigMap, error) {
+func (m *KubeMock) CreateConfigMap(n *string, ns string) (*apiv1.ConfigMap, error) {
 	cm := m.Called().Get(0).(*apiv1.ConfigMap)
 	e := m.Called().Error(1)
 	return cm, e
 }
-func (m *KubeMock) DeleteConfigMap(n *string, ns *string) error {
+func (m *KubeMock) DeleteConfigMap(n string) error {
 	e := m.Called().Error(0)
 	return e
 }
