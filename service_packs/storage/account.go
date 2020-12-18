@@ -12,6 +12,16 @@ import (
 	"github.com/citihub/probr/internal/azureutil"
 )
 
+//
+func DeleteAccount(ctx context.Context, resourceGroupName, accountName string) error {
+
+	c := accountClient()
+
+	_, err := c.Delete(ctx, resourceGroupName, accountName)
+
+	return err
+}
+
 // CreateWithNetworkRuleSet starts creation of a new Storage Account and waits for the account to be created.
 func CreateWithNetworkRuleSet(ctx context.Context, accountName, accountGroupName string, tags map[string]*string, httpsOnly bool, networkRuleSet *storage.NetworkRuleSet) (storage.Account, error) {
 

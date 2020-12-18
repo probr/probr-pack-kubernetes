@@ -2,6 +2,7 @@ package encryption_in_flight
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log"
 	"strings"
@@ -44,6 +45,7 @@ type EncryptionInFlightAzure struct {
 	httpsOption               bool
 	policyAssignmentMgmtGroup string
 	resourceGroupName         string
+	storageAccounts           []string
 }
 
 var state EncryptionInFlightAzure
@@ -56,6 +58,15 @@ func (state *EncryptionInFlightAzure) setup() {
 }
 
 func (state *EncryptionInFlightAzure) teardown() {
+	for _, account := range state.storageAccounts {
+		log.Printf("[DEBUG] need to delete the storageAccount: %s", account)
+		err := storage.DeleteAccount(state.ctx, state.resourceGroupName, account)
+
+		if err != nil {
+			log.Printf("[ERROR] error deleting the storageAccount: %v", err)
+		}
+	}
+
 	log.Println("[DEBUG] Teardown completed")
 }
 
@@ -84,6 +95,8 @@ func (state *EncryptionInFlightAzure) anAzureResourceGroupExists() error {
 	// check the resource group has been configured
 	if config.Vars.CloudProviders.Azure.ResourceGroup == "" {
 		log.Printf("[ERROR] Azure resource group config var not set")
+		err := errors.New("Azure resource group config var not set")
+		return err
 	} else {
 		log.Printf("[NOTICE] Azure resource group config var is %s", config.Vars.CloudProviders.Azure.ResourceGroup)
 	}
@@ -140,6 +153,11 @@ func (state *EncryptionInFlightAzure) creationWillWithAnErrorMatching(expectatio
 		log.Printf("[DEBUG] Creating Storage Account with HTTPS: %v", state.httpsOption)
 		_, err = storage.CreateWithNetworkRuleSet(state.ctx, accountName,
 			state.resourceGroupName, state.tags, state.httpsOption, &networkRuleSet)
+	}
+	if err == nil {
+		// storage account created so add to state
+		log.Printf("[DEBUG] Created Storage Account: %s", accountName)
+		state.storageAccounts = append(state.storageAccounts, accountName)
 	}
 
 	if expectation == "Fail" {

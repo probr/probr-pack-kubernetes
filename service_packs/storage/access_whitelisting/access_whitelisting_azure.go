@@ -2,6 +2,7 @@ package access_whitelisting
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log"
 	"os"
@@ -66,6 +67,8 @@ func (state *accessWhitelistingAzure) anAzureResourceGroupExists() error {
 	// check the resource group has been configured
 	if config.Vars.CloudProviders.Azure.ResourceGroup == "" {
 		log.Printf("[ERROR] Azure resource group config var not set")
+		err := errors.New("Azure resource group config var not set")
+		return err
 	} else {
 		log.Printf("[NOTICE] Azure resource group config var is %s", config.Vars.CloudProviders.Azure.ResourceGroup)
 	}
