@@ -14,6 +14,7 @@ import (
 	"github.com/cucumber/godog"
 
 	"github.com/citihub/probr/internal/azureutil"
+	"github.com/citihub/probr/internal/azureutil/group"
 	"github.com/citihub/probr/internal/azureutil/policy"
 	"github.com/citihub/probr/internal/config"
 	"github.com/citihub/probr/internal/coreengine"
@@ -89,7 +90,6 @@ func (state *EncryptionInFlightAzure) securityControlsThatRestrictDataFromBeingU
 	return nil
 }
 
-// PENDING IMPLEMENTATION
 func (state *EncryptionInFlightAzure) anAzureResourceGroupExists() error {
 
 	// check the resource group has been configured
@@ -102,7 +102,13 @@ func (state *EncryptionInFlightAzure) anAzureResourceGroupExists() error {
 	}
 
 	state.resourceGroupName = config.Vars.CloudProviders.Azure.ResourceGroup
+
 	// Check the resource group exists in the specified azure subscription
+	_, errAzure := group.Get(state.ctx, state.resourceGroupName)
+	if errAzure != nil {
+		log.Printf("[ERROR] Configured Azure resource group %s does not exists", state.resourceGroupName)
+		return errAzure
+	}
 
 	return nil
 }

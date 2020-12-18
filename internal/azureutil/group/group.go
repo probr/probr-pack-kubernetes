@@ -23,6 +23,12 @@ func Create(ctx context.Context, name string) (resources.Group, error) {
 		})
 }
 
+// Get an existing Resource Group by name
+func Get(ctx context.Context, name string) (resources.Group, error) {
+	log.Printf("[DEBUG] getting a Resource Group '%s'", name)
+	return client().Get(ctx, name)
+}
+
 // CreateWithTags creates a new Resource Group in the default location (configured using the AZURE_LOCATION environment variable) and sets the supplied tags.
 func CreateWithTags(ctx context.Context, name string, tags map[string]*string) (resources.Group, error) {
 	log.Printf("[DEBUG] creating Resource Group '%s' on location: '%v'", name, azureutil.Location())
@@ -43,25 +49,25 @@ func client() resources.GroupsClient {
 	envVar = "AZURE_TENANT_ID"
 	value, ok = os.LookupEnv(envVar)
 	if !ok {
-		log.Fatalf("Mandatory env var not set: %v", envVar)
+		log.Printf("[ERROR] Mandatory env var not set: %v", envVar)
 	}
 	log.Printf("[DEBUG] Env var %v value is: %v", envVar, value)
 	envVar = "AZURE_SUBSCRIPTION_ID"
 	value, ok = os.LookupEnv(envVar)
 	if !ok {
-		log.Fatalf("Mandatory env var not set: %v", envVar)
+		log.Printf("[ERROR] Mandatory env var not set: %v", envVar)
 	}
 	log.Printf("[DEBUG] Env var %v value is: %v", envVar, value)
 	envVar = "AZURE_CLIENT_ID"
 	value, ok = os.LookupEnv(envVar)
 	if !ok {
-		log.Fatalf("Mandatory env var not set: %v", envVar)
+		log.Printf("[ERROR] Mandatory env var not set: %v", envVar)
 	}
 	log.Printf("[DEBUG] Env var %v value is: %v", envVar, value)
 	envVar = "AZURE_CLIENT_SECRET"
 	value, ok = os.LookupEnv(envVar)
 	if !ok {
-		log.Fatalf("Mandatory env var not set: %v", envVar)
+		log.Printf("[ERROR] Mandatory env var not set: %v", envVar)
 	}
 	log.Printf("[DEBUG] Env var %v value is: %v", envVar, value)
 

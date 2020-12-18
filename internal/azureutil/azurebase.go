@@ -47,7 +47,7 @@ func randomPrefix() string {
 func getFromEnvVar(varName string) string {
 	v, b := os.LookupEnv(varName)
 	if !b {
-		log.Fatalf("Environment variable \"%v\" is not defined", varName)
+		log.Printf("[ERROR] Environment variable \"%v\" is not defined", varName)
 	}
 	return v
 }
