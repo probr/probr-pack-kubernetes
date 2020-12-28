@@ -105,12 +105,12 @@ func AuditDir() string {
 }
 
 func (ctx *ConfigVars) handleConfigFileExclusions() {
-	if ctx.ServicePacks.Kubernetes.isExcluded() {
+	if ctx.ServicePacks.Kubernetes.IsExcluded() {
 		ctx.addExclusion("probes/kubernetes")
 	} else {
 		ctx.handleProbeExclusions("kubernetes", ctx.ServicePacks.Kubernetes.Probes)
 	}
-	if ctx.ServicePacks.Storage.isExcluded() {
+	if ctx.ServicePacks.Storage.IsExcluded() {
 		ctx.addExclusion("probes/storage")
 	} else {
 		ctx.handleProbeExclusions("storage", ctx.ServicePacks.Storage.Probes)
@@ -119,11 +119,11 @@ func (ctx *ConfigVars) handleConfigFileExclusions() {
 
 func (ctx *ConfigVars) handleProbeExclusions(packName string, probes []Probe) {
 	for _, probe := range probes {
-		if probe.isExcluded() {
+		if probe.IsExcluded() {
 			ctx.addExclusion(fmt.Sprintf("probes/%s/%s", packName, probe.Name))
 		} else {
 			for _, scenario := range probe.Scenarios {
-				if scenario.isExcluded() {
+				if scenario.IsExcluded() {
 					ctx.addExclusion(fmt.Sprintf("probes/%s/%s/%s", packName, probe.Name, scenario.Name))
 				}
 			}
@@ -139,9 +139,13 @@ func (ctx *ConfigVars) addExclusion(tag string) {
 }
 
 // Log and return exclusion configuration
-func (k Kubernetes) isExcluded() bool {
-	if k.Excluded != "" {
-		log.Printf("[NOTICE] Excluding Kubernetes service pack. Justification: %s", k.Excluded)
+func (k Kubernetes) IsExcluded() bool {
+	if k.AuthorisedContainerRegistry == "" || k.UnauthorisedContainerRegistry == "" {
+		if !k.exclusionLogged {
+			file, line := utils.CallerFileLine()
+			log.Printf("[WARN] %s:%v: Ignoring Kubernetes service pack due to required vars not being present.", file, line)
+
+		}
 		return true
 	}
 	log.Printf("[NOTICE] Kubernetes service pack included.")
@@ -149,9 +153,13 @@ func (k Kubernetes) isExcluded() bool {
 }
 
 // Log and return exclusion configuration
-func (k Storage) isExcluded() bool {
-	if k.Excluded != "" {
-		log.Printf("[NOTICE] Excluding Storage service pack. Justification: %s", k.Excluded)
+func (s Storage) IsExcluded() bool {
+	if s.Provider == "" {
+		if !s.exclusionLogged {
+			file, line := utils.CallerFileLine()
+			log.Printf("[WARN] %s:%v: Ignoring Storage service pack due to required vars not being present.", file, line)
+
+		}
 		return true
 	}
 	log.Printf("[NOTICE] Storage service pack included.")
@@ -159,7 +167,7 @@ func (k Storage) isExcluded() bool {
 }
 
 // Log and return exclusion configuration
-func (p Probe) isExcluded() bool {
+func (p Probe) IsExcluded() bool {
 	if p.Excluded != "" {
 		log.Printf("[NOTICE] Excluding %s probe. Justification: %s", strings.Replace(p.Name, "_", " ", -1), p.Excluded)
 		return true
@@ -168,7 +176,7 @@ func (p Probe) isExcluded() bool {
 }
 
 // Log and return exclusion configuration
-func (s Scenario) isExcluded() bool {
+func (s Scenario) IsExcluded() bool {
 	if s.Excluded != "" {
 		log.Printf("[NOTICE] Excluding scenario '%s'. Justification: %s", s.Name, s.Excluded)
 		return true

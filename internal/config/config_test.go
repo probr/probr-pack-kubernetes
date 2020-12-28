@@ -11,14 +11,14 @@ import (
 //
 
 func assertIsNotExcluded(obj Excludable, t *testing.T) {
-	if obj.isExcluded() {
+	if obj.IsExcluded() {
 		t.Log("Non-excluded probe has been exlcuded")
 		t.Fail()
 	}
 }
 
 func assertIsExcluded(obj Excludable, t *testing.T) {
-	if !obj.isExcluded() {
+	if !obj.IsExcluded() {
 		t.Log("Excluded probe has not been exlcuded")
 		t.Fail()
 	}
@@ -87,11 +87,30 @@ func TestNewConfig(t *testing.T) {
 
 func TestK8sIsExcluded(t *testing.T) {
 	config, _ := NewConfig("")
-	assertIsNotExcluded(config.ServicePacks.Kubernetes, t)
 
-	config.ServicePacks.Kubernetes.Excluded = "yes"
+	// 0 required vars set
 	assertIsExcluded(config.ServicePacks.Kubernetes, t)
+
+	// 1 of 2 required vars set
+	config.ServicePacks.Kubernetes.AuthorisedContainerRegistry = "not-empty"
+	assertIsExcluded(config.ServicePacks.Kubernetes, t)
+
+	// All required vars set
+	config.ServicePacks.Kubernetes.UnauthorisedContainerRegistry = "not-empty"
+	assertIsNotExcluded(config.ServicePacks.Kubernetes, t)
 }
+
+func TestStorageIsExcluded(t *testing.T) {
+	config, _ := NewConfig("")
+
+	// 0 required vars set
+	assertIsExcluded(config.ServicePacks.Storage, t)
+
+	// All required vars set
+	config.ServicePacks.Storage.Provider = "not-empty"
+	assertIsNotExcluded(config.ServicePacks.Storage, t)
+}
+
 func TestProbeIsExcluded(t *testing.T) {
 	config, _ := NewConfig("")
 	config.ServicePacks.Kubernetes.Probes = append(

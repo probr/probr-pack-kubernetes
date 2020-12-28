@@ -24,7 +24,7 @@ type ServicePacks struct {
 }
 
 type Kubernetes struct {
-	Excluded                      string   `yaml:"Excluded"`
+	exclusionLogged               bool
 	Probes                        []Probe  `yaml:"Probes"`
 	KubeConfigPath                string   `yaml:"KubeConfig"`
 	KubeContext                   string   `yaml:"KubeContext"`
@@ -35,8 +35,9 @@ type Kubernetes struct {
 }
 
 type Storage struct {
-	Excluded string  `yaml:"Excluded"`
-	Probes   []Probe `yaml:"Probes"`
+	exclusionLogged bool
+	Provider        string  `yaml:"Provider"` // Placeholder!
+	Probes          []Probe `yaml:"Probes"`
 }
 
 type Probe struct {
@@ -70,5 +71,5 @@ type Azure struct {
 
 // For testing
 type Excludable interface {
-	isExcluded() bool
+	IsExcluded() bool
 }

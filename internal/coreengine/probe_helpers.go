@@ -12,6 +12,13 @@ import (
 	"github.com/citihub/probr/internal/config"
 )
 
+// Service Packs should use this interface to export probes
+type Probe interface {
+	ProbeInitialize(*godog.TestSuiteContext)
+	ScenarioInitialize(*godog.ScenarioContext)
+	Name() string
+}
+
 const rootDirName = "probr"
 
 var outputDir *string
