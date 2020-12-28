@@ -24,6 +24,7 @@ var (
 var kube = kubernetes.GetKubeInstance()
 
 func main() {
+	cli_flags.HandleRequestForRequiredVars()
 	cli_flags.HandleFlags()
 	config.LogConfigState()
 

@@ -35,9 +35,9 @@ The following elements are required to get started with Probr:
 
 1. Set your configuration variables. For more on how to do this, see the config documentation further down on this page.
 
-1. Run the probr executable via `./probr [OPTIONS]`. Additional options can be seen via `./probr --help`
-
-*Note: Feature files are not included in the binary. In this present state, Probr must be executed from the top level directory of the source code.*
+1. Run the probr executable via `./probr [OPTIONS]`. 
+    - Additional options can be seen via `./probr --help`
+    - Review required variables via `./probr show-required <SERVICE PACK NAME>`
 
 ## Configuration
 
