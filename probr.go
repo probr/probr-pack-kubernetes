@@ -3,14 +3,10 @@ package probr
 import (
 	"github.com/citihub/probr/internal/coreengine"
 	"github.com/citihub/probr/service_packs"
-	"github.com/citihub/probr/service_packs/kubernetes"
 )
 
-//TODO: revise when interface this bit up ...
-var kube = kubernetes.GetKubeInstance()
-
 func RunAllProbes() (int, *coreengine.ProbeStore, error) {
-	ts := coreengine.NewProbeStore() // get the test mgr
+	ts := coreengine.NewProbeStore()
 
 	for _, probe := range service_packs.GetAllProbes() {
 		ts.AddProbe(probe)

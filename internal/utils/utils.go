@@ -32,6 +32,15 @@ func Int64Ptr(i int64) *int64 {
 	return &i
 }
 
+func FindString(slice []string, val string) (int, bool) {
+	for i, item := range slice {
+		if item == val {
+			return i, true
+		}
+	}
+	return -1, false
+}
+
 // CallerName retrieves the name of the function prior to the location it is called
 func CallerName(up int) string {
 	s := strings.Split(CallerPath(up+1), ".") // split full caller path

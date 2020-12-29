@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"github.com/citihub/probr/internal/config"
+	"github.com/citihub/probr/internal/utils"
 )
 
 type flagHandlerFunc func(v interface{})
@@ -84,12 +85,14 @@ func cucumberDirHandler(v interface{}) {
 // loglevelHandler validates provided value and sets output accordingly
 func loglevelHandler(v interface{}) {
 	if len(*v.(*string)) > 0 {
-		config.Vars.LogLevel = *v.(*string)
-		config.SetLogFilter(config.Vars.LogLevel, os.Stderr)
-		if (*v.(*string) != "DEBUG") && (*v.(*string) != "INFO") && (*v.(*string) != "NOTICE") && (*v.(*string) != "WARN") && (*v.(*string) != "ERROR") {
-			log.Fatalf("[ERROR] Unknown loglevel specified: %v. Must be one of 'DEBUG', 'INFO', 'NOTICE', 'WARN', 'ERROR'", v.(*string))
+		levels := []string{"DEBUG", "INFO", "NOTICE", "WARN", "ERROR"}
+		_, found := utils.FindString(levels, *v.(*string))
+		if !found {
+			log.Fatalf("[ERROR] Unknown loglevel specified: '%s'. Must be one of %v", *v.(*string), levels)
+		} else {
+			config.Vars.LogLevel = *v.(*string)
+			config.SetLogFilter(config.Vars.LogLevel, os.Stderr)
 		}
-		config.Vars.LogLevel = *v.(*string)
 	}
 }
 

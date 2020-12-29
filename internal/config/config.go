@@ -37,7 +37,6 @@ func (ctx *ConfigVars) handleTagExclusions() {
 
 // Init will override config.Vars with the content retrieved from a filepath
 func Init(configPath string) error {
-	log.Printf("[DEBUG] Config initialized by %s", utils.CallerName(1))
 	config, err := NewConfig(configPath)
 
 	if err != nil {
@@ -48,6 +47,8 @@ func Init(configPath string) error {
 	setFromEnvOrDefaults(&Vars) // Set any values not retrieved from file
 
 	SetLogFilter(Vars.LogLevel, os.Stderr) // Set the minimum log level obtained from Vars
+	log.Printf("[DEBUG] Config initialized by %s", utils.CallerName(1))
+
 	Vars.handleConfigFileExclusions()
 
 	return nil
