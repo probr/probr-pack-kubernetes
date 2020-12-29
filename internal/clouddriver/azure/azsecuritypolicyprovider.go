@@ -5,10 +5,9 @@ import (
 	"log"
 	"time"
 
-	"github.com/citihub/probr/internal/config"
-
 	"github.com/Azure/azure-sdk-for-go/profiles/latest/resources/mgmt/policy"
 	"github.com/Azure/go-autorest/autorest/azure/auth"
+	"github.com/citihub/probr/internal/azureutil"
 )
 
 type azPolicy struct {
@@ -165,7 +164,7 @@ func (p *AZSecurityPolicyProvider) getPolicies() (*map[string]*azPolicy, error) 
 		return &p.policiesByType, nil
 	}
 
-	s := config.Vars.CloudProviders.Azure.SubscriptionID
+	s := azureutil.SubscriptionID()
 	log.Printf("[INFO] Using Azure Sub: %v", s)
 
 	scope := "/subscriptions/" + s

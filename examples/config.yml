@@ -12,15 +12,15 @@ ServicePacks:
     ProbeImage: citihub/probr-probe
     Probes: # allows this pack's probes to be disabled by name
       - Name: pod_security_policy
-        Excluded: "yes"
+        Excluded: "out"
       - Name: iam
-        Excluded: ""
+        Excluded:
       - Name: general
-        Excluded: "yes"
+        Excluded: "out"
       - Name: container_registry_access
-        Excluded: "yes"
+        Excluded: "out"
       - Name: internet_access
-        Excluded: "yes"
+        Excluded: "out"
         Scenarios: # allows this probe's scenarios to be disabled using their probe tag value
           - Name: "1.0"
             Excluded: # "Excluded to demonstrate scenario exclusion option"
@@ -28,12 +28,13 @@ ServicePacks:
       # Provider: # if object OR required vars within it are omitted, pack will not be included
 CloudProviders:
   Azure:
-    TenantID:
-    SubscriptionID:
-    ClientID:
-    ClientSecret:
+    TenantID: "8c739bb2-3e1e-494a-9f5a-22e154c876d0"
+    SubscriptionID: "27cc841d-bab8-4080-b103-d89e00dc8c45"
+    ClientID: "4c97ad17-0235-49cf-aa72-4ba445422a65"
+    ClientSecret: ".~~Xcz0.GDegJCSX22X-18~JB6_AaJ9tM6"
     ManagementGroup:
-    Location:
+    ResourceGroup: ProbrRG
+    ResourceLocation: "westeurope"
     Identity:
       DefaultNamespaceAI:
       DefaultNamespaceAIB:

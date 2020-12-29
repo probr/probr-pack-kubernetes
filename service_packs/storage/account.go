@@ -12,7 +12,7 @@ import (
 	"github.com/citihub/probr/internal/azureutil"
 )
 
-//
+// DeleteAccount - deletes a storage account given the azure contect, resource group and account name
 func DeleteAccount(ctx context.Context, resourceGroupName, accountName string) error {
 
 	c := accountClient()
@@ -57,7 +57,7 @@ func CreateWithNetworkRuleSet(ctx context.Context, accountName, accountGroupName
 			Sku: &storage.Sku{
 				Name: storage.StandardLRS},
 			Kind:                              storage.Storage,
-			Location:                          to.StringPtr(azureutil.Location()),
+			Location:                          to.StringPtr(azureutil.ResourceLocation()),
 			AccountPropertiesCreateParameters: networkRuleSetParam,
 			Tags:                              tags,
 		})
@@ -93,12 +93,18 @@ func getAccountKeys(ctx context.Context, accountName, accountGroupName string) (
 }
 
 func accountClient() storage.AccountsClient {
+
+	// Create an azure storage account client object via the connection config vars
 	c := storage.NewAccountsClient(azureutil.SubscriptionID())
-	a, err := auth.NewAuthorizerFromEnvironment()
+
+	// Create an authorization object via the connection config vars
+	authorizer := auth.NewClientCredentialsConfig(azureutil.ClientID(), azureutil.ClientSecret(), azureutil.TenantID())
+
+	authorizerToken, err := authorizer.Authorizer()
 	if err == nil {
-		c.Authorizer = a
+		c.Authorizer = authorizerToken
 	} else {
-		log.Fatalf("Unable to authorise Storage Account accountClient: %v", err)
+		log.Printf("[ERROR] Unable to authorise Storage Account accountClient: %v", err)
 	}
 	return c
 }

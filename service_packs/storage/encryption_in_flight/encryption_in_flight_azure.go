@@ -16,7 +16,6 @@ import (
 	"github.com/citihub/probr/internal/azureutil"
 	"github.com/citihub/probr/internal/azureutil/group"
 	"github.com/citihub/probr/internal/azureutil/policy"
-	"github.com/citihub/probr/internal/config"
 	"github.com/citihub/probr/internal/coreengine"
 	"github.com/citihub/probr/internal/summary"
 	"github.com/citihub/probr/service_packs/storage"
@@ -45,7 +44,6 @@ type EncryptionInFlightAzure struct {
 	httpOption                bool
 	httpsOption               bool
 	policyAssignmentMgmtGroup string
-	resourceGroupName         string
 	storageAccounts           []string
 }
 
@@ -61,7 +59,7 @@ func (state *EncryptionInFlightAzure) setup() {
 func (state *EncryptionInFlightAzure) teardown() {
 	for _, account := range state.storageAccounts {
 		log.Printf("[DEBUG] need to delete the storageAccount: %s", account)
-		err := storage.DeleteAccount(state.ctx, state.resourceGroupName, account)
+		err := storage.DeleteAccount(state.ctx, azureutil.ResourceGroup(), account)
 
 		if err != nil {
 			log.Printf("[ERROR] error deleting the storageAccount: %v", err)
@@ -92,25 +90,20 @@ func (state *EncryptionInFlightAzure) securityControlsThatRestrictDataFromBeingU
 
 func (state *EncryptionInFlightAzure) anAzureResourceGroupExists() error {
 
+	var err error
 	// check the resource group has been configured
-	if config.Vars.CloudProviders.Azure.ResourceGroup == "" {
+	if azureutil.ResourceGroup() == "" {
 		log.Printf("[ERROR] Azure resource group config var not set")
-		err := errors.New("Azure resource group config var not set")
-		return err
-	} else {
-		log.Printf("[NOTICE] Azure resource group config var is %s", config.Vars.CloudProviders.Azure.ResourceGroup)
+		err = errors.New("Azure resource group config var not set")
 	}
-
-	state.resourceGroupName = config.Vars.CloudProviders.Azure.ResourceGroup
-
-	// Check the resource group exists in the specified azure subscription
-	_, errAzure := group.Get(state.ctx, state.resourceGroupName)
-	if errAzure != nil {
-		log.Printf("[ERROR] Configured Azure resource group %s does not exists", state.resourceGroupName)
-		return errAzure
+	if err == nil {
+		// Check the resource group exists in the specified azure subscription
+		_, err = group.Get(state.ctx, azureutil.ResourceGroup())
+		if err != nil {
+			log.Printf("[ERROR] Configured Azure resource group %s does not exists", azureutil.ResourceGroup())
+		}
 	}
-
-	return nil
+	return err
 }
 
 func (state *EncryptionInFlightAzure) weProvisionAnObjectStorageBucket() error {
@@ -150,15 +143,15 @@ func (state *EncryptionInFlightAzure) creationWillWithAnErrorMatching(expectatio
 	if state.httpsOption && state.httpOption {
 		log.Printf("[DEBUG] Creating Storage Account with HTTPS: %v", false)
 		_, err = storage.CreateWithNetworkRuleSet(state.ctx, accountName,
-			state.resourceGroupName, state.tags, false, &networkRuleSet)
+			azureutil.ResourceGroup(), state.tags, false, &networkRuleSet)
 	} else if state.httpsOption {
 		log.Printf("[DEBUG] Creating Storage Account with HTTPS: %v", state.httpsOption)
 		_, err = storage.CreateWithNetworkRuleSet(state.ctx, accountName,
-			state.resourceGroupName, state.tags, state.httpsOption, &networkRuleSet)
+			azureutil.ResourceGroup(), state.tags, state.httpsOption, &networkRuleSet)
 	} else if state.httpOption {
 		log.Printf("[DEBUG] Creating Storage Account with HTTPS: %v", state.httpsOption)
 		_, err = storage.CreateWithNetworkRuleSet(state.ctx, accountName,
-			state.resourceGroupName, state.tags, state.httpsOption, &networkRuleSet)
+			azureutil.ResourceGroup(), state.tags, state.httpsOption, &networkRuleSet)
 	}
 	if err == nil {
 		// storage account created so add to state
@@ -179,15 +172,11 @@ func (state *EncryptionInFlightAzure) creationWillWithAnErrorMatching(expectatio
 		log.Printf("[DEBUG] Detailed Error: %v", detailed)
 
 		if strings.EqualFold(detailed.Code, "RequestDisallowedByPolicy") {
-			// Now check if it is the right policy
-			if strings.Contains(detailed.Message, policyName) {
-				log.Printf("[DEBUG] Request was Disallowed By Policy: %v [Step PASSED]", policyName)
-				return nil
-			}
-			return fmt.Errorf("storage account was not created but blocked not by the right policy: %v", detailed.Message)
+			log.Printf("[DEBUG] Request was Disallowed By Policy: %v [Step PASSED]", policyName)
+			return nil
 		}
 
-		return fmt.Errorf("storage account was not created")
+		return fmt.Errorf("storage account was not created but not due to policy non-compliance")
 	} else if expectation == "Succeed" {
 		if err != nil {
 			log.Printf("[ERROR] Unexpected failure in create storage ac [Step FAILED]")
@@ -236,10 +225,10 @@ func (p ProbeStruct) ProbeInitialize(ctx *godog.TestSuiteContext) {
 
 // initialises the scenario
 func (p ProbeStruct) ScenarioInitialize(ctx *godog.ScenarioContext) {
-	ps := scenarioState{}
+	ss := scenarioState{}
 
 	ctx.BeforeScenario(func(s *godog.Scenario) {
-		beforeScenario(&ps, p.Name(), s)
+		beforeScenario(&ss, p.Name(), s)
 	})
 
 	ctx.Step(`^a specified azure resource group exists$`, state.anAzureResourceGroupExists)
