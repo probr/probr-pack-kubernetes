@@ -47,7 +47,7 @@ func FeatureContext(s *godog.Suite) {
 
 	s.BeforeSuite(state.setup)
 
-	s.Step(`^security controls that restrict data from being unencrypted in flight$`, state.securityControlsThatRestrictDataFromBeingUnencryptedInFlight)
+	s.Step(`^a specified azure resource group exists$`, state.anAzureResourceGroupExists)
 	s.Step(`^we provision an Object Storage bucket$`, state.weProvisionAnObjectStorageBucket)
 	s.Step(`^http access is "([^"]*)"$`, state.httpAccessIs)
 	s.Step(`^https access is "([^"]*)"$`, state.httpsAccessIs)

@@ -7,7 +7,6 @@ import (
 	"log"
 	"strings"
 
-	azurePolicy "github.com/Azure/azure-sdk-for-go/services/resources/mgmt/2019-01-01/policy"
 	azureStorage "github.com/Azure/azure-sdk-for-go/services/storage/mgmt/2019-04-01/storage"
 	"github.com/Azure/go-autorest/autorest"
 	"github.com/Azure/go-autorest/autorest/azure"
@@ -15,14 +14,9 @@ import (
 
 	"github.com/citihub/probr/internal/azureutil"
 	"github.com/citihub/probr/internal/azureutil/group"
-	"github.com/citihub/probr/internal/azureutil/policy"
 	"github.com/citihub/probr/internal/coreengine"
 	"github.com/citihub/probr/internal/summary"
 	"github.com/citihub/probr/service_packs/storage"
-)
-
-const (
-	policyName = "deny_http_storage"
 )
 
 // Allows this probe to be added to the ProbeStore
@@ -67,25 +61,6 @@ func (state *EncryptionInFlightAzure) teardown() {
 	}
 
 	log.Println("[DEBUG] Teardown completed")
-}
-
-func (state *EncryptionInFlightAzure) securityControlsThatRestrictDataFromBeingUnencryptedInFlight() error {
-	var policyAssignment azurePolicy.Assignment
-	var aerr error
-	// Search assignment from Management Group instead of subscription
-	if state.policyAssignmentMgmtGroup != "" {
-		policyAssignment, aerr = policy.AssignmentByManagementGroup(state.ctx, state.policyAssignmentMgmtGroup, policyName)
-	} else {
-		policyAssignment, aerr = policy.AssignmentBySubscription(state.ctx, azureutil.SubscriptionID(), policyName)
-	}
-
-	if aerr != nil {
-		log.Printf("[ERROR] Get policy assignment error: %v", aerr)
-		return aerr
-	}
-
-	log.Printf("[DEBUG] Policy assignment check: %v [Step PASSED]", *policyAssignment.Name)
-	return nil
 }
 
 func (state *EncryptionInFlightAzure) anAzureResourceGroupExists() error {
@@ -172,7 +147,7 @@ func (state *EncryptionInFlightAzure) creationWillWithAnErrorMatching(expectatio
 		log.Printf("[DEBUG] Detailed Error: %v", detailed)
 
 		if strings.EqualFold(detailed.Code, "RequestDisallowedByPolicy") {
-			log.Printf("[DEBUG] Request was Disallowed By Policy: %v [Step PASSED]", policyName)
+			log.Printf("[DEBUG] Request was Disallowed By Policy: [Step PASSED]")
 			return nil
 		}
 

@@ -3,7 +3,7 @@ package encryption_in_flight
 // EncryptionInFlight is an interface. For each CSP specific implementation
 type EncryptionInFlight interface {
 	setup()
-	securityControlsThatRestrictDataFromBeingUnencryptedInFlight() error
+	anAzureResourceGroupExists() error
 	weProvisionAnObjectStorageBucket() error
 	httpAccessIs(arg1 string) error
 	httpsAccessIs(arg1 string) error
