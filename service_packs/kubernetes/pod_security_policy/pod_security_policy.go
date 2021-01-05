@@ -114,7 +114,7 @@ func (s *scenarioState) runVerificationProbe(c VerificationProbe) error {
 		if res.Err != nil && res.Internal {
 			//we have an error which was raised before reaching the cluster (i.e. it's "internal")
 			//this indicates that the command was not successfully executed
-			err = utils.ReformatError("Likely an internal Probr error. Error raised trying to execute verification command (%v)", c.Cmd)
+			err = utils.ReformatError("%s: %v - (%v)", utils.CallerName(0), c, res.Err)
 			log.Print(err)
 			return err
 		}

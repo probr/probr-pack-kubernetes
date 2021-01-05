@@ -248,7 +248,7 @@ func (s *scenarioState) iExecuteTheCommandAgainstTheMICPod(arg1 string) error {
 	} else if res.Err != nil && res.Internal {
 		//we have an error which was raised before reaching the cluster (i.e. it's "internal")
 		//this indicates that the command was not successfully executed
-		err = utils.ReformatError("error raised trying to execute verification command (%v)", c)
+		err = utils.ReformatError("%s: %v - (%v)", utils.CallerName(0), c, res.Err)
 		log.Print(err)
 	}
 	if err != nil {
