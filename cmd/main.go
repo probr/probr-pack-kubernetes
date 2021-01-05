@@ -39,7 +39,7 @@ func main() {
 		log.Printf("[ERROR] Error executing tests %v", err)
 		exit(2) // Exit 2+ is for logic/functional errors
 	}
-	log.Printf("[NOTICE] Overall test completion status: %v", s)
+	log.Printf("[INFO] Overall test completion status: %v", s)
 	summary.State.SetProbrStatus()
 
 	out := probr.GetAllProbeResults(ts)

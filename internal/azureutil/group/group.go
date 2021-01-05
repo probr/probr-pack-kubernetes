@@ -13,7 +13,7 @@ import (
 
 // Create creates a new Resource Group in the default location (configured using the AZURE_LOCATION environment variable).
 func Create(ctx context.Context, name string) (resources.Group, error) {
-	log.Printf("[DEBUG] creating Resource Group '%s' in location: %v", name, azureutil.ResourceLocation())
+	log.Printf("[INFO] creating Resource Group '%s' in location: %v", name, azureutil.ResourceLocation())
 	return client().CreateOrUpdate(
 		ctx,
 		name,
@@ -30,7 +30,7 @@ func Get(ctx context.Context, name string) (resources.Group, error) {
 
 // CreateWithTags creates a new Resource Group in the default location (configured using the AZURE_LOCATION environment variable) and sets the supplied tags.
 func CreateWithTags(ctx context.Context, name string, tags map[string]*string) (resources.Group, error) {
-	log.Printf("[DEBUG] creating Resource Group '%s' on location: '%v'", name, azureutil.ResourceLocation())
+	log.Printf("[INFO] creating Resource Group '%s' on location: '%v'", name, azureutil.ResourceLocation())
 	return client().CreateOrUpdate(
 		ctx,
 		name,

@@ -138,7 +138,7 @@ func (az *AzK8sConstraintTemplate) hasConstraint(cst string) (*bool, error) {
 
 	_, b := (*c)[cst]
 
-	log.Printf("[INFO] Azure Contraint template %q. Result %t.", cst, b)
+	log.Printf("[DEBUG] Azure Constraint template %q. Result %t.", cst, b)
 	return &b, nil
 }
 
@@ -154,7 +154,7 @@ func (az *AzK8sConstraintTemplate) getConstraints() (*map[string]interface{}, er
 		//otherwise set it
 		az.azConstraints = c
 
-		log.Printf("[INFO] Azure Contraints (%d): %v ", len(*az.azConstraints), az.azConstraints)
+		log.Printf("[DEBUG] Azure Constraints (%d): %v ", len(*az.azConstraints), az.azConstraints)
 	}
 
 	return az.azConstraints, nil

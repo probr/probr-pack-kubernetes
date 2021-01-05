@@ -68,7 +68,7 @@ func varsFileHandler(v interface{}) {
 		log.Fatalf("[ERROR] error returned from config.Init: %v", err)
 	} else if len(*v.(*string)) > 0 {
 		config.Vars.VarsFile = *v.(*string)
-		log.Printf("[NOTICE] Config read from file '%v', but may still be overridden by CLI flags.", v.(*string))
+		log.Printf("[INFO] Config read from file '%v', but may still be overridden by CLI flags.", v.(*string))
 	} else {
 		log.Printf("[NOTICE] No configuration variables file specified. Using environment variabls and defaults only.")
 	}
@@ -99,7 +99,7 @@ func loglevelHandler(v interface{}) {
 func tagsHandler(v interface{}) {
 	if len(*v.(*string)) > 0 {
 		config.Vars.Tags = *v.(*string)
-		log.Printf("[NOTICE] tags have been added via command line.")
+		log.Printf("[INFO] tags have been added via command line.")
 	}
 }
 

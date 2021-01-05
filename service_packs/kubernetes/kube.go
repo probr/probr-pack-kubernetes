@@ -252,7 +252,7 @@ func (k *Kube) CreatePodFromObject(pod *apiv1.Pod, podName string, ns string, wa
 	res, err := pc.Create(ctx, pod, metav1.CreateOptions{})
 	if err != nil {
 		if isAlreadyExists(err) {
-			log.Printf("[NOTICE] POD %v already exists. Returning existing.", podName)
+			log.Printf("[INFO] POD %v already exists. Returning existing.", podName)
 			res, _ := pc.Get(ctx, podName, metav1.GetOptions{})
 
 			//return it and nil out err
@@ -350,7 +350,7 @@ func (k *Kube) CreateConfigMap(n *string, ns string) (*apiv1.ConfigMap, error) {
 	res, err := cms.Create(ctx, &cm, metav1.CreateOptions{})
 
 	if err != nil {
-		log.Printf("[WARN] Error creating ConfigMap %q: %v", res.GetObjectMeta().GetName(), err)
+		log.Printf("[ERROR] Error creating ConfigMap %q: %v", res.GetObjectMeta().GetName(), err)
 		return nil, err
 	}
 
@@ -386,7 +386,7 @@ func (k *Kube) ExecCommand(cmd string, ns string, pn *string) (s *CmdExecutionRe
 	if cmd == "" {
 		return &CmdExecutionResult{Err: fmt.Errorf("command string is nil - nothing to execute"), Internal: true}
 	}
-	log.Printf("[NOTICE] Executing command: \"%s\" on POD '%s' in namespace '%s'", cmd, *pn, ns)
+	log.Printf("[DEBUG] Executing command: \"%s\" on POD '%s' in namespace '%s'", cmd, *pn, ns)
 	c, err := k.GetClient()
 	if err != nil {
 		return &CmdExecutionResult{Err: err, Internal: true}
@@ -411,7 +411,7 @@ func (k *Kube) ExecCommand(cmd string, ns string, pn *string) (s *CmdExecutionRe
 
 	req.VersionedParams(&options, parameterCodec)
 
-	log.Printf("[INFO] %s.%s: ExecCommand Request URL: %v", utils.CallerName(2), utils.CallerName(1), req.URL().String())
+	log.Printf("[DEBUG] %s.%s: ExecCommand Request URL: %v", utils.CallerName(2), utils.CallerName(1), req.URL().String())
 
 	config, err := clientcmd.BuildConfigFromFlags("", config.Vars.ServicePacks.Kubernetes.KubeConfigPath)
 	exec, err := remotecommand.NewSPDYExecutor(config, "POST", req.URL())
@@ -627,7 +627,7 @@ func (k *Kube) GetClusterRolesByResource(r string) (*[]rbacv1.ClusterRole, error
 		log.Printf("[DEBUG] ClusterRole: %+v", cr)
 		if k.meetsResourceFilter(r, &cr.ObjectMeta, &cr.Rules) {
 			//add to results
-			log.Printf("[INFO] ClusterRole meets resource filter (%v): %+v", r, cr)
+			log.Printf("[DEBUG] ClusterRole meets resource filter (%v): %+v", r, cr)
 			crs = append(crs, cr)
 		}
 	}
@@ -649,7 +649,7 @@ func (k *Kube) GetRolesByResource(r string) (*[]rbacv1.Role, error) {
 		log.Printf("[DEBUG] Role: %+v", ro)
 		if k.meetsResourceFilter(r, &ro.ObjectMeta, &ro.Rules) {
 			//add to results
-			log.Printf("[INFO] Role meets resource filter (%v): %+v", r, ro)
+			log.Printf("[DEBUG] Role meets resource filter (%v): %+v", r, ro)
 			ros = append(ros, ro)
 		}
 	}
@@ -788,7 +788,7 @@ func (k *Kube) waitForPhase(ph apiv1.PodPhase, c *kubernetes.Clientset, ns *stri
 			continue
 		}
 		if p.GetName() != *n {
-			log.Printf("[DEBUG] Probe received for pod %v which we're not waiting on. Skipping.", p.GetName())
+			log.Printf("[NOTICE] Probe received for pod %v which we're not waiting on. Skipping.", p.GetName())
 			continue
 		}
 
@@ -800,7 +800,7 @@ func (k *Kube) waitForPhase(ph apiv1.PodPhase, c *kubernetes.Clientset, ns *stri
 		// don't wait if we're getting errors:
 		b, err := k.podInErrorState(p)
 		if b {
-			log.Printf("[WARN] Giving up waiting on pod creation. Error: %v", err)
+			log.Printf("[ERROR] Giving up waiting on pod creation. Error: %v", err)
 			return err
 		}
 
@@ -828,7 +828,7 @@ func (k *Kube) podInErrorState(p *apiv1.Pod) (bool, *PodCreationError) {
 			pe, exists := k.k8statusToPodCreationError[r]
 
 			if exists {
-				log.Printf("[DEBUG] Giving up waiting on pod %v . Error reason: %v", n, r)
+				log.Printf("[ERROR] Giving up waiting on pod %v . Error reason: %v", n, r)
 				pcErr := make(map[PodCreationErrorReason]*PodCreationErrorReason, 1)
 
 				pcErr[pe] = &pe

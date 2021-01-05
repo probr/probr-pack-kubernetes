@@ -665,7 +665,7 @@ func (p *KubePodSecurityPolicyProvider) HasPrivilegedAccessRestriction() (*bool,
 	var res bool
 	for _, e := range psps.Items {
 		if !e.Spec.Privileged {
-			log.Printf("[INFO] PodSecurityPolicy: Privileged is set to %v on Policy: %v", e.Spec.Privileged, e.GetName())
+			log.Printf("[DEBUG] PodSecurityPolicy: Privileged is set to %v on Policy: %v", e.Spec.Privileged, e.GetName())
 			res = true
 			break
 		}
@@ -685,7 +685,7 @@ func (p *KubePodSecurityPolicyProvider) HasHostPIDRestriction() (*bool, error) {
 	var res bool
 	for _, e := range psps.Items {
 		if !e.Spec.HostPID {
-			log.Printf("[INFO] PodSecurityPolicy: HostPID is set to %v on Policy: %v\n", e.Spec.HostPID, e.GetName())
+			log.Printf("[DEBUG] PodSecurityPolicy: HostPID is set to %v on Policy: %v\n", e.Spec.HostPID, e.GetName())
 			res = true
 			break
 		}
@@ -705,7 +705,7 @@ func (p *KubePodSecurityPolicyProvider) HasHostIPCRestriction() (*bool, error) {
 	var res bool
 	for _, e := range psps.Items {
 		if !e.Spec.HostIPC {
-			log.Printf("[INFO] PodSecurityPolicy: HostIPC is set to %v on Policy: %v\n", e.Spec.HostIPC, e.GetName())
+			log.Printf("[DEBUG] PodSecurityPolicy: HostIPC is set to %v on Policy: %v\n", e.Spec.HostIPC, e.GetName())
 			res = true
 			break
 		}
@@ -725,7 +725,7 @@ func (p *KubePodSecurityPolicyProvider) HasHostNetworkRestriction() (*bool, erro
 	var res bool
 	for _, e := range psps.Items {
 		if !e.Spec.HostNetwork {
-			log.Printf("[INFO] PodSecurityPolicy: HostNetwork is set to %v on Policy: %v\n", e.Spec.HostNetwork, e.GetName())
+			log.Printf("[DEBUG] PodSecurityPolicy: HostNetwork is set to %v on Policy: %v\n", e.Spec.HostNetwork, e.GetName())
 			res = true
 			break
 		}
@@ -745,7 +745,7 @@ func (p *KubePodSecurityPolicyProvider) HasAllowPrivilegeEscalationRestriction()
 	var res bool
 	for _, e := range psps.Items {
 		if !*e.Spec.AllowPrivilegeEscalation {
-			log.Printf("[INFO] PodSecurityPolicy: AllowPrivilegeEscalation is set to %v on Policy: %v", e.Spec.AllowPrivilegeEscalation, e.GetName())
+			log.Printf("[DEBUG] PodSecurityPolicy: AllowPrivilegeEscalation is set to %v on Policy: %v", e.Spec.AllowPrivilegeEscalation, e.GetName())
 			res = true
 			break
 		}
@@ -765,7 +765,7 @@ func (p *KubePodSecurityPolicyProvider) HasRootUserRestriction() (*bool, error) 
 	var res bool
 	for _, e := range psps.Items {
 		if e.Spec.RunAsUser.Rule == v1beta1.RunAsUserStrategyMustRunAsNonRoot {
-			log.Printf("[INFO] PodSecurityPolicy: RunAsUserStrategyMustRunAsNonRoot is set on Policy: %v", e.GetName())
+			log.Printf("[DEBUG] PodSecurityPolicy: RunAsUserStrategyMustRunAsNonRoot is set on Policy: %v", e.GetName())
 			res = true
 			break
 		}
@@ -786,7 +786,7 @@ func (p *KubePodSecurityPolicyProvider) HasNETRAWRestriction() (*bool, error) {
 	for _, e := range psps.Items {
 		for _, c := range e.Spec.RequiredDropCapabilities {
 			if c == "NET_RAW" || c == "ALL" {
-				log.Printf("[INFO] PodSecurityPolicy: HasNETRAWRestriction: RequiredDropCapability of %v is set on Policy: %v", c, e.GetName())
+				log.Printf("[DEBUG] PodSecurityPolicy: HasNETRAWRestriction: RequiredDropCapability of %v is set on Policy: %v", c, e.GetName())
 				res = true
 				break
 			}
@@ -807,7 +807,7 @@ func (p *KubePodSecurityPolicyProvider) HasAllowedCapabilitiesRestriction() (*bo
 	res := true
 	for _, e := range psps.Items {
 		if e.Spec.AllowedCapabilities != nil && len(e.Spec.AllowedCapabilities) > 0 {
-			log.Printf("[INFO] PodSecurityPolicy: HasAllowedCapabilitiesRestriction: at least one AllowedCapability is set on Policy: %v", e.GetName())
+			log.Printf("[DEBUG] PodSecurityPolicy: HasAllowedCapabilitiesRestriction: at least one AllowedCapability is set on Policy: %v", e.GetName())
 			res = false
 			break
 		}
@@ -859,7 +859,7 @@ func (p *KubePodSecurityPolicyProvider) HasVolumeTypeRestriction() (*bool, error
 		for _, v := range e.Spec.Volumes {
 			_, exists := g[string(v)]
 			if !exists {
-				log.Printf("[INFO] PodSecurityPolicy: HasVolumeTypeRestriction: at least one unapproved volume type (%v) is set on Policy: %v",
+				log.Printf("[DEBUG] PodSecurityPolicy: HasVolumeTypeRestriction: at least one unapproved volume type (%v) is set on Policy: %v",
 					v, e.GetName())
 				res = false
 				break
@@ -883,7 +883,7 @@ func (p *KubePodSecurityPolicyProvider) HasSeccompProfileRestriction() (*bool, e
 	for _, e := range psps.Items {
 		v, exists := e.Annotations[a]
 		if exists {
-			log.Printf("[INFO] PodSecurityPolicy: HasSeccompProfileRestriction: annotation of %v with value %v is set on Policy: %v",
+			log.Printf("[DEBUG] PodSecurityPolicy: HasSeccompProfileRestriction: annotation of %v with value %v is set on Policy: %v",
 				a, v, e.GetName())
 			res = true
 			break
