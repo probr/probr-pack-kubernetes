@@ -40,43 +40,91 @@ of step functions.
 
 ## Adding a new service pack
 
-1. Create a folder under the service_packs folder e.g. storage_packs/`storage`
-   
-1. Create a folder for each probe and insert code and feature files into the folder e.g. service_packs/`storage`/`encryption_in_flight` holds the following files for the encryption_in_flight probe:
+1. Create a directory for your new pack under the service_packs folder (e.g. `storage_packs/storage`)
+
+1. Create a folder for each probe and insert code and feature files into the folder e.g. `service_packs/storage/encryption_in_flight` holds the following files for the encryption_in_flight probe:
 
       - encryption_in_flight.feature - the 'bdd' feature file storing the control requirements for this probe
       - encryption_in_flight.go - implementation code for the probe
       - encryption_in_flight_test.go - unit test code
-  
+
+1. Create a subdirectory that will import all of your newly created probes. Directory must be named "pack" (e.g. `storage_packs/storage/pack`) and must contain a function named `GetProbes`.
+
+   ```go
+      // storage_packs/storage/pack/pack.go
+      func GetProbes() []coreengine.Probe {
+         if config.Vars.ServicePacks.Storage.IsExcluded() {
+            return nil
+         }
+         return []coreengine.Probe{
+            access_whitelisting.Probe,
+            encryption_at_rest.Probe,
+            encryption_in_flight.Probe,
+         }
+      }
+   ```
+
 1. Add code to the go file, in order to integrate the service pack probes with the GoDog handler
-   - Define a ***ProbeStruct***:
-      - type ProbeStruct struct{} 
-      - var Probe ProbeStruct   // allows the probe to be added to the ProbeStore
-      - func (p ProbeStruct) Name() string {return "probe name"}
-   - Define ProbeInitialize(ctx *godog.TestSuiteContext) - code to initialize the Godog handler prior to the probe run:
-      - e.g. initialize probe state
-   - Define ScenarioInitialize(ctx *godog.ScenarioContext) - code to initialize the Godog handler prior to executing a scenario:
-      - all steps defined in the scenario must be mapped to implementation code; the code will be called by the GoDog handler when executing the associated feature's scenario step
-      - ctx.Step(***the scenario clause***, ***mapped function***) e.g. ctx.Step(`^the detective measure is enabled$`, `state.policyOrRuleAssigned`)
-  
-2. Add the service pack configuration variables to config/types.go
-   - Define the service pack type e.g.
-      - type ***Storage*** struct {
-      - Excluded string `yaml:"Exclude"`
-      - Probes   []Probe `yaml:"Probes"`
-      - }
-   - Add the type to the ServicePacks struct e.g. 
-      - type ServicePacks struct {
-	  - Kubernetes Kubernetes `yaml:"Kubernetes"`
-	  - ***Storage*** Storage    `yaml:"Storage"`
+   - Define a ***ProbeStruct*** - follow an existing example to ensure proper implementation
 
-1. Add the service pack and its probes to the init() function in service_packs/service_packs.go
-	- packs["storage"] = []probe{
-	-	encryption_in_flight.Probe,
-	-	encryption_at_rest.Probe,
-	-	access_whitelisting.Probe,
-	- }
+      ```go
+         // storage_packs/my_pack/my_probe/my_probe.go
+         type ProbeStruct struct{} 
+         var Probe ProbeStruct   // allows the probe to be added to the ProbeStore
+         func (p ProbeStruct) Name() string {return "my-probe-name"} // Used in storage_packs/storage_packs.go
+         func ProbeInitialize(ctx *godog.TestSuiteContext) {} // required by the Godog handler
+         func ScenarioInitialize(ctx *godog.ScenarioContext) {} // defines each step, required by the Godog handler
+      ```
 
-1. Add service pack exclusion logic to the handleProbeExclusions method in internal/config/config.go
+1. Add the service pack configuration variables to `internal/config/types.go`, allowing users to specify the inclusion of your service pack.
+   - Define the service pack type. Example:
 
-1. Add any utilities under internal and import where required e.g. the storage probes use the azure connection utilities package, which is installed in the internal/azureutil folder
+      ```go
+        // internal/config/types.go
+        type Storage struct {
+          Excluded string `yaml:"Exclude"`
+          Probes   []Probe `yaml:"Probes"`
+        }
+      ```
+   - Add the type to the ServicePacks struct. Example: 
+
+      ```go
+         // internal/config/types.go
+         type ServicePacks struct {
+           Kubernetes Kubernetes `yaml:"Kubernetes"`
+           Storage    `yaml:"Storage"`
+         }
+      ```
+
+1. Add an `IsExcluded` function to config.yml with at least one required variable. Without this, your service pack will be run by default (which is undesired behavior).
+
+   ```go
+      // internal/config/config.go
+      func (s Storage) IsExcluded() bool {
+         if s.Provider == "" {
+            if !s.exclusionLogged {
+               log.Printf("[WARN] Ignoring Storage service pack due to required vars not being present.")
+               s.exclusionLogged = true
+            }
+            return true
+         }
+         log.Printf("[NOTICE] Storage service pack included.")
+         return false
+      }
+   ```
+
+1. Add the service pack and its probes to `service_packs/service_packs.go`
+   
+   ```go
+      // service_packs/service_packs.go
+      import (
+         ...   
+         storage_pack "github.com/citihub/probr/service_packs/storage/pack"
+      )
+      ...
+      func packs() (packs map[string][]coreengine.Probe) {
+         ...
+         packs["storage"] = storage_pack.GetProbes()
+         return
+      }
+      ```
