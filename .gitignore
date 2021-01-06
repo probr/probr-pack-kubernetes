@@ -253,3 +253,4 @@ audit_output
 probr
 static-content/
 .kube/
+config.yml
