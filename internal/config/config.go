@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"reflect"
 	"strings"
 
 	"github.com/briandowns/spinner"
@@ -133,28 +134,12 @@ func (ctx *ConfigVars) addExclusion(tag string) {
 
 // Log and return exclusion configuration
 func (k Kubernetes) IsExcluded() bool {
-	if k.AuthorisedContainerRegistry == "" || k.UnauthorisedContainerRegistry == "" {
-		if !k.exclusionLogged {
-			log.Printf("[WARN] Ignoring Kubernetes service pack due to required vars not being present.")
-			k.exclusionLogged = true
-		}
-		return true
-	}
-	log.Printf("[NOTICE] Kubernetes service pack included.")
-	return false
+	return validatePackRequirements("Kubernetes", k)
 }
 
 // Log and return exclusion configuration
 func (s Storage) IsExcluded() bool {
-	if s.Provider == "" {
-		if !s.exclusionLogged {
-			log.Printf("[WARN] Ignoring Storage service pack due to required vars not being present.")
-			s.exclusionLogged = true
-		}
-		return true
-	}
-	log.Printf("[NOTICE] Storage service pack included.")
-	return false
+	return validatePackRequirements("Storage", s)
 }
 
 // Log and return exclusion configuration
@@ -172,5 +157,19 @@ func (s Scenario) IsExcluded() bool {
 		log.Printf("[NOTICE] Excluding scenario '%s'. Justification: %s", s.Name, s.Excluded)
 		return true
 	}
+	return false
+}
+
+func validatePackRequirements(name string, object interface{}) bool {
+	// reflect for dynamic type querying
+	storage := reflect.Indirect(reflect.ValueOf(object))
+
+	for i, requirement := range Requirements[name] {
+		if storage.FieldByName(requirement).String() == "" {
+			log.Printf("[WARN] Ignoring %s service pack due to required var '%s' not being present.", name, Requirements[name][i])
+			return true
+		}
+	}
+	log.Printf("[NOTICE] Storage service pack included.")
 	return false
 }

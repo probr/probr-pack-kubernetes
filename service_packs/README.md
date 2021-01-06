@@ -96,21 +96,23 @@ of step functions.
          }
       ```
 
-1. Add an `IsExcluded` function to config.yml with at least one required variable. Without this, your service pack will be run by default (which is undesired behavior).
+1. Add an `IsExcluded` function to `internal/config` with at least one required variable. Without this, your service pack will be run by default (which is undesired behavior).
 
    ```go
       // internal/config/config.go
+      // Log and return exclusion configuration
       func (s Storage) IsExcluded() bool {
-         if s.Provider == "" {
-            if !s.exclusionLogged {
-               log.Printf("[WARN] Ignoring Storage service pack due to required vars not being present.")
-               s.exclusionLogged = true
-            }
-            return true
-         }
-         log.Printf("[NOTICE] Storage service pack included.")
-         return false
+         return validatePackRequirements("Storage", s)
       }
+   ```
+
+   ```go
+      // internal/config/requirements.go
+      var Requirements = map[string][]string{
+         "Storage":    []string{"Provider"},
+         "Kubernetes": []string{"AuthorisedContainerRegistry", "UnauthorisedContainerRegistry"},
+      }
+
    ```
 
 1. Add the service pack and its probes to `service_packs/service_packs.go`

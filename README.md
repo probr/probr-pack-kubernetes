@@ -37,7 +37,7 @@ The following elements are required to get started with Probr:
 
 1. Run the probr executable via `./probr [OPTIONS]`. 
     - Additional options can be seen via `./probr --help`
-    - Review required variables via `./probr show-required <SERVICE PACK NAME>`
+    - Review required variables by using `./probr show-requirements <SERVICE-PACK-NAME; optional>`
 
 ## Configuration
 
