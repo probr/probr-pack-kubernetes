@@ -53,8 +53,9 @@ func main() {
 	exit(s)
 }
 
+// --silent disables, and otherwise only shows on ERROR/WARN
 func showIndicator() bool {
-	return config.Vars.LogLevel == "ERROR" && !config.Vars.Silent
+	return (config.Vars.LogLevel == "ERROR" || config.Vars.LogLevel == "WARN") && !config.Vars.Silent
 }
 
 func exit(status int) {
