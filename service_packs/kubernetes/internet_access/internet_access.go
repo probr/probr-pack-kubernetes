@@ -104,6 +104,10 @@ func (p ProbeStruct) Name() string {
 	return "internet_access"
 }
 
+func (p ProbeStruct) Path() string {
+	return coreengine.GetFeaturePath("service_packs", "kubernetes", p.Name())
+}
+
 // iaProbeInitialize handles any overall Test Suite initialisation steps.  This is registered with the
 // test handler as part of the init() function.
 func (p ProbeStruct) ProbeInitialize(ctx *godog.TestSuiteContext) {

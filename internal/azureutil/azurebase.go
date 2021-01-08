@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/citihub/probr/internal/config"
+	"github.com/citihub/probr/internal/utils"
 )
 
 const (
@@ -69,9 +70,9 @@ func ManagementGroup() string {
 
 func randomPrefix() string {
 	if prefix == "" {
-		prefix = "test" + RandString(6) + ""
+		prefix = "test" + utils.RandomString(6) + ""
 	}
-	return "test" + RandString(6) + ""
+	return "test" + utils.RandomString(6) + ""
 }
 
 func getFromEnvVar(varName string) string {

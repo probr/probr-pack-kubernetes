@@ -15,7 +15,7 @@ func TestGetProbes(t *testing.T) {
 		t.Fail()
 	}
 
-	config.Vars.ServicePacks.Storage.Provider = "not-empty"
+	config.Vars.ServicePacks.Storage.Provider = "Azure"
 	pack = GetProbes()
 	if len(pack) == 0 {
 		t.Logf("Expected value not returned from GetProbes")

@@ -10,6 +10,7 @@ import (
 	"github.com/cucumber/godog"
 
 	"github.com/citihub/probr/internal/config"
+	"github.com/citihub/probr/internal/utils"
 )
 
 // Service Packs should use this interface to export probes
@@ -17,6 +18,7 @@ type Probe interface {
 	ProbeInitialize(*godog.TestSuiteContext)
 	ScenarioInitialize(*godog.ScenarioContext)
 	Name() string
+	Path() string
 }
 
 const rootDirName = "probr"
@@ -59,6 +61,13 @@ func getOutputPath(t string) (*os.File, error) {
 	//filename is test name (supplied) + .json
 	fn := t + ".json"
 	return os.Create(filepath.Join(config.Vars.CucumberDir, fn))
+}
+
+func GetFeaturePath(path ...string) string {
+	featureName := path[len(path)-1]
+	uniqueBoxName := utils.RandomString(5) + featureName
+	box := utils.BoxStaticFile(uniqueBoxName, path...) // Establish static files for binary build
+	return filepath.Join(box.ResolutionDir, featureName+".feature")
 }
 
 // LogScenarioStart logs the name and tags associated with the supplied scenario.

@@ -17,6 +17,7 @@ import (
 	"github.com/citihub/probr/internal/azureutil/policy"
 	"github.com/citihub/probr/internal/coreengine"
 	"github.com/citihub/probr/internal/summary"
+	"github.com/citihub/probr/internal/utils"
 	"github.com/citihub/probr/service_packs/storage"
 )
 
@@ -26,18 +27,17 @@ const (
 )
 
 // Allows this probe to be added to the ProbeStore
-type ProbeStruct struct{}
+type ProbeStruct struct {
+	state scenarioState
+}
 
 // Allows this probe to be added to the ProbeStore
 var Probe ProbeStruct
 
 type scenarioState struct {
-	name  string
-	audit *summary.ScenarioAudit
-	probe *summary.Probe
-}
-
-type accessWhitelistingAzure struct {
+	name                      string
+	audit                     *summary.ScenarioAudit
+	probe                     *summary.Probe
 	ctx                       context.Context
 	policyAssignmentMgmtGroup string
 	tags                      map[string]*string
@@ -46,21 +46,19 @@ type accessWhitelistingAzure struct {
 	runningErr                error
 }
 
-var state accessWhitelistingAzure
-
-func (state *accessWhitelistingAzure) setup() {
+func (state *scenarioState) setup() {
 
 	log.Println("[DEBUG] Setting up \"AccessWhitelistingAzure\"")
 	state.ctx = context.Background()
 
 }
 
-func (state *accessWhitelistingAzure) teardown() {
+func (state *scenarioState) teardown() {
 
 	log.Println("[DEBUG] Teardown completed")
 }
 
-func (state *accessWhitelistingAzure) anAzureResourceGroupExists() error {
+func (state *scenarioState) anAzureResourceGroupExists() error {
 
 	var err error
 	// check the resource group has been configured
@@ -78,7 +76,7 @@ func (state *accessWhitelistingAzure) anAzureResourceGroupExists() error {
 	return err
 }
 
-func (state *accessWhitelistingAzure) checkPolicyAssigned() error {
+func (state *scenarioState) checkPolicyAssigned() error {
 
 	var a azurePolicy.Assignment
 	var err error
@@ -99,13 +97,13 @@ func (state *accessWhitelistingAzure) checkPolicyAssigned() error {
 	return nil
 }
 
-func (state *accessWhitelistingAzure) provisionStorageContainer() error {
+func (state *scenarioState) provisionStorageContainer() error {
 	// define a bucket name, then pass the step - we will provision the account in the next step.
-	state.bucketName = azureutil.RandString(10)
+	state.bucketName = utils.RandomString(10)
 	return nil
 }
 
-func (state *accessWhitelistingAzure) createWithWhitelist(ipRange string) error {
+func (state *scenarioState) createWithWhitelist(ipRange string) error {
 	var networkRuleSet azureStorage.NetworkRuleSet
 	if ipRange == "nil" {
 		networkRuleSet = azureStorage.NetworkRuleSet{
@@ -127,7 +125,7 @@ func (state *accessWhitelistingAzure) createWithWhitelist(ipRange string) error 
 	return nil
 }
 
-func (state *accessWhitelistingAzure) creationWill(expectation string) error {
+func (state *scenarioState) creationWill(expectation string) error {
 	if expectation == "Fail" {
 		if state.runningErr == nil {
 			return fmt.Errorf("incorrectly created Storage Account: %v", *state.storageAccount.ID)
@@ -142,11 +140,11 @@ func (state *accessWhitelistingAzure) creationWill(expectation string) error {
 	return state.runningErr
 }
 
-func (state *accessWhitelistingAzure) cspSupportsWhitelisting() error {
+func (state *scenarioState) cspSupportsWhitelisting() error {
 	return nil
 }
 
-func (state *accessWhitelistingAzure) examineStorageContainer(containerNameEnvVar string) error {
+func (state *scenarioState) examineStorageContainer(containerNameEnvVar string) error {
 	accountName := os.Getenv(containerNameEnvVar)
 	if accountName == "" {
 		return fmt.Errorf("environment variable \"%s\" is not defined test can't run", containerNameEnvVar)
@@ -191,9 +189,17 @@ func (state *accessWhitelistingAzure) examineStorageContainer(containerNameEnvVa
 	return fmt.Errorf("no whitelisting has been defined for %v", accountName)
 }
 
-func (state *accessWhitelistingAzure) whitelistingIsConfigured() error {
+// PENDING IMPLEMENTATION
+func (state *scenarioState) whitelistingIsConfigured() error {
 	// Checked in previous step
 	return nil
+}
+
+func (s *scenarioState) beforeScenario(probeName string, gs *godog.Scenario) {
+	s.name = gs.Name
+	s.probe = summary.State.GetProbeLog(probeName)
+	s.audit = summary.State.GetProbeLog(probeName).InitializeAuditor(gs.Name, gs.Tags)
+	coreengine.LogScenarioStart(gs)
 }
 
 // Return this probe's name
@@ -201,41 +207,38 @@ func (p ProbeStruct) Name() string {
 	return "access_whitelisting"
 }
 
+func (p ProbeStruct) Path() string {
+	return coreengine.GetFeaturePath("service_packs", "storage", "azure", p.Name())
+}
+
 // ProbeInitialize handles any overall Test Suite initialisation steps.  This is registered with the
 // test handler as part of the init() function.
 //func (p ProbeStruct) ProbeInitialize(ctx *godog.Suite) {
 func (p ProbeStruct) ProbeInitialize(ctx *godog.TestSuiteContext) {
+	p.state = scenarioState{}
 
-	ctx.BeforeSuite(state.setup)
+	ctx.BeforeSuite(p.state.setup)
 
-	ctx.AfterSuite(state.teardown)
+	ctx.AfterSuite(p.state.teardown)
 }
 
 // initialises the scenario
 func (p ProbeStruct) ScenarioInitialize(ctx *godog.ScenarioContext) {
-	ps := scenarioState{}
 
 	ctx.BeforeScenario(func(s *godog.Scenario) {
-		beforeScenario(&ps, p.Name(), s)
+		p.state.beforeScenario(p.Name(), s)
 	})
 
-	ctx.Step(`^the CSP provides a whitelisting capability for Object Storage containers$`, state.cspSupportsWhitelisting)
-	ctx.Step(`^a specified azure resource group exists$`, state.anAzureResourceGroupExists)
-	ctx.Step(`^we examine the Object Storage container in environment variable "([^"]*)"$`, state.examineStorageContainer)
-	ctx.Step(`^whitelisting is configured with the given IP address range or an endpoint$`, state.whitelistingIsConfigured)
-	ctx.Step(`^security controls that Prevent Object Storage from being created without network source address whitelisting are applied$`, state.checkPolicyAssigned)
-	ctx.Step(`^we provision an Object Storage container$`, state.provisionStorageContainer)
-	ctx.Step(`^it is created with whitelisting entry "([^"]*)"$`, state.createWithWhitelist)
-	ctx.Step(`^creation will "([^"]*)"$`, state.creationWill)
+	ctx.Step(`^the CSP provides a whitelisting capability for Object Storage containers$`, p.state.cspSupportsWhitelisting)
+	ctx.Step(`^a specified azure resource group exists$`, p.state.anAzureResourceGroupExists)
+	ctx.Step(`^we examine the Object Storage container in environment variable "([^"]*)"$`, p.state.examineStorageContainer)
+	ctx.Step(`^whitelisting is configured with the given IP address range or an endpoint$`, p.state.whitelistingIsConfigured)
+	ctx.Step(`^security controls that Prevent Object Storage from being created without network source address whitelisting are applied$`, p.state.checkPolicyAssigned)
+	ctx.Step(`^we provision an Object Storage container$`, p.state.provisionStorageContainer)
+	ctx.Step(`^it is created with whitelisting entry "([^"]*)"$`, p.state.createWithWhitelist)
+	ctx.Step(`^creation will "([^"]*)"$`, p.state.creationWill)
 
 	ctx.AfterScenario(func(s *godog.Scenario, err error) {
 		coreengine.LogScenarioEnd(s)
 	})
-}
-
-func beforeScenario(s *scenarioState, probeName string, gs *godog.Scenario) {
-	s.name = gs.Name
-	s.probe = summary.State.GetProbeLog(probeName)
-	s.audit = summary.State.GetProbeLog(probeName).InitializeAuditor(gs.Name, gs.Tags)
-	coreengine.LogScenarioStart(gs)
 }

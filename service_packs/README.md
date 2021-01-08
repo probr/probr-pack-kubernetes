@@ -53,9 +53,7 @@ of step functions.
    ```go
       // storage_packs/storage/pack/pack.go
       func GetProbes() []coreengine.Probe {
-         if config.Vars.ServicePacks.Storage.IsExcluded() {
-            return nil
-         }
+         ...
          return []coreengine.Probe{
             access_whitelisting.Probe,
             encryption_at_rest.Probe,
@@ -72,6 +70,7 @@ of step functions.
          type ProbeStruct struct{} 
          var Probe ProbeStruct   // allows the probe to be added to the ProbeStore
          func (p ProbeStruct) Name() string {return "my-probe-name"} // Used in storage_packs/storage_packs.go
+         func (p ProbeStruct) Path() string { return coreengine.GetFeaturePath("service_packs", "kubernetes", p.Name()) } // Allows for custom pack file structure
          func ProbeInitialize(ctx *godog.TestSuiteContext) {} // required by the Godog handler
          func ScenarioInitialize(ctx *godog.ScenarioContext) {} // defines each step, required by the Godog handler
       ```
@@ -86,6 +85,7 @@ of step functions.
           Probes   []Probe `yaml:"Probes"`
         }
       ```
+
    - Add the type to the ServicePacks struct. Example: 
 
       ```go
@@ -96,13 +96,13 @@ of step functions.
          }
       ```
 
-1. Add an `IsExcluded` function to `internal/config` with at least one required variable. Without this, your service pack will be run by default (which is undesired behavior).
+1. Optional: Add an `IsExcluded` function to `internal/config` with at least one required variable. Without this, you will need some other logic in `GetProbes()` to avoid service pack being run by default (which is undesired behavior). See the storage service pack `pack.go` for an example of how to conditionally include probes without using `IsExcluded`.
 
    ```go
       // internal/config/config.go
       // Log and return exclusion configuration
-      func (s Storage) IsExcluded() bool {
-         return validatePackRequirements("Storage", s)
+      func (k Kubernetes) IsExcluded() bool {
+         return validatePackRequirements("Kubernetes", k)
       }
    ```
 
@@ -116,7 +116,7 @@ of step functions.
    ```
 
 1. Add the service pack and its probes to `service_packs/service_packs.go`
-   
+
    ```go
       // service_packs/service_packs.go
       import (
