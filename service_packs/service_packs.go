@@ -9,13 +9,9 @@ import (
 func packs() (packs map[string][]coreengine.Probe) {
 	packs = make(map[string][]coreengine.Probe)
 
-	// Kubernetes pack requires the following vars:
-	//   AuthorisedContainerRegistry, UnauthorisedContainerRegistry
 	packs["kubernetes"] = kubernetes_pack.GetProbes()
-
-	// Storage pack requires the following vars:
-	//   Provider
 	packs["storage"] = storage_pack.GetProbes()
+
 	return
 }
 

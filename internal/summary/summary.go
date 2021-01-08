@@ -32,7 +32,7 @@ func (s *SummaryState) PrintSummary() {
 		log.Printf("[NOTICE] Summary Log suppressed by configuration NoSummary=true.")
 	} else {
 		summary, _ := json.MarshalIndent(s, "", "  ")
-		fmt.Printf("%s", summary) // Summary output should not be handled by log levels
+		log.Printf("Finished\n%s", summary) // Summary output should not be handled by log levels
 	}
 }
 

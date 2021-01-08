@@ -16,6 +16,11 @@ type ConfigVars struct {
 	VarsFile                  string         // set by flags only
 	NoSummary                 bool           // set by flags only
 	Silent                    bool           // set by flags only
+	Meta                      Meta           // set by CLI options only
+}
+
+type Meta struct {
+	RunOnly string // set by CLI 'run' option
 }
 
 type ServicePacks struct {

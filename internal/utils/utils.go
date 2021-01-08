@@ -32,6 +32,7 @@ func Int64Ptr(i int64) *int64 {
 	return &i
 }
 
+// FindString searches a []string for a specific value
 func FindString(slice []string, val string) (int, bool) {
 	for i, item := range slice {
 		if item == val {
@@ -87,9 +88,4 @@ func BoxStaticFile(boxName string, path ...string) *packr.Box {
 func ReplaceBytesValue(b []byte, old string, new string) []byte {
 	newString := strings.Replace(string(b), old, new, -1)
 	return []byte(newString)
-}
-
-// Placeholder error in case function panics
-func PanicPrecaution() error {
-	return fmt.Errorf("this probe panicked and could not return a verbose error")
 }
