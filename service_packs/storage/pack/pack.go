@@ -9,6 +9,9 @@ import (
 )
 
 func GetProbes() []coreengine.Probe {
+	if config.Vars.ServicePacks.Storage.IsExcluded() {
+		return nil
+	}
 	switch config.Vars.ServicePacks.Storage.Provider {
 	case "Azure":
 		return []coreengine.Probe{

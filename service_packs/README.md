@@ -96,7 +96,7 @@ of step functions.
          }
       ```
 
-1. Optional: Add an `IsExcluded` function to `internal/config` with at least one required variable. Without this, you will need some other logic in `GetProbes()` to avoid service pack being run by default (which is undesired behavior). See the storage service pack `pack.go` for an example of how to conditionally include probes without using `IsExcluded`.
+1. Add an `IsExcluded` function to `internal/config` with at least one required variable. This must be used in `GetProbes()` or (1) `probr run <SERVICE-PACK>` will not function properly, and (2) the service pack will be run every time by default (which is undesired behavior). 
 
    ```go
       // internal/config/config.go
