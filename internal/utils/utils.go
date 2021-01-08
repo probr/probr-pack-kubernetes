@@ -32,7 +32,8 @@ func Int64Ptr(i int64) *int64 {
 	return &i
 }
 
-// FindString searches a []string for a specific value
+// Searches a []string for a specific value.
+// If found, returns the index of first occurrence, and True. If not found, returns -1 and False.
 func FindString(slice []string, val string) (int, bool) {
 	for i, item := range slice {
 		if item == val {
@@ -85,6 +86,7 @@ func BoxStaticFile(boxName string, path ...string) *packr.Box {
 	return packr.New(boxName, filepath.Join(path...)) // Establish static files for binary build
 }
 
+// For a given string in bytes, replaces a substring with a new value
 func ReplaceBytesValue(b []byte, old string, new string) []byte {
 	newString := strings.Replace(string(b), old, new, -1)
 	return []byte(newString)
