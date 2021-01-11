@@ -151,14 +151,14 @@ type ClusterPayload struct {
 }
 
 //general feature steps:
-func ClusterIsDeployed() (string, ClusterPayload) {
+func ClusterIsDeployed() (string, ClusterPayload, error) {
+	var err error
 	b := GetKubeInstance().ClusterIsDeployed()
-
 	if b == nil || !*b {
-		log.Fatalf("[ERROR] Kubernetes cluster is not deployed")
+		err = utils.ReformatError("Kubernetes cluster is not deployed")
+		log.Print(err)
 	}
-
 	description := "Passes if Probr successfully connects to the specified cluster."
 	payload := ClusterPayload{config.Vars.ServicePacks.Kubernetes.KubeConfigPath, config.Vars.ServicePacks.Kubernetes.KubeContext}
-	return description, payload
+	return description, payload, err
 }

@@ -32,9 +32,9 @@ func SetNetworkAccess(n NetworkAccess) {
 
 // General
 func (s *scenarioState) aKubernetesClusterIsDeployed() error {
-	description, payload := kubernetes.ClusterIsDeployed()
-	s.audit.AuditScenarioStep(description, payload, nil)
-	return nil // ClusterIsDeployed will create a fatal error if kubeconfig doesn't validate
+	description, payload, error := kubernetes.ClusterIsDeployed()
+	s.audit.AuditScenarioStep(description, payload, error)
+	return error //  ClusterIsDeployed will create a fatal error if kubeconfig doesn't validate
 }
 
 func (s *scenarioState) aPodIsDeployedInTheCluster() error {
