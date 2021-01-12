@@ -32,7 +32,7 @@ func Int64Ptr(i int64) *int64 {
 	return &i
 }
 
-// Searches a []string for a specific value.
+// FindString searches a []string for a specific value.
 // If found, returns the index of first occurrence, and True. If not found, returns -1 and False.
 func FindString(slice []string, val string) (int, bool) {
 	for i, item := range slice {
@@ -44,23 +44,31 @@ func FindString(slice []string, val string) (int, bool) {
 }
 
 // CallerName retrieves the name of the function prior to the location it is called
+// If using CallerName(0), the current function's name will be returned
+// If using CallerName(1), the current function's parent name will be returned
+// If using CallerName(2), the current function's parent's parent name will be returned
 func CallerName(up int) string {
 	s := strings.Split(CallerPath(up+1), ".") // split full caller path
 	return s[len(s)-1]                        // select last element from caller path
 }
 
+// CallerPath checks the goroutine's stack of function invocation and returns the following:
+// For up=0, return full caller path for caller function
+// For up=1, returns full caller path for caller of caller
 func CallerPath(up int) string {
 	f := make([]uintptr, 1)
 	runtime.Callers(up+2, f)                  // add full caller path to empty object
 	return runtime.FuncForPC(f[0] - 1).Name() // get full caller path in string form
 }
 
+// CallerFileLine returns file name and line of invoker
+// Similar to CallerName(1), but with file and line returned
 func CallerFileLine() (string, int) {
 	_, file, line, _ := runtime.Caller(2)
 	return file, line
 }
 
-// utils.ReformatError prefixes the error string ready for logging and/or output
+// ReformatError prefixes the error string ready for logging and/or output
 func ReformatError(e string, v ...interface{}) error {
 	var b strings.Builder
 	b.WriteString("[ERROR] ")
@@ -71,9 +79,20 @@ func ReformatError(e string, v ...interface{}) error {
 	return fmt.Errorf(s)
 }
 
+// ReadStaticFile returns the bytes for a given static file
+// If the static asset has not been added to packer, it adds it using full dir path as the box name.
+// Path:
+//  In most cases it will be ReadStaticFile(assetDir, fileName).
+//  It could also be used as ReadStaticFile(assetDir, subfolder, filename)
 func ReadStaticFile(path ...string) ([]byte, error) {
-	filename := path[len(path)-1]
-	dirpath := path[0:(len(path) - 1)]
+
+	// Validation for empty path
+	if path == nil || len(path) == 0 {
+		return nil, ReformatError("Path argument cannot be empty")
+	}
+
+	filename := path[len(path)-1]      // file name is the last string argument
+	dirpath := path[0:(len(path) - 1)] // folder path
 	boxName := strings.Join(dirpath[:], ".")
 	if boxes[boxName] == nil {
 		boxes[boxName] = BoxStaticFile(boxName, dirpath...) // Name the box after the file being read
@@ -86,7 +105,7 @@ func BoxStaticFile(boxName string, path ...string) *packr.Box {
 	return packr.New(boxName, filepath.Join(path...)) // Establish static files for binary build
 }
 
-// For a given string in bytes, replaces a substring with a new value
+// ReplaceBytesValue replaces a substring with a new value for a given string in bytes
 func ReplaceBytesValue(b []byte, old string, new string) []byte {
 	newString := strings.Replace(string(b), old, new, -1)
 	return []byte(newString)

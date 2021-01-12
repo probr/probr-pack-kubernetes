@@ -3,8 +3,11 @@ package utils
 import (
 	"bytes"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"os"
+	"path/filepath"
+	"reflect"
 	"strings"
 	"testing"
 )
@@ -81,4 +84,123 @@ func TestReplaceBytesValue(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestCallerPath(t *testing.T) {
+	type args struct {
+		up int
+	}
+	tests := []struct {
+		testName       string
+		testArgs       args
+		expectedResult string
+	}{
+		{"CallerPath(%v) - Expected: %q", args{up: 0}, "github.com/citihub/probr/internal/utils.TestCallerPath.func1"},
+		{"CallerPath(%v) - Expected: %q", args{up: 1}, "testing.tRunner"},
+	}
+
+	for _, tt := range tests {
+		tt.testName = fmt.Sprintf(tt.testName, tt.testArgs, tt.expectedResult)
+		t.Run(tt.testName, func(t *testing.T) {
+			if got := CallerPath(tt.testArgs.up); got != tt.expectedResult {
+				t.Errorf("CallerPath(%v) = %v, Expected: %v", tt.testArgs.up, got, tt.expectedResult)
+			}
+		})
+	}
+}
+
+func TestCallerName(t *testing.T) {
+	type args struct {
+		up int
+	}
+	tests := []struct {
+		testName       string
+		testArgs       args
+		expectedResult string
+	}{
+		{"CallerName(%v) - Expected: %q", args{up: 0}, "func1"},
+		{"CallerName(%v) - Expected: %q", args{up: 1}, "tRunner"},
+		{"CallerName(%v) - Expected: %q", args{up: 2}, "goexit"},
+	}
+	for _, tt := range tests {
+		tt.testName = fmt.Sprintf(tt.testName, tt.testArgs, tt.expectedResult)
+		t.Run(tt.testName, func(t *testing.T) {
+			if got := CallerName(tt.testArgs.up); got != tt.expectedResult {
+				t.Errorf("CallerName(%v) = %v, Expected: %v", tt.testArgs.up, got, tt.expectedResult)
+			}
+		})
+	}
+}
+
+func TestCallerFileLine(t *testing.T) {
+	t.Skip("Skip for now since it is used for internal testing only")
+}
+
+func TestReadStaticFile(t *testing.T) {
+
+	testFolder := "testdata"
+	testSubFolder := "testdata_subfolder"
+	testFileName := "psp-azp-privileges.yaml"
+	testFilePath := filepath.Join(testFolder, testFileName)
+	testFileContent, fileError := ioutil.ReadFile(testFilePath)
+	if fileError != nil {
+		t.Fatalf("Error loading test data: %v", fileError)
+	}
+
+	type args struct {
+		path []string
+	}
+	tests := []struct {
+		testName       string
+		testArgs       args
+		expectedResult []byte
+		expectedError  bool
+	}{
+		{
+			testName:       "ReadStaticFile(%v)",
+			testArgs:       args{path: []string{testFolder, testFileName}}, //Test case with folder and file
+			expectedResult: testFileContent,
+			expectedError:  false,
+		},
+		{
+			testName:       "ReadStaticFile(%v)",
+			testArgs:       args{path: []string{testFolder, testSubFolder, testFileName}}, //Test case with folder, subfolder and file
+			expectedResult: testFileContent,
+			expectedError:  false,
+		},
+		{
+			testName:       "ReadStaticFile(%v)",
+			testArgs:       args{path: []string{}}, //Test case with empty args
+			expectedResult: nil,
+			expectedError:  true,
+		},
+		{
+			testName:       "ReadStaticFile(%v)",
+			testArgs:       args{path: []string{testFolder, testSubFolder, "invalidfilename"}}, //Test case with invalid file
+			expectedResult: nil,
+			expectedError:  true,
+		},
+	}
+	for _, tt := range tests {
+
+		tt.testName = fmt.Sprintf(tt.testName, tt.testArgs)
+
+		t.Run(tt.testName, func(t *testing.T) {
+			got, err := ReadStaticFile(tt.testArgs.path...)
+			if (err != nil) != tt.expectedError {
+				t.Errorf("ReadStaticFile() error = %v, Expected %v", err, tt.expectedError)
+				return
+			}
+			if !reflect.DeepEqual(got, tt.expectedResult) {
+				t.Errorf("ReadStaticFile() = %v, Expected %v", got, tt.expectedResult)
+				return
+			}
+			if got == nil && tt.expectedResult != nil {
+				t.Errorf("ReadStaticFile() = %v, Expected %v", got, tt.expectedResult)
+			}
+
+		})
+	}
+
+	// Skip test for pckr.box integration
 }
