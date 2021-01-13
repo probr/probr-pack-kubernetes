@@ -3,6 +3,7 @@ package pod_security_policy
 //go:generate go-bindata.exe -pkg $GOPACKAGE -o assets/assets.go assets/yaml
 
 import (
+	"fmt"
 	"log"
 	"strings"
 
@@ -53,8 +54,11 @@ func (s *scenarioState) aKubernetesDeploymentIsAppliedToAnExistingKubernetesClus
 func (s *scenarioState) theOperationWillWithAnError(res, msg string) error {
 	err := kubernetes.AssertResult(&s.podState, res, msg)
 
-	description := ""
-	var payload interface{}
+	description := fmt.Sprintf("The operation with result %s and message %s", res, msg)
+	payload := struct {
+		PodState kubernetes.PodState
+		PodName  string
+	}{s.podState, s.podState.PodName}
 	s.audit.AuditScenarioStep(description, payload, err)
 
 	return err
@@ -63,8 +67,11 @@ func (s *scenarioState) theOperationWillWithAnError(res, msg string) error {
 func (s *scenarioState) performAllowedCommand() error {
 	err := s.runVerificationProbe(VerificationProbe{Cmd: Ls, ExpectedExitCode: 0}) //'0' exit code as we expect this to succeed
 
-	description := ""
-	var payload interface{}
+	description := "Perform Allowed commands"
+	payload := struct {
+		PodState kubernetes.PodState
+		PodName  string
+	}{s.podState, s.podState.PodName}
 	s.audit.AuditScenarioStep(description, payload, err)
 
 	return err
@@ -152,8 +159,11 @@ func (s *scenarioState) privilegedAccessRequestIsMarkedForTheKubernetesDeploymen
 
 	err = kubernetes.ProcessPodCreationResult(&s.podState, pd, kubernetes.PSPNoPrivilege, err)
 
-	description := ""
-	var payload interface{}
+	description := fmt.Sprintf("Privileged access request %s is marked for the kubernetes deployment ", privilegedAccessRequested)
+	payload := struct {
+		PodState kubernetes.PodState
+		PodName  string
+	}{s.podState, s.podState.PodName}
 	s.audit.AuditScenarioStep(description, payload, err)
 
 	return err
@@ -162,8 +172,11 @@ func (s *scenarioState) privilegedAccessRequestIsMarkedForTheKubernetesDeploymen
 func (s *scenarioState) someControlExistsToPreventPrivilegedAccessForKubernetesDeploymentsToAnActiveKubernetesCluster() error {
 	err := s.runControlProbe(psp.PrivilegedAccessIsRestricted, "PrivilegedAccessIsRestricted")
 
-	description := ""
-	var payload interface{}
+	description := "Some controls exists to prevent privileged access for kiubernetes deployment an active kubernetes"
+	payload := struct {
+		PodState kubernetes.PodState
+		PodName  string
+	}{s.podState, s.podState.PodName}
 	s.audit.AuditScenarioStep(description, payload, err)
 
 	return err
@@ -172,8 +185,11 @@ func (s *scenarioState) someControlExistsToPreventPrivilegedAccessForKubernetesD
 func (s *scenarioState) iShouldNotBeAbleToPerformACommandThatRequiresPrivilegedAccess() error {
 	err := s.runVerificationProbe(VerificationProbe{Cmd: Chroot, ExpectedExitCode: 1})
 
-	description := ""
-	var payload interface{}
+	description := "Should not able to perform command that requires privileged"
+	payload := struct {
+		PodState kubernetes.PodState
+		PodName  string
+	}{s.podState, s.podState.PodName}
 	s.audit.AuditScenarioStep(description, payload, err)
 
 	return err
@@ -194,8 +210,11 @@ func (s *scenarioState) hostPIDRequestIsMarkedForTheKubernetesDeployment(hostPID
 
 	err = kubernetes.ProcessPodCreationResult(&s.podState, pd, kubernetes.PSPHostNamespace, err)
 
-	description := ""
-	var payload interface{}
+	description := fmt.Sprintf("Host pid request is marked for the kubernetes deployment hostpidrequested %s", hostPIDRequested)
+	payload := struct {
+		PodState kubernetes.PodState
+		PodName  string
+	}{s.podState, s.podState.PodName}
 	s.audit.AuditScenarioStep(description, payload, err)
 
 	return err
@@ -204,8 +223,11 @@ func (s *scenarioState) hostPIDRequestIsMarkedForTheKubernetesDeployment(hostPID
 func (s *scenarioState) someSystemExistsToPreventAKubernetesContainerFromRunningUsingTheHostPIDOnTheActiveKubernetesCluster() error {
 	err := s.runControlProbe(psp.HostPIDIsRestricted, "HostPIDIsRestricted")
 
-	description := ""
-	var payload interface{}
+	description := "Some systems exist to prevent kubernetes container from running using the host pid on the active kubernetes cluster"
+	payload := struct {
+		PodState kubernetes.PodState
+		PodName  string
+	}{s.podState, s.podState.PodName}
 	s.audit.AuditScenarioStep(description, payload, err)
 
 	return err
@@ -214,8 +236,11 @@ func (s *scenarioState) someSystemExistsToPreventAKubernetesContainerFromRunning
 func (s *scenarioState) iShouldNotBeAbleToPerformACommandThatProvidesAccessToTheHostPIDNamespace() error {
 	err := s.runVerificationProbe(VerificationProbe{Cmd: EnterHostPIDNS, ExpectedExitCode: 1})
 
-	description := ""
-	var payload interface{}
+	description := "Should not be able to perform command that provide access to the host pid namespaces"
+	payload := struct {
+		PodState kubernetes.PodState
+		PodName  string
+	}{s.podState, s.podState.PodName}
 	s.audit.AuditScenarioStep(description, payload, err)
 
 	return err
@@ -235,8 +260,11 @@ func (s *scenarioState) hostIPCRequestIsMarkedForTheKubernetesDeployment(hostIPC
 
 	err = kubernetes.ProcessPodCreationResult(&s.podState, pd, kubernetes.PSPHostNamespace, err)
 
-	description := ""
-	var payload interface{}
+	description := fmt.Sprintf(" Host ipc request is marked for the kubernetes deployment %s", hostIPCRequested)
+	payload := struct {
+		PodState kubernetes.PodState
+		PodName  string
+	}{s.podState, s.podState.PodName}
 	s.audit.AuditScenarioStep(description, payload, err)
 
 	return err
@@ -246,8 +274,11 @@ func (s *scenarioState) hostIPCRequestIsMarkedForTheKubernetesDeployment(hostIPC
 func (s *scenarioState) someSystemExistsToPreventAKubernetesDeploymentFromRunningUsingTheHostIPCInAnExistingKubernetesCluster() error {
 	err := s.runControlProbe(psp.HostIPCIsRestricted, "HostIPCIsRestricted")
 
-	description := ""
-	var payload interface{}
+	description := "Some system exists to prevent a kubernetes deployment from running using the host ipc in an existing kubernetes cluster"
+	payload := struct {
+		PodState kubernetes.PodState
+		PodName  string
+	}{s.podState, s.podState.PodName}
 	s.audit.AuditScenarioStep(description, payload, err)
 
 	return err
@@ -256,8 +287,11 @@ func (s *scenarioState) someSystemExistsToPreventAKubernetesDeploymentFromRunnin
 func (s *scenarioState) iShouldNotBeAbleToPerformACommandThatProvidesAccessToTheHostIPCNamespace() error {
 	err := s.runVerificationProbe(VerificationProbe{Cmd: EnterHostIPCNS, ExpectedExitCode: 1})
 
-	description := ""
-	var payload interface{}
+	description := "Should not be able to perform command that provide access to the host pid namespaces"
+	payload := struct {
+		PodState kubernetes.PodState
+		PodName  string
+	}{s.podState, s.podState.PodName}
 	s.audit.AuditScenarioStep(description, payload, err)
 
 	return err
@@ -277,8 +311,11 @@ func (s *scenarioState) hostNetworkRequestIsMarkedForTheKubernetesDeployment(hos
 
 	err = kubernetes.ProcessPodCreationResult(&s.podState, pd, kubernetes.PSPHostNetwork, err)
 
-	description := ""
-	var payload interface{}
+	description := fmt.Sprintf(" Host network request is marked for the kubernetes deployment %s", hostNetworkRequested)
+	payload := struct {
+		PodState kubernetes.PodState
+		PodName  string
+	}{s.podState, s.podState.PodName}
 	s.audit.AuditScenarioStep(description, payload, err)
 
 	return err
@@ -287,8 +324,11 @@ func (s *scenarioState) hostNetworkRequestIsMarkedForTheKubernetesDeployment(hos
 func (s *scenarioState) someSystemExistsToPreventAKubernetesDeploymentFromRunningUsingTheHostNetworkInAnExistingKubernetesCluster() error {
 	err := s.runControlProbe(psp.HostNetworkIsRestricted, "HostNetworkIsRestricted")
 
-	description := ""
-	var payload interface{}
+	description := "Some sytems exists to prevent kubernetes deployment from running using the host network in an existing kubernetes cluster"
+	payload := struct {
+		PodState kubernetes.PodState
+		PodName  string
+	}{s.podState, s.podState.PodName}
 	s.audit.AuditScenarioStep(description, payload, err)
 
 	return err
@@ -297,8 +337,11 @@ func (s *scenarioState) someSystemExistsToPreventAKubernetesDeploymentFromRunnin
 func (s *scenarioState) iShouldNotBeAbleToPerformACommandThatProvidesAccessToTheHostNetworkNamespace() error {
 	err := s.runVerificationProbe(VerificationProbe{Cmd: EnterHostNetworkNS, ExpectedExitCode: 1})
 
-	description := ""
-	var payload interface{}
+	description := "Should not be able to perform form a command that provide access to the host network space"
+	payload := struct {
+		PodState kubernetes.PodState
+		PodName  string
+	}{s.podState, s.podState.PodName}
 	s.audit.AuditScenarioStep(description, payload, err)
 
 	return err
@@ -334,8 +377,11 @@ func (s *scenarioState) privilegedEscalationIsMarkedForTheKubernetesDeployment(p
 func (s *scenarioState) someSystemExistsToPreventAKubernetesDeploymentFromRunningUsingTheAllowPrivilegeEscalationInAnExistingKubernetesCluster() error {
 	err := s.runControlProbe(psp.PrivilegedEscalationIsRestricted, "PrivilegedEscalationIsRestricted")
 
-	description := ""
-	var payload interface{}
+	description := "Some systems exists to prevent kebernetes deployment from running the allowed privileged escalation in an existing kubernetes cluster"
+	payload := struct {
+		PodState kubernetes.PodState
+		PodName  string
+	}{s.podState, s.podState.PodName}
 	s.audit.AuditScenarioStep(description, payload, err)
 
 	return err
@@ -356,8 +402,11 @@ func (s *scenarioState) theUserRequestedIsForTheKubernetesDeployment(requestedUs
 	pd, err := psp.CreatePODSettingSecurityContext(nil, nil, &runAsUser, s.probe)
 	err = kubernetes.ProcessPodCreationResult(&s.podState, pd, kubernetes.PSPAllowedUsersGroups, err)
 
-	description := ""
-	var payload interface{}
+	description := fmt.Sprintf("The requested userid for the kubernetes deployment %s", requestedUser)
+	payload := struct {
+		PodState kubernetes.PodState
+		PodName  string
+	}{s.podState, s.podState.PodName}
 	s.audit.AuditScenarioStep(description, payload, err)
 
 	return err
@@ -366,8 +415,11 @@ func (s *scenarioState) theUserRequestedIsForTheKubernetesDeployment(requestedUs
 func (s *scenarioState) someSystemExistsToPreventAKubernetesDeploymentFromRunningAsTheRootUserInAnExistingKubernetesCluster() error {
 	err := s.runControlProbe(psp.RootUserIsRestricted, "RootUserIsRestricted")
 
-	description := ""
-	var payload interface{}
+	description := "some systems exists to prevent kubernetes deployment from running the root user in existing kubernetes cluster"
+	payload := struct {
+		PodState kubernetes.PodState
+		PodName  string
+	}{s.podState, s.podState.PodName}
 	s.audit.AuditScenarioStep(description, payload, err)
 
 	return err
@@ -376,8 +428,11 @@ func (s *scenarioState) someSystemExistsToPreventAKubernetesDeploymentFromRunnin
 func (s *scenarioState) theKubernetesDeploymentShouldRunWithANonrootUID() error {
 	err := s.runVerificationProbe(VerificationProbe{Cmd: VerifyNonRootUID, ExpectedExitCode: 1})
 
-	description := ""
-	var payload interface{}
+	description := "the Kubernetes Deployment Should Run With A Non rootUID"
+	payload := struct {
+		PodState kubernetes.PodState
+		PodName  string
+	}{s.podState, s.podState.PodName}
 	s.audit.AuditScenarioStep(description, payload, err)
 
 	return err
@@ -395,8 +450,11 @@ func (s *scenarioState) nETRAWIsMarkedForTheKubernetesDeployment(netRawRequested
 	pd, err := psp.CreatePODSettingCapabilities(&c, s.probe)
 	err = kubernetes.ProcessPodCreationResult(&s.podState, pd, kubernetes.PSPAllowedCapabilities, err)
 
-	description := ""
-	var payload interface{}
+	description := fmt.Sprintf("NETRAWIs Marked For The Kubernetes Deployment %s", netRawRequested)
+	payload := struct {
+		PodState kubernetes.PodState
+		PodName  string
+	}{s.podState, s.podState.PodName}
 	s.audit.AuditScenarioStep(description, payload, err)
 
 	return err
@@ -405,8 +463,11 @@ func (s *scenarioState) nETRAWIsMarkedForTheKubernetesDeployment(netRawRequested
 func (s *scenarioState) someSystemExistsToPreventAKubernetesDeploymentFromRunningWithNETRAWCapabilityInAnExistingKubernetesCluster() error {
 	err := s.runControlProbe(psp.NETRawIsRestricted, "NETRAWIsRestricted")
 
-	description := ""
-	var payload interface{}
+	description := "some System Exists To Prevent A Kubernetes Deployment From Running With NETRAW Capability In An Existing Kubernetes Cluster"
+	payload := struct {
+		PodState kubernetes.PodState
+		PodName  string
+	}{s.podState, s.podState.PodName}
 	s.audit.AuditScenarioStep(description, payload, err)
 
 	return err
@@ -415,8 +476,11 @@ func (s *scenarioState) someSystemExistsToPreventAKubernetesDeploymentFromRunnin
 func (s *scenarioState) iShouldNotBeAbleToPerformACommandThatRequiresNETRAWCapability() error {
 	err := s.runVerificationProbe(VerificationProbe{Cmd: NetRawProbe, ExpectedExitCode: 1})
 
-	description := ""
-	var payload interface{}
+	description := "Should Not Be Able To Per form A Command That Requires NETRAW Capability"
+	payload := struct {
+		PodState kubernetes.PodState
+		PodName  string
+	}{s.podState, s.podState.PodName}
 	s.audit.AuditScenarioStep(description, payload, err)
 
 	return err
@@ -435,8 +499,11 @@ func (s *scenarioState) additionalCapabilitiesForTheKubernetesDeployment(addCapa
 	pd, err := psp.CreatePODSettingCapabilities(&c, s.probe)
 	err = kubernetes.ProcessPodCreationResult(&s.podState, pd, kubernetes.PSPAllowedCapabilities, err)
 
-	description := ""
-	var payload interface{}
+	description := fmt.Sprintf("additional Capabilities For The Kubernetes Deployment %s", addCapabilities)
+	payload := struct {
+		PodState kubernetes.PodState
+		PodName  string
+	}{s.podState, s.podState.PodName}
 	s.audit.AuditScenarioStep(description, payload, err)
 
 	return err
@@ -445,8 +512,11 @@ func (s *scenarioState) additionalCapabilitiesForTheKubernetesDeployment(addCapa
 func (s *scenarioState) someSystemExistsToPreventKubernetesDeploymentsWithCapabilitiesBeyondTheDefaultSetFromBeingDeployedToAnExistingKubernetesCluster() error {
 	err := s.runControlProbe(psp.AllowedCapabilitiesAreRestricted, "AllowedCapabilitiesAreRestricted")
 
-	description := ""
-	var payload interface{}
+	description := "some System Exists To Prevent Kubernetes Deployments With Capabilities Beyond The Default Set From Being Deployed To An Existing Kubernetes Cluster"
+	payload := struct {
+		PodState kubernetes.PodState
+		PodName  string
+	}{s.podState, s.podState.PodName}
 	s.audit.AuditScenarioStep(description, payload, err)
 
 	return err
@@ -455,8 +525,11 @@ func (s *scenarioState) someSystemExistsToPreventKubernetesDeploymentsWithCapabi
 func (s *scenarioState) iShouldNotBeAbleToPerformACommandThatRequiresCapabilitiesOutsideOfTheDefaultSet() error {
 	err := s.runVerificationProbe(VerificationProbe{Cmd: SpecialCapProbe, ExpectedExitCode: 2})
 
-	description := ""
-	var payload interface{}
+	description := "Should Not Be Able To Perform A Command That Requires Capabilities Outside Of The Default Set"
+	payload := struct {
+		PodState kubernetes.PodState
+		PodName  string
+	}{s.podState, s.podState.PodName}
 	s.audit.AuditScenarioStep(description, payload, err)
 
 	return err
@@ -476,8 +549,11 @@ func (s *scenarioState) assignedCapabilitiesForTheKubernetesDeployment(assignCap
 	pd, err := psp.CreatePODSettingCapabilities(&c, s.probe)
 	err = kubernetes.ProcessPodCreationResult(&s.podState, pd, kubernetes.PSPAllowedCapabilities, err)
 
-	description := ""
-	var payload interface{}
+	description := fmt.Sprintf("assigned capabilities for kubernetes deployment %s", assignCapabilities)
+	payload := struct {
+		PodState kubernetes.PodState
+		PodName  string
+	}{s.podState, s.podState.PodName}
 	s.audit.AuditScenarioStep(description, payload, err)
 
 	return err
@@ -486,8 +562,11 @@ func (s *scenarioState) assignedCapabilitiesForTheKubernetesDeployment(assignCap
 func (s *scenarioState) someSystemExistsToPreventKubernetesDeploymentsWithAssignedCapabilitiesFromBeingDeployedToAnExistingKubernetesCluster() error {
 	err := s.runControlProbe(psp.AssignedCapabilitiesAreRestricted, "AssignedCapabilitiesAreRestricted")
 
-	description := ""
-	var payload interface{}
+	description := fmt.Sprintf("some systems exists to prevent kubernetes deployments with assigned capabilities from being deployed an existing kubernetes cluster")
+	payload := struct {
+		PodState kubernetes.PodState
+		PodName  string
+	}{s.podState, s.podState.PodName}
 	s.audit.AuditScenarioStep(description, payload, err)
 
 	return err
@@ -496,8 +575,11 @@ func (s *scenarioState) someSystemExistsToPreventKubernetesDeploymentsWithAssign
 func (s *scenarioState) iShouldNotBeAbleToPerformACommandThatRequiresAnyCapabilities() error {
 	err := s.runVerificationProbe(VerificationProbe{Cmd: SpecialCapProbe, ExpectedExitCode: 2})
 
-	description := ""
-	var payload interface{}
+	description := "should not be able to perform a command that requires any capabilities"
+	payload := struct {
+		PodState kubernetes.PodState
+		PodName  string
+	}{s.podState, s.podState.PodName}
 	s.audit.AuditScenarioStep(description, payload, err)
 
 	return err
@@ -508,9 +590,6 @@ func (s *scenarioState) anPortRangeIsRequestedForTheKubernetesDeployment(portRan
 
 	var y []byte
 	var err error
-	description := ""
-	var payload interface{}
-
 	if portRange == "unapproved" {
 		y, err = utils.ReadStaticFile(kubernetes.AssetsDir, "psp-azp-hostport-unapproved.yaml")
 	} else {
@@ -522,6 +601,11 @@ func (s *scenarioState) anPortRangeIsRequestedForTheKubernetesDeployment(portRan
 		err = kubernetes.ProcessPodCreationResult(&s.podState, pd, kubernetes.PSPAllowedPortRange, err)
 	}
 
+	description := fmt.Sprintf("Port range is requested for kubernetes deployment %s", portRange)
+	payload := struct {
+		PodState kubernetes.PodState
+		PodName  string
+	}{s.podState, s.podState.PodName}
 	s.audit.AuditScenarioStep(description, payload, err)
 
 	return err
@@ -531,8 +615,11 @@ func (s *scenarioState) anPortRangeIsRequestedForTheKubernetesDeployment(portRan
 func (s *scenarioState) someSystemExistsToPreventKubernetesDeploymentsWithUnapprovedPortRangeFromBeingDeployedToAnExistingKubernetesCluster() error {
 	err := s.runControlProbe(psp.HostPortsAreRestricted, "HostPortsAreRestricted")
 
-	description := ""
-	var payload interface{}
+	description := "some System Exists To Prevent Kubernetes Deployments With Unapproved Port Range From Being Deployed To An Existing Kubernetes Cluster"
+	payload := struct {
+		PodState kubernetes.PodState
+		PodName  string
+	}{s.podState, s.podState.PodName}
 	s.audit.AuditScenarioStep(description, payload, err)
 
 	return err
@@ -541,8 +628,11 @@ func (s *scenarioState) someSystemExistsToPreventKubernetesDeploymentsWithUnappr
 func (s *scenarioState) iShouldNotBeAbleToPerformACommandThatAccessAnUnapprovedPortRange() error {
 	err := s.runVerificationProbe(VerificationProbe{Cmd: NetCat, ExpectedExitCode: 1})
 
-	description := ""
-	var payload interface{}
+	description := "Should not be able to perform a command that access an up approved port range"
+	payload := struct {
+		PodState kubernetes.PodState
+		PodName  string
+	}{s.podState, s.podState.PodName}
 	s.audit.AuditScenarioStep(description, payload, err)
 
 	return err
@@ -553,9 +643,6 @@ func (s *scenarioState) anVolumeTypeIsRequestedForTheKubernetesDeployment(volume
 
 	var y []byte
 	var err error
-	description := ""
-	var payload interface{}
-
 	if volumeType == "unapproved" {
 		y, err = utils.ReadStaticFile(kubernetes.AssetsDir, "psp-azp-volumetypes-unapproved.yaml")
 	} else {
@@ -567,6 +654,11 @@ func (s *scenarioState) anVolumeTypeIsRequestedForTheKubernetesDeployment(volume
 		err = kubernetes.ProcessPodCreationResult(&s.podState, pd, kubernetes.PSPAllowedVolumeTypes, err)
 	}
 
+	description := fmt.Sprintf("a volument type is requested for kubernetes deployment is %s", volumeType)
+	payload := struct {
+		PodState kubernetes.PodState
+		PodName  string
+	}{s.podState, s.podState.PodName}
 	s.audit.AuditScenarioStep(description, payload, err)
 
 	return err
@@ -575,8 +667,11 @@ func (s *scenarioState) anVolumeTypeIsRequestedForTheKubernetesDeployment(volume
 func (s *scenarioState) someSystemExistsToPreventKubernetesDeploymentsWithUnapprovedVolumeTypesFromBeingDeployedToAnExistingKubernetesCluster() error {
 	err := s.runControlProbe(psp.VolumeTypesAreRestricted, "VolumeTypesAreRestricted")
 
-	description := ""
-	var payload interface{}
+	description := "some systems exists to prevent kubernetes deployments without un approved volume types from being deployed existing kubernetes cluster"
+	payload := struct {
+		PodState kubernetes.PodState
+		PodName  string
+	}{s.podState, s.podState.PodName}
 	s.audit.AuditScenarioStep(description, payload, err)
 
 	return err
@@ -594,8 +689,6 @@ func (s *scenarioState) anSeccompProfileIsRequestedForTheKubernetesDeployment(se
 
 	var y []byte
 	var err error
-	description := ""
-	var payload interface{}
 
 	if seccompProfile == "unapproved" {
 		y, err = utils.ReadStaticFile(kubernetes.AssetsDir, "psp-azp-seccomp-unapproved.yaml")
@@ -610,6 +703,11 @@ func (s *scenarioState) anSeccompProfileIsRequestedForTheKubernetesDeployment(se
 		err = kubernetes.ProcessPodCreationResult(&s.podState, pd, kubernetes.PSPSeccompProfile, err)
 	}
 
+	description := fmt.Sprintf("Sec comp profile requested for kubernetes deployment %s", seccompProfile)
+	payload := struct {
+		PodState kubernetes.PodState
+		PodName  string
+	}{s.podState, s.podState.PodName}
 	s.audit.AuditScenarioStep(description, payload, err)
 
 	return err
@@ -618,8 +716,11 @@ func (s *scenarioState) anSeccompProfileIsRequestedForTheKubernetesDeployment(se
 func (s *scenarioState) someSystemExistsToPreventKubernetesDeploymentsWithoutApprovedSeccompProfilesFromBeingDeployedToAnExistingKubernetesCluster() error {
 	err := s.runControlProbe(psp.SeccompProfilesAreRestricted, "SeccompProfilesAreRestricted")
 
-	description := ""
-	var payload interface{}
+	description := "Some system exists to prevent kubernetes deployments without approved sec profiles from being deployed to and existing kubernetes cluster"
+	payload := struct {
+		PodState kubernetes.PodState
+		PodName  string
+	}{s.podState, s.podState.PodName}
 	s.audit.AuditScenarioStep(description, payload, err)
 
 	return err
@@ -627,8 +728,11 @@ func (s *scenarioState) someSystemExistsToPreventKubernetesDeploymentsWithoutApp
 func (s *scenarioState) iShouldNotBeAbleToPerformASystemCallThatIsBlockedByTheSeccompProfile() error {
 	err := s.runVerificationProbe(VerificationProbe{Cmd: Unshare, ExpectedExitCode: 1})
 
-	description := ""
-	var payload interface{}
+	description := "Should not be allowed to perform system call that is blocked by the sec profile"
+	payload := struct {
+		PodState kubernetes.PodState
+		PodName  string
+	}{s.podState, s.podState.PodName}
 	s.audit.AuditScenarioStep(description, payload, err)
 
 	return err
