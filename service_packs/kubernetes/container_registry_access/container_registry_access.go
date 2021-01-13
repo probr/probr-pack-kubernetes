@@ -75,8 +75,12 @@ func (s *scenarioState) aUserAttemptsToDeployAuthorisedContainer() error {
 func (s *scenarioState) theDeploymentAttemptIsAllowed() error {
 	err := kubernetes.AssertResult(&s.podState, "allowed", "")
 
-	description := fmt.Sprintf("Asserts pod creation result in scenario state is denied.")
-	s.audit.AuditScenarioStep(description, nil, err)
+	description := "Asserts pod creation result in scenario state is denied"
+	payload := struct {
+		PodState kubernetes.PodState
+		PodName  string
+	}{s.podState, s.podState.PodName}
+	s.audit.AuditScenarioStep(description, payload, err)
 
 	return err
 }
@@ -99,7 +103,11 @@ func (s *scenarioState) theDeploymentAttemptIsDenied() error {
 	err := kubernetes.AssertResult(&s.podState, "denied", "")
 
 	description := fmt.Sprintf("Asserts pod creation result in scenario state is denied.")
-	s.audit.AuditScenarioStep(description, nil, err)
+	payload := struct {
+		PodState kubernetes.PodState
+		PodName  string
+	}{s.podState, s.podState.PodName}
+	s.audit.AuditScenarioStep(description, payload, err)
 
 	return err
 }
