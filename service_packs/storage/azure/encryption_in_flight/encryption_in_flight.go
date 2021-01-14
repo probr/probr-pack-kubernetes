@@ -43,7 +43,6 @@ var Probe ProbeStruct
 func (state *scenarioState) setup() {
 
 	log.Println("[DEBUG] Setting up \"scenarioState\"")
-	state.ctx = context.Background()
 
 }
 
@@ -184,6 +183,7 @@ func (s *scenarioState) beforeScenario(probeName string, gs *godog.Scenario) {
 	s.name = gs.Name
 	s.probe = summary.State.GetProbeLog(probeName)
 	s.audit = summary.State.GetProbeLog(probeName).InitializeAuditor(gs.Name, gs.Tags)
+	s.ctx = context.Background()
 	coreengine.LogScenarioStart(gs)
 }
 
