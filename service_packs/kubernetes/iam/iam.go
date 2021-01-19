@@ -1,11 +1,4 @@
-// Provides the implementation required to execute the feature based test cases described in the
-// the 'events' directory.  The 'assets' directory holds any assets required for the test cases.   Assets are 'embedded'
-// via the 'go-bindata.exe' tool which is invoked via the 'go generate' tool.  It is important, therefore, that the
-//'go:generate' comment is present in order to include this package in the scope of the 'go generate' tool.  This can be
-// invoked directly on the command line of via the Makefile (e.g. make clean-build).
 package iam
-
-//go:generate go-bindata.exe -pkg $GOPACKAGE -o assets/iam/assets.go assets/iam/yaml probe_specifications/iamcontrol
 
 import (
 	"fmt"

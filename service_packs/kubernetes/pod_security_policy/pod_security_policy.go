@@ -1,7 +1,5 @@
 package pod_security_policy
 
-//go:generate go-bindata.exe -pkg $GOPACKAGE -o assets/assets.go assets/yaml
-
 import (
 	"fmt"
 	"log"
