@@ -204,3 +204,10 @@ func TestReadStaticFile(t *testing.T) {
 
 	// Skip test for pckr.box integration
 }
+
+func TestAuditPlaceholders(t *testing.T) {
+	str, interf, err := AuditPlaceholders()
+	if str != "" || interf != nil || err != nil {
+		t.Errorf("Audit Placeholder objects did not return as expected")
+	}
+}

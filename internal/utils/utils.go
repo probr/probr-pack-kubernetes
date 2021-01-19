@@ -110,3 +110,8 @@ func ReplaceBytesValue(b []byte, old string, new string) []byte {
 	newString := strings.Replace(string(b), old, new, -1)
 	return []byte(newString)
 }
+
+// AuditPlaceholders creates empty objects to reduce code repetition when auditing probe steps
+func AuditPlaceholders() (string, interface{}, error) {
+	return *new(string), *new(interface{}), *new(error)
+}

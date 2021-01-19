@@ -55,11 +55,20 @@ func (e *ProbeAudit) Write() {
 	}
 }
 
-// auditScenarioStep sets description, payload, and pass/fail based on err parameter
+// auditScenarioStep sets description, payload, and pass/fail based on err parameter.
+// This function should be deferred to catch panic behavior, otherwise the audit will not be logged on panic
 func (p *ScenarioAudit) AuditScenarioStep(description string, payload interface{}, err error) {
-	// Initialize any empty objects
-	// Now do the actual probe summary
-	stepName := utils.CallerName(1)
+	stepName := utils.CallerName(2) // returns name if deferred and not panicking
+	switch stepName {
+	case "call":
+		stepName = utils.CallerName(1) // returns name if this function was not deferred in the caller
+	case "gopanic":
+		stepName = utils.CallerName(3) // returns name if caller panicked and this function was deferred
+	}
+	p.audit(stepName, description, payload, err)
+}
+
+func (p *ScenarioAudit) audit(stepName string, description string, payload interface{}, err error) {
 	stepNumber := len(p.Steps) + 1
 	p.Steps[stepNumber] = &StepAudit{
 		Name:        stepName,
@@ -79,7 +88,6 @@ func (p *ScenarioAudit) AuditScenarioStep(description string, payload interface{
 		}
 	}
 }
-
 func (e *ProbeAudit) probeRan() bool {
 	if len(e.Scenarios) > 0 {
 		return true
