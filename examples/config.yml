@@ -5,9 +5,9 @@ CucumberDir: cucumber_output
 OverwriteHistoricalAudits: true
 ServicePacks:
   Kubernetes:
-    KubeConfig: 
+    KubeConfig:
     KubeContext:
-    AuthorisedContainerRegistry: citihubprod.azurecr.io # required
+    AuthorisedContainerRegistry: myprodregistry.azurecr.io # required
     UnauthorisedContainerRegistry: docker.io # required
     ProbeImage: citihub/probr-probe
     Probes: # allows this pack's probes to be disabled by name
@@ -28,9 +28,9 @@ ServicePacks:
       # Provider: # if object OR required vars within it are omitted, pack will not be included
 CloudProviders:
   Azure:
-    TenantID: "8c739bb2-3e1e-494a-9f5a-22e154c876d0"
-    SubscriptionID: "27cc841d-bab8-4080-b103-d89e00dc8c45"
-    ClientID: "4c97ad17-0235-49cf-aa72-4ba445422a65"
+    TenantID: "6d1664ba-5a5c-11eb-ae93-0242ac130002"
+    SubscriptionID: "74515eb0-5a5c-11eb-ae93-0242ac130002"
+    ClientID: "d73d9c6c-64e8-4ab2-8db3-3ffecdc64bcb"
     ClientSecret: ".~~Xcz0.GDegJCSX22X-18~JB6_AaJ9tM6"
     ManagementGroup:
     ResourceGroup: ProbrRG

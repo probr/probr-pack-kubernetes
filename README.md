@@ -1,18 +1,21 @@
-# Probr
+<img src="assets/images/probr.png" width="200">
 
-## Your Zero Trust Compliance Toolbox
+## Interactive Application Security Testing (IAST) for Cloud
+Probr analyzes the complex behaviours and interactions in your cloud resources to enable engineers, developers and operations teams identify and fix security related flaws early and often, to assist in building secure platforms and reducing the number of defects discovered later in the development lifecycle.
 
-Probr is intended to provide flexible "probing" of your cloud provider and Kubernetes cluster to ensure that the result of your security controls have properly taken effect.
+Probr has been designed to test aspects of security and compliance that are otherwise challenging to assert using static code inspection or configuration inspection alone, providing a deeper level of confidence in the compliance of your cloud solutions.
 
-Instead of reading configurations or scanning to validate that specific policies are in place, Probr attempts to perform specific tasks that should or shouldn't be able to occur from specific roles.
+### Control Specifications
+Probr uses structured natural language to describe the behaviours of an adequately controlled set of cloud resources. These form the basis of control requirements without getting into the nitty gritty of how those controls should be implemented.  This leaves engineering teams the freedom to determine the best course of action to implement those behaviours. The implementation may change frequently, given the rapid feature velocity in the cloud and tooling ecosystem, without needing to update Probr. This differentiates Probr from policy-based tools, which are designed to look for specific features of resource implementation, so need to iterate in-line with changes to the underlying implementation approach.
 
-Probr may be used by **security professionals** to audit or demonstrate the need for specific policies and remediation, or Probr may be used by **engineering teams** to display that necessary regulations are being met.
+### How it works
+Probr deploys a series of probes to test the behaviours of the cloud resources in your code, returning a machine-readable set of structured results that can be integrated into the broader DevSecOps process for decision making.
 
 ## Quickstart Guide
 
 ### Requirements
 
-The following elements are required to get started with Probr:
+The following elements are required to get started running the Probr Kubernetes service pack:
 
 - A running Kubernetes cluster
 - The kubeconfig file for the cluster you wish to probe
@@ -22,6 +25,7 @@ The following elements are required to get started with Probr:
 
 - **Option 1** - Download the latest Probr package by clicking the corresponding asset on our [release page](https://github.com/citihub/probr/releases).
 - **Option 2** - You may build the edge version of Probr by using `go build -o probr.exe cmd/main.go` from the source code. This may also be necessary if an executable compatible with your system is not available in on the release page.
+- **Option 3** - There is an example Dockerfile in [examples/docker](./examples/docker) which will build a Docker image with both Probr and [Cucumber HTML Reporter](https://www.npmjs.com/package/cucumber-html-reporter)
 
 *Note: The usage docs refer to the executable as `probr` or `probr.exe` interchangeably. Use the former for unix/linux systems, and the latter package if you are working in Windows.*
 
@@ -35,7 +39,7 @@ The following elements are required to get started with Probr:
 
 1. Set your configuration variables. For more on how to do this, see the config documentation further down on this page.
 
-1. Run the probr executable via `./probr [OPTIONS]`. 
+1. Run the probr executable via `./probr [OPTIONS]`.
     - Additional options can be seen via `./probr --help`
     - Review required variables by using `./probr show-requirements <SERVICE-PACK-NAME; optional>`
 
@@ -60,7 +64,7 @@ If you would like to handle logic differently per environment, env vars may be u
 
 ### Vars File
 
-An example Vars file is available at `probr/examples/config.yml`
+An example Vars file is available at [./examples/config.yml](./examples/config.yml).
 You may have as many vars files as you wish in your codebase, which will enable you to maintain configurations for multiple environments in a single codebase.
 
 The location of the vars file is passed as a CLI option e.g.
@@ -68,8 +72,6 @@ The location of the vars file is passed as a CLI option e.g.
 ```
 probr --varsFile=./config-dev.yml
 ```
-
-**IMPORTANT:** Remember to encrypt your config file if it contains secrets.
 
 ### Probr Configuration Variables
 
@@ -129,7 +131,7 @@ Tags may also be specified via a command line parameter to control which tagged 
 
 A variety of tagging options are available to help you specify which probes should be included or excluded at runtime.
 
-In the bullet-point lists below, each relationship level is represented by a `/` in the tag name. Examples are below the list of tags. 
+In the bullet-point lists below, each relationship level is represented by a `/` in the tag name. Examples are below the list of tags.
 
 The available tags are as follows:
 
