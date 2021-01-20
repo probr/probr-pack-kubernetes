@@ -2,7 +2,9 @@ package encryption_at_rest
 
 import (
 	"context"
+	"fmt"
 	"log"
+	"strings"
 
 	"github.com/citihub/probr/internal/coreengine"
 	"github.com/citihub/probr/internal/summary"
@@ -29,38 +31,116 @@ type ProbeStruct struct {
 var Probe ProbeStruct
 
 func (state *scenarioState) securityControlsThatRestrictDataFromBeingUnencryptedAtRest() error {
+
+	var err error
+	var stepTrace strings.Builder
+	payload := struct {
+	}{}
+	defer func() {
+		state.audit.AuditScenarioStep(stepTrace.String(), payload, err)
+	}()
+	err = fmt.Errorf("Not Implemented")
+	stepTrace.WriteString("TODO: Pending implementation;")
+
 	// It is available
+
 	log.Printf("[DEBUG] Azure Storage account is encrypted by default and cannot be turned off. No test to run. Checking Azure Policy. (Unless customise this test to check for specific key usage.")
-	return nil
+	return nil //TODO: Remove this line and return actual err. This is temporary to ensure test doesn't halt and other steps are not skipped
 }
 
 // PENDING IMPLEMENTATION
 func (state *scenarioState) weProvisionAnObjectStorageBucket() error {
+
+	var err error
+	var stepTrace strings.Builder
+	payload := struct {
+	}{}
+	defer func() {
+		state.audit.AuditScenarioStep(stepTrace.String(), payload, err)
+	}()
+	err = fmt.Errorf("Not Implemented")
+	stepTrace.WriteString("TODO: Pending implementation;")
+
 	return nil
 }
 
 // PENDING IMPLEMENTATION
 func (state *scenarioState) encryptionAtRestIs(encryptionOption string) error {
+
+	var err error
+	var stepTrace strings.Builder
+	payload := struct {
+	}{}
+	defer func() {
+		state.audit.AuditScenarioStep(stepTrace.String(), payload, err)
+	}()
+	err = fmt.Errorf("Not Implemented")
+	stepTrace.WriteString("TODO: Pending implementation;")
+
 	return nil
 }
 
 // PENDING IMPLEMENTATION
 func (state *scenarioState) creationWillWithAnErrorMatching(result string) error {
+
+	var err error
+	var stepTrace strings.Builder
+	payload := struct {
+	}{}
+	defer func() {
+		state.audit.AuditScenarioStep(stepTrace.String(), payload, err)
+	}()
+	err = fmt.Errorf("Not Implemented")
+	stepTrace.WriteString("TODO: Pending implementation;")
+
 	return nil
 }
 
 // PENDING IMPLEMENTATION
 func (state *scenarioState) createContainerWithoutEncryption() error {
+
+	var err error
+	var stepTrace strings.Builder
+	payload := struct {
+	}{}
+	defer func() {
+		state.audit.AuditScenarioStep(stepTrace.String(), payload, err)
+	}()
+	err = fmt.Errorf("Not Implemented")
+	stepTrace.WriteString("TODO: Pending implementation;")
+
 	return nil
 }
 
 // PENDING IMPLEMENTATION
 func (state *scenarioState) detectiveDetectsNonCompliant() error {
+
+	var err error
+	var stepTrace strings.Builder
+	payload := struct {
+	}{}
+	defer func() {
+		state.audit.AuditScenarioStep(stepTrace.String(), payload, err)
+	}()
+	err = fmt.Errorf("Not Implemented")
+	stepTrace.WriteString("TODO: Pending implementation;")
+
 	return nil
 }
 
 // PENDING IMPLEMENTATION
 func (state *scenarioState) containerIsRemediated() error {
+
+	var err error
+	var stepTrace strings.Builder
+	payload := struct {
+	}{}
+	defer func() {
+		state.audit.AuditScenarioStep(stepTrace.String(), payload, err)
+	}()
+	err = fmt.Errorf("Not Implemented")
+	stepTrace.WriteString("TODO: Pending implementation;")
+
 	return nil
 }
 
@@ -74,6 +154,17 @@ func (state *scenarioState) teardown() {
 
 // PENDING IMPLEMENTATION
 func (state *scenarioState) policyOrRuleAvailable() error {
+
+	var err error
+	var stepTrace strings.Builder
+	payload := struct {
+	}{}
+	defer func() {
+		state.audit.AuditScenarioStep(stepTrace.String(), payload, err)
+	}()
+	err = fmt.Errorf("Not Implemented")
+	stepTrace.WriteString("TODO: Pending implementation;")
+
 	// It is available
 	log.Printf("[DEBUG] Azure Storage account is encrypted by default and cannot be turned off. No test to run. Checking Azure Policy. (Unless customise this test to check for specific key usage.")
 	return nil
@@ -81,11 +172,33 @@ func (state *scenarioState) policyOrRuleAvailable() error {
 
 // PENDING IMPLEMENTATION
 func (state *scenarioState) checkPolicyOrRuleAssignment() error {
+
+	var err error
+	var stepTrace strings.Builder
+	payload := struct {
+	}{}
+	defer func() {
+		state.audit.AuditScenarioStep(stepTrace.String(), payload, err)
+	}()
+	err = fmt.Errorf("Not Implemented")
+	stepTrace.WriteString("TODO: Pending implementation;")
+
 	return nil
 }
 
 // PENDING IMPLEMENTATION
 func (state *scenarioState) policyOrRuleAssigned() error {
+
+	var err error
+	var stepTrace strings.Builder
+	payload := struct {
+	}{}
+	defer func() {
+		state.audit.AuditScenarioStep(stepTrace.String(), payload, err)
+	}()
+	err = fmt.Errorf("Not Implemented")
+	stepTrace.WriteString("TODO: Pending implementation;")
+
 	return nil
 }
 
