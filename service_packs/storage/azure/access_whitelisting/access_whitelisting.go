@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strings"
 
 	azurePolicy "github.com/Azure/azure-sdk-for-go/services/resources/mgmt/2019-01-01/policy"
 	azureStorage "github.com/Azure/azure-sdk-for-go/services/storage/mgmt/2019-04-01/storage"
@@ -22,8 +23,8 @@ import (
 )
 
 const (
-	policyAssignmentName = "deny_storage_wo_net_acl"
-	storageRgEnvVar      = "STORAGE_ACCOUNT_RESOURCE_GROUP"
+	policyAssignmentName = "deny_storage_wo_net_acl"        // TODO: Should this be in config?
+	storageRgEnvVar      = "STORAGE_ACCOUNT_RESOURCE_GROUP" // TODO: Should this be replaced with azureutil.ResourceGroup() - which not only checks in env var, but also config vars?
 )
 
 // Allows this probe to be added to the ProbeStore
@@ -60,32 +61,63 @@ func (state *scenarioState) teardown() {
 func (state *scenarioState) anAzureResourceGroupExists() error {
 
 	var err error
-	// check the resource group has been configured
+	var stepTrace strings.Builder
+	payload := struct {
+		AzureSubscriptionID string
+		AzureResourceGroup  string
+	}{
+		AzureSubscriptionID: azureutil.SubscriptionID(),
+		AzureResourceGroup:  azureutil.ResourceGroup(),
+	}
+	defer func() {
+		state.audit.AuditScenarioStep(stepTrace.String(), payload, err)
+	}()
+
+	stepTrace.WriteString("Check if value for Azure resource group is set in config file;")
 	if azureutil.ResourceGroup() == "" {
 		log.Printf("[ERROR] Azure resource group config var not set")
 		err = errors.New("Azure resource group config var not set")
 	}
 	if err == nil {
-		// Check the resource group exists in the specified azure subscription
+		stepTrace.WriteString("Check the resource group exists in the specified azure subscription;")
 		_, err = group.Get(state.ctx, azureutil.ResourceGroup())
 		if err != nil {
 			log.Printf("[ERROR] Configured Azure resource group %s does not exists", azureutil.ResourceGroup())
 		}
 	}
+
 	return err
 }
 
 func (state *scenarioState) checkPolicyAssigned() error {
 
-	var a azurePolicy.Assignment
 	var err error
+	var stepTrace strings.Builder
+	payload := struct {
+		AzureSubscriptionID  string
+		ManagamentGroup      string
+		PolicyAssignmentName string
+		PolicyAssignment     azurePolicy.Assignment
+	}{}
+	defer func() {
+		state.audit.AuditScenarioStep(stepTrace.String(), payload, err)
+	}()
 
-	// If a Management Group has not been set, check Policy Assignment at the Subscription
+	var a azurePolicy.Assignment
+
 	if state.policyAssignmentMgmtGroup == "" {
+		stepTrace.WriteString("Management Group has not been set, check Policy Assignment at the Subscription;")
 		a, err = policy.AssignmentBySubscription(state.ctx, azureutil.SubscriptionID(), policyAssignmentName)
 	} else {
+		stepTrace.WriteString("Check Policy Assignment at the Management Group;")
 		a, err = policy.AssignmentByManagementGroup(state.ctx, state.policyAssignmentMgmtGroup, policyAssignmentName)
 	}
+
+	//Audit log
+	payload.AzureSubscriptionID = azureutil.SubscriptionID()
+	payload.ManagamentGroup = state.policyAssignmentMgmtGroup
+	payload.PolicyAssignmentName = policyAssignmentName
+	payload.PolicyAssignment = a
 
 	if err != nil {
 		log.Printf("[ERROR] Policy Assignment error: %v", err)
@@ -97,83 +129,189 @@ func (state *scenarioState) checkPolicyAssigned() error {
 }
 
 func (state *scenarioState) provisionStorageContainer() error {
+
 	// define a bucket name, then pass the step - we will provision the account in the next step.
+
+	var err error
+	var stepTrace strings.Builder
+	payload := struct {
+		BucketName string
+	}{}
+	defer func() {
+		state.audit.AuditScenarioStep(stepTrace.String(), payload, err)
+	}()
+
+	stepTrace.WriteString("A bucket name is defined using a random string, storage account is not yet provisioned;")
 	state.bucketName = utils.RandomString(10)
-	return nil
+
+	//Audit log
+	payload.BucketName = state.bucketName
+
+	return err
 }
 
 func (state *scenarioState) createWithWhitelist(ipRange string) error {
+
+	var err error
+	var stepTrace strings.Builder
+	payload := struct {
+		SubscriptionID string
+		ResourceGroup  string
+		BucketName     string
+		IPRange        string
+		NetworkRuleSet azureStorage.NetworkRuleSet
+		Tags           interface{}
+		StorageAccount azureStorage.Account
+	}{}
+	defer func() {
+		state.audit.AuditScenarioStep(stepTrace.String(), payload, err)
+	}()
+
+	stepTrace.WriteString(fmt.Sprintf("Attempting to create storage bucket with whitelisting for given IP Range: %s;", ipRange))
+
 	var networkRuleSet azureStorage.NetworkRuleSet
 	if ipRange == "nil" {
+		stepTrace.WriteString("IP Range is nil, using DefaultActionAllow for NetworkRuleSet;")
 		networkRuleSet = azureStorage.NetworkRuleSet{
 			DefaultAction: azureStorage.DefaultActionAllow,
 		}
 	} else {
+		stepTrace.WriteString("Setting IP Rule to allow given IP Range;")
 		ipRule := azureStorage.IPRule{
 			Action:           azureStorage.Allow,
 			IPAddressOrRange: to.StringPtr(ipRange),
 		}
 
+		stepTrace.WriteString("Setting Network Rule Set with IP Rule;")
 		networkRuleSet = azureStorage.NetworkRuleSet{
 			IPRules:       &[]azureStorage.IPRule{ipRule},
 			DefaultAction: azureStorage.DefaultActionDeny,
 		}
 	}
 
+	stepTrace.WriteString("Creating storage bucket with Network Rule Set within Resource Group;")
 	state.storageAccount, state.runningErr = storage.CreateWithNetworkRuleSet(state.ctx, state.bucketName, azureutil.ResourceGroup(), state.tags, true, &networkRuleSet)
+
+	//Audit log
+	err = state.runningErr
+	payload.SubscriptionID = azureutil.SubscriptionID()
+	payload.ResourceGroup = azureutil.ResourceGroup()
+	payload.BucketName = state.bucketName
+	payload.IPRange = ipRange
+	payload.NetworkRuleSet = networkRuleSet
+	payload.Tags = state.tags
+	payload.StorageAccount = state.storageAccount
+
 	return nil
 }
 
 func (state *scenarioState) creationWill(expectation string) error {
+
+	var err error
+	var stepTrace strings.Builder
+	payload := struct {
+		StorageAccountID string
+		CreationError    string
+	}{}
+	defer func() {
+		state.audit.AuditScenarioStep(stepTrace.String(), payload, err)
+	}()
+
+	stepTrace.WriteString(fmt.Sprintf("Expectation that Object Storage container was provisioned with whitelisting in previous step is: %s;", expectation))
+
 	if expectation == "Fail" {
 		if state.runningErr == nil {
-			return fmt.Errorf("incorrectly created Storage Account: %v", *state.storageAccount.ID)
+			//Expected Fail but no previous error occurred, step should Fail
+			err = fmt.Errorf("incorrectly created Storage Account: %v", *state.storageAccount.ID)
+			payload.StorageAccountID = *state.storageAccount.ID // Audit log
+			return err
 		}
-		return nil
+		payload.CreationError = state.runningErr.Error() // Audit log
+		return nil                                       //Expected Fail and previous error occurred, step should Pass
 	}
 
 	if state.runningErr == nil {
-		return nil
+		payload.StorageAccountID = *state.storageAccount.ID // Audit log
+		return nil                                          //Expected Success and no previous error occurred, step should Pass
 	}
 
-	return state.runningErr
+	//Expected Success but previous error occurred, step should Fail
+	err = state.runningErr
+	payload.CreationError = state.runningErr.Error() // Audit log
+	return err
 }
 
 func (state *scenarioState) cspSupportsWhitelisting() error {
-	return nil
+
+	var err error
+	var stepTrace strings.Builder
+	payload := struct {
+	}{}
+	defer func() {
+		state.audit.AuditScenarioStep(stepTrace.String(), payload, err)
+	}()
+
+	err = fmt.Errorf("Not Implemented")
+
+	stepTrace.WriteString("TODO: Pending implementation;")
+
+	//return err
+	return nil //TODO: Remove this line and return actual err. This is temporary to ensure test doesn't halt and other steps are not skipped
 }
 
 func (state *scenarioState) examineStorageContainer(containerNameEnvVar string) error {
-	accountName := os.Getenv(containerNameEnvVar)
+
+	var err error
+	var stepTrace strings.Builder
+	payload := struct {
+		StorageAccountName string
+		ResourceGroup      string
+		NetworkRuleSet     azureStorage.NetworkRuleSet
+	}{}
+	defer func() {
+		state.audit.AuditScenarioStep(stepTrace.String(), payload, err)
+	}()
+
+	stepTrace.WriteString(fmt.Sprintf("Checking value for environment variable: %s;", containerNameEnvVar))
+	accountName := os.Getenv(containerNameEnvVar) // TODO: Should this come from config?
+	payload.StorageAccountName = accountName
 	if accountName == "" {
-		return fmt.Errorf("environment variable \"%s\" is not defined test can't run", containerNameEnvVar)
+		err = fmt.Errorf("environment variable \"%s\" is not defined test can't run", containerNameEnvVar)
+		return err
 	}
 
-	resourceGroup := os.Getenv(storageRgEnvVar)
+	stepTrace.WriteString(fmt.Sprintf("Checking value for environment variable: %s;", storageRgEnvVar))
+	resourceGroup := os.Getenv(storageRgEnvVar) // TODO: Should this be replaced with azureutil.ResourceGroup() - which not only checks in env var, but also config vars?
+	payload.ResourceGroup = resourceGroup
 	if resourceGroup == "" {
-		return fmt.Errorf("environment variable \"%s\" is not defined test can't run", storageRgEnvVar)
+		err = fmt.Errorf("environment variable \"%s\" is not defined test can't run", storageRgEnvVar)
+		return err
 	}
 
+	stepTrace.WriteString("Retrieving storage account details from Azure;")
 	state.storageAccount, state.runningErr = storage.AccountProperties(state.ctx, resourceGroup, accountName)
-
 	if state.runningErr != nil {
-		return state.runningErr
+		err = state.runningErr
+		return err
 	}
 
+	stepTrace.WriteString("Checking that firewall network rule default action is not Allow;")
 	networkRuleSet := state.storageAccount.AccountProperties.NetworkRuleSet
+	payload.NetworkRuleSet = *networkRuleSet
 	result := false
 	// Default action is deny
 	if networkRuleSet.DefaultAction == azureStorage.DefaultActionAllow {
-		return fmt.Errorf("%s has not configured with firewall network rule default action is not deny", accountName)
+		err = fmt.Errorf("%s has not configured with firewall network rule default action is not deny", accountName)
+		return err
 	}
 
-	// Check if it has IP whitelisting
+	stepTrace.WriteString("Checking if it has IP whitelisting;")
 	for _, ipRule := range *networkRuleSet.IPRules {
 		result = true
 		log.Printf("[DEBUG] IP WhiteListing: %v, %v", *ipRule.IPAddressOrRange, ipRule.Action)
 	}
 
-	// Check if it has private Endpoint whitelisting
+	stepTrace.WriteString("Checking if it has private Endpoint whitelisting;")
 	for _, vnetRule := range *networkRuleSet.VirtualNetworkRules {
 		result = true
 		log.Printf("[DEBUG] VNet whitelisting: %v, %v", *vnetRule.VirtualNetworkResourceID, vnetRule.Action)
@@ -183,15 +321,31 @@ func (state *scenarioState) examineStorageContainer(containerNameEnvVar string) 
 
 	if result {
 		log.Printf("[DEBUG] Whitelisting rule exists. [Step PASSED]")
-		return nil
+		err = nil
+	} else {
+		err = fmt.Errorf("no whitelisting has been defined for %v", accountName)
 	}
-	return fmt.Errorf("no whitelisting has been defined for %v", accountName)
+	return err
 }
 
 // PENDING IMPLEMENTATION
 func (state *scenarioState) whitelistingIsConfigured() error {
 	// Checked in previous step
-	return nil
+
+	var err error
+	var stepTrace strings.Builder
+	payload := struct {
+	}{}
+	defer func() {
+		state.audit.AuditScenarioStep(stepTrace.String(), payload, err)
+	}()
+
+	err = fmt.Errorf("Not Implemented")
+
+	stepTrace.WriteString("TODO: Pending implementation;")
+
+	//return err
+	return nil //TODO: Remove this line. This is temporary to ensure test doesn't halt and other steps are not skipped
 }
 
 func (s *scenarioState) beforeScenario(probeName string, gs *godog.Scenario) {
