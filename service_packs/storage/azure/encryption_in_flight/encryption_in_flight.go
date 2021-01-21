@@ -62,13 +62,25 @@ func (state *scenarioState) teardown() {
 func (state *scenarioState) anAzureResourceGroupExists() error {
 
 	var err error
-	// check the resource group has been configured
+	var stepTrace strings.Builder
+	payload := struct {
+		AzureSubscriptionID string
+		AzureResourceGroup  string
+	}{
+		AzureSubscriptionID: azureutil.SubscriptionID(),
+		AzureResourceGroup:  azureutil.ResourceGroup(),
+	}
+	defer func() {
+		state.audit.AuditScenarioStep(stepTrace.String(), payload, err)
+	}()
+
+	stepTrace.WriteString("Check if value for Azure resource group is set in config vars;")
 	if azureutil.ResourceGroup() == "" {
 		log.Printf("[ERROR] Azure resource group config var not set")
 		err = errors.New("Azure resource group config var not set")
 	}
 	if err == nil {
-		// Check the resource group exists in the specified azure subscription
+		stepTrace.WriteString("Check the resource group exists in the specified azure subscription;")
 		_, err = group.Get(state.ctx, azureutil.ResourceGroup())
 		if err != nil {
 			log.Printf("[ERROR] Configured Azure resource group %s does not exists", azureutil.ResourceGroup())
@@ -78,11 +90,32 @@ func (state *scenarioState) anAzureResourceGroupExists() error {
 }
 
 func (state *scenarioState) weProvisionAnObjectStorageBucket() error {
+
+	var err error
+	var stepTrace strings.Builder
+	payload := struct {
+	}{}
+	defer func() {
+		state.audit.AuditScenarioStep(stepTrace.String(), payload, err)
+	}()
+	err = fmt.Errorf("Not Implemented")
+	stepTrace.WriteString("TODO: Pending implementation;")
+
 	// Nothing to do here
 	return nil
 }
 
 func (state *scenarioState) httpAccessIs(arg1 string) error {
+
+	var err error
+	var stepTrace strings.Builder
+	payload := struct {
+	}{}
+	defer func() {
+		state.audit.AuditScenarioStep(stepTrace.String(), payload, err)
+	}()
+
+	stepTrace.WriteString(fmt.Sprintf("Http Option: %s;", arg1))
 	if arg1 == "enabled" {
 		state.httpOption = true
 	} else {
@@ -92,6 +125,16 @@ func (state *scenarioState) httpAccessIs(arg1 string) error {
 }
 
 func (state *scenarioState) httpsAccessIs(arg1 string) error {
+
+	var err error
+	var stepTrace strings.Builder
+	payload := struct {
+	}{}
+	defer func() {
+		state.audit.AuditScenarioStep(stepTrace.String(), payload, err)
+	}()
+
+	stepTrace.WriteString(fmt.Sprintf("Https Option: %s;", arg1))
 	if arg1 == "enabled" {
 		state.httpsOption = true
 	} else {
@@ -101,31 +144,51 @@ func (state *scenarioState) httpsAccessIs(arg1 string) error {
 }
 
 func (state *scenarioState) creationWillWithAnErrorMatching(expectation, errDescription string) error {
-	accountName := utils.RandomString(5) + "storageac"
 
 	var err error
+	var stepTrace strings.Builder
+	payload := struct {
+		AccountName    string
+		NetworkRuleSet azureStorage.NetworkRuleSet
+		HTTPOption     bool
+		HTTPSOption    bool
+	}{}
+	defer func() {
+		state.audit.AuditScenarioStep(stepTrace.String(), payload, err)
+	}()
+
+	stepTrace.WriteString("Generating random value for account name;")
+	accountName := utils.RandomString(5) + "storageac"
+	payload.AccountName = accountName
 
 	networkRuleSet := azureStorage.NetworkRuleSet{
 		DefaultAction: azureStorage.DefaultActionDeny,
 		IPRules:       &[]azureStorage.IPRule{},
 	}
+	payload.NetworkRuleSet = networkRuleSet
+	payload.HTTPOption = state.httpOption
+	payload.HTTPSOption = state.httpsOption
 
 	// Both true take it as http option is try
 	if state.httpsOption && state.httpOption {
-		log.Printf("[DEBUG] Creating Storage Account with HTTPS: %v", false)
+		stepTrace.WriteString(fmt.Sprintf("Creating Storage Account with HTTPS: %v;", false))
+		log.Printf("[DEBUG] Creating Storage Account with HTTPS: %v;", false)
 		_, err = storage.CreateWithNetworkRuleSet(state.ctx, accountName,
 			azureutil.ResourceGroup(), state.tags, false, &networkRuleSet)
 	} else if state.httpsOption {
+		stepTrace.WriteString(fmt.Sprintf("Creating Storage Account with HTTPS: %v;", state.httpsOption))
 		log.Printf("[DEBUG] Creating Storage Account with HTTPS: %v", state.httpsOption)
 		_, err = storage.CreateWithNetworkRuleSet(state.ctx, accountName,
 			azureutil.ResourceGroup(), state.tags, state.httpsOption, &networkRuleSet)
 	} else if state.httpOption {
+		stepTrace.WriteString(fmt.Sprintf("Creating Storage Account with HTTPS: %v;", state.httpsOption))
 		log.Printf("[DEBUG] Creating Storage Account with HTTPS: %v", state.httpsOption)
 		_, err = storage.CreateWithNetworkRuleSet(state.ctx, accountName,
 			azureutil.ResourceGroup(), state.tags, state.httpsOption, &networkRuleSet)
 	}
 	if err == nil {
 		// storage account created so add to state
+		stepTrace.WriteString(fmt.Sprintf("Created Storage Account: %s;", accountName))
 		log.Printf("[DEBUG] Created Storage Account: %s", accountName)
 		state.storageAccounts = append(state.storageAccounts, accountName)
 	}
@@ -133,7 +196,8 @@ func (state *scenarioState) creationWillWithAnErrorMatching(expectation, errDesc
 	if expectation == "Fail" {
 
 		if err == nil {
-			return fmt.Errorf("storage account was created, but should not have been: policy is not working or incorrectly configured")
+			err = fmt.Errorf("storage account was created, but should not have been: policy is not working or incorrectly configured")
+			return err
 		}
 
 		detailedError := err.(autorest.DetailedError)
@@ -143,11 +207,14 @@ func (state *scenarioState) creationWillWithAnErrorMatching(expectation, errDesc
 		log.Printf("[DEBUG] Detailed Error: %v", detailed)
 
 		if strings.EqualFold(detailed.Code, "RequestDisallowedByPolicy") {
+			stepTrace.WriteString("Request was Disallowed By Policy;")
 			log.Printf("[DEBUG] Request was Disallowed By Policy: [Step PASSED]")
 			return nil
 		}
 
-		return fmt.Errorf("storage account was not created but not due to policy non-compliance")
+		err = fmt.Errorf("storage account was not created but not due to policy non-compliance")
+		return err
+
 	} else if expectation == "Succeed" {
 		if err != nil {
 			log.Printf("[ERROR] Unexpected failure in create storage ac [Step FAILED]")
@@ -156,26 +223,82 @@ func (state *scenarioState) creationWillWithAnErrorMatching(expectation, errDesc
 		return nil
 	}
 
-	return fmt.Errorf("unsupported `result` option '%s' in the Gherkin feature - use either 'Fail' or 'Succeed'", expectation)
+	err = fmt.Errorf("unsupported `result` option '%s' in the Gherkin feature - use either 'Fail' or 'Succeed'", expectation)
+	return err
 }
 
 func (state *scenarioState) detectObjectStorageUnencryptedTransferAvailable() error {
+
+	var err error
+	var stepTrace strings.Builder
+	payload := struct {
+	}{}
+	defer func() {
+		state.audit.AuditScenarioStep(stepTrace.String(), payload, err)
+	}()
+	err = fmt.Errorf("Not Implemented")
+	stepTrace.WriteString("TODO: Pending implementation;")
+
 	return nil
 }
 
 func (state *scenarioState) detectObjectStorageUnencryptedTransferEnabled() error {
+
+	var err error
+	var stepTrace strings.Builder
+	payload := struct {
+	}{}
+	defer func() {
+		state.audit.AuditScenarioStep(stepTrace.String(), payload, err)
+	}()
+	err = fmt.Errorf("Not Implemented")
+	stepTrace.WriteString("TODO: Pending implementation;")
+
 	return nil
 }
 
 func (state *scenarioState) createUnencryptedTransferObjectStorage() error {
+
+	var err error
+	var stepTrace strings.Builder
+	payload := struct {
+	}{}
+	defer func() {
+		state.audit.AuditScenarioStep(stepTrace.String(), payload, err)
+	}()
+	err = fmt.Errorf("Not Implemented")
+	stepTrace.WriteString("TODO: Pending implementation;")
+
 	return nil
 }
 
 func (state *scenarioState) detectsTheObjectStorage() error {
+
+	var err error
+	var stepTrace strings.Builder
+	payload := struct {
+	}{}
+	defer func() {
+		state.audit.AuditScenarioStep(stepTrace.String(), payload, err)
+	}()
+	err = fmt.Errorf("Not Implemented")
+	stepTrace.WriteString("TODO: Pending implementation;")
+
 	return nil
 }
 
 func (state *scenarioState) encryptedDataTrafficIsEnforced() error {
+
+	var err error
+	var stepTrace strings.Builder
+	payload := struct {
+	}{}
+	defer func() {
+		state.audit.AuditScenarioStep(stepTrace.String(), payload, err)
+	}()
+	err = fmt.Errorf("Not Implemented")
+	stepTrace.WriteString("TODO: Pending implementation;")
+
 	return nil
 }
 

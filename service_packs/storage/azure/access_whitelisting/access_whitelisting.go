@@ -73,7 +73,7 @@ func (state *scenarioState) anAzureResourceGroupExists() error {
 		state.audit.AuditScenarioStep(stepTrace.String(), payload, err)
 	}()
 
-	stepTrace.WriteString("Check if value for Azure resource group is set in config file;")
+	stepTrace.WriteString("Check if value for Azure resource group is set in config vars;")
 	if azureutil.ResourceGroup() == "" {
 		log.Printf("[ERROR] Azure resource group config var not set")
 		err = errors.New("Azure resource group config var not set")
