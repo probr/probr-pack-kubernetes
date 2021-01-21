@@ -32,14 +32,10 @@ const (
 type PSPProbeCommand int
 
 type scenarioState struct {
-	name           string
-	audit          *summary.ScenarioAudit
-	probe          *summary.Probe
-	httpStatusCode int
-	podName        string
-	podState       kubernetes.PodState
-	useDefaultNS   bool
-	wildcardRoles  interface{}
+	name     string
+	audit    *summary.ScenarioAudit
+	probe    *summary.Probe
+	podState kubernetes.PodState
 }
 
 // PSPVerificationProbe encapsulates the command and expected result to be used in a Pod Security Policy probe.

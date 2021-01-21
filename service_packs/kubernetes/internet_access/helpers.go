@@ -20,8 +20,6 @@ type scenarioState struct {
 	httpStatusCode int
 	podName        string
 	podState       kubernetes.PodState
-	useDefaultNS   bool
-	wildcardRoles  interface{}
 }
 
 func beforeScenario(s *scenarioState, probeName string, gs *godog.Scenario) {
