@@ -29,14 +29,10 @@ type CRA struct {
 }
 
 type scenarioState struct {
-	name           string
-	audit          *summary.ScenarioAudit
-	probe          *summary.Probe
-	httpStatusCode int
-	podName        string
-	podState       kubernetes.PodState
-	useDefaultNS   bool
-	wildcardRoles  interface{}
+	name     string
+	audit    *summary.ScenarioAudit
+	probe    *summary.Probe
+	podState kubernetes.PodState
 }
 
 // NewCRA creates a new CRA with the supplied kubernetes instance.
