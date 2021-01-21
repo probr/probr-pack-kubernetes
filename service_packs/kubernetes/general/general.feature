@@ -1,14 +1,10 @@
-@probes/kubernetes
-@probes/kubernetes/general
-@standard/cis
-@standard/cis/gke
-@csp/any
+@k-gen
 Feature: General Cluster Security Configurations
     As a Security Auditor
     I want to ensure that Kubernetes clusters have general security configurations in place
     So that no general cluster vulnerabilities can be exploited
 
-    @probes/kubernetes/general/1.0 @control_type/inspection @standard/cis/gke/5.1.3 @standard/citihub/CHC2-IAM105
+    @k-gen-001
     Scenario Outline: Minimise wildcards in Roles and Cluster Roles
         Given a Kubernetes cluster is deployed
         When I inspect the "<rolelevel>" that are configured
@@ -19,13 +15,13 @@ Feature: General Cluster Security Configurations
             | Roles         |
             | Cluster Roles |
 
-    @probes/kubernetes/general/1.1 @control_type/inspection @standard/cis/gke/5.6.3
+    @k-gen-002
     Scenario: Ensure Security Contexts are enforced
         Given a Kubernetes cluster is deployed
         When I attempt to create a deployment which does not have a Security Context
         Then the deployment is rejected
 
-    @probes/kubernetes/general/1.2 @control_type/inspection @standard/cis/gke/6.10.1 @standard/citihub/CHC2-ITS115
+    @k-gen-003
     Scenario: Ensure Kubernetes Web UI is disabled
         Given a Kubernetes cluster is deployed
         And the Kubernetes Web UI is disabled

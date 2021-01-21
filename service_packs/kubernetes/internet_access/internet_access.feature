@@ -1,15 +1,10 @@
-@probes/kubernetes
-@probes/kubernetes/internet_access
-@category/internet_access
-@standard/citihub
-@standard/citihub/CHC2-SVD010
-@csp/any
+@k-iaf
 Feature: Egress control of a kubernetes cluster
     As a Security Auditor
     I want to ensure that containers running inside Kubernetes clusters cannot directly access the Internet
     So that Internet traffic can be inspected and controlled
 
-    @probes/kubernetes/internet_access/1.0 @control_type/preventative 
+    @k-iaf-001
     Scenario Outline: Test outgoing connectivity of a deployed pod
         Given a Kubernetes cluster is deployed
         And a pod is deployed in the cluster
