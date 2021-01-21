@@ -25,6 +25,16 @@ func (ctx *ConfigVars) GetTags() string {
 	return ctx.Tags
 }
 
+func (ctx *ConfigVars) SetTags(tags map[string][]string) {
+	configTags := strings.Split(ctx.GetTags(), ",")
+	for _, configTag := range configTags {
+		for _, tag := range tags[configTag] {
+			configTags = append(configTags, "@"+tag)
+		}
+	}
+	ctx.Tags = strings.Join(configTags, ",")
+}
+
 // Handle tag exclusions provided via the config vars file
 func (ctx *ConfigVars) handleTagExclusions() {
 	for _, tag := range ctx.TagExclusions {
