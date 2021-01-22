@@ -9,6 +9,7 @@ import (
 )
 
 func GetProbes() []coreengine.Probe {
+	config.Vars.SetTags(tags)
 	if config.Vars.ServicePacks.Storage.IsExcluded() {
 		return nil
 	}

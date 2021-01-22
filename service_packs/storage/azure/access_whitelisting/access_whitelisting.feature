@@ -1,8 +1,4 @@
-@probes/storage
-@probes/storage/access_whitelisting
-@standard/citihub/CHC2-CHC2-SVD030
-@csp.aws
-@csp.azure
+@s-az-aw
 Feature: Object Storage Has Network Whitelisting Measures Enforced
 
   As a Cloud Security Architect
@@ -11,14 +7,14 @@ Feature: Object Storage Has Network Whitelisting Measures Enforced
 
   #Rule: CHC2-SVD030 - protect cloud service network access by limiting access from the appropriate source network only
 
-    @probes/storage/access_whitelisting/1.0 @control_type/detective
+    @s-az-aw-001
     Scenario: Check Object Storage is Configured With Network Source Address Whitelisting
       Given the CSP provides a whitelisting capability for Object Storage containers
       And a specified azure resource group exists
       When we examine the Object Storage container in environment variable "TARGET_STORAGE_CONTAINER"
       Then whitelisting is configured with the given IP address range or an endpoint
 
-    @probes/storage/access_whitelisting/1.1 @control_type/preventative
+    @s-az-aw-002
     Scenario Outline: Prevent Object Storage from Being Created Without Network Source Address Whitelisting
       Given security controls that Prevent Object Storage from being created without network source address whitelisting are applied
       And a specified azure resource group exists
