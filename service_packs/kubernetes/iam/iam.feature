@@ -1,4 +1,5 @@
 @k-iam
+@probes/kubernetes/iam
 Feature: Ensure stringent authentication and authorisation
     As a Security Auditor
     I want to ensure that stringent authentication and authorisation policies are applied to my organisation's Kubernetes clusters

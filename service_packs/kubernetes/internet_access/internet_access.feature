@@ -1,4 +1,5 @@
 @k-iaf
+@probes/kubernetes/internet_access
 Feature: Egress control of a kubernetes cluster
     As a Security Auditor
     I want to ensure that containers running inside Kubernetes clusters cannot directly access the Internet

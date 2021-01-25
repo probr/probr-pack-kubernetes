@@ -1,4 +1,5 @@
 @k-cra
+@probes/kubernetes/container_registry_access
 Feature: Protect image container registries
     As a Security Auditor
     I want to ensure that containers image registries are secured in my organisation's Kubernetes clusters
