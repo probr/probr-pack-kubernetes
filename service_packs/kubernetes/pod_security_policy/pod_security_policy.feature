@@ -1,13 +1,5 @@
-@probes/kubernetes
+@k-psp
 @probes/kubernetes/pod_security_policy
-@category/pod_security_policy
-@standard/cis
-@standard/cis/gke
-@standard/cis/gke/5
-@standard/cis/gke/5.2
-@standard/citihub
-@standard/citihub/CHC2-IAM105
-@csp/any
 Feature: Maximise security through Pod Security Policies
 
 As a Cloud Security Administrator
@@ -21,7 +13,7 @@ So that a policy of least privilege can be enforced in order to prevent maliciou
 #TODO: also ... for 5.2.5, we can test to prevent creation, but what about trying to execute a cmd which reqs root?
 # think we should do that, but is that a separate scenario or blend into this one?  for some this makes sense - mark with @detective?
 
-    @probes/kubernetes/pod_security_policy/1.0 @control_type/preventative @standard/cis/gke/5.2.1
+    @k-psp-001
     Scenario Outline: Prevent a deployment from running with privileged access
         Given a Kubernetes cluster exists which we can deploy into
         And some system exists to prevent a Kubernetes deployment running with privileged access in an existing Kubernetes cluster
@@ -37,7 +29,7 @@ So that a policy of least privilege can be enforced in order to prevent maliciou
             | False                       | Succeed       | No error would show                          |
             | Not Defined                 | Succeed       | No error would show                          |
 
-    @probes/kubernetes/pod_security_policy/1.1 @control_type/preventative @standard/cis/gke/5.2.2
+    @k-psp-002
     Scenario Outline: Prevent a deployment from running with the hostPID
         Given a Kubernetes cluster exists which we can deploy into
         And some system exists to prevent a Kubernetes deployment from running using the hostPID in an existing Kubernetes cluster
@@ -53,7 +45,7 @@ So that a policy of least privilege can be enforced in order to prevent maliciou
             | False                       | Succeed       |                                              |
             | Not Defined                 | Succeed       |                                              |
 
-    @probes/kubernetes/pod_security_policy/1.2 @control_type/preventative @standard/cis/gke/5.2.3
+    @k-psp-003
     Scenario Outline: Prevent a deployment from running with the hostIPC flag.
         Given a Kubernetes cluster exists which we can deploy into
         And some system exists to prevent a Kubernetes deployment from running using the hostIPC in an existing Kubernetes cluster
@@ -69,7 +61,7 @@ So that a policy of least privilege can be enforced in order to prevent maliciou
             | False                       | Succeed  | No error would show                      |
             | Not defined                 | Succeed  | No error would show                      |
 
-    @probes/kubernetes/pod_security_policy/1.3 @control_type/preventative @standard/cis/gke/5.2.4
+    @k-psp-004
     Scenario Outline: Prevent a deployment from running with the hostNetwork flag.
         Given a Kubernetes cluster exists which we can deploy into
         And some system exists to prevent a Kubernetes deployment from running using the hostNetwork in an existing Kubernetes cluster
@@ -85,7 +77,7 @@ So that a policy of least privilege can be enforced in order to prevent maliciou
             | False                           | Succeed  | No error would show                      |
             | Not defined                     | Succeed  | No error would show                      |
 
-    @probes/kubernetes/pod_security_policy/1.4 @control_type/preventative @standard/cis/gke/5.2.5
+    @k-psp-005
     Scenario Outline: Prevent a deployment from running with the allowPrivilegeEscalation flag
         Given a Kubernetes cluster exists which we can deploy into
         And some system exists to prevent a Kubernetes deployment from running using the allowPrivilegeEscalation in an existing Kubernetes cluster
@@ -101,7 +93,7 @@ So that a policy of least privilege can be enforced in order to prevent maliciou
             | False                              | Succeed       | No error would show                                         |
             | Not Defined                        | Succeed       | No error would show                                         |
 
-    @probes/kubernetes/pod_security_policy/1.5 @control_type/preventative @standard/cis/gke/5.2.6
+    @k-psp-006
     Scenario Outline: Prevent a deployment from running as the root user
         Given a Kubernetes cluster exists which we can deploy into
         And some system exists to prevent a Kubernetes deployment from running as the root user in an existing Kubernetes cluster
@@ -117,7 +109,7 @@ So that a policy of least privilege can be enforced in order to prevent maliciou
             | Non-Root       | Succeed  |                             |
             | Not Defined    | Succeed  |                             |
 
-    @probes/kubernetes/pod_security_policy/1.6 @control_type/preventative @standard/cis/gke/5.2.7
+    @k-psp-007
     Scenario Outline: Prevent deployments from running with the NET_RAW capability.
         Given a Kubernetes cluster exists which we can deploy into
         And some system exists to prevent a Kubernetes deployment from running with NET_RAW capability in an existing Kubernetes cluster
@@ -133,7 +125,7 @@ So that a policy of least privilege can be enforced in order to prevent maliciou
             | False             | Succeed |                                               |
             | Not Defined       | Succeed |                                               |
 
-    @probes/kubernetes/pod_security_policy/1.7 @control_type/preventative @standard/cis/gke/5.2.8
+    @k-psp-008
     Scenario Outline: Prevent container running with capabilities beyond the default set.
         Given a Kubernetes cluster exists which we can deploy into
         And some system exists to prevent Kubernetes deployments with capabilities beyond the default set from being deployed to an existing kubernetes cluster
@@ -149,7 +141,7 @@ So that a policy of least privilege can be enforced in order to prevent maliciou
             | ARE NOT     | Succeed |                                              |
             | Not Defined | Succeed |                                              |
 
-    @probes/kubernetes/pod_security_policy/1.8 @control_type/preventative @standard/cis/gke/5.2.9
+    @k-psp-009
     Scenario Outline: Prevent deployments from running with assigned capabilities.
         Given a Kubernetes cluster exists which we can deploy into
             And some system exists to prevent Kubernetes deployments with assigned capabilities from being deployed to an existing Kubernetes cluster
@@ -165,7 +157,7 @@ So that a policy of least privilege can be enforced in order to prevent maliciou
             | ARE NOT     | Succeed |                                                         |
             | Not defined | Succeed |                                                         |
 
-    @probes/kubernetes/pod_security_policy/1.10 @control_type/preventative
+    @k-psp-010
     Scenario Outline: Prevent deployments from accessing unapproved volume types
         Given a Kubernetes cluster exists which we can deploy into
         And some system exists to prevent Kubernetes deployments with unapproved volume types from being deployed to an existing Kubernetes cluster
@@ -181,7 +173,7 @@ So that a policy of least privilege can be enforced in order to prevent maliciou
             | approved      | Succeed    |                                         |
             | not defined | Succeed    |                                       |
 
-    @probes/kubernetes/pod_security_policy/1.11 @control_type/preventative
+    @k-psp-011
     Scenario Outline: Prevent deployments from running without approved seccomp profile
         Given a Kubernetes cluster exists which we can deploy into
         And some system exists to prevent Kubernetes deployments without approved seccomp profiles from being deployed to an existing Kubernetes cluster
