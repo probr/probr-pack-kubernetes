@@ -1,7 +1,9 @@
 package summary
 
 import (
+	"fmt"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/citihub/probr/internal/config"
@@ -46,6 +48,8 @@ func TestSummaryState_LogPodName(t *testing.T) {
 func createSummaryStateWithMockProbe(probename string) SummaryState {
 	var sumstate SummaryState
 	sumstate.Probes = make(map[string]*Probe)
+	sumstate.Meta = make(map[string]interface{})
+	sumstate.Meta["names of pods created"] = []string{}
 	ap := filepath.Join(config.AuditDir(), (probename + ".json")) // Needed in both Probe and ProbeAudit
 	sumstate.Probes[probename] = &Probe{
 		name:          probename,
@@ -93,6 +97,160 @@ func TestSummaryState_initProbe(t *testing.T) {
 			if !found {
 				t.Errorf("Summary State doesn't contain probe name: %v", createdProbes)
 				t.Logf("probe name found: %v", v)
+			}
+
+		})
+	}
+}
+
+func TestSummaryState_SetProbrStatus(t *testing.T) {
+	var probeName = "testProbe"
+	var mockSummaryState = createSummaryStateWithMockProbe(probeName)
+	type args struct {
+		probeName    string
+		probesPassed int
+		probesFailed int
+	}
+	tests := []struct {
+		testName       string
+		s              *SummaryState
+		expectedResult string
+		args           args
+	}{
+		{
+			testName:       "SetProbrStatus",
+			s:              &mockSummaryState,
+			expectedResult: "Complete - All Probes Completed Successfully",
+			args:           args{probeName: "testProbe", probesPassed: 1, probesFailed: 0},
+		}, {
+			testName:       "SetProbrStatus_WithFailedProbes",
+			s:              &mockSummaryState,
+			expectedResult: fmt.Sprintf("Complete - %v of %v Probes Failed", 1, 2),
+			args:           args{probeName: "testProbe", probesPassed: 0, probesFailed: 1},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.testName, func(t *testing.T) {
+			tt.s.initProbe(tt.args.probeName)
+			tt.s.initProbe("anotherPod")
+			tt.s.ProbesPassed = tt.args.probesPassed
+			tt.s.ProbesFailed = tt.args.probesFailed
+			tt.s.ProbesSkipped = 0
+			tt.s.SetProbrStatus()
+			if string(tt.s.Status) != string(tt.expectedResult) {
+				t.Errorf("\nCall: SetProbrStatus()\nExpected: %q", string(tt.expectedResult))
+			}
+		})
+	}
+}
+
+func TestSummaryState_LogProbeMeta(t *testing.T) {
+
+	var mockSummaryState SummaryState
+	mockSummaryState.Probes = make(map[string]*Probe)
+	mockSummaryState.Meta = make(map[string]interface{})
+	mockSummaryState.Meta["names of pods created"] = []string{}
+
+	type args struct {
+		name  string
+		key   string
+		value interface{}
+	}
+	tests := []struct {
+		testName       string
+		s              *SummaryState
+		expectedResult string
+		args           args
+	}{
+		{
+			testName:       "LogProbeMeta",
+			s:              &mockSummaryState,
+			expectedResult: "valueTest",
+			args:           args{name: "testProbe", key: "testKey", value: "valueTest"},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.testName, func(t *testing.T) {
+			tt.s.LogProbeMeta(tt.args.name, tt.args.key, tt.args.value)
+			if string(tt.s.Probes[tt.args.name].Meta[tt.args.key].(string)) != string(tt.expectedResult) {
+				t.Errorf("\nCall: LogProbeMeta()\nExpected: %q", string(tt.expectedResult))
+			}
+		})
+	}
+}
+
+func TestSummaryState_GetProbeLog(t *testing.T) {
+	var probeName = "testProbe"
+	var mockSummaryState SummaryState
+	mockSummaryState.Probes = make(map[string]*Probe)
+	mockSummaryState.Meta = make(map[string]interface{})
+	mockSummaryState.Meta["names of pods created"] = []string{}
+	var expectedProbeWithSummaryState = createSummaryStateWithMockProbe(probeName)
+
+	type args struct {
+		name string
+	}
+	tests := []struct {
+		testName string
+		s        *SummaryState
+		want     *Probe
+		args     args
+	}{
+		{
+			testName: "GetProbeLog",
+			s:        &mockSummaryState,
+			want:     expectedProbeWithSummaryState.Probes[probeName],
+			args:     args{name: "testProbe"},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.testName, func(t *testing.T) {
+			if got := tt.s.GetProbeLog(tt.args.name); strings.Compare(got.name, tt.want.name) > 0 {
+				t.Errorf("SummaryState.GetProbeLog() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestSummaryState_completeProbe(t *testing.T) {
+
+	var probeName = "testProbe"
+	var mockSummaryState = createSummaryStateWithMockProbe(probeName)
+
+	mockSummaryState.Probes[probeName].audit.Scenarios = make(map[int]*ScenarioAudit)
+	scenarioCounter := len(mockSummaryState.Probes[probeName].audit.Scenarios) + 1
+	mockSummaryState.Probes[probeName].Result = "Excluded"
+	mockSummaryState.Probes[probeName].audit.Scenarios[scenarioCounter] = &ScenarioAudit{
+		Name:  "scena1",
+		Steps: make(map[int]*StepAudit),
+		Tags:  []string{"scenario"},
+	}
+	mockSummaryState.Probes[probeName].ScenariosFailed = 0
+	mockSummaryState.Probes[probeName].audit.ScenariosFailed = &mockSummaryState.Probes[probeName].ScenariosFailed
+
+	type args struct {
+		e *Probe
+	}
+	tests := []struct {
+		testName string
+		s        *SummaryState
+		args
+		expectedResult string
+	}{
+		{
+			testName:       "completeProbe",
+			s:              &mockSummaryState,
+			args:           args{e: mockSummaryState.Probes[probeName]},
+			expectedResult: "Success",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.testName, func(t *testing.T) {
+			tt.s.completeProbe(tt.args.e)
+
+			if strings.Compare(tt.args.e.Result, tt.expectedResult) > 0 {
+				t.Errorf("SummaryState.completeProbe() = %v, want %v", tt.args.e.Result, tt.expectedResult)
 			}
 
 		})
