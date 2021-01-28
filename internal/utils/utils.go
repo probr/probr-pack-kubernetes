@@ -8,13 +8,10 @@ import (
 	"runtime"
 	"strings"
 
-	"github.com/gobuffalo/packr/v2"
+	"github.com/markbates/pkger"
 )
 
-var boxes map[string]*packr.Box
-
 func init() {
-	boxes = make(map[string]*packr.Box)
 }
 
 // BoolPtr returns a pointer to a bool
@@ -80,7 +77,6 @@ func ReformatError(e string, v ...interface{}) error {
 }
 
 // ReadStaticFile returns the bytes for a given static file
-// If the static asset has not been added to packer, it adds it using full dir path as the box name.
 // Path:
 //  In most cases it will be ReadStaticFile(assetDir, fileName).
 //  It could also be used as ReadStaticFile(assetDir, subfolder, filename)
@@ -91,18 +87,26 @@ func ReadStaticFile(path ...string) ([]byte, error) {
 		return nil, ReformatError("Path argument cannot be empty")
 	}
 
-	filename := path[len(path)-1]      // file name is the last string argument
-	dirpath := path[0:(len(path) - 1)] // folder path
-	boxName := strings.Join(dirpath[:], ".")
-	if boxes[boxName] == nil {
-		boxes[boxName] = BoxStaticFile(boxName, dirpath...) // Name the box after the file being read
-	}
-	filepath := filepath.Join(boxes[boxName].ResolutionDir, filename)
-	return ioutil.ReadFile(filepath)
-}
+	filename := path[len(path)-1]           // file name is the last string argument
+	dirpathSlice := path[0:(len(path) - 1)] // folder path
 
-func BoxStaticFile(boxName string, path ...string) *packr.Box {
-	return packr.New(boxName, filepath.Join(path...)) // Establish static files for binary build
+	dirPath := ""
+	for _, folder := range dirpathSlice {
+		dirPath = filepath.Join(dirPath, folder)
+	}
+	filepath := filepath.Join("/", dirPath, filename) //Need the abs path (/) for pgker to work
+
+	// If pkged.go file has been generated using pkger cli tool, this will open the file from bundled memory buffer.
+	// Otherwise, this will read from file system
+	// See: https://github.com/markbates/pkger
+
+	f, err := pkger.Open(filepath)
+	if err != nil {
+		return nil, err
+	}
+	defer f.Close()
+
+	return ioutil.ReadAll(f)
 }
 
 // ReplaceBytesValue replaces a substring with a new value for a given string in bytes

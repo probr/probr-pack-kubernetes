@@ -10,7 +10,6 @@ import (
 	"github.com/cucumber/godog"
 
 	"github.com/citihub/probr/internal/config"
-	"github.com/citihub/probr/internal/utils"
 )
 
 // Service Packs should use this interface to export probes
@@ -64,10 +63,12 @@ func getOutputPath(t string) (*os.File, error) {
 }
 
 func GetFeaturePath(path ...string) string {
-	featureName := path[len(path)-1]
-	uniqueBoxName := utils.RandomString(5) + featureName
-	box := utils.BoxStaticFile(uniqueBoxName, path...) // Establish static files for binary build
-	return filepath.Join(box.ResolutionDir, featureName+".feature")
+	featureName := path[len(path)-1] + ".feature"
+	dirPath := ""
+	for _, folder := range path {
+		dirPath = filepath.Join(dirPath, folder)
+	}
+	return filepath.Join(dirPath, featureName)
 }
 
 // LogScenarioStart logs the name and tags associated with the supplied scenario.

@@ -65,3 +65,27 @@ func TestScenarioString(t *testing.T) {
 		t.Fail()
 	}
 }
+
+func TestGetFeaturePath(t *testing.T) {
+	type args struct {
+		path []string
+	}
+	tests := []struct {
+		testName       string
+		testArgs       args
+		expectedResult string
+	}{
+		{
+			testName:       "GetFeaturePath_WithTwoSubfoldersAndFeatureName_ShouldReturnFeatureFilePath",
+			testArgs:       args{path: []string{"service_packs", "kubernetes", "container_registry_access"}},
+			expectedResult: filepath.Join("service_packs", "kubernetes", "container_registry_access", "container_registry_access.feature"), // Using filepath.join() instead of literal string in order to run test in Windows (\\) and Linux (/)
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.testName, func(t *testing.T) {
+			if got := GetFeaturePath(tt.testArgs.path...); got != tt.expectedResult {
+				t.Errorf("GetFeaturePath() = %v, Expected: %v", got, tt.expectedResult)
+			}
+		})
+	}
+}

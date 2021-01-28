@@ -138,10 +138,13 @@ func TestCallerFileLine(t *testing.T) {
 
 func TestReadStaticFile(t *testing.T) {
 
-	testFolder := "testdata"
+	testFolder, testFolderErr := filepath.Abs("./testdata") // Need absolute path so that pkger.Open can work
+	if testFolderErr != nil {
+		t.Fatalf("Error loading test data folder: %v", testFolderErr)
+	}
 	testSubFolder := "testdata_subfolder"
 	testFileName := "psp-azp-privileges.yaml"
-	testFilePath := filepath.Join(testFolder, testFileName)
+	testFilePath := filepath.Join("/", testFolder, testFileName)
 	testFileContent, fileError := ioutil.ReadFile(testFilePath)
 	if fileError != nil {
 		t.Fatalf("Error loading test data: %v", fileError)
@@ -157,33 +160,31 @@ func TestReadStaticFile(t *testing.T) {
 		expectedError  bool
 	}{
 		{
-			testName:       "ReadStaticFile(%v)",
+			testName:       "ReadStaticFile_WithValidFolderAndFile_ShouldReturnFileBytes",
 			testArgs:       args{path: []string{testFolder, testFileName}}, //Test case with folder and file
 			expectedResult: testFileContent,
 			expectedError:  false,
 		},
 		{
-			testName:       "ReadStaticFile(%v)",
+			testName:       "ReadStaticFile_WithValidFolderSubfolderAndFile_ShouldReturnFileBytes",
 			testArgs:       args{path: []string{testFolder, testSubFolder, testFileName}}, //Test case with folder, subfolder and file
 			expectedResult: testFileContent,
 			expectedError:  false,
 		},
 		{
-			testName:       "ReadStaticFile(%v)",
+			testName:       "ReadStaticFile_WithEmptyArgs_ShouldReturnError",
 			testArgs:       args{path: []string{}}, //Test case with empty args
 			expectedResult: nil,
 			expectedError:  true,
 		},
 		{
-			testName:       "ReadStaticFile(%v)",
+			testName:       "ReadStaticFile_WithInvalidFile_ShouldReturnError",
 			testArgs:       args{path: []string{testFolder, testSubFolder, "invalidfilename"}}, //Test case with invalid file
 			expectedResult: nil,
 			expectedError:  true,
 		},
 	}
 	for _, tt := range tests {
-
-		tt.testName = fmt.Sprintf(tt.testName, tt.testArgs)
 
 		t.Run(tt.testName, func(t *testing.T) {
 			got, err := ReadStaticFile(tt.testArgs.path...)

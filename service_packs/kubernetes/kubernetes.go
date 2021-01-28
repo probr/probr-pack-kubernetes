@@ -5,6 +5,7 @@ import (
 	"path/filepath"
 
 	"github.com/cucumber/godog"
+	"github.com/markbates/pkger"
 	apiv1 "k8s.io/api/core/v1"
 
 	"github.com/citihub/probr/internal/config"
@@ -45,6 +46,11 @@ type PodPayload struct {
 
 func init() {
 	AssetsDir = filepath.Join("service_packs", "kubernetes", "assets")
+
+	// This line will ensure that all static files are bundled into pked.go file when using pkger cli tool
+	// It is needed, as variables are not supported in pkger
+	// See: https://github.com/markbates/pkger
+	pkger.Include("/service_packs/kubernetes/assets")
 }
 
 //
