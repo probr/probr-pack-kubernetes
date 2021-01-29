@@ -13,8 +13,7 @@ func setFromEnvOrDefaults(e *ConfigVars) {
 	e.set(&e.Tags, "PROBR_TAGS", "")
 	e.set(&e.AuditEnabled, "PROBR_AUDIT_ENABLED", "true")
 	e.set(&e.OutputType, "PROBR_OUTPUT_TYPE", "IO")
-	e.set(&e.CucumberDir, "PROBR_CUCUMBER_DIR", "cucumber_output")
-	e.set(&e.AuditDir, "PROBR_AUDIT_DIR", "audit_output")
+	e.set(&e.WriteDirectory, "PROBR_WRITE_DIRECTORY", "probr_output")
 	e.set(&e.LogLevel, "PROBR_LOG_LEVEL", "ERROR")
 	e.set(&e.OverwriteHistoricalAudits, "OVERWRITE_AUDITS", "true")
 

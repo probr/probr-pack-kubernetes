@@ -33,7 +33,6 @@ When creating new config vars, remember to do the following:
 
 1. Add an entry to the struct `ConfigVars` in `internal/config/config.go`
 1. Add an entry (matching the config vars struct) to `setEnvOrDefaults` in `internal/config/defaults.go`
-1. Add logic (matching the defaults entry) to `internal/config/getters.go`
 1. If appropriate, add logic to `cmd/probr-cli/flags.go`
 
 By following the above steps, you will have accomplished the following:

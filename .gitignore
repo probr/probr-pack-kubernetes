@@ -247,8 +247,7 @@ node_modules
 __debug_bin
 
 # probr misc ('probr' is Linux exe)
-cucumber_output
-audit_output
+probr_output
 !examples/*
 probr
 static-content/

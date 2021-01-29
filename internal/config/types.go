@@ -6,8 +6,7 @@ type ConfigVars struct {
 	ServicePacks              ServicePacks   `yaml:"ServicePacks"`
 	CloudProviders            CloudProviders `yaml:"CloudProviders"`
 	OutputType                string         `yaml:"OutputType"`
-	CucumberDir               string         `yaml:"CucumberDir"`
-	AuditDir                  string         `yaml:"AuditDir"`
+	WriteDirectory            string         `yaml:"WriteDirectory"`
 	AuditEnabled              string         `yaml:"AuditEnabled"`
 	LogLevel                  string         `yaml:"LogLevel"`
 	OverwriteHistoricalAudits string         `yaml:"OverwriteHistoricalAudits"`

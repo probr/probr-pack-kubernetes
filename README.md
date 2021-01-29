@@ -82,12 +82,11 @@ These are general configuration variables.
 |VarsFile|Config YAML File Path|yes|N/A|N/A|N/A|
 |Silent|Disable visual runtime indicator|yes|no|N/A|false|
 |NoSummary|Flag to switch off summary output|yes|no|N/A|false|
-|CucumberDir|Path to cucumber output dir if applicable|yes|yes|PROBR_CUCUMBER_DIR|cucumber_output|
+|WriteDirectory|Path to all output, including audit, cucumber results and other temp files|yes|yes|PROBR_WRITE_DIRECTORY|probr_output|
 |Tags|Feature tag inclusions and exclusions|yes|yes|PROBR_TAGS| |
 |LogLevel|Set log verbosity level|yes|yes|PROBR_LOG_LEVEL|ERROR|
 |OutputType|"IO" will write to file, as is needed for CLI usage. "INMEM" should be used in non-CLI cases, where values should be returned in-memory instead|no|yes|PROBR_OUTPUT_TYPE|IO|
 |AuditEnabled|Flag to switch on audit log|no|yes|PROBR_AUDIT_ENABLED|true|
-|AuditDir|Path to audit dir|no|yes|PROBR_AUDIT_DIR|audit_output|
 |OverwriteHistoricalAudits|Flag to allow audit overwriting|no|yes|OVERWRITE_AUDITS|true|
 |ContainerRegistry|Probe image container registry|no|yes|PROBR_CONTAINER_REGISTRY|docker.io|
 |ProbeImage|Probe image name|no|probeImage|PROBR_PROBE_IMAGE|citihub/probr-probe|

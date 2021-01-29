@@ -1,7 +1,6 @@
 # Empty and omitted keys will use default values
 AuditEnabled: true
-AuditDir: audit_output
-CucumberDir: cucumber_output
+WriteDirectory: probr_output
 OverwriteHistoricalAudits: true
 ServicePacks:
   Kubernetes:

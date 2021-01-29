@@ -27,7 +27,7 @@ func HandleFlags() {
 	stringFlag("varsfile", "path to config file", varsFileHandler)
 	stringFlag("loglevel", "set log level", loglevelHandler)
 	stringFlag("kubeconfig", "kube config file", kubeConfigHandler)
-	stringFlag("cucumberdir", "cucumber output directory", cucumberDirHandler)
+	stringFlag("writedirectory", "output directory", writeDirHandler)
 	stringFlag("tags", "feature tags to include or exclude", tagsHandler)
 	boolFlag("silent", "disable visual runtime indicator, useful for CI tasks", silentHandler)
 	boolFlag("nosummary", "switch off summary output", nosummaryHandler)
@@ -74,11 +74,11 @@ func varsFileHandler(v interface{}) {
 	}
 }
 
-// cucumberDirHandler
-func cucumberDirHandler(v interface{}) {
+// writeDirHandler
+func writeDirHandler(v interface{}) {
 	if len(*v.(*string)) > 0 {
 		log.Printf("[NOTICE] Output Directory has been overridden via command line")
-		config.Vars.CucumberDir = *v.(*string)
+		config.Vars.WriteDirectory = *v.(*string)
 	}
 }
 
