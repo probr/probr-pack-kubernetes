@@ -8,7 +8,7 @@ var (
 		"@probes/kubernetes/internet_access":           []string{"k-iaf"},
 		"@standard/citihub/CHC2-APPDEV135":             []string{"k-cra"},
 		"@standard/citihub/CHC2-ITS120":                []string{"k-cra"},
-		"@control_type/preventative":                   []string{"k-cra-001", "k-cra-002", "k-cra-003", "k-iam-001", "k-iam-002", "k-iam-003", "k-iaf-001", "k-psp-001", "k-psp-002", "k-psp-003", "k-psp-004", "k-psp-005", "k-psp-006", "k-psp-007", "k-psp-008", "k-psp-009", "k-psp-010", "k-psp-011"},
+		"@control_type/preventative":                   []string{"k-cra-001", "k-cra-002", "k-cra-003", "k-iam-001", "k-iam-002", "k-iam-003", "k-iaf-001", "k-psp-001", "k-psp-002", "k-psp-003", "k-psp-004", "k-psp-005", "k-psp-006", "k-psp-007", "k-psp-008", "k-psp-009", "k-psp-010", "k-psp-011", "k-psp-012"},
 		"@standard/cis":                                []string{"k-gen", "k-psp"},
 		"@standard/cis/gke":                            []string{"k-gen", "k-psp"},
 		"@standard/cis/gke/v1.6.0/5.1.3":               []string{"k-gen-001"},
@@ -42,5 +42,6 @@ var (
 		"@standard/cis/gke/v1.6.0/5.2.7":               []string{"k-psp-007"},
 		"@standard/cis/gke/v1.6.0/5.2.8":               []string{"k-psp-008"},
 		"@standard/cis/gke/v1.6.0/5.2.9":               []string{"k-psp-009"},
+		"@standard/none/PSP-0.1":                       []string{"k-psp-012"},
 	}
 )
