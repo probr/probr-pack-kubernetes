@@ -144,7 +144,7 @@ func TestReadStaticFile(t *testing.T) {
 	}
 	testSubFolder := "testdata_subfolder"
 	testFileName := "psp-azp-privileges.yaml"
-	testFilePath := filepath.Join("/", testFolder, testFileName)
+	testFilePath := filepath.Join(testFolder, testFileName)
 	testFileContent, fileError := ioutil.ReadFile(testFilePath)
 	if fileError != nil {
 		t.Fatalf("Error loading test data: %v", fileError)
