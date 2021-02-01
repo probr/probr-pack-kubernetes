@@ -203,4 +203,4 @@ So that a policy of least privilege can be enforced in order to prevent maliciou
 			| requested 	| RESULT 	| ERRORMESSAGE							|
 			| unapproved  	| Fail  	| Cannot access unapproved port range	|
 			| approved		| Succeed	|									  	|
-			| not defined	| Succeed	|	
+			| not defined	| Succeed	|	                                    |
