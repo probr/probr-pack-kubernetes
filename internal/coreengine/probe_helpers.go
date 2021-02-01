@@ -25,7 +25,7 @@ const rootDirName = "probr"
 var outputDir *string
 
 // This variable points to the function. It is used in oder to be able to mock config.CucumberDir() function during testing. See TestGetOutputPath.
-var cucumberDirFunc = config.CucumberDir
+var cucumberDirFunc = config.Vars.CucumberDir
 
 // getRootDir gets the root directory of the probr executable.
 func getRootDir() (string, error) {

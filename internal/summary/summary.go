@@ -76,7 +76,7 @@ func (s *SummaryState) LogPodName(n string) {
 
 func (s *SummaryState) initProbe(n string) {
 	if s.Probes[n] == nil {
-		ap := filepath.Join(config.AuditDir(), (n + ".json")) // Needed in both Probe and ProbeAudit
+		ap := filepath.Join(config.Vars.AuditDir(), (n + ".json")) // Needed in both Probe and ProbeAudit
 		s.Probes[n] = &Probe{
 			name:          n,
 			Meta:          make(map[string]interface{}),

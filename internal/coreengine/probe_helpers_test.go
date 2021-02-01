@@ -30,7 +30,7 @@ func TestGetOutputPath(t *testing.T) {
 	desiredFile := filepath.Join(d, f) + ".json"
 	defer func() {
 
-		cucumberDirFunc = config.CucumberDir //Restoring to original function after test
+		cucumberDirFunc = config.Vars.CucumberDir //Restoring to original function after test
 
 		// Cleanup test assets
 		file.Close()

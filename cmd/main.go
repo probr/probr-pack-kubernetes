@@ -51,7 +51,7 @@ func main() {
 	if out == nil || len(out) == 0 {
 		summary.State.Meta["no probes completed"] = fmt.Sprintf(
 			"Probe results not written to file, possibly due to all being excluded or permissions on the specified output directory: %s",
-			config.CucumberDir(),
+			config.Vars.CucumberDir(),
 		)
 	}
 	summary.State.PrintSummary()
