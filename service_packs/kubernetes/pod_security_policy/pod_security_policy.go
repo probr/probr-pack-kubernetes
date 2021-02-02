@@ -50,14 +50,17 @@ func (s *scenarioState) aKubernetesDeploymentIsAppliedToAnExistingKubernetesClus
 }
 
 func (s *scenarioState) theOperationWillWithAnError(res, msg string) error {
-	err := kubernetes.AssertResult(&s.podState, res, msg)
-
-	description := fmt.Sprintf("The operation with result %s and message %s", res, msg)
-	payload := struct {
+	description, payload, err := utils.AuditPlaceholders()
+	defer func() {
+		s.audit.AuditScenarioStep(description, payload, err)
+	}()
+	err = kubernetes.AssertResult(&s.podState, res, msg)
+	description = fmt.Sprintf("The operation with result %s and message %s", res, msg)
+	payload = struct {
 		PodState kubernetes.PodState
 		PodName  string
-	}{s.podState, s.podState.PodName}
-	s.audit.AuditScenarioStep(description, payload, err)
+		Expected string
+	}{s.podState, s.podState.PodName, res}
 
 	return err
 }
@@ -697,9 +700,10 @@ func (s *scenarioState) anSeccompProfileIsRequestedForTheKubernetesDeployment(se
 	}
 
 	if err != nil {
-		pd, err := psp.CreatePodFromYaml(y, s.probe)
-		err = kubernetes.ProcessPodCreationResult(&s.podState, pd, kubernetes.PSPSeccompProfile, err)
+		log.Print(utils.ReformatError("error reading seccomp provile %v yaml file : %v", seccompProfile, err))
 	}
+	pd, err := psp.CreatePodFromYaml(y, s.probe)
+	err = kubernetes.ProcessPodCreationResult(&s.podState, pd, kubernetes.PSPSeccompProfile, err)
 
 	description := fmt.Sprintf("Sec comp profile requested for kubernetes deployment %s", seccompProfile)
 	payload := struct {

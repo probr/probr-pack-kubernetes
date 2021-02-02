@@ -169,9 +169,9 @@ So that a policy of least privilege can be enforced in order to prevent maliciou
 
         Examples:
             | requested   | RESULT     | ERRORMESSAGE                           |
-            | unapproved  | Fail      | Cannot access unapproved volume type |
-            | approved      | Succeed    |                                         |
-            | not defined | Succeed    |                                       |
+            | unapproved  | Fail       | Cannot access unapproved volume type   |
+            | approved    | Succeed    |                                        |
+            | not defined | Succeed    |                                        |
 
     @k-psp-011
     Scenario Outline: Prevent deployments from running without approved seccomp profile
@@ -184,10 +184,10 @@ So that a policy of least privilege can be enforced in order to prevent maliciou
         And I should be able to perform an allowed command
 
         Examples:
-            | requested  | RESULT     | ERRORMESSAGE                                |
-            | unapproved | Fail      | Cannot request unapproved seccomp profile    |
-            | approved     | Succeed    | no error                                      |
-            | undefined     | Fail        | Approved seccomp profile required            |
+            | requested  | RESULT    | ERRORMESSAGE                                |
+            | unapproved | Fail      | Cannot request unapproved seccomp profile   |
+            | approved   | Succeed   | no error                                    |
+            | undefined  | Fail      | Approved seccomp profile required           |
 
     @k-psp-012
 	Scenario Outline: Prevent deployments from accessing unapproved port range
