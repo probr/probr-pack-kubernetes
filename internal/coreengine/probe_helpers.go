@@ -2,6 +2,7 @@ package coreengine
 
 import (
 	"fmt"
+	"io/ioutil"
 	"log"
 	"os"
 	"path/filepath"
@@ -10,6 +11,7 @@ import (
 	"github.com/cucumber/godog"
 
 	"github.com/citihub/probr/internal/config"
+	"github.com/citihub/probr/internal/utils"
 )
 
 // Service Packs should use this interface to export probes
@@ -24,8 +26,10 @@ const rootDirName = "probr"
 
 var outputDir *string
 
-// This variable points to the function. It is used in oder to be able to mock config.CucumberDir() function during testing. See TestGetOutputPath.
-var cucumberDirFunc = config.Vars.CucumberDir
+// These variables points to the functions. they are used in oder to be able to mock oiginal behavior during testing.
+var cucumberDirFunc = config.Vars.CucumberDir // see TestGetOutputPath
+var getTmpFeatureFileFunc = getTmpFeatureFile // See TestGeatFeaturePath
+var tmpDirFunc = config.Vars.TmpDir           // See Test_getTmpFeatureFile
 
 // getRootDir gets the root directory of the probr executable.
 func getRootDir() (string, error) {
@@ -69,7 +73,64 @@ func GetFeaturePath(path ...string) string {
 	for _, folder := range path {
 		dirPath = filepath.Join(dirPath, folder)
 	}
-	return filepath.Join(dirPath, featureName)
+	//return filepath.Join(dirPath, featureName)
+	featurePath := filepath.Join(dirPath, featureName) // This is the original path to feature file in source code
+
+	// Unpacking/copying feature file to tmp location
+	tmpFeaturePath, err := getTmpFeatureFileFunc(featurePath)
+	if err != nil {
+		log.Printf("Error unpacking feature file '%v' - Error: %v", featurePath, err)
+		return ""
+	}
+	return tmpFeaturePath
+}
+
+// getTmpFeatureFile checks if feature file exists in -tmp- folder.
+// If so returns the file path, otherwise unpacks the original file using pkger and copies it to -tmp- location before returning file path.
+func getTmpFeatureFile(featurePath string) (string, error) {
+
+	tmpFeaturePath := filepath.Join(tmpDirFunc(), featurePath)
+
+	// If file already exists return it
+	_, e := os.Stat(tmpFeaturePath)
+	if e == nil {
+		return tmpFeaturePath, nil
+	}
+
+	// If file doesn't exist, extract it from pkger inmemory buffer
+	if os.IsNotExist(e) {
+
+		err := unpackFileAndSave(featurePath, tmpFeaturePath)
+		if err != nil {
+			return "", fmt.Errorf("Error unpacking file: '%v' - Error: %v", featurePath, err)
+		}
+
+		return tmpFeaturePath, err
+	}
+
+	return "", fmt.Errorf("Error getting os stat for tmp file: '%v' - Error: %v", tmpFeaturePath, e)
+}
+
+func unpackFileAndSave(origFilePath string, newFilePath string) error {
+
+	// TODO: This function could be extracted to a separate object i.e: Bundler interface?
+
+	fileBytes, readFileErr := utils.ReadStaticFile(origFilePath) // Read bytes using pkger memory bundle
+	if readFileErr != nil {
+		return fmt.Errorf("Error reading file content: '%v' - Error: %v", origFilePath, readFileErr)
+	}
+
+	createFilePathErr := os.MkdirAll(filepath.Dir(newFilePath), 0755) // Create directory and sub directories for file
+	if createFilePathErr != nil {
+		return fmt.Errorf("Error creating path for file: '%v' - Error: %v", newFilePath, createFilePathErr)
+	}
+
+	writeFileErr := ioutil.WriteFile(newFilePath, fileBytes, 0755) // Save file to new location
+	if writeFileErr != nil {
+		return fmt.Errorf("Error saving file: '%v' - Error: %v", newFilePath, writeFileErr)
+	}
+
+	return nil // File created
 }
 
 // LogScenarioStart logs the name and tags associated with the supplied scenario.

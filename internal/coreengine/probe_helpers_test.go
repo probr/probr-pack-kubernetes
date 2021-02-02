@@ -6,9 +6,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/cucumber/godog"
-
 	"github.com/citihub/probr/internal/config"
+	"github.com/citihub/probr/internal/utils"
+	"github.com/cucumber/godog"
 )
 
 func TestGetRootDir(t *testing.T) {
@@ -50,11 +50,9 @@ func TestGetOutputPath(t *testing.T) {
 		_ = os.MkdirAll(d, 0755) // Creates if not already existing
 		return d
 	}
-	var e error
-	file, e = getOutputPath(f)
+	file, _ = getOutputPath(f)
 	if desiredFile != file.Name() {
 		t.Logf("Desired filepath '%s' does not match '%s'", desiredFile, file.Name())
-		t.Log(e)
 		t.Fail()
 	}
 }
@@ -80,6 +78,15 @@ func TestScenarioString(t *testing.T) {
 }
 
 func TestGetFeaturePath(t *testing.T) {
+	// Faking result for getTmpFeatureFileFunc() to avoid creating -tmp- folder and feature file.
+	getTmpFeatureFileFunc = func(featurePath string) (string, error) {
+		tmpFeaturePath := filepath.Join("tmp", featurePath)
+		return tmpFeaturePath, nil
+	}
+	defer func() {
+		getTmpFeatureFileFunc = getTmpFeatureFile //Restoring to original function after test
+	}()
+
 	type args struct {
 		path []string
 	}
@@ -91,13 +98,101 @@ func TestGetFeaturePath(t *testing.T) {
 		{
 			testName:       "GetFeaturePath_WithTwoSubfoldersAndFeatureName_ShouldReturnFeatureFilePath",
 			testArgs:       args{path: []string{"service_packs", "kubernetes", "container_registry_access"}},
-			expectedResult: filepath.Join("service_packs", "kubernetes", "container_registry_access", "container_registry_access.feature"), // Using filepath.join() instead of literal string in order to run test in Windows (\\) and Linux (/)
+			expectedResult: filepath.Join("tmp", "service_packs", "kubernetes", "container_registry_access", "container_registry_access.feature"), // Using filepath.join() instead of literal string in order to run test in Windows (\\) and Linux (/)
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.testName, func(t *testing.T) {
 			if got := GetFeaturePath(tt.testArgs.path...); got != tt.expectedResult {
 				t.Errorf("GetFeaturePath() = %v, Expected: %v", got, tt.expectedResult)
+			}
+		})
+	}
+}
+
+func Test_getTmpFeatureFile(t *testing.T) {
+	testTmpDir := filepath.Join("testdata", utils.RandomString(10))
+
+	// Faking original behavior
+	tmpDirFunc = func() string {
+		return testTmpDir
+	}
+	defer func() {
+		tmpDirFunc = config.Vars.TmpDir //Restoring to original function after test
+
+		// Delete test data after tests
+		os.RemoveAll(testTmpDir)
+	}()
+
+	type args struct {
+		featurePath string
+	}
+	tests := []struct {
+		testName       string
+		testArgs       args
+		expectedResult string
+		expectedErr    bool
+	}{
+		{
+			testName:       "ShouldCreateTmpFolderWithFeatureFile",
+			testArgs:       args{featurePath: filepath.Join("service_packs", "kubernetes", "container_registry_access", "container_registry_access.feature")},
+			expectedResult: filepath.Join(testTmpDir, "service_packs", "kubernetes", "container_registry_access", "container_registry_access.feature"),
+			expectedErr:    false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.testName, func(t *testing.T) {
+			got, err := getTmpFeatureFile(tt.testArgs.featurePath)
+			if (err != nil) != tt.expectedErr {
+				t.Errorf("getTmpFeatureFile() error = %v, expected error: %v", err, tt.expectedErr)
+				return
+			}
+			if got != tt.expectedResult {
+				t.Errorf("getTmpFeatureFile() = %v, expected %v", got, tt.expectedResult)
+			}
+			// Check if file was saved to tmp location
+			_, e := os.Stat(tt.expectedResult)
+			if e != nil {
+				t.Errorf("File not found in tmp location: %v - Error: %v", tt.expectedResult, e)
+			}
+		})
+	}
+}
+
+func Test_unpackFileAndSave(t *testing.T) {
+	testTmpDir := filepath.Join("testdata", utils.RandomString(10))
+	defer func() {
+		// Delete test data after tests
+		os.RemoveAll(testTmpDir)
+	}()
+
+	type args struct {
+		origFilePath string
+		newFilePath  string
+	}
+	tests := []struct {
+		testName    string
+		testArgs    args
+		expectedErr bool
+	}{
+		{
+			testName: "ShouldCreateFileInNewLocation",
+			testArgs: args{
+				origFilePath: filepath.Join("service_packs", "kubernetes", "container_registry_access", "container_registry_access.feature"),
+				newFilePath:  filepath.Join(testTmpDir, "service_packs", "kubernetes", "container_registry_access", "container_registry_access.feature"),
+			},
+			expectedErr: false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.testName, func(t *testing.T) {
+			if err := unpackFileAndSave(tt.testArgs.origFilePath, tt.testArgs.newFilePath); (err != nil) != tt.expectedErr {
+				t.Errorf("unpackFileAndSave() error = %v, expected error: %v", err, tt.expectedErr)
+			}
+			// Check if file was saved to tmp location
+			_, e := os.Stat(tt.testArgs.newFilePath)
+			if e != nil {
+				t.Errorf("File not found in tmp location: %v - Error: %v", tt.testArgs.newFilePath, e)
 			}
 		})
 	}

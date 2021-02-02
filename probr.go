@@ -1,9 +1,16 @@
 package probr
 
 import (
+	"log"
+	"os"
+
+	"github.com/citihub/probr/internal/config"
 	"github.com/citihub/probr/internal/coreengine"
 	"github.com/citihub/probr/service_packs"
 )
+
+// This variable points to the function. It is used in oder to be able to mock oiginal behavior during testing.
+var tmpDirFunc = config.Vars.TmpDir // See TestGetAllProbeResults
 
 func RunAllProbes() (int, *coreengine.ProbeStore, error) {
 	ts := coreengine.NewProbeStore()
@@ -18,6 +25,8 @@ func RunAllProbes() (int, *coreengine.ProbeStore, error) {
 
 //GetAllProbeResults maps ProbeStore results to strings
 func GetAllProbeResults(ps *coreengine.ProbeStore) map[string]string {
+	defer cleanup()
+
 	out := make(map[string]string)
 	for name := range ps.Probes {
 		results, name, err := readProbeResults(ps, name)
@@ -38,4 +47,13 @@ func readProbeResults(ps *coreengine.ProbeStore, name string) (probeResults, pro
 	probeResults = p.Results.String()
 	probeName = p.ProbeDescriptor.Name
 	return
+}
+
+// cleanup is used to dispose of any temp resources used during execution
+func cleanup() {
+	// Remove tmp folder and its content
+	err := os.RemoveAll(tmpDirFunc())
+	if err != nil {
+		log.Printf("[ERROR] Error removing tmp folder %v", err)
+	}
 }
