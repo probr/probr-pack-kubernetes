@@ -24,13 +24,20 @@ var Probe ProbeStruct
 // General
 func (s *scenarioState) aKubernetesClusterIsDeployed() error {
 	description, payload, error := kubernetes.ClusterIsDeployed()
-	s.audit.AuditScenarioStep(description, payload, error)
+	defer func() {
+		s.audit.AuditScenarioStep(description, payload, error)
+	}()
 	return error //  ClusterIsDeployed will create a fatal error if kubeconfig doesn't validate
 }
 
 //@CIS-5.1.3
 func (s *scenarioState) iInspectTheThatAreConfigured(roleLevel string) error {
-	var err error
+	// Standard auditing logic to ensures panics are also audited
+	description, payload, err := utils.AuditPlaceholders()
+	defer func() {
+		s.audit.AuditScenarioStep(description, payload, err)
+	}()
+
 	if roleLevel == "Cluster Roles" {
 		l, e := kubernetes.GetKubeInstance().GetClusterRolesByResource("*")
 		err = e
@@ -44,18 +51,22 @@ func (s *scenarioState) iInspectTheThatAreConfigured(roleLevel string) error {
 		err = utils.ReformatError("error raised when retrieving '%v': %v", roleLevel, err)
 	}
 
-	description := fmt.Sprintf("Ensures that %s are configured. Retains wildcard roles in state for following steps. Passes if retrieval command does not have error.", roleLevel)
-	payload := struct {
+	description = fmt.Sprintf("Ensures that %s are configured. Retains wildcard roles in state for following steps. Passes if retrieval command does not have error.", roleLevel)
+	payload = struct {
 		PodState kubernetes.PodState
 		PodName  string
 	}{s.podState, s.podState.PodName}
-	s.audit.AuditScenarioStep(description, payload, err)
 	return err
 }
 
 func (s *scenarioState) iShouldOnlyFindWildcardsInKnownAndAuthorisedConfigurations() error {
+	// Standard auditing logic to ensures panics are also audited
+	description, payload, err := utils.AuditPlaceholders()
+	defer func() {
+		s.audit.AuditScenarioStep(description, payload, err)
+	}()
+
 	//we strip out system/known entries in the cluster roles & roles call
-	var err error
 	var wildcardCount int
 	//	wildcardCount := len(s.wildcardRoles.([]interface{}))
 	switch s.wildcardRoles.(type) {
@@ -72,18 +83,23 @@ func (s *scenarioState) iShouldOnlyFindWildcardsInKnownAndAuthorisedConfiguratio
 		err = utils.ReformatError("roles exist with wildcarded resources")
 	}
 
-	description := "Examines scenario state's wildcard roles. Passes if no wildcard roles are found."
-	payload := struct {
+	description = "Examines scenario state's wildcard roles. Passes if no wildcard roles are found."
+	payload = struct {
 		PodState kubernetes.PodState
 		PodName  string
 	}{s.podState, s.podState.PodName}
-	s.audit.AuditScenarioStep(description, payload, err)
 
 	return err
 }
 
 //@CIS-5.6.3
 func (s *scenarioState) iAttemptToCreateADeploymentWhichDoesNotHaveASecurityContext() error {
+	// Standard auditing logic to ensures panics are also audited
+	description, payload, err := utils.AuditPlaceholders()
+	defer func() {
+		s.audit.AuditScenarioStep(description, payload, err)
+	}()
+
 	cname := "probr-general"
 	podName := kubernetes.GenerateUniquePodName(cname)
 	image := config.Vars.ServicePacks.Kubernetes.AuthorisedContainerRegistry + "/" + config.Vars.ServicePacks.Kubernetes.ProbeImage
@@ -93,25 +109,28 @@ func (s *scenarioState) iAttemptToCreateADeploymentWhichDoesNotHaveASecurityCont
 
 	err = kubernetes.ProcessPodCreationResult(&s.podState, pod, kubernetes.UndefinedPodCreationErrorReason, err)
 
-	description := "Attempts to create a deployment without a security context. Retains the status of the deployment in scenario state for following steps. Passes if created, or if an expected error is encountered."
-	payload := kubernetes.PodPayload{Pod: pod, PodAudit: podAudit}
-	s.audit.AuditScenarioStep(description, payload, err)
+	description = "Attempts to create a deployment without a security context. Retains the status of the deployment in scenario state for following steps. Passes if created, or if an expected error is encountered."
+	payload = kubernetes.PodPayload{Pod: pod, PodAudit: podAudit}
 	return err
 }
 
 func (s *scenarioState) theDeploymentIsRejected() error {
+	// Standard auditing logic to ensures panics are also audited
+	description, payload, err := utils.AuditPlaceholders()
+	defer func() {
+		s.audit.AuditScenarioStep(description, payload, err)
+	}()
+
 	//looking for a non-nil creation error
-	var err error
 	if s.podState.CreationError == nil {
 		err = utils.ReformatError("pod %v was created successfully. Test fail.", s.podState.PodName)
 	}
 
-	description := "Looks for a creation error on the current scenario state. Passes if error is found, because it should have been rejected."
-	payload := struct {
+	description = "Looks for a creation error on the current scenario state. Passes if error is found, because it should have been rejected."
+	payload = struct {
 		PodState kubernetes.PodState
 		PodName  string
 	}{s.podState, s.podState.PodName}
-	s.audit.AuditScenarioStep(description, payload, err)
 
 	return err
 }
@@ -125,10 +144,23 @@ func (s *scenarioState) iShouldNotBeAbleToAccessTheKubernetesWebUI() error {
 	//http://127.0.0.1:8001/api/v1/namespaces/kube-system/services/https:kubernetes-dashboard:/proxy/#/login
 	//I don't think this is going to be easy to do from here
 	//Is there another test?  Or is it sufficient to verify that no kube-dashboard is running?
-	return nil
+
+	// Standard auditing logic to ensures panics are also audited
+	description, payload, err := utils.AuditPlaceholders()
+	defer func() {
+		s.audit.AuditScenarioStep(description, payload, err)
+	}()
+
+	return godog.ErrPending
 }
 
 func (s *scenarioState) theKubernetesWebUIIsDisabled() error {
+	// Standard auditing logic to ensures panics are also audited
+	description, payload, err := utils.AuditPlaceholders()
+	defer func() {
+		s.audit.AuditScenarioStep(description, payload, err)
+	}()
+
 	//look for the dashboard pod in the kube-system ns
 	pl, err := kubernetes.GetKubeInstance().GetPods("kube-system")
 	var name string
@@ -145,13 +177,12 @@ func (s *scenarioState) theKubernetesWebUIIsDisabled() error {
 		}
 	}
 
-	description := "Attempts to find a pod in the 'kube-system' namespace with the prefix 'kubernetes-dashboard'. Passes if no pod is returned."
-	payload := struct {
+	description = "Attempts to find a pod in the 'kube-system' namespace with the prefix 'kubernetes-dashboard'. Passes if no pod is returned."
+	payload = struct {
 		PodState         kubernetes.PodState
 		PodName          string
 		PodDashBoardName string
 	}{s.podState, s.podState.PodName, name}
-	s.audit.AuditScenarioStep(description, payload, err)
 
 	return err
 }

@@ -33,13 +33,20 @@ func SetNetworkAccess(n NetworkAccess) {
 
 // General
 func (s *scenarioState) aKubernetesClusterIsDeployed() error {
-	description, payload, error := kubernetes.ClusterIsDeployed()
-	s.audit.AuditScenarioStep(description, payload, error)
-	return error //  ClusterIsDeployed will create a fatal error if kubeconfig doesn't validate
+	description, payload, err := kubernetes.ClusterIsDeployed()
+	defer func() {
+		s.audit.AuditScenarioStep(description, payload, err)
+	}()
+	return err //  ClusterIsDeployed will create a fatal error if kubeconfig doesn't validate
 }
 
 func (s *scenarioState) aPodIsDeployedInTheCluster() error {
-	var err error
+	// Standard auditing logic to ensures panics are also audited
+	description, payload, err := utils.AuditPlaceholders()
+	defer func() {
+		s.audit.AuditScenarioStep(description, payload, err)
+	}()
+
 	var podAudit *kubernetes.PodAudit
 	var pod *apiv1.Pod
 	if s.podName != "" {
@@ -59,14 +66,19 @@ func (s *scenarioState) aPodIsDeployedInTheCluster() error {
 		}
 	}
 
-	description := fmt.Sprintf("Verifying the Pod %s deployed in the cluster", s.podState.PodName)
-	payload := kubernetes.PodPayload{Pod: pod, PodAudit: podAudit}
-	s.audit.AuditScenarioStep(description, payload, err)
+	description = fmt.Sprintf("Verifying the Pod %s deployed in the cluster", s.podState.PodName)
+	payload = kubernetes.PodPayload{Pod: pod, PodAudit: podAudit}
 
 	return err
 }
 
 func (s *scenarioState) aProcessInsideThePodEstablishesADirectHTTPSConnectionTo(url string) error {
+	// Standard auditing logic to ensures panics are also audited
+	description, payload, err := utils.AuditPlaceholders()
+	defer func() {
+		s.audit.AuditScenarioStep(description, payload, err)
+	}()
+
 	code, err := na.AccessURL(&s.podName, &url)
 
 	if err != nil {
@@ -77,18 +89,22 @@ func (s *scenarioState) aProcessInsideThePodEstablishesADirectHTTPSConnectionTo(
 	//hold on to the code
 	s.httpStatusCode = code
 
-	description := fmt.Sprintf("Proces inside the pod established http connection with url '%s',", url)
-	payload := struct {
+	description = fmt.Sprintf("Proces inside the pod established http connection with url '%s',", url)
+	payload = struct {
 		PodState kubernetes.PodState
 		PodName  string
 	}{s.podState, s.podState.PodName}
-	s.audit.AuditScenarioStep(description, payload, err)
 
 	return err
 }
 
 func (s *scenarioState) accessIs(accessResult string) error {
-	var err error
+	// Standard auditing logic to ensures panics are also audited
+	description, payload, err := utils.AuditPlaceholders()
+	defer func() {
+		s.audit.AuditScenarioStep(description, payload, err)
+	}()
+
 	if accessResult == "blocked" {
 		//then the result should be anything other than 200
 		if s.httpStatusCode == 200 {
@@ -97,12 +113,11 @@ func (s *scenarioState) accessIs(accessResult string) error {
 		}
 	}
 
-	description := fmt.Sprintf("The access result is %s,", accessResult)
-	payload := struct {
+	description = fmt.Sprintf("The access result is %s,", accessResult)
+	payload = struct {
 		PodState kubernetes.PodState
 		PodName  string
 	}{s.podState, s.podState.PodName}
-	s.audit.AuditScenarioStep(description, payload, err)
 
 	return err
 }

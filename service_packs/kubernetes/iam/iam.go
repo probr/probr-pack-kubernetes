@@ -47,27 +47,39 @@ func (s *scenarioState) azureIdentitySetupCheck(f func(arg1 string, arg2 string)
 
 // General
 func (s *scenarioState) aKubernetesClusterIsDeployed() error {
-	description, payload, error := kubernetes.ClusterIsDeployed()
-	s.audit.AuditScenarioStep(description, payload, error)
-	return error //  ClusterIsDeployed will create a fatal error if kubeconfig doesn't validate
+	description, payload, err := kubernetes.ClusterIsDeployed()
+	defer func() {
+		s.audit.AuditScenarioStep(description, payload, err)
+	}()
+	return err //  ClusterIsDeployed will create a fatal error if kubeconfig doesn't validate
 }
 
 //AZ-AAD-AI-1.0
 func (s *scenarioState) aNamedAzureIdentityBindingExistsInNamedNS(aibName string, namespace string) error {
+	// Standard auditing logic to ensures panics are also audited
+	description, payload, err := utils.AuditPlaceholders()
+	defer func() {
+		s.audit.AuditScenarioStep(description, payload, err)
+	}()
 
-	err := s.azureIdentitySetupCheck(iam.AzureIdentityBindingExists, namespace, "AzureIdentityBinding", aibName)
+	err = s.azureIdentitySetupCheck(iam.AzureIdentityBindingExists, namespace, "AzureIdentityBinding", aibName)
 
-	description := "Gets the AzureIdentityBindings, then filters according to namespace. Passes if binding is retrieved for namespace."
-	payload := struct {
+	description = "Gets the AzureIdentityBindings, then filters according to namespace. Passes if binding is retrieved for namespace."
+	payload = struct {
 		AzIdentbindName string
 		AzNameSpace     string
 	}{aibName, namespace}
-	s.audit.AuditScenarioStep(description, payload, err)
 
 	return err
 }
 
 func (s *scenarioState) iCreateASimplePodInNamespaceAssignedWithThatAzureIdentityBinding(namespace, aibName string) error {
+	// Standard auditing logic to ensures panics are also audited
+	description, payload, err := utils.AuditPlaceholders()
+	defer func() {
+		s.audit.AuditScenarioStep(description, payload, err)
+	}()
+
 	y, err := utils.ReadStaticFile(kubernetes.AssetsDir, "iam-azi-test-aib-curl.yaml")
 	if err != nil {
 		err = utils.ReformatError("error reading yaml for test: %v", err)
@@ -80,56 +92,67 @@ func (s *scenarioState) iCreateASimplePodInNamespaceAssignedWithThatAzureIdentit
 		err = kubernetes.ProcessPodCreationResult(&s.podState, pd, kubernetes.UndefinedPodCreationErrorReason, err)
 	}
 
-	description := fmt.Sprintf("Creating simple pod in %s namespace assigned with the azure identity binding %s", namespace, aibName)
-	payload := struct {
+	description = fmt.Sprintf("Creating simple pod in %s namespace assigned with the azure identity binding %s", namespace, aibName)
+	payload = struct {
 		PodState kubernetes.PodState
 		PodName  string
 	}{s.podState, s.podState.PodName}
 
-	s.audit.AuditScenarioStep(description, payload, err)
-
 	return err
-
 }
 
 //AZ-AAD-AI-1.0, AZ-AAD-AI-1.1
 func (s *scenarioState) thePodIsDeployedSuccessfully() error {
+	// Standard auditing logic to ensures panics are also audited
+	description, payload, err := utils.AuditPlaceholders()
+	defer func() {
+		s.audit.AuditScenarioStep(description, payload, err)
+	}()
+
 	//check for pod name
 	//note: the pod may still have a creation error if it didn't start up properly, but will have a name if the deployment succeeded
 	//i.e.:
 	// podName != "" -> successful deploy, potentially non-nil creation error
 	// podName == "" -> unsuccessful deploy, non-nil creation error
-	var err error
 	if s.podState.PodName == "" {
 		err = utils.ReformatError("pod was not deployed successfully - creation error: %v", s.podState.CreationError)
 	}
 
-	description := "The Pod Deploying successfully"
-	payload := struct {
+	description = "The Pod Deploying successfully"
+	payload = struct {
 		PodState kubernetes.PodState
 		PodName  string
 	}{s.podState, s.podState.PodName}
-	s.audit.AuditScenarioStep(description, payload, err)
 
 	return err
 }
 
 func (s *scenarioState) anAttemptToObtainAnAccessTokenFromThatPodShouldFail() error {
-	//reuse the parameterised / scenario outline func
-	err := s.anAttemptToObtainAnAccessTokenFromThatPodShould("Fail")
+	// Standard auditing logic to ensures panics are also audited
+	description, payload, err := utils.AuditPlaceholders()
+	defer func() {
+		s.audit.AuditScenarioStep(description, payload, err)
+	}()
 
-	description := "Attempting to get access token from Pod"
-	payload := struct {
+	//reuse the parameterised / scenario outline func
+	err = s.anAttemptToObtainAnAccessTokenFromThatPodShould("Fail")
+
+	description = "Attempting to get access token from Pod"
+	payload = struct {
 		PodState kubernetes.PodState
 		PodName  string
 	}{s.podState, s.podState.PodName}
-	s.audit.AuditScenarioStep(description, payload, err)
 
 	return err
 }
 
 func (s *scenarioState) anAttemptToObtainAnAccessTokenFromThatPodShould(expectedresult string) error {
-	var err error
+	// Standard auditing logic to ensures panics are also audited
+	description, payload, err := utils.AuditPlaceholders()
+	defer func() {
+		s.audit.AuditScenarioStep(description, payload, err)
+	}()
+
 	if s.podState.CreationError != nil {
 		err = utils.ReformatError("failed to create pod", s.podState.CreationError)
 		log.Print(err)
@@ -160,48 +183,60 @@ func (s *scenarioState) anAttemptToObtainAnAccessTokenFromThatPodShould(expected
 		}
 	}
 
-	description := "Attempting to get access toekn from Pod"
-	payload := struct {
+	description = "Attempting to get access toekn from Pod"
+	payload = struct {
 		PodState kubernetes.PodState
 		PodName  string
 	}{s.podState, s.podState.PodName}
-	s.audit.AuditScenarioStep(description, payload, err)
 
 	return err
 }
 
 //AZ-AAD-AI-1.1
 func (s *scenarioState) aNamedAzureIdentityExistsInNamedNS(namespace string, aiName string) error {
+	// Standard auditing logic to ensures panics are also audited
+	description, payload, err := utils.AuditPlaceholders()
+	defer func() {
+		s.audit.AuditScenarioStep(description, payload, err)
+	}()
 
-	err := s.azureIdentitySetupCheck(iam.AzureIdentityExists, namespace, "AzureIdentity", aiName)
+	err = s.azureIdentitySetupCheck(iam.AzureIdentityExists, namespace, "AzureIdentity", aiName)
 
-	description := fmt.Sprintf("Gets the AzureIdentityBindings from binding %s, then filters according to namespace %s. Passes if binding is retrieved for namespace.", aiName, namespace)
-	payload := struct {
+	description = fmt.Sprintf("Gets the AzureIdentityBindings from binding %s, then filters according to namespace %s. Passes if binding is retrieved for namespace.", aiName, namespace)
+	payload = struct {
 		PodState kubernetes.PodState
 		PodName  string
 	}{s.podState, s.podState.PodName}
-	s.audit.AuditScenarioStep(description, payload, err)
 
 	return err
 }
 
 func (s *scenarioState) iCreateAnAzureIdentityBindingCalledInANondefaultNamespace(aibName, aiName string) error {
+	// Standard auditing logic to ensures panics are also audited
+	description, payload, err := utils.AuditPlaceholders()
+	defer func() {
+		s.audit.AuditScenarioStep(description, payload, err)
+	}()
 
-	err := iam.CreateAIB(false, aibName, aiName) // create an AIB in a non-default NS if it deosn't already exist
+	err = iam.CreateAIB(false, aibName, aiName) // create an AIB in a non-default NS if it deosn't already exist
 	if err != nil {
 		err = utils.ReformatError("error returned from CreateAIB: %v", err)
 		log.Print(err)
 	}
-	description := fmt.Sprintf("Gets the AzureIdentityBindings from binding %s, then filters according to namespace %s. Passes if binding is retrieved for namespace.", aiName, aiName)
-	payload := struct {
+	description = fmt.Sprintf("Gets the AzureIdentityBindings from binding %s, then filters according to namespace %s. Passes if binding is retrieved for namespace.", aiName, aiName)
+	payload = struct {
 		PodState kubernetes.PodState
 		PodName  string
 	}{s.podState, s.podState.PodName}
-	s.audit.AuditScenarioStep(description, payload, err)
 	return err
 }
 
 func (s *scenarioState) iDeployAPodAssignedWithTheAzureIdentityBindingIntoTheSameNamespaceAsTheAzureIdentityBinding(aibName string) error {
+	// Standard auditing logic to ensures panics are also audited
+	description, payload, err := utils.AuditPlaceholders()
+	defer func() {
+		s.audit.AuditScenarioStep(description, payload, err)
+	}()
 
 	y, err := utils.ReadStaticFile(kubernetes.AssetsDir, "iam-azi-test-aib-curl.yaml")
 	if err != nil {
@@ -211,18 +246,23 @@ func (s *scenarioState) iDeployAPodAssignedWithTheAzureIdentityBindingIntoTheSam
 		pd, err := iam.CreateIAMProbePod(y, false, aibName, s.probe)
 		err = kubernetes.ProcessPodCreationResult(&s.podState, pd, kubernetes.UndefinedPodCreationErrorReason, err)
 	}
-	description := fmt.Sprintf("Deploy Pod assigned with the AzureIdentityBindings from binding %s,", aibName)
-	payload := struct {
+	description = fmt.Sprintf("Deploy Pod assigned with the AzureIdentityBindings from binding %s,", aibName)
+	payload = struct {
 		PodState kubernetes.PodState
 		PodName  string
 	}{s.podState, s.podState.PodName}
-	s.audit.AuditScenarioStep(description, payload, err)
 
 	return err
 }
 
 //AZ-AAD-AI-1.2
 func (s *scenarioState) theClusterHasManagedIdentityComponentsDeployed() error {
+	// Standard auditing logic to ensures panics are also audited
+	description, payload, err := utils.AuditPlaceholders()
+	defer func() {
+		s.audit.AuditScenarioStep(description, payload, err)
+	}()
+
 	//look for the mic pods in the default ns
 	pl, err := kubernetes.GetKubeInstance().GetPods("")
 
@@ -243,17 +283,21 @@ func (s *scenarioState) theClusterHasManagedIdentityComponentsDeployed() error {
 		}
 	}
 
-	description := "Cluster has managed identity componenet deployed"
-	payload := struct {
+	description = "Cluster has managed identity componenet deployed"
+	payload = struct {
 		PodState kubernetes.PodState
 		PodName  string
 	}{s.podState, s.podState.PodName}
-	s.audit.AuditScenarioStep(description, payload, err)
 
 	return err
 }
 
 func (s *scenarioState) iExecuteTheCommandAgainstTheMICPod(arg1 string) error {
+	// Standard auditing logic to ensures panics are also audited
+	description, payload, err := utils.AuditPlaceholders()
+	defer func() {
+		s.audit.AuditScenarioStep(description, payload, err)
+	}()
 
 	c := CatAzJSON
 	res, err := iam.ExecuteVerificationCmd(s.podState.PodName, c, true)
@@ -277,29 +321,32 @@ func (s *scenarioState) iExecuteTheCommandAgainstTheMICPod(arg1 string) error {
 		s.podState.CommandExitCode = res.Code
 	}
 
-	description := fmt.Sprintf("Executing command %s,", arg1)
-	payload := struct {
+	description = fmt.Sprintf("Executing command %s,", arg1)
+	payload = struct {
 		PodState kubernetes.PodState
 		PodName  string
 	}{s.podState, s.podState.PodName}
-	s.audit.AuditScenarioStep(description, payload, err)
 
 	return err
 }
 
 func (s *scenarioState) kubernetesShouldPreventMeFromRunningTheCommand() error {
-	var err error
+	// Standard auditing logic to ensures panics are also audited
+	description, payload, err := utils.AuditPlaceholders()
+	defer func() {
+		s.audit.AuditScenarioStep(description, payload, err)
+	}()
+
 	if s.podState.CommandExitCode == 0 {
 		//bad! don't want the command to succeed
 		err = utils.ReformatError("verification command was not blocked")
 	}
 
-	description := "Examines scenario state to ensure that verification command was blocked."
-	payload := struct {
+	description = "Examines scenario state to ensure that verification command was blocked."
+	payload = struct {
 		PodState kubernetes.PodState
 		PodName  string
 	}{s.podState, s.podState.PodName}
-	s.audit.AuditScenarioStep(description, payload, err)
 
 	return err
 }
