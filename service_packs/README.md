@@ -62,6 +62,19 @@ of step functions.
       }
    ```
 
+   - A function named `init` must also be added to the `pack.go` file, containing logic to include all feature files in pkger bundle.
+   For more information about pkger, please review the [official pkger docs](https://github.com/markbates/pkger)
+   ```go
+      func init() {
+         // This line will ensure that all static files are bundled into pkged.go file when using pkger cli tool
+         // See: https://github.com/markbates/pkger
+         pkger.Include("/service_packs/kubernetes/general/general.feature")
+         pkger.Include("/service_packs/kubernetes/pod_security_policy/pod_security_policy.feature")
+         pkger.Include("/service_packs/kubernetes/internet_access/internet_access.feature")
+         pkger.Include("/service_packs/kubernetes/iam/iam.feature")
+      }
+   ```
+
 1. Add code to the go file, in order to integrate the service pack probes with the GoDog handler
    - Define a ***ProbeStruct*** - follow an existing example to ensure proper implementation
 
