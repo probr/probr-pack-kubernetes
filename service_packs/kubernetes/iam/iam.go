@@ -7,8 +7,8 @@ import (
 
 	"github.com/cucumber/godog"
 
-	"github.com/citihub/probr/internal/coreengine"
 	"github.com/citihub/probr/internal/utils"
+	"github.com/citihub/probr/service_packs/coreengine"
 	"github.com/citihub/probr/service_packs/kubernetes"
 )
 

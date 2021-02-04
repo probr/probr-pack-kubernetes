@@ -2,7 +2,7 @@ package kubernetes_pack
 
 import (
 	"github.com/citihub/probr/internal/config"
-	"github.com/citihub/probr/internal/coreengine"
+	"github.com/citihub/probr/service_packs/coreengine"
 	"github.com/citihub/probr/service_packs/kubernetes/container_registry_access"
 	"github.com/citihub/probr/service_packs/kubernetes/general"
 	"github.com/citihub/probr/service_packs/kubernetes/iam"

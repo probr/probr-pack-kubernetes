@@ -8,8 +8,8 @@ import (
 	"testing"
 
 	"github.com/citihub/probr/internal/config"
-	"github.com/citihub/probr/internal/coreengine"
 	"github.com/citihub/probr/internal/utils"
+	"github.com/citihub/probr/service_packs/coreengine"
 )
 
 func TestGetAllProbeResults(t *testing.T) {

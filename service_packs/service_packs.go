@@ -1,7 +1,7 @@
 package service_packs
 
 import (
-	"github.com/citihub/probr/internal/coreengine"
+	"github.com/citihub/probr/service_packs/coreengine"
 	kubernetes_pack "github.com/citihub/probr/service_packs/kubernetes/pack"
 	storage_pack "github.com/citihub/probr/service_packs/storage/pack"
 )

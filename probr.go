@@ -5,8 +5,8 @@ import (
 	"os"
 
 	"github.com/citihub/probr/internal/config"
-	"github.com/citihub/probr/internal/coreengine"
 	"github.com/citihub/probr/service_packs"
+	"github.com/citihub/probr/service_packs/coreengine"
 )
 
 // This variable points to the function. It is used in oder to be able to mock oiginal behavior during testing.
