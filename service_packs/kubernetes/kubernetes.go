@@ -10,8 +10,8 @@ import (
 
 	"github.com/citihub/probr/audit"
 	"github.com/citihub/probr/config"
-	"github.com/citihub/probr/internal/utils"
 	"github.com/citihub/probr/service_packs/coreengine"
+	"github.com/citihub/probr/utils"
 )
 
 var AssetsDir string

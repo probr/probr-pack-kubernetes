@@ -11,7 +11,7 @@ import (
 	"github.com/cucumber/godog"
 
 	"github.com/citihub/probr/config"
-	"github.com/citihub/probr/internal/utils"
+	"github.com/citihub/probr/utils"
 )
 
 // Service Packs should use this interface to export probes

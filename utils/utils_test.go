@@ -95,7 +95,7 @@ func TestCallerPath(t *testing.T) {
 		testArgs       args
 		expectedResult string
 	}{
-		{"CallerPath(%v) - Expected: %q", args{up: 0}, "github.com/citihub/probr/internal/utils.TestCallerPath.func1"},
+		{"CallerPath(%v) - Expected: %q", args{up: 0}, "github.com/citihub/probr/utils.TestCallerPath.func1"},
 		{"CallerPath(%v) - Expected: %q", args{up: 1}, "testing.tRunner"},
 	}
 

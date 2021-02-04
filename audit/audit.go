@@ -8,7 +8,7 @@ import (
 	"strings"
 
 	"github.com/citihub/probr/config"
-	"github.com/citihub/probr/internal/utils"
+	"github.com/citihub/probr/utils"
 )
 
 type ProbeAudit struct {

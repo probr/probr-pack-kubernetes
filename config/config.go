@@ -10,7 +10,7 @@ import (
 	"strings"
 
 	"github.com/briandowns/spinner"
-	"github.com/citihub/probr/internal/utils"
+	"github.com/citihub/probr/utils"
 	"gopkg.in/yaml.v2"
 )
 

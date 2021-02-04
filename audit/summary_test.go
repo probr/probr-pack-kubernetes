@@ -7,7 +7,7 @@ import (
 	"testing"
 
 	"github.com/citihub/probr/config"
-	"github.com/citihub/probr/internal/utils"
+	"github.com/citihub/probr/utils"
 )
 
 func TestSummaryState_LogPodName(t *testing.T) {

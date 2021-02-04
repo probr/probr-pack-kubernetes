@@ -6,7 +6,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/citihub/probr/internal/utils"
+	"github.com/citihub/probr/utils"
 )
 
 func tmpLogger(testString, level string) bytes.Buffer {

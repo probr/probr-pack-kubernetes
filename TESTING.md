@@ -170,7 +170,7 @@ The following structure is recommended:
         --- PASS: TestSum/TestCase#3 (0.00s)
         --- PASS: TestSum/TestCase#4 (0.00s)
     PASS
-    ok      github.com/citihub/probr/internal/utils 0.227s
+    ok      github.com/citihub/probr/utils 0.227s
     ```
 
 - Autogenerate tests with *gotest tool*
@@ -218,7 +218,7 @@ The following structure is recommended:
       --- PASS: TestSum/TestCase1_AddingTwoPositiveNumbers_ShouldReturnSum (0.00s)
       --- PASS: TestSum/TestCase2_AddingZeroToNumber_ShouldReturnNumber (0.00s)
   PASS
-  ok      github.com/citihub/probr/internal/utils 0.223s
+  ok      github.com/citihub/probr/utils 0.223s
   ```
 
 

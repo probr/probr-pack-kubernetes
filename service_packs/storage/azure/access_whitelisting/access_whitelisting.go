@@ -14,12 +14,13 @@ import (
 	"github.com/cucumber/godog"
 
 	"github.com/citihub/probr/audit"
-	"github.com/citihub/probr/internal/utils"
 	"github.com/citihub/probr/service_packs/coreengine"
 	"github.com/citihub/probr/service_packs/storage"
 	azureutil "github.com/citihub/probr/service_packs/storage/azure"
 	"github.com/citihub/probr/service_packs/storage/azure/group"
 	"github.com/citihub/probr/service_packs/storage/azure/policy"
+
+	"github.com/citihub/probr/utils"
 )
 
 const (
