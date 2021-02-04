@@ -28,9 +28,9 @@ func toFileGodogProbeHandler(gd *GodogProbe) (int, *bytes.Buffer, error) {
 	if err != nil {
 		return -1, nil, err
 	}
+
 	status, err := runTestSuite(o, gd)
 
-	//TODO - review!
 	//FUDGE! If the tests are skipped due to tags, then an empty file may
 	//be left lingering.  This will have a non-zero size as we've actually
 	//had to create the file prior to the test run (see line 31).  If it's
@@ -38,7 +38,7 @@ func toFileGodogProbeHandler(gd *GodogProbe) (int, *bytes.Buffer, error) {
 	//and can be removed.
 	i, err := o.Stat()
 	s := i.Size()
-
+	o.Close()
 	if s < 4 {
 		err = os.Remove(o.Name())
 		if err != nil {
