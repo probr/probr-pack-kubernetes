@@ -1,10 +1,10 @@
-package azureutil
+package azure
 
 import (
 	"log"
 	"os"
 
-	"github.com/citihub/probr/internal/config"
+	"github.com/citihub/probr/config"
 	"github.com/citihub/probr/internal/utils"
 )
 

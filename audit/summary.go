@@ -6,7 +6,7 @@ import (
 	"log"
 	"path/filepath"
 
-	"github.com/citihub/probr/internal/config"
+	"github.com/citihub/probr/config"
 )
 
 type SummaryState struct {

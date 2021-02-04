@@ -9,7 +9,7 @@ import (
 	apiv1 "k8s.io/api/core/v1"
 
 	"github.com/citihub/probr/audit"
-	"github.com/citihub/probr/internal/config"
+	"github.com/citihub/probr/config"
 	"github.com/citihub/probr/internal/utils"
 	"github.com/citihub/probr/service_packs/coreengine"
 )

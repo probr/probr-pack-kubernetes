@@ -8,7 +8,7 @@ import (
 
 	aibv1 "github.com/Azure/aad-pod-identity/pkg/apis/aadpodidentity"
 	"github.com/citihub/probr/audit"
-	"github.com/citihub/probr/internal/config"
+	"github.com/citihub/probr/config"
 	"github.com/citihub/probr/service_packs/coreengine"
 	"github.com/citihub/probr/service_packs/kubernetes"
 	"github.com/cucumber/godog"

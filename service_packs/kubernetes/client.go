@@ -3,7 +3,7 @@ package kubernetes
 import (
 	"log"
 
-	"github.com/citihub/probr/internal/config"
+	"github.com/citihub/probr/config"
 
 	k8s "k8s.io/client-go/kubernetes"
 	restclient "k8s.io/client-go/rest"

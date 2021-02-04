@@ -4,7 +4,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/citihub/probr/internal/config"
+	"github.com/citihub/probr/config"
 	"github.com/citihub/probr/service_packs"
 	"github.com/citihub/probr/service_packs/coreengine"
 )

@@ -3,7 +3,7 @@ package storage_pack
 import (
 	"testing"
 
-	"github.com/citihub/probr/internal/config"
+	"github.com/citihub/probr/config"
 	"github.com/citihub/probr/service_packs/coreengine"
 )
 

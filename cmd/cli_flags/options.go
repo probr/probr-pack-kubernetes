@@ -6,7 +6,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/citihub/probr/internal/config"
+	"github.com/citihub/probr/config"
 )
 
 func HandleRequestForRequiredVars() {

@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/citihub/probr/internal/config"
+	"github.com/citihub/probr/config"
 	"github.com/citihub/probr/internal/utils"
 	"github.com/cucumber/godog"
 )

@@ -7,7 +7,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/citihub/probr/internal/config"
+	"github.com/citihub/probr/config"
 	"github.com/citihub/probr/internal/utils"
 	"github.com/citihub/probr/service_packs/coreengine"
 )
