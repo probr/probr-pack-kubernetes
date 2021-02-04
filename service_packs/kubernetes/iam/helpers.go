@@ -6,14 +6,12 @@ import (
 	"fmt"
 	"log"
 
+	aibv1 "github.com/Azure/aad-pod-identity/pkg/apis/aadpodidentity"
+	"github.com/citihub/probr/audit"
 	"github.com/citihub/probr/internal/config"
-	"github.com/citihub/probr/internal/summary"
 	"github.com/citihub/probr/service_packs/coreengine"
 	"github.com/citihub/probr/service_packs/kubernetes"
 	"github.com/cucumber/godog"
-
-	aibv1 "github.com/Azure/aad-pod-identity/pkg/apis/aadpodidentity"
-
 	apiv1 "k8s.io/api/core/v1"
 
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -23,8 +21,8 @@ import (
 
 type scenarioState struct {
 	name         string
-	audit        *summary.ScenarioAudit
-	probe        *summary.Probe
+	audit        *audit.ScenarioAudit
+	probe        *audit.Probe
 	podState     kubernetes.PodState
 	useDefaultNS bool
 }
@@ -54,7 +52,7 @@ type IdentityAccessManagement interface {
 	AzureIdentityExists(namespace, aiName string) (bool, error)
 	AzureIdentityBindingExists(namespace, aibName string) (bool, error)
 	CreateAIB(useDefaultNS bool, aibName, aiName string) error
-	CreateIAMProbePod(y []byte, useDefaultNS bool, aibName string, probe *summary.Probe) (*apiv1.Pod, error)
+	CreateIAMProbePod(y []byte, useDefaultNS bool, aibName string, probe *audit.Probe) (*apiv1.Pod, error)
 	DeleteIAMProbePod(n string, useDefaultNS bool, e string) error
 	ExecuteVerificationCmd(pn string, cmd IAMProbeCommand, useDefaultNS bool) (*kubernetes.CmdExecutionResult, error)
 	GetAccessToken(pn string, useDefaultNS bool) (*string, error)
@@ -191,7 +189,7 @@ func (i *IAM) filteredRawResourceGrp(apiGroup string, namespace string, resource
 }
 
 // CreateIAMProbePod creates a pod configured for IAM test cases.
-func (i *IAM) CreateIAMProbePod(y []byte, useDefaultNS bool, aibName string, probe *summary.Probe) (*apiv1.Pod, error) {
+func (i *IAM) CreateIAMProbePod(y []byte, useDefaultNS bool, aibName string, probe *audit.Probe) (*apiv1.Pod, error) {
 	n := kubernetes.GenerateUniquePodName(i.probePodName)
 
 	pod, err := i.k.CreatePodFromYaml(y, n, i.getNamespace(useDefaultNS),
@@ -271,7 +269,7 @@ func (i *IAM) getAadPodIDBinding(useDefaultNS bool, aibName string) *string {
 
 func beforeScenario(s *scenarioState, probeName string, gs *godog.Scenario) {
 	s.name = gs.Name
-	s.probe = summary.State.GetProbeLog(probeName)
-	s.audit = summary.State.GetProbeLog(probeName).InitializeAuditor(gs.Name, gs.Tags)
+	s.probe = audit.State.GetProbeLog(probeName)
+	s.audit = audit.State.GetProbeLog(probeName).InitializeAuditor(gs.Name, gs.Tags)
 	coreengine.LogScenarioStart(gs)
 }

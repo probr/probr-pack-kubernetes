@@ -12,7 +12,7 @@ import (
 	"github.com/Azure/go-autorest/autorest/azure"
 	"github.com/cucumber/godog"
 
-	"github.com/citihub/probr/internal/summary"
+	"github.com/citihub/probr/audit"
 	"github.com/citihub/probr/internal/utils"
 	"github.com/citihub/probr/service_packs/coreengine"
 	"github.com/citihub/probr/service_packs/storage"
@@ -22,8 +22,8 @@ import (
 
 type scenarioState struct {
 	name                      string
-	audit                     *summary.ScenarioAudit
-	probe                     *summary.Probe
+	audit                     *audit.ScenarioAudit
+	probe                     *audit.Probe
 	ctx                       context.Context
 	tags                      map[string]*string
 	httpOption                bool
@@ -304,8 +304,8 @@ func (state *scenarioState) encryptedDataTrafficIsEnforced() error {
 
 func (s *scenarioState) beforeScenario(probeName string, gs *godog.Scenario) {
 	s.name = gs.Name
-	s.probe = summary.State.GetProbeLog(probeName)
-	s.audit = summary.State.GetProbeLog(probeName).InitializeAuditor(gs.Name, gs.Tags)
+	s.probe = audit.State.GetProbeLog(probeName)
+	s.audit = audit.State.GetProbeLog(probeName).InitializeAuditor(gs.Name, gs.Tags)
 	s.ctx = context.Background()
 	coreengine.LogScenarioStart(gs)
 }

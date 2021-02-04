@@ -12,8 +12,8 @@ import (
 	"sync"
 	"time"
 
+	"github.com/citihub/probr/audit"
 	"github.com/citihub/probr/internal/config"
-	"github.com/citihub/probr/internal/summary"
 	"github.com/citihub/probr/internal/utils"
 
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -70,9 +70,9 @@ type Kubernetes interface {
 	ClusterIsDeployed() *bool
 	GetClient() (*kubernetes.Clientset, error)
 	GetPods(ns string) (*apiv1.PodList, error)
-	CreatePod(pname string, ns string, cname string, image string, w bool, sc *apiv1.SecurityContext, probe *summary.Probe) (*apiv1.Pod, *PodAudit, error)
-	CreatePodFromObject(pod *apiv1.Pod, podName string, ns string, wait bool, probe *summary.Probe) (*apiv1.Pod, error)
-	CreatePodFromYaml(y []byte, pname string, ns string, image string, aadpodidbinding string, w bool, probe *summary.Probe) (*apiv1.Pod, error)
+	CreatePod(pname string, ns string, cname string, image string, w bool, sc *apiv1.SecurityContext, probe *audit.Probe) (*apiv1.Pod, *PodAudit, error)
+	CreatePodFromObject(pod *apiv1.Pod, podName string, ns string, wait bool, probe *audit.Probe) (*apiv1.Pod, error)
+	CreatePodFromYaml(y []byte, pname string, ns string, image string, aadpodidbinding string, w bool, probe *audit.Probe) (*apiv1.Pod, error)
 	GetPodObject(pname string, ns string, cname string, image string, sc *apiv1.SecurityContext) *apiv1.Pod
 	ExecCommand(cmd string, ns string, pn *string) *CmdExecutionResult
 	DeletePod(pname string, ns string, e string) error
@@ -182,7 +182,7 @@ func (k *Kube) GetPods(ns string) (*apiv1.PodList, error) {
 
 // CreatePod creates a pod with the supplied parameters.  A true value for 'wait' indicates that
 // the function should wait (block) until the pod is in a running state.
-func (k *Kube) CreatePod(podName string, ns string, containerName string, image string, wait bool, sc *apiv1.SecurityContext, probe *summary.Probe) (*apiv1.Pod, *PodAudit, error) {
+func (k *Kube) CreatePod(podName string, ns string, containerName string, image string, wait bool, sc *apiv1.SecurityContext, probe *audit.Probe) (*apiv1.Pod, *PodAudit, error) {
 	//create Pod Object ...
 	p := k.GetPodObject(podName, ns, containerName, image, sc)
 	audit := &PodAudit{podName, "probr-general-test-ns", containerName, image, sc}
@@ -193,7 +193,7 @@ func (k *Kube) CreatePod(podName string, ns string, containerName string, image 
 
 // CreatePodFromYaml creates a pod for the supplied yaml.  A true value for 'w' indicates that the function
 // should wait (block) until the pod is in a running state.
-func (k *Kube) CreatePodFromYaml(y []byte, pname string, ns string, image string, aadpodidbinding string, w bool, probe *summary.Probe) (*apiv1.Pod, error) {
+func (k *Kube) CreatePodFromYaml(y []byte, pname string, ns string, image string, aadpodidbinding string, w bool, probe *audit.Probe) (*apiv1.Pod, error) {
 	vars := config.Vars.ServicePacks.Kubernetes
 	approvedImage := vars.AuthorisedContainerRegistry + "/" + vars.ProbeImage
 	podSpec := utils.ReplaceBytesValue(y, "{{ probr-compatible-image }}", approvedImage)
@@ -224,7 +224,7 @@ func (k *Kube) CreatePodFromYaml(y []byte, pname string, ns string, image string
 
 // CreatePodFromObject creates a pod from the supplied pod object with the given pod name and namespace.  A true value for 'w' indicates that the function
 // should wait (block) until the pod is in a running state.
-func (k *Kube) CreatePodFromObject(pod *apiv1.Pod, podName string, ns string, wait bool, probe *summary.Probe) (*apiv1.Pod, error) {
+func (k *Kube) CreatePodFromObject(pod *apiv1.Pod, podName string, ns string, wait bool, probe *audit.Probe) (*apiv1.Pod, error) {
 	if pod == nil || podName == "" || ns == "" {
 		return nil, fmt.Errorf("one or more of pod (%v), podName (%v) or namespace (%v) is nil - cannot create POD", pod, podName, ns)
 	}
@@ -460,7 +460,7 @@ func (k *Kube) DeletePod(podName string, ns string, probeName string) error {
 		return err
 	}
 
-	summary.State.GetProbeLog(probeName).CountPodDestroyed()
+	audit.State.GetProbeLog(probeName).CountPodDestroyed()
 	log.Printf("[INFO] POD %v deleted.", podName)
 
 	return nil

@@ -3,8 +3,8 @@ package container_registry_access
 import (
 	"strings"
 
+	"github.com/citihub/probr/audit"
 	"github.com/citihub/probr/internal/config"
-	"github.com/citihub/probr/internal/summary"
 	"github.com/citihub/probr/service_packs/coreengine"
 	"github.com/citihub/probr/service_packs/kubernetes"
 	"github.com/cucumber/godog"
@@ -19,7 +19,7 @@ const (
 // ContainerRegistryAccess interface defines the methods to support container registry access tests.
 type ContainerRegistryAccess interface {
 	ClusterIsDeployed() *bool
-	SetupContainerAccessProbePod(r string, probe *summary.Probe) (*apiv1.Pod, *kubernetes.PodAudit, error)
+	SetupContainerAccessProbePod(r string, probe *audit.Probe) (*apiv1.Pod, *kubernetes.PodAudit, error)
 	TeardownContainerAccessProbePod(p string, e string) error
 }
 
@@ -30,8 +30,8 @@ type CRA struct {
 
 type scenarioState struct {
 	name     string
-	audit    *summary.ScenarioAudit
-	probe    *summary.Probe
+	audit    *audit.ScenarioAudit
+	probe    *audit.Probe
 	podState kubernetes.PodState
 }
 
@@ -57,7 +57,7 @@ func (c *CRA) ClusterIsDeployed() *bool {
 }
 
 //SetupContainerAccessProbePod creates a pod with characteristics required for testing container access.
-func (c *CRA) SetupContainerAccessProbePod(r string, probe *summary.Probe) (*apiv1.Pod, *kubernetes.PodAudit, error) {
+func (c *CRA) SetupContainerAccessProbePod(r string, probe *audit.Probe) (*apiv1.Pod, *kubernetes.PodAudit, error) {
 	//full image is the repository + the configured image
 	i := r + "/" + config.Vars.ServicePacks.Kubernetes.ProbeImage
 	pname := kubernetes.GenerateUniquePodName(caPodNameBase + "-" + strings.ReplaceAll(r, ".", "-"))
@@ -74,7 +74,7 @@ func (c *CRA) TeardownContainerAccessProbePod(p string, e string) error {
 
 func beforeScenario(s *scenarioState, probeName string, gs *godog.Scenario) {
 	s.name = gs.Name
-	s.probe = summary.State.GetProbeLog(probeName)
-	s.audit = summary.State.GetProbeLog(probeName).InitializeAuditor(gs.Name, gs.Tags)
+	s.probe = audit.State.GetProbeLog(probeName)
+	s.audit = audit.State.GetProbeLog(probeName).InitializeAuditor(gs.Name, gs.Tags)
 	coreengine.LogScenarioStart(gs)
 }

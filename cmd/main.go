@@ -9,9 +9,9 @@ import (
 	"github.com/briandowns/spinner"
 
 	"github.com/citihub/probr"
+	"github.com/citihub/probr/audit"
 	"github.com/citihub/probr/cmd/cli_flags"
 	"github.com/citihub/probr/internal/config"
-	"github.com/citihub/probr/internal/summary"
 )
 
 func main() {
@@ -45,16 +45,16 @@ func main() {
 		exit(2) // Exit 2+ is for logic/functional errors
 	}
 	log.Printf("[INFO] Overall test completion status: %v", s)
-	summary.State.SetProbrStatus()
+	audit.State.SetProbrStatus()
 
 	out := probr.GetAllProbeResults(ts)
 	if out == nil || len(out) == 0 {
-		summary.State.Meta["no probes completed"] = fmt.Sprintf(
+		audit.State.Meta["no probes completed"] = fmt.Sprintf(
 			"Probe results not written to file, possibly due to all being excluded or permissions on the specified output directory: %s",
 			config.Vars.CucumberDir(),
 		)
 	}
-	summary.State.PrintSummary()
+	audit.State.PrintSummary()
 	exit(s)
 }
 

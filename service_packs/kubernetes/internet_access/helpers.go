@@ -5,8 +5,8 @@ import (
 	"os"
 	"strconv"
 
+	"github.com/citihub/probr/audit"
 	"github.com/citihub/probr/internal/config"
-	"github.com/citihub/probr/internal/summary"
 	"github.com/citihub/probr/service_packs/coreengine"
 	"github.com/citihub/probr/service_packs/kubernetes"
 	"github.com/cucumber/godog"
@@ -15,8 +15,8 @@ import (
 
 type scenarioState struct {
 	name           string
-	audit          *summary.ScenarioAudit
-	probe          *summary.Probe
+	audit          *audit.ScenarioAudit
+	probe          *audit.Probe
 	httpStatusCode int
 	podName        string
 	podState       kubernetes.PodState
@@ -24,8 +24,8 @@ type scenarioState struct {
 
 func beforeScenario(s *scenarioState, probeName string, gs *godog.Scenario) {
 	s.name = gs.Name
-	s.probe = summary.State.GetProbeLog(probeName)
-	s.audit = summary.State.GetProbeLog(probeName).InitializeAuditor(gs.Name, gs.Tags)
+	s.probe = audit.State.GetProbeLog(probeName)
+	s.audit = audit.State.GetProbeLog(probeName).InitializeAuditor(gs.Name, gs.Tags)
 	coreengine.LogScenarioStart(gs)
 }
 
@@ -37,7 +37,7 @@ const (
 // NetworkAccess defines functionality for supporting Network Access tests.
 type NetworkAccess interface {
 	ClusterIsDeployed() *bool
-	SetupNetworkAccessProbePod(probe *summary.Probe) (*apiv1.Pod, *kubernetes.PodAudit, error)
+	SetupNetworkAccessProbePod(probe *audit.Probe) (*apiv1.Pod, *kubernetes.PodAudit, error)
 	TeardownNetworkAccessProbePod(p string, e string) error
 	AccessURL(pn *string, url *string) (int, error)
 }
@@ -85,7 +85,7 @@ func (n *NA) ClusterIsDeployed() *bool {
 }
 
 // SetupNetworkAccessProbePod creates a pod with characteristics required for testing network access.
-func (n *NA) SetupNetworkAccessProbePod(probe *summary.Probe) (*apiv1.Pod, *kubernetes.PodAudit, error) {
+func (n *NA) SetupNetworkAccessProbePod(probe *audit.Probe) (*apiv1.Pod, *kubernetes.PodAudit, error) {
 	pname, ns, cname, image := kubernetes.GenerateUniquePodName(n.probePodName), kubernetes.Namespace, n.probeContainer, n.probeImage
 	//let caller handle result:
 	return n.k.CreatePod(pname, ns, cname, image, true, nil, probe)

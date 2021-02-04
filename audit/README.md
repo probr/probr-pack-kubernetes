@@ -6,7 +6,7 @@ These logs are designed to be one-per-probe. Each test may have multiple probes,
 
 ### State
 
-A new State context is created each time `probr` is run, and is readily accessible anywhere in the code via `summary.State`.
+A new State context is created each time `probr` is run, and is readily accessible anywhere in the code via `audit.State`.
 
 
 **SummaryStateStruct.LogProbeMeta**
@@ -17,7 +17,7 @@ Adding entries to the an Probe's meta data requires the name of the test and a k
 n := "name-of-the-current-test"
 k = "arbitrary_key_name"
 v = "string_value"
-summary.State.LogProbeMeta(n, k, v)
+audit.State.LogProbeMeta(n, k, v)
 ```
 
 **SummaryStateStruct.LogPodName**
@@ -27,7 +27,7 @@ The names of all pods should be tracked, so users may identify whether Probr is 
 ```
 if pd != nil {
   s.PodName = pd.GetObjectMeta().GetName()
-  summary.State.LogPodName(s.PodName)
+  audit.State.LogPodName(s.PodName)
 }
 ```
 
@@ -38,18 +38,18 @@ Many summaries will be made directly to probes. In order to do so, the probe mus
 ```
 	ctx.BeforeScenario(func(s *godog.Scenario) {
 		ps.name = s.Name
-		ps.probe = summary.State.GetProbeLog(NAME)
+		ps.probe = audit.State.GetProbeLog(NAME)
 		coreengine.LogScenarioStart(s)
 	})
 ```
 
 **SummaryStateStruct.ProbeComplete**
 
-After an probe has finished running every scenario, we should summary the final outcome of the probe.
+After an probe has finished running every scenario, we should audit the final outcome of the probe.
 
 ```
 s, o, err := g.Handler(g.Data)
-summary.State.ProbeComplete(t.ProbeDescriptor.Name)
+audit.State.ProbeComplete(t.ProbeDescriptor.Name)
 ```
 
 **SummaryStateStruct.SetProbrStatus**
@@ -57,7 +57,7 @@ summary.State.ProbeComplete(t.ProbeDescriptor.Name)
 After all probes have completed, we should set the final probr status. This step may not always be relevant, as it may be possible to nest it within other methods such as `PrintSummary`. This should be reevaluated after more feedback has been gathered regarding how Probr is being used.
 
 ```
-summary.State.SetProbrStatus()
+audit.State.SetProbrStatus()
 ```
 
 **SummaryStateStruct.PrintSummary**
@@ -65,7 +65,7 @@ summary.State.SetProbrStatus()
 Instead of logging the final status of Probr within a particular _loglevel_ and formatting it using `log`, PrintSummary simply formats the status into JSON and prints it to the command line. This is currently the very last thing our CLI tool does prior to exiting.
 
 ```
-summary.State.PrintSummary()
+audit.State.PrintSummary()
 os.Exit(s)
 ```
 

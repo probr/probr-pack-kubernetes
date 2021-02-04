@@ -8,7 +8,7 @@ import (
 	"log"
 	"sync"
 
-	"github.com/citihub/probr/internal/summary"
+	"github.com/citihub/probr/audit"
 )
 
 // ProbeStatus type describes the status of the test, e.g. Pending, Running, CompleteSuccess, CompleteFail and Error
@@ -72,8 +72,8 @@ func (ps *ProbeStore) AddProbe(probe *GodogProbe) {
 	probe.Status = &status
 	ps.Probes[probe.ProbeDescriptor.Name] = probe
 
-	summary.State.GetProbeLog(probe.ProbeDescriptor.Name).Result = probe.Status.String()
-	summary.State.LogProbeMeta(probe.ProbeDescriptor.Name, "group", probe.ProbeDescriptor.Group.String())
+	audit.State.GetProbeLog(probe.ProbeDescriptor.Name).Result = probe.Status.String()
+	audit.State.LogProbeMeta(probe.ProbeDescriptor.Name, "group", probe.ProbeDescriptor.Group.String())
 }
 
 // GetProbe returns the test identified by the given name.
@@ -109,7 +109,7 @@ func (ps *ProbeStore) ExecAllProbes() (int, error) {
 
 	for name := range ps.Probes {
 		st, err := ps.ExecProbe(name)
-		summary.State.ProbeComplete(name)
+		audit.State.ProbeComplete(name)
 		if err != nil {
 			//log but continue with remaining probe
 			log.Printf("[ERROR] error executing probe: %v", err)

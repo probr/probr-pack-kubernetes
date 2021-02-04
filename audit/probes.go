@@ -1,4 +1,4 @@
-package summary
+package audit
 
 import (
 	"github.com/cucumber/messages-go/v10"

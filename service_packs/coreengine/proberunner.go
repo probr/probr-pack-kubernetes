@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"fmt"
 
-	"github.com/citihub/probr/internal/summary"
+	"github.com/citihub/probr/audit"
 	"github.com/cucumber/godog"
 )
 
@@ -33,14 +33,14 @@ type GodogProbe struct {
 func (ps *ProbeStore) RunProbe(probe *GodogProbe) (int, error) {
 
 	if probe == nil {
-		summary.State.GetProbeLog(probe.ProbeDescriptor.Name).Result = "Internal Error - Probe not found"
+		audit.State.GetProbeLog(probe.ProbeDescriptor.Name).Result = "Internal Error - Probe not found"
 		return 2, fmt.Errorf("probe is nil - cannot run test")
 	}
 
 	if probe.ProbeDescriptor == nil {
 		//update status
 		*probe.Status = Error
-		summary.State.GetProbeLog(probe.ProbeDescriptor.Name).Result = "Internal Error - Probe descriptor not found"
+		audit.State.GetProbeLog(probe.ProbeDescriptor.Name).Result = "Internal Error - Probe descriptor not found"
 		return 3, fmt.Errorf("probe descriptor is nil - cannot run test")
 	}
 

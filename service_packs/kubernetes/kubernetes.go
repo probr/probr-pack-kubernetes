@@ -8,8 +8,8 @@ import (
 	"github.com/markbates/pkger"
 	apiv1 "k8s.io/api/core/v1"
 
+	"github.com/citihub/probr/audit"
 	"github.com/citihub/probr/internal/config"
-	"github.com/citihub/probr/internal/summary"
 	"github.com/citihub/probr/internal/utils"
 	"github.com/citihub/probr/service_packs/coreengine"
 )
@@ -26,8 +26,8 @@ type PodState struct {
 
 type scenarioState struct {
 	name           string
-	audit          *summary.ScenarioAudit
-	probe          *summary.Probe
+	audit          *audit.ScenarioAudit
+	probe          *audit.Probe
 	httpStatusCode int
 	podName        string
 	podState       PodState
@@ -59,8 +59,8 @@ func init() {
 func BeforeScenario(s *scenarioState, probeName string, gs *godog.Scenario) {
 	s.setup()
 	s.name = gs.Name
-	s.probe = summary.State.GetProbeLog(probeName)
-	s.audit = summary.State.GetProbeLog(probeName).InitializeAuditor(gs.Name, gs.Tags)
+	s.probe = audit.State.GetProbeLog(probeName)
+	s.audit = audit.State.GetProbeLog(probeName).InitializeAuditor(gs.Name, gs.Tags)
 	coreengine.LogScenarioStart(gs)
 }
 
