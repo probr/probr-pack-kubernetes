@@ -6,8 +6,7 @@ import (
 
 	"github.com/Azure/azure-sdk-for-go/services/resources/mgmt/2019-01-01/policy"
 	"github.com/Azure/go-autorest/autorest/azure/auth"
-
-	"github.com/citihub/probr/internal/azureutil"
+	azureutil "github.com/citihub/probr/service_packs/storage/azure"
 )
 
 // AssignmentBySubscription gets a Policy Assignment by Policy Assignment name, scoped to a Subscription.

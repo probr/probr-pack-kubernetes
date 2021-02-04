@@ -13,13 +13,13 @@ import (
 	"github.com/Azure/go-autorest/autorest/to"
 	"github.com/cucumber/godog"
 
-	"github.com/citihub/probr/internal/azureutil"
-	"github.com/citihub/probr/internal/azureutil/group"
-	"github.com/citihub/probr/internal/azureutil/policy"
 	"github.com/citihub/probr/internal/summary"
 	"github.com/citihub/probr/internal/utils"
 	"github.com/citihub/probr/service_packs/coreengine"
 	"github.com/citihub/probr/service_packs/storage"
+	azureutil "github.com/citihub/probr/service_packs/storage/azure"
+	"github.com/citihub/probr/service_packs/storage/azure/group"
+	"github.com/citihub/probr/service_packs/storage/azure/policy"
 )
 
 const (

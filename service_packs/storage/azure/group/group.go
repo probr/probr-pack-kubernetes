@@ -7,8 +7,7 @@ import (
 	"github.com/Azure/azure-sdk-for-go/services/resources/mgmt/2018-02-01/resources"
 	"github.com/Azure/go-autorest/autorest/azure/auth"
 	"github.com/Azure/go-autorest/autorest/to"
-
-	"github.com/citihub/probr/internal/azureutil"
+	azureutil "github.com/citihub/probr/service_packs/storage/azure"
 )
 
 // Create creates a new Resource Group in the default location (configured using the AZURE_LOCATION environment variable).
