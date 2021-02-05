@@ -84,7 +84,7 @@ So that a policy of least privilege can be enforced in order to prevent maliciou
         When a Kubernetes deployment is applied to an existing Kubernetes cluster
         And privileged escalation is marked "<AllowPrivilegeEscalation requested>" for the Kubernetes deployment
         Then the operation will "<RESULT>" with an error "<ERRORMESSAGE>"
-        But I should not be able to perform a command that requires privileged access
+        But I should not be able to perform a sudo command that requires privileged access
         And I should be able to perform an allowed command
 
         Examples:

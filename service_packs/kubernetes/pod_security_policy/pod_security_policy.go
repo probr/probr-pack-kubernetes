@@ -473,6 +473,24 @@ func (s *scenarioState) someSystemExistsToPreventAKubernetesDeploymentFromRunnin
 	return err
 }
 
+func (s *scenarioState) iShouldNotBeAbleToPerformASudoCommandThatRequiresPrivilegedAccess() error {
+	// Standard auditing logic to ensures panics are also audited
+	description, payload, err := utils.AuditPlaceholders()
+	defer func() {
+		s.audit.AuditScenarioStep(description, payload, err)
+	}()
+
+	err = s.runVerificationProbe(VerificationProbe{Cmd: SudoChroot, ExpectedExitCode: 126})
+
+	description = "Should not able to perform sudo command that requires privileged"
+	payload = struct {
+		PodState kubernetes.PodState
+		PodName  string
+	}{s.podState, s.podState.PodName}
+
+	return err
+}
+
 //"but" same as 5.2.1
 
 //CIS-5.2.6
@@ -985,6 +1003,7 @@ func (p ProbeStruct) ScenarioInitialize(ctx *godog.ScenarioContext) {
 	//CIS-5.2.5
 	ctx.Step(`^privileged escalation is marked "([^"]*)" for the Kubernetes deployment$`, ps.privilegedEscalationIsMarkedForTheKubernetesDeployment)
 	ctx.Step(`^some system exists to prevent a Kubernetes deployment from running using the allowPrivilegeEscalation in an existing Kubernetes cluster$`, ps.someSystemExistsToPreventAKubernetesDeploymentFromRunningUsingTheAllowPrivilegeEscalationInAnExistingKubernetesCluster)
+	ctx.Step(`^I should not be able to perform a sudo command that requires privileged access$`, ps.iShouldNotBeAbleToPerformASudoCommandThatRequiresPrivilegedAccess)
 
 	//CIS-5.2.6
 	ctx.Step(`^the user requested is "([^"]*)" for the Kubernetes deployment$`, ps.theUserRequestedIsForTheKubernetesDeployment)

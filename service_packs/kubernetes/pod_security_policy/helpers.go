@@ -56,6 +56,7 @@ const (
 	NetCat
 	Unshare
 	Ls
+	SudoChroot PSPProbeCommand = iota
 )
 
 func (c PSPProbeCommand) String() string {
@@ -68,7 +69,8 @@ func (c PSPProbeCommand) String() string {
 		"ip link add dummy0 type dummy",
 		"nc -l 1234",
 		"unshare",
-		"ls"}[c]
+		"ls",
+		"sudo chroot ."}[c]
 }
 
 const (
