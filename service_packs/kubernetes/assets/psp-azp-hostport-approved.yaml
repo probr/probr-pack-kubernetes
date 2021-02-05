@@ -22,3 +22,5 @@ spec:
       mountPath: /data/demo
     securityContext:
       allowPrivilegeEscalation: false
+      capabilities:
+        drop: ["NET_RAW"]

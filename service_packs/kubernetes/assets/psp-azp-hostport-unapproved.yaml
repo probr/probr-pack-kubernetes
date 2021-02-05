@@ -24,4 +24,6 @@ spec:
     - name: sec-ctx-vol
       mountPath: /data/demo
     securityContext:
-      allowPrivilegeEscalation: false            
+      allowPrivilegeEscalation: false  
+      capabilities:
+        drop: ["NET_RAW"]          

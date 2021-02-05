@@ -15,4 +15,6 @@ spec:
     image: {{ probr-compatible-image }}
     command: [ "sh", "-c", "sleep 1h" ]
     securityContext:
-      allowPrivilegeEscalation: false            
+      allowPrivilegeEscalation: false
+      capabilities:
+        drop: ["NET_RAW"]

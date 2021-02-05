@@ -21,6 +21,7 @@ spec:
     volumeMounts:
     - name: approved-volume
       mountPath: /tmp/test
-      
     securityContext:
       allowPrivilegeEscalation: false
+      capabilities:
+        drop: ["NET_RAW"]
