@@ -67,7 +67,7 @@ func (c PSPProbeCommand) String() string {
 		"id -u > 0 ",
 		"ping google.com",
 		"ip link add dummy0 type dummy",
-		"nc -l 1234",
+		"nc -l 1234 -w 10",
 		"unshare",
 		"ls",
 		"sudo chroot ."}[c]
