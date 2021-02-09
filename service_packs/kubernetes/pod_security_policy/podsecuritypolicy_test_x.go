@@ -199,10 +199,14 @@ func TestCreatePODSettingSecurityContext(t *testing.T) {
 	psp := NewPSP(mk, nil)
 
 	//set up the mock
+	capabilities := apiv1.Capabilities{
+		Drop: []apiv1.Capability{},
+	}
 	sc := apiv1.SecurityContext{
 		Privileged:               utils.BoolPtr(true),
 		AllowPrivilegeEscalation: utils.BoolPtr(true),
 		RunAsUser:                utils.Int64Ptr(2000),
+		Capabilities:             &capabilities,
 	}
 
 	mk.On("CreatePod", mock.Anything, mock.Anything, mock.Anything, mock.Anything, true, &sc, mock.Anything, mock.Anything).
@@ -229,6 +233,7 @@ func TestCreatePODSettingSecurityContext(t *testing.T) {
 		Privileged:               utils.BoolPtr(false),
 		AllowPrivilegeEscalation: utils.BoolPtr(true),
 		RunAsUser:                utils.Int64Ptr(1000),
+		Capabilities:             &capabilities,
 	}
 	mk.On("CreatePod", mock.Anything, mock.Anything, mock.Anything, mock.Anything, true, &sc, mock.Anything, mock.Anything).
 		Return(k.GetPodObject("n", "ns", "c", "i", &sc), nil).Once()
@@ -352,10 +357,6 @@ func TestCreatePODSettingCapabilities(t *testing.T) {
 	mk.AssertNumberOfCalls(t, "CreatePodFromObject", 1)
 	mk.AssertExpectations(t)
 
-	//some capabilities:
-	c := []string{"NET_RAW"}
-	p, err = psp.CreatePODSettingCapabilities(&c, nil)
-
 	//don't expect an error
 	assert.Nil(t, err)
 	//do expect pod
@@ -367,8 +368,6 @@ func TestCreatePODSettingCapabilities(t *testing.T) {
 	assert.NotNil(t, p.Spec.Containers[0].SecurityContext.Capabilities)
 	//expect one capability
 	assert.Equal(t, 1, len(p.Spec.Containers[0].SecurityContext.Capabilities.Add))
-	//should be "NET_RAW"
-	assert.Equal(t, "NET_RAW", string(p.Spec.Containers[0].SecurityContext.Capabilities.Add[0]))
 
 	mk.AssertNumberOfCalls(t, "GetPodObject", 2)
 	mk.AssertNumberOfCalls(t, "CreatePodFromObject", 2)

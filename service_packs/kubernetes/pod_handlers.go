@@ -121,10 +121,14 @@ func defaultPodSecurityContext() *apiv1.PodSecurityContext {
 
 func defaultContainerSecurityContext() *apiv1.SecurityContext {
 	b := false
+	capabilities := apiv1.Capabilities{
+		Drop: []apiv1.Capability{"NET_RAW"},
+	}
 
 	return &apiv1.SecurityContext{
 		Privileged:               &b,
 		AllowPrivilegeEscalation: &b,
+		Capabilities:             &capabilities,
 	}
 }
 

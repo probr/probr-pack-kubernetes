@@ -487,11 +487,15 @@ func (psp *PSP) CreatePODSettingSecurityContext(pr *bool, pe *bool, runAsUser *i
 		i := int64(1000)
 		runAsUser = &i
 	}
+	capabilities := apiv1.Capabilities{
+		Drop: []apiv1.Capability{"NET_RAW"},
+	}
 
 	sc := apiv1.SecurityContext{
 		Privileged:               pr,
 		AllowPrivilegeEscalation: pe,
 		RunAsUser:                runAsUser,
+		Capabilities:             &capabilities,
 	}
 
 	pname, ns, cname, image := kubernetes.GenerateUniquePodName(psp.probePodName), kubernetes.Namespace, psp.probeContainer, psp.probeImage
@@ -549,6 +553,7 @@ func (psp *PSP) CreatePODSettingCapabilities(c *[]string, probe *audit.Probe) (*
 				}
 				con.SecurityContext.Capabilities.Add =
 					append(con.SecurityContext.Capabilities.Add, apiv1.Capability(cap))
+				con.SecurityContext.Capabilities.Drop = append(con.SecurityContext.Capabilities.Drop, apiv1.Capability("NET_RAW"))
 			}
 		}
 	}
