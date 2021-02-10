@@ -16,6 +16,10 @@ type ProbeStruct struct{}
 
 var Probe ProbeStruct
 
+const (
+	identityPodsNamespace = "kube-system" //value needs replacing with configuration
+)
+
 // IdentityAccessManagement is the section of the kubernetes package which provides the kubernetes interactions required to support
 // identity access management scenarios.
 var iam IdentityAccessManagement
@@ -257,6 +261,7 @@ func (s *scenarioState) iDeployAPodAssignedWithTheAzureIdentityBindingIntoTheSam
 
 //AZ-AAD-AI-1.2
 func (s *scenarioState) theClusterHasManagedIdentityComponentsDeployed() error {
+
 	// Standard auditing logic to ensures panics are also audited
 	description, payload, err := utils.AuditPlaceholders()
 	defer func() {
@@ -264,22 +269,25 @@ func (s *scenarioState) theClusterHasManagedIdentityComponentsDeployed() error {
 	}()
 
 	//look for the mic pods in the default ns
-	pl, err := kubernetes.GetKubeInstance().GetPods("")
+	pl, err := kubernetes.GetKubeInstance().GetPods(identityPodsNamespace)
 
 	if err != nil {
 		err = utils.ReformatError("error raised when trying to retrieve pods %v", err)
 	} else {
 		//a "pass" is the prescence of a "mic*" pod(s)
 		//break on the first ...
+		micCount := 0
 		for _, pd := range pl.Items {
-			if strings.HasPrefix(pd.Name, "mic-") {
+			if strings.Contains(pd.Name, "mic-") {
 				//grab the pod name as we'll execute the cmd against this:
 				s.podState.PodName = pd.Name
-				err = nil
+				micCount = micCount + 1
 			}
 		}
-		if err != nil {
+		if micCount == 0 {
 			err = utils.ReformatError("no MIC pods found - test fail")
+		} else {
+			err = nil
 		}
 	}
 
@@ -300,7 +308,7 @@ func (s *scenarioState) iExecuteTheCommandAgainstTheMICPod(arg1 string) error {
 	}()
 
 	c := CatAzJSON
-	res, err := iam.ExecuteVerificationCmd(s.podState.PodName, c, true)
+	res, err := iam.ExecuteVerificationCmd(s.podState.PodName, c, identityPodsNamespace)
 
 	if err != nil {
 		//this is an error from trying to execute the command as opposed to

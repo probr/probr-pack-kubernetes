@@ -54,7 +54,7 @@ type IdentityAccessManagement interface {
 	CreateAIB(useDefaultNS bool, aibName, aiName string) error
 	CreateIAMProbePod(y []byte, useDefaultNS bool, aibName string, probe *audit.Probe) (*apiv1.Pod, error)
 	DeleteIAMProbePod(n string, useDefaultNS bool, e string) error
-	ExecuteVerificationCmd(pn string, cmd IAMProbeCommand, useDefaultNS bool) (*kubernetes.CmdExecutionResult, error)
+	ExecuteVerificationCmd(pn string, cmd IAMProbeCommand, ns string) (*kubernetes.CmdExecutionResult, error)
 	GetAccessToken(pn string, useDefaultNS bool) (*string, error)
 }
 
@@ -203,9 +203,8 @@ func (i *IAM) DeleteIAMProbePod(n string, useDefaultNS bool, e string) error {
 }
 
 // ExecuteVerificationCmd executes a verification command against the supplied pod name.
-func (i *IAM) ExecuteVerificationCmd(pn string, cmd IAMProbeCommand, useDefaultNS bool) (*kubernetes.CmdExecutionResult, error) {
+func (i *IAM) ExecuteVerificationCmd(pn string, cmd IAMProbeCommand, ns string) (*kubernetes.CmdExecutionResult, error) {
 	c := cmd.String()
-	ns := i.getNamespace(useDefaultNS)
 	res := i.k.ExecCommand(c, ns, &pn)
 
 	log.Printf("[NOTICE] ExecuteVerificationCmd: %v stdout: %v exit code: %v (error: %v)", cmd, res.Stdout, res.Code, res.Err)
@@ -216,8 +215,10 @@ func (i *IAM) ExecuteVerificationCmd(pn string, cmd IAMProbeCommand, useDefaultN
 
 // GetAccessToken attempts to retrieve an access token by executing a curl command requesting a token for the Azure Resource Manager.
 func (i *IAM) GetAccessToken(pn string, useDefaultNS bool) (*string, error) {
+	ns := i.getNamespace(useDefaultNS)
+
 	//curl for the auth token ... need to supply appropiate ns
-	res, err := i.ExecuteVerificationCmd(pn, CurlAuthToken, useDefaultNS)
+	res, err := i.ExecuteVerificationCmd(pn, CurlAuthToken, ns)
 	log.Printf("[NOTICE] curl result: %v", res)
 
 	if err != nil {
