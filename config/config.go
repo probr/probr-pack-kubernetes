@@ -177,6 +177,11 @@ func (s Storage) IsExcluded() bool {
 }
 
 // Log and return exclusion configuration
+func (a APIM) IsExcluded() bool {
+	return validatePackRequirements("APIM", a)
+}
+
+// Log and return exclusion configuration
 func (p Probe) IsExcluded() bool {
 	if p.Excluded != "" {
 		log.Printf("[NOTICE] Excluding %s probe. Justification: %s", strings.Replace(p.Name, "_", " ", -1), p.Excluded)

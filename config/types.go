@@ -25,6 +25,7 @@ type Meta struct {
 type ServicePacks struct {
 	Kubernetes Kubernetes `yaml:"Kubernetes"`
 	Storage    Storage    `yaml:"Storage"`
+	APIM       APIM       `yaml:"APIM"`
 }
 
 type Kubernetes struct {
@@ -40,6 +41,12 @@ type Kubernetes struct {
 }
 
 type Storage struct {
+	exclusionLogged bool
+	Provider        string  `yaml:"Provider"` // Placeholder!
+	Probes          []Probe `yaml:"Probes"`
+}
+
+type APIM struct {
 	exclusionLogged bool
 	Provider        string  `yaml:"Provider"` // Placeholder!
 	Probes          []Probe `yaml:"Probes"`
