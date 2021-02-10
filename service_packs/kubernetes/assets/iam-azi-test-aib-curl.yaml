@@ -13,7 +13,7 @@ spec:
    fsGroup: 2000
    supplementalGroups: [ 1 ]
   containers:
-  - name: demo
+  - name: iam-azi-test-aib-curl
     image: {{ probr-compatible-image }}
     command: [ "sh", "-c", "sleep 1h" ]
     securityContext:

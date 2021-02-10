@@ -119,6 +119,12 @@ func ReplaceBytesValue(b []byte, old string, new string) []byte {
 	return []byte(newString)
 }
 
+// ReplaceBytesMultipleValues replaces multiple substring with a new value for a given string in bytes
+func ReplaceBytesMultipleValues(b []byte, replacer *strings.Replacer) []byte {
+	newString := replacer.Replace(string(b))
+	return []byte(newString)
+}
+
 // AuditPlaceholders creates empty objects to reduce code repetition when auditing probe steps
 func AuditPlaceholders() (string, interface{}, error) {
 	return *new(string), *new(interface{}), *new(error)

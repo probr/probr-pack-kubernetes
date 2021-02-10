@@ -2,6 +2,9 @@ apiVersion: v1
 kind: Pod
 metadata:
   name: security-context-demo
+  labels: 
+    caller: {{ probr-caller-function }}
+    feature: k-psp-011
   annotations:
     seccomp.security.alpha.kubernetes.io/pod: "runtime/default"
 spec:  
@@ -11,7 +14,7 @@ spec:
     fsGroup: 2000
     supplementalGroups: [ 1 ]      
   containers:
-  - name: sec-ctx-demo
+  - name: psp-azp-seccomp-approved
     image: {{ probr-compatible-image }}
     command: [ "sh", "-c", "touch /tmp/healthy; sleep 1h" ]
     livenessProbe:
