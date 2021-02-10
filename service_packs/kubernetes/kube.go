@@ -197,6 +197,10 @@ func (k *Kube) CreatePodFromYaml(y []byte, pname string, ns string, image string
 	vars := config.Vars.ServicePacks.Kubernetes
 	approvedImage := vars.AuthorisedContainerRegistry + "/" + vars.ProbeImage
 	podSpec := utils.ReplaceBytesValue(y, "{{ probr-compatible-image }}", approvedImage)
+
+	dropCapabilities := vars.ContainerDropCapabilities
+	podSpec = utils.ReplaceBytesValue(podSpec, "{{ probr-cap-drop }}", dropCapabilities)
+
 	o, _, err := scheme.Codecs.UniversalDeserializer().Decode(podSpec, nil, nil)
 	if err != nil {
 		log.Printf("[ERROR] %s: could not create pod from yaml asset, %v", utils.CallerName(2), err)

@@ -36,6 +36,7 @@ type Kubernetes struct {
 	AuthorisedContainerRegistry   string   `yaml:"AuthorisedContainerRegistry"`
 	UnauthorisedContainerRegistry string   `yaml:"UnauthorisedContainerRegistry"`
 	ProbeImage                    string   `yaml:"ProbeImage"`
+	ContainerDropCapabilities     string   `yaml:"ContainerDropCapabilities"`
 }
 
 type Storage struct {
