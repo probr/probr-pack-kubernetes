@@ -488,7 +488,7 @@ func (psp *PSP) CreatePODSettingSecurityContext(pr *bool, pe *bool, runAsUser *i
 		runAsUser = &i
 	}
 	capabilities := apiv1.Capabilities{
-		Drop: []apiv1.Capability{"NET_RAW"},
+		Drop: kubernetes.GetContainerDropCapabilitiesFromConfig(),
 	}
 
 	sc := apiv1.SecurityContext{
@@ -553,7 +553,6 @@ func (psp *PSP) CreatePODSettingCapabilities(c *[]string, probe *audit.Probe) (*
 				}
 				con.SecurityContext.Capabilities.Add =
 					append(con.SecurityContext.Capabilities.Add, apiv1.Capability(cap))
-				con.SecurityContext.Capabilities.Drop = append(con.SecurityContext.Capabilities.Drop, apiv1.Capability("NET_RAW"))
 			}
 		}
 	}

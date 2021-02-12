@@ -9,6 +9,7 @@ import (
 	"math/rand"
 	"time"
 
+	"github.com/citihub/probr/config"
 	apiv1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
@@ -121,8 +122,9 @@ func defaultPodSecurityContext() *apiv1.PodSecurityContext {
 
 func defaultContainerSecurityContext() *apiv1.SecurityContext {
 	b := false
+
 	capabilities := apiv1.Capabilities{
-		Drop: []apiv1.Capability{"NET_RAW"},
+		Drop: GetContainerDropCapabilitiesFromConfig(),
 	}
 
 	return &apiv1.SecurityContext{
@@ -164,4 +166,18 @@ func waitForDelete(c *k8s.Clientset, ns string, n string) error {
 	log.Printf("[INFO] *** Completed waiting for DELETE on pod %v", n)
 
 	return nil
+}
+
+func GetContainerDropCapabilitiesFromConfig() []apiv1.Capability {
+	var apiDropCapabilities []apiv1.Capability
+
+	// Adding all values from config
+	dropCapabilitiesFromConfig := config.Vars.ServicePacks.Kubernetes.ContainerDropCapabilities
+	for _, dropCap := range dropCapabilitiesFromConfig {
+		if dropCap != "" {
+			apiDropCapabilities = append(apiDropCapabilities, apiv1.Capability(dropCap))
+		}
+	}
+
+	return apiDropCapabilities
 }

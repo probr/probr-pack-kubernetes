@@ -27,4 +27,4 @@ spec:
     securityContext:
       allowPrivilegeEscalation: {{ allowPrivilegeEscalation }}
       capabilities:
-        drop: {{ probr-cap-drop }}
+        drop: [ {{ probr-cap-drop }} ]

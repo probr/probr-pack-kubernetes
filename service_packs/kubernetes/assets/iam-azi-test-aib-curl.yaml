@@ -19,6 +19,6 @@ spec:
     securityContext:
       allowPrivilegeEscalation: false
       capabilities:
-        drop: {{ probr-cap-drop }}
+        drop: [ {{ probr-cap-drop }} ]
   nodeSelector:
     kubernetes.io/os: linux
