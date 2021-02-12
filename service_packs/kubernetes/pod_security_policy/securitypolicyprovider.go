@@ -9,7 +9,6 @@ type SecurityPolicyProvider interface {
 	HasHostNetworkRestriction() (*bool, error)
 	HasAllowPrivilegeEscalationRestriction() (*bool, error)
 	HasRootUserRestriction() (*bool, error)
-	HasNETRAWRestriction() (*bool, error)
 	HasAllowedCapabilitiesRestriction() (*bool, error)
 	HasAssignedCapabilitiesRestriction() (*bool, error)
 	HasHostPortRestriction() (*bool, error)

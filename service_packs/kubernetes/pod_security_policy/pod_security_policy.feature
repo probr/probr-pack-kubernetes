@@ -112,7 +112,6 @@ So that a policy of least privilege can be enforced in order to prevent maliciou
     @k-psp-007
     Scenario Outline: Prevent deployments from running with the NET_RAW capability.
         Given a Kubernetes cluster exists which we can deploy into
-        And some system exists to prevent a Kubernetes deployment from running with NET_RAW capability in an existing Kubernetes cluster
         When a Kubernetes deployment is applied to an existing Kubernetes cluster
         And  NET_RAW is marked "<NET_RAW requested>" for the Kubernetes deployment
         Then the operation will "<RESULT>" with an error "<ERRORMESSAGE>"

@@ -93,12 +93,6 @@ func (az *AzK8sConstraintTemplate) HasRootUserRestriction() (*bool, error) {
 	return az.hasConstraint(azK8sAllowedUsersGroups)
 }
 
-//HasNETRAWRestriction provides the AzK8sConstraintTemplate implementation of SecurityPolicyProvider.
-func (az *AzK8sConstraintTemplate) HasNETRAWRestriction() (*bool, error) {
-	//TODO: at time of writing, not clear that any AZ policy/constraint convers NET_RAW
-	return utils.BoolPtr(false), nil
-}
-
 //HasAllowedCapabilitiesRestriction provides the AzK8sConstraintTemplate implementation of SecurityPolicyProvider.
 func (az *AzK8sConstraintTemplate) HasAllowedCapabilitiesRestriction() (*bool, error) {
 	//Az AllowedCapabilities covers both allowed & assigned capabilities
