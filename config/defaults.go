@@ -16,6 +16,7 @@ func setFromEnvOrDefaults(e *ConfigVars) {
 	e.set(&e.WriteDirectory, "PROBR_WRITE_DIRECTORY", "probr_output")
 	e.set(&e.LogLevel, "PROBR_LOG_LEVEL", "ERROR")
 	e.set(&e.OverwriteHistoricalAudits, "OVERWRITE_AUDITS", "true")
+	e.set(&e.ResultsFormat, "PROBR_RESULTS_FORMAT", "cucumber")
 
 	e.set(&e.ServicePacks.Kubernetes.KeepPods, "PROBR_KEEP_PODS", "false")
 	e.set(&e.ServicePacks.Kubernetes.KubeConfigPath, "KUBE_CONFIG", getDefaultKubeConfigPath())
@@ -25,7 +26,6 @@ func setFromEnvOrDefaults(e *ConfigVars) {
 	e.set(&e.ServicePacks.Kubernetes.UnauthorisedContainerRegistry, "PROBR_UNAUTHORISED_REGISTRY", "")
 	e.set(&e.ServicePacks.Kubernetes.ProbeImage, "PROBR_PROBE_IMAGE", "citihub/probr-probe")
 	e.set(&e.ServicePacks.Kubernetes.ContainerRequiredDropCapabilities, "PROBR_REQUIRED_DROP_CAPABILITIES", []string{"NET_RAW"})
-	//e.set(&e.ServicePacks.Kubernetes.ContainerAllowedAddCapabilities, "PROBR_ALLOWED_ADD_CAPABILITIES", []string{"CHOWN", "DAC_OVERRIDE", "FSETID", "FOWNER", "MKNOD", "NET_RAW", "SETGID", "SETUID", "SETFCAP", "SETPCAP", "NET_BIND_SERVICE", "SYS_CHROOT", "KILL", "AUDIT_WRITE"})
 	e.set(&e.ServicePacks.Kubernetes.ContainerAllowedAddCapabilities, "PROBR_ALLOWED_ADD_CAPABILITIES", []string{""})
 	e.set(&e.ServicePacks.Kubernetes.ApprovedVolumeTypes, "PROBR_APPROVED_VOLUME_TYPES", []string{"configmap", "emptydir", "persistentvolumeclaim"})
 	e.set(&e.ServicePacks.Kubernetes.UnapprovedHostPort, "PROBR_UNAPPROVED_HOSTPORT", "22")

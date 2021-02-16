@@ -16,6 +16,7 @@ type ConfigVars struct {
 	NoSummary                 bool           // set by flags only
 	Silent                    bool           // set by flags only
 	Meta                      Meta           // set by CLI options only
+	ResultsFormat             string         // set by flags only
 }
 
 type Meta struct {
