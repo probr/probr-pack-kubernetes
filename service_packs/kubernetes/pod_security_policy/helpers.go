@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"strings"
 	"sync"
 	"time"
 
@@ -32,10 +33,12 @@ const (
 type PSPProbeCommand int
 
 type scenarioState struct {
-	name     string
-	audit    *audit.ScenarioAudit
-	probe    *audit.Probe
-	podState kubernetes.PodState
+	name      string
+	audit     *audit.ScenarioAudit
+	probe     *audit.Probe
+	podState  kubernetes.PodState
+	podStates []kubernetes.PodState
+	info      []interface{} //used to pass arbitrary information between steps
 }
 
 // PSPVerificationProbe encapsulates the command and expected result to be used in a Pod Security Policy probe.
@@ -58,6 +61,74 @@ const (
 	Ls
 	SudoChroot PSPProbeCommand = iota
 )
+
+func getSupportedVolumeTypes() []string {
+	return []string{"configmap", "emptydir", "hostpath", "persistentvolumeclaim"}
+}
+
+func getApprovedVolumeTypes() []string {
+	var approvedVolumeTypes []string
+
+	for _, vt := range config.Vars.ServicePacks.Kubernetes.ApprovedVolumeTypes {
+		approvedVolumeTypes = append(approvedVolumeTypes, strings.ToLower(vt))
+	}
+	return approvedVolumeTypes
+}
+
+func getAllowedAdditionalCapabilities() []string {
+	return config.Vars.ServicePacks.Kubernetes.ContainerAllowedAddCapabilities
+}
+
+func getDefaultLinuxCapabilities() map[string]string {
+	return map[string]string{
+		"AUDIT_WRITE":      "/bin/sh -c 'exit 2'",
+		"CHOWN":            "/bin/sh -c 'exit 2'",
+		"DAC_OVERRIDE":     "/bin/sh -c 'exit 2'",
+		"FOWNER":           "/bin/sh -c 'exit 2'",
+		"FSETID":           "/bin/sh -c 'exit 2'",
+		"KILL":             "/bin/sh -c 'exit 2'",
+		"MKNOD":            "/bin/sh -c 'exit 2'",
+		"NET_BIND_SERVICE": "/bin/sh -c 'exit 2'",
+		"NET_RAW":          "ping www.google.com",
+		"SETFCAP":          "/bin/sh -c 'exit 2'",
+		"SETGID":           "/bin/sh -c 'exit 2'",
+		"SETPCAP":          "/bin/sh -c 'exit 2'",
+		"SETUID":           "/bin/sh -c 'exit 2'",
+		"SYS_CHROOT":       "/bin/sh -c 'exit 2'",
+	}
+}
+
+func getLinuxNonDefaultCapabilities() map[string]string {
+	return map[string]string{
+		"AUDIT_CONTROL":      "/bin/sh -c 'exit 2'",
+		"AUDIT_READ":         "/bin/sh -c 'exit 2'",
+		"BLOCK_SUSPEND":      "/bin/sh -c 'exit 2'",
+		"BPF":                "/bin/sh -c 'exit 2'",
+		"CHECKPOINT_RESTORE": "/bin/sh -c 'exit 2'",
+		"DAC_READ_SEARCH":    "/bin/sh -c 'exit 2'",
+		"IPC_LOCK":           "/bin/sh -c 'exit 2'",
+		"IPC_OWNER":          "/bin/sh -c 'exit 2'",
+		"LEASE":              "/bin/sh -c 'exit 2'",
+		"LINUX_IMMUTABLE":    "/bin/sh -c 'exit 2'",
+		"MAC_ADMIN":          "/bin/sh -c 'exit 2'",
+		"MAC_OVERRIDE":       "/bin/sh -c 'exit 2'",
+		"NET_ADMIN":          "ip link add dummy0 type dummy 2",
+		"NET_BROADCAST":      "/bin/sh -c 'exit 2'",
+		"PERFMON":            "/bin/sh -c 'exit 2'",
+		"SYS_ADMIN":          "/bin/sh -c 'exit 2'",
+		"SYS_BOOT":           "/bin/sh -c 'exit 2'",
+		"SYS_MODULE":         "/bin/sh -c 'exit 2'",
+		"SYS_NICE":           "/bin/sh -c 'exit 2'",
+		"SYS_PACCT":          "/bin/sh -c 'exit 2'",
+		"SYS_PTRACE":         "/bin/sh -c 'exit 2'",
+		"SYS_RAWIO":          "/bin/sh -c 'exit 2'",
+		"SYS_RESOURCE":       "/bin/sh -c 'exit 2'",
+		"SYS_TIME":           "/bin/sh -c 'exit 2'",
+		"SYS_TTY_CONFIG":     "/bin/sh -c 'exit 2'",
+		"SYSLOG":             "/bin/sh -c 'exit 2'",
+		"WAKE_ALARM":         "/bin/sh -c 'exit 2'",
+	}
+}
 
 func (c PSPProbeCommand) String() string {
 	return [...]string{"chroot .",
@@ -100,6 +171,7 @@ type PodSecurityPolicy interface {
 	CreatePODSettingCapabilities(c *[]string, probe *audit.Probe) (*apiv1.Pod, error)
 	CreatePodFromYaml(y []byte, probe *audit.Probe) (*apiv1.Pod, error)
 	ExecPSPProbeCmd(pName *string, cmd PSPProbeCommand, probe *audit.Probe) (*kubernetes.CmdExecutionResult, error)
+	ExecCmd(pName *string, cmd string, probe *audit.Probe) (*kubernetes.CmdExecutionResult, error)
 	TeardownPodSecurityProbe(p string, e string) error
 	CreateConfigMap() error
 	DeleteConfigMap() error
@@ -551,6 +623,11 @@ func (psp *PSP) CreatePodFromYaml(y []byte, probe *audit.Probe) (*apiv1.Pod, err
 
 // ExecPSPProbeCmd executes the given PSPProbeCommand against the supplied pod name.
 func (psp *PSP) ExecPSPProbeCmd(pName *string, cmd PSPProbeCommand, probe *audit.Probe) (*kubernetes.CmdExecutionResult, error) {
+	return psp.ExecCmd(pName, cmd.String(), probe)
+}
+
+// ExecCmd executes the given cmd against the supplied pod name
+func (psp *PSP) ExecCmd(pName *string, cmd string, probe *audit.Probe) (*kubernetes.CmdExecutionResult, error) {
 	var pn string
 	//if we've not been given a pod name, assume one needs to be created:
 	if pName == nil {
@@ -567,7 +644,7 @@ func (psp *PSP) ExecPSPProbeCmd(pName *string, cmd PSPProbeCommand, probe *audit
 		pn = *pName
 	}
 
-	c := cmd.String()
+	c := cmd
 	res := psp.k.ExecCommand(c, kubernetes.Namespace, &pn)
 
 	log.Printf("[INFO] ExecPSPProbeCmd: %v stdout: %v exit code: %v (error: %v)", cmd, res.Stdout, res.Code, res.Err)

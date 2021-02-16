@@ -196,7 +196,7 @@ func (k *Kube) CreatePod(podName string, ns string, containerName string, image 
 func (k *Kube) CreatePodFromYaml(y []byte, pname string, ns string, image string, aadpodidbinding string, w bool, probe *audit.Probe) (*apiv1.Pod, error) {
 	vars := config.Vars.ServicePacks.Kubernetes
 	approvedImage := vars.AuthorisedContainerRegistry + "/" + vars.ProbeImage
-	containerDropCapabilities := strings.Join(vars.ContainerDropCapabilities, ",")
+	containerDropCapabilities := strings.Join(vars.ContainerRequiredDropCapabilities, ",")
 	replaceSpecValues := strings.NewReplacer("{{ probr-compatible-image }}", approvedImage, "{{ probr-caller-function }}", utils.CallerName(2), "{{ probr-cap-drop }}", containerDropCapabilities)
 	podSpec := utils.ReplaceBytesMultipleValues(y, replaceSpecValues)
 
@@ -428,6 +428,7 @@ func (k *Kube) ExecCommand(cmd string, ns string, pn *string) (s *CmdExecutionRe
 		Stderr: &stderr,
 		Tty:    false,
 	})
+	//TODO: I think this is returning a false result - need to look at the stderr
 	if err != nil {
 		if ce, ok := err.(executil.CodeExitError); ok {
 			//the command has been executed on the container, but the underlying command raised an error

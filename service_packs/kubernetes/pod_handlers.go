@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"log"
 	"math/rand"
+	"strconv"
 	"time"
 
 	"github.com/citihub/probr/config"
@@ -172,7 +173,7 @@ func GetContainerDropCapabilitiesFromConfig() []apiv1.Capability {
 	var apiDropCapabilities []apiv1.Capability
 
 	// Adding all values from config
-	dropCapabilitiesFromConfig := config.Vars.ServicePacks.Kubernetes.ContainerDropCapabilities
+	dropCapabilitiesFromConfig := config.Vars.ServicePacks.Kubernetes.ContainerRequiredDropCapabilities
 	for _, dropCap := range dropCapabilitiesFromConfig {
 		if dropCap != "" {
 			apiDropCapabilities = append(apiDropCapabilities, apiv1.Capability(dropCap))
@@ -180,4 +181,19 @@ func GetContainerDropCapabilitiesFromConfig() []apiv1.Capability {
 	}
 
 	return apiDropCapabilities
+}
+
+func GetUnapprovedHostPortFromConfig() string {
+	return config.Vars.ServicePacks.Kubernetes.UnapprovedHostPort
+}
+
+func GetKeepPodsFromConfig() bool {
+	flag, err := strconv.ParseBool(config.Vars.ServicePacks.Kubernetes.KeepPods)
+
+	if err != nil {
+		log.Printf("[INFO] Error converting KeepPods to bool val. Defaulting to false.")
+		return false
+	} else {
+		return flag
+	}
 }

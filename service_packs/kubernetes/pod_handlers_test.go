@@ -55,7 +55,7 @@ func TestGetDropCapabilitiesFromConfig(t *testing.T) {
 			} else {
 				// Set custom config vars
 				// Only ContainerDropCapabilities for now. Extend if more config vars are used.
-				config.Vars.ServicePacks.Kubernetes.ContainerDropCapabilities = tt.customConfigValues
+				config.Vars.ServicePacks.Kubernetes.ContainerRequiredDropCapabilities = tt.customConfigValues
 			}
 
 			if got := GetContainerDropCapabilitiesFromConfig(); !reflect.DeepEqual(got, tt.expectedResult) {

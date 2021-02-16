@@ -129,26 +129,26 @@ So that a policy of least privilege can be enforced in order to prevent maliciou
         Given a Kubernetes cluster exists which we can deploy into
         And some system exists to prevent Kubernetes deployments with capabilities beyond the default set from being deployed to an existing kubernetes cluster
         When a Kubernetes deployment is applied to an existing Kubernetes cluster
-        And additional capabilities "<requested>" requested for the Kubernetes deployment
-        Then the operation will "<RESULT>" with an error "<ERRORMESSAGE>"
+        And additional capabilities requested for the Kubernetes deployment are "<allowed>" allowed
+        Then all operations will "<RESULT>" with an error "<ERRORMESSAGE>"
         But I should not be able to perform a command that requires capabilities outside of the default set
         And I should be able to perform an allowed command
 
         Examples:
-            | requested   | RESULT  | ERRORMESSAGE                                   |
-            | ARE         | Fail    | Containers can't run with added capabilities |
-            | ARE NOT     | Succeed |                                              |
-            | Not Defined | Succeed |                                              |
+            | allowed     | RESULT  | ERRORMESSAGE                                    |
+            | NOT         | Fail    | Containers can't run with added capabilities    |
+            | ARE         | Succeed |                                                 |
+            | Not Defined | Succeed |                                                 |
 
     @k-psp-009
     Scenario Outline: Prevent deployments from running with assigned capabilities.
         Given a Kubernetes cluster exists which we can deploy into
-            And some system exists to prevent Kubernetes deployments with assigned capabilities from being deployed to an existing Kubernetes cluster
+        And some system exists to prevent Kubernetes deployments with assigned capabilities from being deployed to an existing Kubernetes cluster
         When a Kubernetes deployment is applied to an existing Kubernetes cluster
-            And assigned capabilities "<requested>" requested for the Kubernetes deployment
+        And assigned capabilities "<requested>" requested for the Kubernetes deployment
         Then the operation will "<RESULT>" with an error "<ERRORMESSAGE>"
-            But I should not be able to perform a command that requires any capabilities
-            And I should be able to perform an allowed command
+        But I should not be able to perform a command that requires any capabilities
+        And I should be able to perform an allowed command
 
         Examples:
             | requested   | RESULT  | ERRORMESSAGE                                            |
@@ -161,16 +161,13 @@ So that a policy of least privilege can be enforced in order to prevent maliciou
         Given a Kubernetes cluster exists which we can deploy into
         And some system exists to prevent Kubernetes deployments with unapproved volume types from being deployed to an existing Kubernetes cluster
         When a Kubernetes deployment is applied to an existing Kubernetes cluster
-        And an "<requested>" volume type is requested for the Kubernetes deployment
-        Then the operation will "<RESULT>" with an error "<ERRORMESSAGE>"
-        But I should not be able to perform a command that accesses an unapproved volume type
-        And I should be able to perform an allowed command
+        And "<requested>" volume types are requested for the Kubernetes deployment
+        Then all operations will "<RESULT>" with an error "<ERRORMESSAGE>"
 
         Examples:
             | requested   | RESULT     | ERRORMESSAGE                           |
             | unapproved  | Fail       | Cannot access unapproved volume type   |
             | approved    | Succeed    |                                        |
-            | not defined | Succeed    |                                        |
 
     @k-psp-011
     Scenario Outline: Prevent deployments from running without approved seccomp profile
@@ -189,17 +186,14 @@ So that a policy of least privilege can be enforced in order to prevent maliciou
             | undefined  | Fail      | Approved seccomp profile required           |
 
     @k-psp-012
-	Scenario Outline: Prevent deployments from accessing unapproved port range
-		Given a Kubernetes cluster exists which we can deploy into
-		And some system exists to prevent Kubernetes deployments with unapproved port range from being deployed to an existing Kubernetes cluster
+    Scenario Outline: Prevent pods from exposing unapproved host ports
+    		Given a Kubernetes cluster exists which we can deploy into
+    		And some system exists to prevent Kubernetes deployments with unapproved port range from being deployed to an existing Kubernetes cluster
         When a Kubernetes deployment is applied to an existing Kubernetes cluster
-		And an "<requested>" port range is requested for the Kubernetes deployment
-		Then the operation will "<RESULT>" with an error "<ERRORMESSAGE>"
-		But I should not be able to perform a command that access an unapproved port range
-		And I should be able to perform an allowed command
+    		And an "<requested>" hostPort is requested for the Kubernetes deployment
+    		Then the operation will "<RESULT>" with an error "<ERRORMESSAGE>"
 
-		Examples:
-			| requested 	| RESULT 	| ERRORMESSAGE							|
-			| unapproved  	| Fail  	| Cannot access unapproved port range	|
-			| approved		| Succeed	|									  	|
-			| not defined	| Succeed	|	                                    |
+    		Examples:
+    			| requested 	| RESULT 	| ERRORMESSAGE							          |
+    			| unapproved  | Fail  	| Cannot access unapproved port range	|
+    			| not defined	| Succeed	|	                                    |
