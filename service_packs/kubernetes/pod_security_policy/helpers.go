@@ -169,6 +169,7 @@ type PodSecurityPolicy interface {
 	CreatePODSettingSecurityContext(pr *bool, pe *bool, runAsUser *int64, probe *audit.Probe) (*apiv1.Pod, error)
 	CreatePODSettingAttributes(hostPID *bool, hostIPC *bool, hostNetwork *bool, probe *audit.Probe) (*apiv1.Pod, error)
 	CreatePODSettingCapabilities(c *[]string, probe *audit.Probe) (*apiv1.Pod, error)
+	CreatePODWithCapabilities(capAdd []string, capDrop []string, probe *audit.Probe) (*apiv1.Pod, error)
 	CreatePodFromYaml(y []byte, probe *audit.Probe) (*apiv1.Pod, error)
 	ExecPSPProbeCmd(pName *string, cmd PSPProbeCommand, probe *audit.Probe) (*kubernetes.CmdExecutionResult, error)
 	ExecCmd(pName *string, cmd string, probe *audit.Probe) (*kubernetes.CmdExecutionResult, error)
@@ -608,6 +609,31 @@ func (psp *PSP) CreatePODSettingCapabilities(c *[]string, probe *audit.Probe) (*
 					append(con.SecurityContext.Capabilities.Add, apiv1.Capability(cap))
 			}
 		}
+	}
+
+	// create from PO (and let caller handle ...)
+	return psp.k.CreatePodFromObject(po, pname, ns, true, probe)
+}
+
+// CreatePODWithCapabilities creates a pod with the supplied capabilities.
+func (psp *PSP) CreatePODWithCapabilities(capAdd []string, capDrop []string, probe *audit.Probe) (*apiv1.Pod, error) {
+	pname, ns, cname, image := kubernetes.GenerateUniquePodName(psp.probePodName), kubernetes.Namespace, psp.probeContainer, psp.probeImage
+
+	// Get the pod object with default security context
+	po := psp.k.GetPodObject(pname, ns, cname, image, nil)
+
+	// Override security context capabilities
+	for _, con := range po.Spec.Containers {
+		if con.SecurityContext == nil {
+			con.SecurityContext = &apiv1.SecurityContext{}
+		}
+		if con.SecurityContext.Capabilities == nil {
+			con.SecurityContext.Capabilities = &apiv1.Capabilities{}
+			con.SecurityContext.Capabilities.Add = make([]apiv1.Capability, 0)
+			con.SecurityContext.Capabilities.Drop = make([]apiv1.Capability, 0)
+		}
+		con.SecurityContext.Capabilities.Add = kubernetes.GetCapabilitiesFromList(capAdd)
+		con.SecurityContext.Capabilities.Drop = kubernetes.GetCapabilitiesFromList(capDrop)
 	}
 
 	// create from PO (and let caller handle ...)

@@ -90,7 +90,7 @@ These are general configuration variables.
 |OverwriteHistoricalAudits|Flag to allow audit overwriting|no|yes|OVERWRITE_AUDITS|true|
 |ContainerRegistry|Probe image container registry|no|yes|PROBR_CONTAINER_REGISTRY|docker.io|
 |ProbeImage|Probe image name|no|probeImage|PROBR_PROBE_IMAGE|citihub/probr-probe|
-|ContainerDropCapabilities|Container Drop Capabilities|no|ContainerDropCapabilities|PROBR_CONTAINER_DROP_CAPABILITIES|["NET_RAW"]|
+|ContainerRequiredDropCapabilities|Container Required Drop Capabilities|no|ContainerRequiredDropCapabilities|PROBR_REQUIRED_DROP_CAPABILITIES|["NET_RAW"]|
 
 ### Service Pack Configuration Variables
 

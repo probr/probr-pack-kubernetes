@@ -672,21 +672,27 @@ func (s *scenarioState) theKubernetesDeploymentShouldRunWithANonrootUID() error 
 	return err
 }
 
-//CIS-5.2.7
-func (s *scenarioState) nETRAWIsMarkedForTheKubernetesDeployment(netRawRequested string) error {
+func (s *scenarioState) kubernetesDeploymentWithNETRAWCapability(netRawRequested string) error {
 	// Standard auditing logic to ensures panics are also audited
 	description, payload, err := utils.AuditPlaceholders()
 	defer func() {
 		s.audit.AuditScenarioStep(description, payload, err)
 	}()
 
-	var c []string
-	if netRawRequested == "True" {
-		c = make([]string, 1)
-		c[0] = "NET_RAW"
+	var capAdd, capDrop []string
+
+	switch netRawRequested {
+	case "Added":
+		capAdd = []string{"NET_RAW"}
+		capDrop = nil
+	case "Dropped":
+		capAdd = nil
+		capDrop = []string{"NET_RAW"}
+	case "Not Defined":
+		capAdd, capDrop = nil, nil
 	}
 
-	pd, err := psp.CreatePODSettingCapabilities(&c, s.probe)
+	pd, err := psp.CreatePODWithCapabilities(capAdd, capDrop, s.probe)
 	err = kubernetes.ProcessPodCreationResult(&s.podState, pd, kubernetes.PSPAllowedCapabilities, err)
 
 	description = fmt.Sprintf("NETRAWIs Marked For The Kubernetes Deployment %s", netRawRequested)
@@ -1190,7 +1196,7 @@ func (p ProbeStruct) ScenarioInitialize(ctx *godog.ScenarioContext) {
 	ctx.Step(`^the Kubernetes deployment should run with a non-root UID$`, ps.theKubernetesDeploymentShouldRunWithANonrootUID)
 
 	//CIS-5.2.7
-	ctx.Step(`^NET_RAW is marked "([^"]*)" for the Kubernetes deployment$`, ps.nETRAWIsMarkedForTheKubernetesDeployment)
+	ctx.Step(`^a Kubernetes deployment with NET_RAW capability "([^"]*)" is applied to an existing Kubernetes cluster$`, ps.kubernetesDeploymentWithNETRAWCapability)
 	ctx.Step(`^I should not be able to perform a command that requires NET_RAW capability$`, ps.iShouldNotBeAbleToPerformACommandThatRequiresNETRAWCapability)
 
 	//CIS-5.2.8

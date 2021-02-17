@@ -11,55 +11,84 @@ import (
 
 func TestGetDropCapabilitiesFromConfig(t *testing.T) {
 
-	// Default config
-	dropCapabilitiesFromDefaultValue := []apiv1.Capability{"NET_RAW"} //This test will fail if default value changes for config.Vars.ServicePacks.Kubernetes.ContainerDropCapabilities. Adjust as needed.
+	// Default value
+	dropCapabilitiesFromDefaultValue := []apiv1.Capability{"NET_RAW"} //This test will fail if default value changes for config.Vars.ServicePacks.Kubernetes.ContainerRequiredDropCapabilities. Adjust as needed.
 
-	// Custom config - single value
-	customConfig := []string{"CAP_SETUID"}
-	dropCapabilitiesFromCustomConfig := []apiv1.Capability{"CAP_SETUID"}
-
-	// Custom config - list
-	customConfigList := []string{"NET_RAW", "CAP_SETUID", "CAP_SYS_ADMIN"}
-	dropCapabilitiesFromCustomConfigList := []apiv1.Capability{"NET_RAW", "CAP_SETUID", "CAP_SYS_ADMIN"}
+	// Config value
+	configValue := []string{"CAP_SETUID"}
+	dropCapabilitiesFromConfigValue := []apiv1.Capability{"CAP_SETUID"}
 
 	tests := []struct {
-		testName           string
-		customConfigValues []string
-		expectedResult     []apiv1.Capability
+		testName       string
+		configValue    []string
+		expectedResult []apiv1.Capability
 	}{
 		{
-			testName:           "ShouldReturn_UsingDefaultValue",
-			customConfigValues: nil, //Use default
-			expectedResult:     dropCapabilitiesFromDefaultValue,
+			testName:       "ShouldReturn_UsingDefaultValue",
+			configValue:    nil, //Use default
+			expectedResult: dropCapabilitiesFromDefaultValue,
 		},
 		{
-			testName:           "ShouldReturn_UsingCustomConfig_SingleValue",
-			customConfigValues: customConfig,
-			expectedResult:     dropCapabilitiesFromCustomConfig,
-		},
-		{
-			testName:           "ShouldReturn_UsingCustomConfig_List",
-			customConfigValues: customConfigList,
-			expectedResult:     dropCapabilitiesFromCustomConfigList,
+			testName:       "ShouldReturn_UsingConfigValue",
+			configValue:    configValue,
+			expectedResult: dropCapabilitiesFromConfigValue,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.testName, func(t *testing.T) {
-			if tt.customConfigValues == nil {
+			if tt.configValue == nil {
 				// Create default config
 				err := config.Init("")
 				if err != nil {
 					t.Errorf("[ERROR] error returned from config.Init: %v", err)
 				}
 			} else {
-				// Set custom config vars
+				// Set config vars
 				// Only ContainerDropCapabilities for now. Extend if more config vars are used.
-				config.Vars.ServicePacks.Kubernetes.ContainerRequiredDropCapabilities = tt.customConfigValues
+				config.Vars.ServicePacks.Kubernetes.ContainerRequiredDropCapabilities = tt.configValue
 			}
 
 			if got := GetContainerDropCapabilitiesFromConfig(); !reflect.DeepEqual(got, tt.expectedResult) {
 				t.Errorf("defaultContainerSecurityContext() = %v, Expected result: %v", got, tt.expectedResult)
+			}
+		})
+	}
+}
+
+func TestGetCapabilitiesFromList(t *testing.T) {
+
+	// Single value
+	singleItemList := []string{"CAP_SETUID"}
+	capabilitiesSingleValue := []apiv1.Capability{"CAP_SETUID"}
+
+	// Multiple values
+	multiItemsList := []string{"NET_RAW", "CAP_SETUID", "CAP_SYS_ADMIN"}
+	capabilitiesMultiValues := []apiv1.Capability{"NET_RAW", "CAP_SETUID", "CAP_SYS_ADMIN"}
+
+	type args struct {
+		capList []string
+	}
+	tests := []struct {
+		testName       string
+		testArgs       args
+		expectedResult []apiv1.Capability
+	}{
+		{
+			testName:       "ShouldReturn_ApiCapabilities_SingleValue",
+			testArgs:       args{singleItemList},
+			expectedResult: capabilitiesSingleValue,
+		},
+		{
+			testName:       "ShouldReturn_ApiCapabilities_MultipleValues",
+			testArgs:       args{multiItemsList},
+			expectedResult: capabilitiesMultiValues,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.testName, func(t *testing.T) {
+			if got := GetCapabilitiesFromList(tt.testArgs.capList); !reflect.DeepEqual(got, tt.expectedResult) {
+				t.Errorf("GetCapabilitiesFromList() = %v, Expected: %v", got, tt.expectedResult)
 			}
 		})
 	}

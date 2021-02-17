@@ -170,17 +170,23 @@ func waitForDelete(c *k8s.Clientset, ns string, n string) error {
 }
 
 func GetContainerDropCapabilitiesFromConfig() []apiv1.Capability {
-	var apiDropCapabilities []apiv1.Capability
-
 	// Adding all values from config
 	dropCapabilitiesFromConfig := config.Vars.ServicePacks.Kubernetes.ContainerRequiredDropCapabilities
-	for _, dropCap := range dropCapabilitiesFromConfig {
+
+	return GetCapabilitiesFromList(dropCapabilitiesFromConfig)
+}
+
+func GetCapabilitiesFromList(capList []string) []apiv1.Capability {
+	var apiCapabilities []apiv1.Capability
+
+	// Adding all values from config
+	for _, dropCap := range capList {
 		if dropCap != "" {
-			apiDropCapabilities = append(apiDropCapabilities, apiv1.Capability(dropCap))
+			apiCapabilities = append(apiCapabilities, apiv1.Capability(dropCap))
 		}
 	}
 
-	return apiDropCapabilities
+	return apiCapabilities
 }
 
 func GetUnapprovedHostPortFromConfig() string {
