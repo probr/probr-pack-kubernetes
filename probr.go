@@ -25,7 +25,7 @@ func RunAllProbes() (int, *coreengine.ProbeStore, error) {
 
 //GetAllProbeResults maps ProbeStore results to strings
 func GetAllProbeResults(ps *coreengine.ProbeStore) map[string]string {
-	defer cleanup()
+	defer CleanupTmp()
 
 	out := make(map[string]string)
 	for name := range ps.Probes {
@@ -49,8 +49,8 @@ func readProbeResults(ps *coreengine.ProbeStore, name string) (probeResults, pro
 	return
 }
 
-// cleanup is used to dispose of any temp resources used during execution
-func cleanup() {
+// CleanupTmp is used to dispose of any temp resources used during execution
+func CleanupTmp() {
 	// Remove tmp folder and its content
 	err := os.RemoveAll(tmpDirFunc())
 	if err != nil {

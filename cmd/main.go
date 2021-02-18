@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"os/signal"
+	"syscall"
 	"time"
 
 	"github.com/briandowns/spinner"
@@ -15,6 +17,10 @@ import (
 )
 
 func main() {
+
+	// Setup for handling SIGTERM (Ctrl+C)
+	setupCloseHandler()
+
 	err := config.Init("") // Create default config
 	if err != nil {
 		log.Printf("[ERROR] error returned from config.Init: %v", err)
@@ -68,4 +74,20 @@ func exit(status int) {
 		config.Spinner.Stop()
 	}
 	os.Exit(status)
+}
+
+// setupCloseHandler creates a 'listener' on a new goroutine which will notify the
+// program if it receives an interrupt from the OS. We then handle this by calling
+// our clean up procedure and exiting the program.
+// Ref: https://golangcode.com/handle-ctrl-c-exit-in-terminal/
+func setupCloseHandler() {
+	c := make(chan os.Signal)
+	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
+	go func() {
+		<-c
+		log.Printf("Execution aborted - %v", "SIGTERM")
+		probr.CleanupTmp()
+		// TODO: Additional cleanup may be needed. For instance, any pods created during tests are not being dropped if aborted.
+		os.Exit(0)
+	}()
 }
