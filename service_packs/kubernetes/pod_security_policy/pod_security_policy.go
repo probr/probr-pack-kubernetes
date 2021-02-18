@@ -186,7 +186,7 @@ func (s *scenarioState) runVerificationProbeWithCommand(podState kubernetes.PodS
 			err = utils.ReformatError("%s: %v - (%v)", utils.CallerName(0), command, res.Err)
 			log.Print(err)
 			return err
-		} // TODO: Potential bug: (res.Err != nil && res.Internal == false) not handled. E.g: Try to execute 'sudo chroot'.
+		}
 
 		//log.Printf("Command: %s, Exit Code: %v\n", command, res.Code)
 
@@ -260,7 +260,7 @@ func (s *scenarioState) runVerificationProbe(c VerificationProbe) error {
 			err = utils.ReformatError("%s: %v - (%v)", utils.CallerName(0), c, res.Err)
 			log.Print(err)
 			return err
-		} // TODO: Potential bug: (res.Err != nil && res.Internal == false) not handled. E.g: Try to execute 'sudo chroot'.
+		}
 
 		//we've managed to execution against the cluster.  This may have failed due to pod security, but this
 		//is still a 'successful' execution.  The exit code of the command needs to be verified against expected
