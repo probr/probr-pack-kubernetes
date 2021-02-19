@@ -8,12 +8,12 @@ Feature: Egress control of a kubernetes cluster
     @k-iaf-001
     Scenario Outline: Test outgoing connectivity of a deployed pod
         Given a Kubernetes cluster is deployed
-        And a pod is deployed in the cluster
-        When a process inside the pod establishes a direct http(s) connection to "<url>"
+        When a pod is deployed in the cluster
+        And a process inside the pod establishes a direct http(s) connection to "<url>"
         Then access is "<result>"
 
         Examples:
-            | url                             | result    |
-            | www.google.com        | blocked |
+            | url               | result  |
+            | www.google.com    | blocked |
             | www.microsoft.com | blocked |
-            | www.ubuntu.com        | blocked |
+            | www.ubuntu.com    | blocked |
