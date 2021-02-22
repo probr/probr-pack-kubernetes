@@ -208,7 +208,7 @@ func TestReadStaticFile(t *testing.T) {
 
 func TestAuditPlaceholders(t *testing.T) {
 	str, interf, err := AuditPlaceholders()
-	if str != "" || interf != nil || err != nil {
+	if str.String() != "" || interf != nil || err != nil {
 		t.Errorf("Audit Placeholder objects did not return as expected")
 	}
 }

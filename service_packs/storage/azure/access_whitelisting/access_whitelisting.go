@@ -168,7 +168,8 @@ func (state *scenarioState) createWithWhitelist(ipRange string) error {
 		state.audit.AuditScenarioStep(stepTrace.String(), payload, err)
 	}()
 
-	stepTrace.WriteString(fmt.Sprintf("Attempting to create storage bucket with whitelisting for given IP Range: %s;", ipRange))
+	stepTrace.WriteString(fmt.Sprintf(
+		"Attempting to create storage bucket with whitelisting for given IP Range: %s;", ipRange))
 
 	var networkRuleSet azureStorage.NetworkRuleSet
 	if ipRange == "nil" {
@@ -218,7 +219,8 @@ func (state *scenarioState) creationWill(expectation string) error {
 		state.audit.AuditScenarioStep(stepTrace.String(), payload, err)
 	}()
 
-	stepTrace.WriteString(fmt.Sprintf("Expectation that Object Storage container was provisioned with whitelisting in previous step is: %s;", expectation))
+	stepTrace.WriteString(fmt.Sprintf(
+		"Expectation that Object Storage container was provisioned with whitelisting in previous step is: %s;", expectation))
 
 	if expectation == "Fail" {
 		if state.runningErr == nil {
@@ -273,7 +275,8 @@ func (state *scenarioState) examineStorageContainer(containerNameEnvVar string) 
 		state.audit.AuditScenarioStep(stepTrace.String(), payload, err)
 	}()
 
-	stepTrace.WriteString(fmt.Sprintf("Checking value for environment variable: %s;", containerNameEnvVar))
+	stepTrace.WriteString(fmt.Sprintf(
+		"Checking value for environment variable: %s;", containerNameEnvVar))
 	accountName := os.Getenv(containerNameEnvVar) // TODO: Should this come from config?
 	payload.StorageAccountName = accountName
 	if accountName == "" {
@@ -281,7 +284,8 @@ func (state *scenarioState) examineStorageContainer(containerNameEnvVar string) 
 		return err
 	}
 
-	stepTrace.WriteString(fmt.Sprintf("Checking value for environment variable: %s;", storageRgEnvVar))
+	stepTrace.WriteString(fmt.Sprintf(
+		"Checking value for environment variable: %s;", storageRgEnvVar))
 	resourceGroup := os.Getenv(storageRgEnvVar) // TODO: Should this be replaced with azureutil.ResourceGroup() - which not only checks in env var, but also config vars?
 	payload.ResourceGroup = resourceGroup
 	if resourceGroup == "" {

@@ -115,7 +115,8 @@ func (state *scenarioState) httpAccessIs(arg1 string) error {
 		state.audit.AuditScenarioStep(stepTrace.String(), payload, err)
 	}()
 
-	stepTrace.WriteString(fmt.Sprintf("Http Option: %s;", arg1))
+	stepTrace.WriteString(fmt.Sprintf(
+		"Http Option: %s;", arg1))
 	if arg1 == "enabled" {
 		state.httpOption = true
 	} else {
@@ -134,7 +135,8 @@ func (state *scenarioState) httpsAccessIs(arg1 string) error {
 		state.audit.AuditScenarioStep(stepTrace.String(), payload, err)
 	}()
 
-	stepTrace.WriteString(fmt.Sprintf("Https Option: %s;", arg1))
+	stepTrace.WriteString(fmt.Sprintf(
+		"Https Option: %s;", arg1))
 	if arg1 == "enabled" {
 		state.httpsOption = true
 	} else {
@@ -171,24 +173,28 @@ func (state *scenarioState) creationWillWithAnErrorMatching(expectation, errDesc
 
 	// Both true take it as http option is try
 	if state.httpsOption && state.httpOption {
-		stepTrace.WriteString(fmt.Sprintf("Creating Storage Account with HTTPS: %v;", false))
+		stepTrace.WriteString(fmt.Sprintf(
+			"Creating Storage Account with HTTPS: %v;", false))
 		log.Printf("[DEBUG] Creating Storage Account with HTTPS: %v;", false)
 		_, err = storage.CreateWithNetworkRuleSet(state.ctx, accountName,
 			azureutil.ResourceGroup(), state.tags, false, &networkRuleSet)
 	} else if state.httpsOption {
-		stepTrace.WriteString(fmt.Sprintf("Creating Storage Account with HTTPS: %v;", state.httpsOption))
+		stepTrace.WriteString(fmt.Sprintf(
+			"Creating Storage Account with HTTPS: %v;", state.httpsOption))
 		log.Printf("[DEBUG] Creating Storage Account with HTTPS: %v", state.httpsOption)
 		_, err = storage.CreateWithNetworkRuleSet(state.ctx, accountName,
 			azureutil.ResourceGroup(), state.tags, state.httpsOption, &networkRuleSet)
 	} else if state.httpOption {
-		stepTrace.WriteString(fmt.Sprintf("Creating Storage Account with HTTPS: %v;", state.httpsOption))
+		stepTrace.WriteString(fmt.Sprintf(
+			"Creating Storage Account with HTTPS: %v;", state.httpsOption))
 		log.Printf("[DEBUG] Creating Storage Account with HTTPS: %v", state.httpsOption)
 		_, err = storage.CreateWithNetworkRuleSet(state.ctx, accountName,
 			azureutil.ResourceGroup(), state.tags, state.httpsOption, &networkRuleSet)
 	}
 	if err == nil {
 		// storage account created so add to state
-		stepTrace.WriteString(fmt.Sprintf("Created Storage Account: %s;", accountName))
+		stepTrace.WriteString(fmt.Sprintf(
+			"Created Storage Account: %s;", accountName))
 		log.Printf("[DEBUG] Created Storage Account: %s", accountName)
 		state.storageAccounts = append(state.storageAccounts, accountName)
 	}

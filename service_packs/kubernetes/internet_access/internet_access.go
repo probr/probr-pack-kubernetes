@@ -3,6 +3,7 @@ package internet_access
 import (
 	"fmt"
 	"log"
+	"strings"
 
 	"github.com/cucumber/godog"
 	apiv1 "k8s.io/api/core/v1"
@@ -12,9 +13,10 @@ import (
 	"github.com/citihub/probr/utils"
 )
 
-type ProbeStruct struct{}
+type probeStruct struct{}
 
-var Probe ProbeStruct
+// Probe meets the service pack interface for adding the logic from this file
+var Probe probeStruct
 
 var ia_ps scenarioState
 
@@ -33,18 +35,20 @@ func SetNetworkAccess(n NetworkAccess) {
 
 // General
 func (s *scenarioState) aKubernetesClusterIsDeployed() error {
+	var stepTrace strings.Builder
 	description, payload, err := kubernetes.ClusterIsDeployed()
+	stepTrace.WriteString(description)
 	defer func() {
-		s.audit.AuditScenarioStep(description, payload, err)
+		s.audit.AuditScenarioStep(stepTrace.String(), payload, err)
 	}()
 	return err //  ClusterIsDeployed will create a fatal error if kubeconfig doesn't validate
 }
 
 func (s *scenarioState) aPodIsDeployedInTheCluster() error {
 	// Standard auditing logic to ensures panics are also audited
-	description, payload, err := utils.AuditPlaceholders()
+	stepTrace, payload, err := utils.AuditPlaceholders()
 	defer func() {
-		s.audit.AuditScenarioStep(description, payload, err)
+		s.audit.AuditScenarioStep(stepTrace.String(), payload, err)
 	}()
 
 	var podAudit *kubernetes.PodAudit
@@ -66,7 +70,8 @@ func (s *scenarioState) aPodIsDeployedInTheCluster() error {
 		}
 	}
 
-	description = fmt.Sprintf("Verifying the Pod %s deployed in the cluster", s.podState.PodName)
+	stepTrace.WriteString(fmt.Sprintf(
+		"Verifying the Pod %s deployed in the cluster", s.podState.PodName))
 	payload = kubernetes.PodPayload{Pod: pod, PodAudit: podAudit}
 
 	return err
@@ -74,9 +79,9 @@ func (s *scenarioState) aPodIsDeployedInTheCluster() error {
 
 func (s *scenarioState) aProcessInsideThePodEstablishesADirectHTTPSConnectionTo(url string) error {
 	// Standard auditing logic to ensures panics are also audited
-	description, payload, err := utils.AuditPlaceholders()
+	stepTrace, payload, err := utils.AuditPlaceholders()
 	defer func() {
-		s.audit.AuditScenarioStep(description, payload, err)
+		s.audit.AuditScenarioStep(stepTrace.String(), payload, err)
 	}()
 
 	code, err := na.AccessURL(&s.podName, &url)
@@ -89,20 +94,20 @@ func (s *scenarioState) aProcessInsideThePodEstablishesADirectHTTPSConnectionTo(
 	//hold on to the code
 	s.httpStatusCode = code
 
-	description = fmt.Sprintf("Proces inside the pod established http connection with url '%s',", url)
+	stepTrace.WriteString(fmt.Sprintf(
+		"Proces inside the pod established http connection with url '%s',", url))
 	payload = struct {
 		PodState kubernetes.PodState
-		PodName  string
-	}{s.podState, s.podState.PodName}
+	}{s.podState}
 
 	return err
 }
 
 func (s *scenarioState) accessIs(accessResult string) error {
 	// Standard auditing logic to ensures panics are also audited
-	description, payload, err := utils.AuditPlaceholders()
+	stepTrace, payload, err := utils.AuditPlaceholders()
 	defer func() {
-		s.audit.AuditScenarioStep(description, payload, err)
+		s.audit.AuditScenarioStep(stepTrace.String(), payload, err)
 	}()
 
 	if accessResult == "blocked" {
@@ -113,26 +118,28 @@ func (s *scenarioState) accessIs(accessResult string) error {
 		}
 	}
 
-	description = fmt.Sprintf("The access result is %s,", accessResult)
+	stepTrace.WriteString(fmt.Sprintf(
+		"The access result is %s,", accessResult))
 	payload = struct {
 		PodState kubernetes.PodState
-		PodName  string
-	}{s.podState, s.podState.PodName}
+	}{s.podState}
 
 	return err
 }
 
-func (p ProbeStruct) Name() string {
+// Name presents the name of this probe for external reference
+func (p probeStruct) Name() string {
 	return "internet_access"
 }
 
-func (p ProbeStruct) Path() string {
+// Path presents the path of these feature files for external reference
+func (p probeStruct) Path() string {
 	return coreengine.GetFeaturePath("service_packs", "kubernetes", p.Name())
 }
 
-// iaProbeInitialize handles any overall Test Suite initialisation steps.  This is registered with the
+// ProbeInitialize handles any overall Test Suite initialisation steps.  This is registered with the
 // test handler as part of the init() function.
-func (p ProbeStruct) ProbeInitialize(ctx *godog.TestSuiteContext) {
+func (p probeStruct) ProbeInitialize(ctx *godog.TestSuiteContext) {
 	ctx.BeforeSuite(func() {}) //nothing for now
 
 	ctx.AfterSuite(func() {
@@ -146,11 +153,11 @@ func (p ProbeStruct) ProbeInitialize(ctx *godog.TestSuiteContext) {
 	}
 }
 
-// iaScenarioInitialize initialises the specific test steps.  This is essentially the creation of the test
+// ScenarioInitialize initialises the specific test steps.  This is essentially the creation of the test
 // which reflects the tests described in the events directory.  There must be a test step registered for
 // each line in the feature files. Note: Godog will output stub steps and implementations if it doesn't find
 // a step / function defined.  See: https://github.com/cucumber/godog#example.
-func (p ProbeStruct) ScenarioInitialize(ctx *godog.ScenarioContext) {
+func (p probeStruct) ScenarioInitialize(ctx *godog.ScenarioContext) {
 
 	ctx.BeforeScenario(func(s *godog.Scenario) {
 		beforeScenario(&ia_ps, p.Name(), s)

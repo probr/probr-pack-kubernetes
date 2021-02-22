@@ -126,6 +126,6 @@ func ReplaceBytesMultipleValues(b []byte, replacer *strings.Replacer) []byte {
 }
 
 // AuditPlaceholders creates empty objects to reduce code repetition when auditing probe steps
-func AuditPlaceholders() (string, interface{}, error) {
-	return *new(string), *new(interface{}), *new(error)
+func AuditPlaceholders() (strings.Builder, interface{}, error) {
+	return *new(strings.Builder), *new(interface{}), *new(error)
 }

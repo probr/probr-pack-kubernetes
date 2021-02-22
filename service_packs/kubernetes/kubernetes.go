@@ -1,6 +1,7 @@
 package kubernetes
 
 import (
+	"fmt"
 	"log"
 	"path/filepath"
 
@@ -151,12 +152,13 @@ func AssertResult(s *PodState, res, msg string) error {
 
 }
 
+// ClusterPayload ...
 type ClusterPayload struct {
 	KubeConfigPath string
 	KubeContext    string
 }
 
-//general feature steps:
+//ClusterIsDeployed ...
 func ClusterIsDeployed() (string, ClusterPayload, error) {
 	var err error
 	b := GetKubeInstance().ClusterIsDeployed()
@@ -164,7 +166,9 @@ func ClusterIsDeployed() (string, ClusterPayload, error) {
 		err = utils.ReformatError("Kubernetes cluster is not deployed")
 		log.Print(err)
 	}
-	description := "Passes if Probr successfully connects to the specified cluster."
+	description := fmt.Sprintf("Validated that the k8s cluster specified in '%s' is deployed by checking the '%s' context; ",
+		config.Vars.ServicePacks.Kubernetes.KubeConfigPath,
+		config.Vars.ServicePacks.Kubernetes.KubeContext)
 	payload := ClusterPayload{config.Vars.ServicePacks.Kubernetes.KubeConfigPath, config.Vars.ServicePacks.Kubernetes.KubeContext}
 	return description, payload, err
 }
