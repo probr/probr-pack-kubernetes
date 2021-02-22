@@ -9,7 +9,8 @@ ServicePacks:
     AuthorisedContainerRegistry: myprodregistry.azurecr.io # required
     UnauthorisedContainerRegistry: docker.io # required
     ProbeImage: citihub/probr-probe
-    ContainerRequiredDropCapabilities: "[NET_RAW]"
+    ContainerRequiredDropCapabilities:
+      - "NET_RAW"
     Probes: # allows this pack's probes to be disabled by name
       - Name: pod_security_policy
         Excluded: "out"
