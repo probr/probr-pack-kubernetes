@@ -1,28 +1,23 @@
 {
   "Name": "pod_security_policy",
-  "PodsDestroyed": 0,
-  "ScenariosAttempted": 36,
-  "ScenariosSucceeded": 25,
-  "ScenariosFailed": 11,
+  "PodsDestroyed": 25,
+  "ScenariosAttempted": 35,
+  "ScenariosSucceeded": 33,
+  "ScenariosFailed": 2,
   "Result": "Failed",
   "Scenarios": {
     "1": {
       "Name": "Prevent a deployment from running with privileged access",
       "Result": "Passed",
       "Tags": [
-        "@service/kubernetes",
-        "@control/family/pod_security_policy",
-        "@csp/azure",
-        "@csp/aws",
-        "@csp/gcp",
-        "@standard/cis/5.2",
-        "@control/type/preventative",
-        "@standard/cis/5.2.1"
+        "@k-psp",
+        "@probes/kubernetes/pod_security_policy",
+        "@k-psp-001"
       ],
       "Steps": {
         "1": {
           "Name": "aKubernetesClusterIsDeployed",
-          "Description": "Passes if Probr successfully connects to the specified cluster.",
+          "Description": "Validated that the k8s cluster specified in '/root/.kube/config' is deployed by checking the '' context; ",
           "Result": "Passed",
           "Error": "",
           "Payload": {
@@ -32,38 +27,104 @@
         },
         "2": {
           "Name": "someControlExistsToPreventPrivilegedAccessForKubernetesDeploymentsToAnActiveKubernetesCluster",
-          "Description": "",
+          "Description": "Validate that the kube instance security context contains 'k8sazurecontainernoprivilege'; ",
           "Result": "Passed",
           "Error": "",
-          "Payload": null
+          "Payload": {
+            "PodState": {
+              "PodName": "",
+              "CreationError": null,
+              "ExpectedReason": null,
+              "CommandExitCode": 0
+            }
+          }
         },
         "3": {
-          "Name": "privilegedAccessRequestIsMarkedForTheKubernetesDeployment",
-          "Description": "",
+          "Name": "aKubernetesDeploymentIsAppliedToAnExistingKubernetesCluster",
+          "Description": "PENDING IMPLEMENTATION",
           "Result": "Passed",
           "Error": "",
           "Payload": null
         },
         "4": {
-          "Name": "theOperationWillWithAnError",
-          "Description": "",
+          "Name": "privilegedAccessRequestIsMarkedForTheKubernetesDeployment",
+          "Description": "Attempt to deploy a pod with priviledged access 'True'; ",
           "Result": "Passed",
           "Error": "",
-          "Payload": null
+          "Payload": {
+            "PodState": {
+              "PodName": "",
+              "CreationError": {
+                "ReasonCodes": {
+                  "1": 7,
+                  "2": 7
+                }
+              },
+              "ExpectedReason": 1,
+              "CommandExitCode": 0
+            }
+          }
         },
         "5": {
-          "Name": "iShouldNotBeAbleToPerformACommandThatRequiresPrivilegedAccess",
-          "Description": "",
+          "Name": "theOperationWillWithAnError",
+          "Description": "Validate that the scenario state was updated in the previous step with a particular result and message; ",
           "Result": "Passed",
           "Error": "",
-          "Payload": null
+          "Payload": {
+            "ExpectedResult": "Fail",
+            "ExpectedMessage": "Containers with privileged access can't run",
+            "PodState": {
+              "PodName": "",
+              "CreationError": {
+                "ReasonCodes": {
+                  "1": 7,
+                  "2": 7
+                }
+              },
+              "ExpectedReason": 1,
+              "CommandExitCode": 0
+            }
+          }
         },
         "6": {
-          "Name": "performAllowedCommand",
-          "Description": "",
+          "Name": "iShouldNotBeAbleToPerformACommandThatRequiresPrivilegedAccess",
+          "Description": "Validate that the command 'chroot .' fails to execute; ",
           "Result": "Passed",
           "Error": "",
-          "Payload": null
+          "Payload": {
+            "PodState": {
+              "PodName": "",
+              "CreationError": {
+                "ReasonCodes": {
+                  "1": 7,
+                  "2": 7
+                }
+              },
+              "ExpectedReason": 1,
+              "CommandExitCode": 0
+            }
+          }
+        },
+        "7": {
+          "Name": "iShouldBeAbleToPerformAnAllowedCommand",
+          "Description": "Validate that 'ls' is executed successfully",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": {
+            "PodState": {
+              "PodName": "",
+              "CreationError": {
+                "ReasonCodes": {
+                  "1": 7,
+                  "2": 7
+                }
+              },
+              "ExpectedReason": 1,
+              "CommandExitCode": 0
+            },
+            "Command": "ls",
+            "ExpectedExitCode": 0
+          }
         }
       }
     },
@@ -71,19 +132,14 @@
       "Name": "Prevent a deployment from running with the hostNetwork flag.",
       "Result": "Passed",
       "Tags": [
-        "@service/kubernetes",
-        "@control/family/pod_security_policy",
-        "@csp/azure",
-        "@csp/aws",
-        "@csp/gcp",
-        "@standard/cis/5.2",
-        "@control/type/preventative",
-        "@standard/cis/5.2.4"
+        "@k-psp",
+        "@probes/kubernetes/pod_security_policy",
+        "@k-psp-004"
       ],
       "Steps": {
         "1": {
           "Name": "aKubernetesClusterIsDeployed",
-          "Description": "Passes if Probr successfully connects to the specified cluster.",
+          "Description": "Validated that the k8s cluster specified in '/root/.kube/config' is deployed by checking the '' context; ",
           "Result": "Passed",
           "Error": "",
           "Payload": {
@@ -93,38 +149,104 @@
         },
         "2": {
           "Name": "someSystemExistsToPreventAKubernetesDeploymentFromRunningUsingTheHostNetworkInAnExistingKubernetesCluster",
-          "Description": "",
+          "Description": "Validate that at least on of the pod security policies has HostNetwork set to false; ",
           "Result": "Passed",
           "Error": "",
-          "Payload": null
+          "Payload": {
+            "PodState": {
+              "PodName": "",
+              "CreationError": null,
+              "ExpectedReason": null,
+              "CommandExitCode": 0
+            }
+          }
         },
         "3": {
-          "Name": "hostNetworkRequestIsMarkedForTheKubernetesDeployment",
-          "Description": "",
+          "Name": "aKubernetesDeploymentIsAppliedToAnExistingKubernetesCluster",
+          "Description": "PENDING IMPLEMENTATION",
           "Result": "Passed",
           "Error": "",
           "Payload": null
         },
         "4": {
-          "Name": "theOperationWillWithAnError",
-          "Description": "",
+          "Name": "hostNetworkRequestIsMarkedForTheKubernetesDeployment",
+          "Description": "Attempt to deploy a pod with host network request marked 'True'; ",
           "Result": "Passed",
           "Error": "",
-          "Payload": null
+          "Payload": {
+            "PodState": {
+              "PodName": "",
+              "CreationError": {
+                "ReasonCodes": {
+                  "6": 10,
+                  "8": 10
+                }
+              },
+              "ExpectedReason": 6,
+              "CommandExitCode": 0
+            }
+          }
         },
         "5": {
-          "Name": "iShouldNotBeAbleToPerformACommandThatProvidesAccessToTheHostNetworkNamespace",
-          "Description": "",
+          "Name": "theOperationWillWithAnError",
+          "Description": "Validate that the scenario state was updated in the previous step with a particular result and message; ",
           "Result": "Passed",
           "Error": "",
-          "Payload": null
+          "Payload": {
+            "ExpectedResult": "Fail",
+            "ExpectedMessage": "Containers with hostNetwork access can't run",
+            "PodState": {
+              "PodName": "",
+              "CreationError": {
+                "ReasonCodes": {
+                  "6": 10,
+                  "8": 10
+                }
+              },
+              "ExpectedReason": 6,
+              "CommandExitCode": 0
+            }
+          }
         },
         "6": {
-          "Name": "performAllowedCommand",
-          "Description": "",
+          "Name": "iShouldNotBeAbleToPerformACommandThatProvidesAccessToTheHostNetworkNamespace",
+          "Description": "Validate that the exit code for command 'nsenter -t 1 -n ps' is 1; ",
           "Result": "Passed",
           "Error": "",
-          "Payload": null
+          "Payload": {
+            "PodState": {
+              "PodName": "",
+              "CreationError": {
+                "ReasonCodes": {
+                  "6": 10,
+                  "8": 10
+                }
+              },
+              "ExpectedReason": 6,
+              "CommandExitCode": 0
+            }
+          }
+        },
+        "7": {
+          "Name": "iShouldBeAbleToPerformAnAllowedCommand",
+          "Description": "Validate that 'ls' is executed successfully",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": {
+            "PodState": {
+              "PodName": "",
+              "CreationError": {
+                "ReasonCodes": {
+                  "6": 10,
+                  "8": 10
+                }
+              },
+              "ExpectedReason": 6,
+              "CommandExitCode": 0
+            },
+            "Command": "ls",
+            "ExpectedExitCode": 0
+          }
         }
       }
     },
@@ -132,19 +254,14 @@
       "Name": "Prevent a deployment from running with the hostNetwork flag.",
       "Result": "Passed",
       "Tags": [
-        "@service/kubernetes",
-        "@control/family/pod_security_policy",
-        "@csp/azure",
-        "@csp/aws",
-        "@csp/gcp",
-        "@standard/cis/5.2",
-        "@control/type/preventative",
-        "@standard/cis/5.2.4"
+        "@k-psp",
+        "@probes/kubernetes/pod_security_policy",
+        "@k-psp-004"
       ],
       "Steps": {
         "1": {
           "Name": "aKubernetesClusterIsDeployed",
-          "Description": "Passes if Probr successfully connects to the specified cluster.",
+          "Description": "Validated that the k8s cluster specified in '/root/.kube/config' is deployed by checking the '' context; ",
           "Result": "Passed",
           "Error": "",
           "Payload": {
@@ -154,38 +271,84 @@
         },
         "2": {
           "Name": "someSystemExistsToPreventAKubernetesDeploymentFromRunningUsingTheHostNetworkInAnExistingKubernetesCluster",
-          "Description": "",
+          "Description": "Validate that at least on of the pod security policies has HostNetwork set to false; ",
           "Result": "Passed",
           "Error": "",
-          "Payload": null
+          "Payload": {
+            "PodState": {
+              "PodName": "",
+              "CreationError": null,
+              "ExpectedReason": null,
+              "CommandExitCode": 0
+            }
+          }
         },
         "3": {
-          "Name": "hostNetworkRequestIsMarkedForTheKubernetesDeployment",
-          "Description": "",
+          "Name": "aKubernetesDeploymentIsAppliedToAnExistingKubernetesCluster",
+          "Description": "PENDING IMPLEMENTATION",
           "Result": "Passed",
           "Error": "",
           "Payload": null
         },
         "4": {
-          "Name": "theOperationWillWithAnError",
-          "Description": "",
+          "Name": "hostNetworkRequestIsMarkedForTheKubernetesDeployment",
+          "Description": "Attempt to deploy a pod with host network request marked 'False'; ",
           "Result": "Passed",
           "Error": "",
-          "Payload": null
+          "Payload": {
+            "PodState": {
+              "PodName": "psp-test-pod-220221-103327-61",
+              "CreationError": null,
+              "ExpectedReason": null,
+              "CommandExitCode": 0
+            }
+          }
         },
         "5": {
-          "Name": "iShouldNotBeAbleToPerformACommandThatProvidesAccessToTheHostNetworkNamespace",
-          "Description": "",
+          "Name": "theOperationWillWithAnError",
+          "Description": "Validate that the scenario state was updated in the previous step with a particular result and message; ",
           "Result": "Passed",
           "Error": "",
-          "Payload": null
+          "Payload": {
+            "ExpectedResult": "Succeed",
+            "ExpectedMessage": "No error would show",
+            "PodState": {
+              "PodName": "psp-test-pod-220221-103327-61",
+              "CreationError": null,
+              "ExpectedReason": null,
+              "CommandExitCode": 0
+            }
+          }
         },
         "6": {
-          "Name": "performAllowedCommand",
-          "Description": "",
+          "Name": "iShouldNotBeAbleToPerformACommandThatProvidesAccessToTheHostNetworkNamespace",
+          "Description": "Validate that the exit code for command 'nsenter -t 1 -n ps' is 1; ",
           "Result": "Passed",
           "Error": "",
-          "Payload": null
+          "Payload": {
+            "PodState": {
+              "PodName": "psp-test-pod-220221-103327-61",
+              "CreationError": null,
+              "ExpectedReason": null,
+              "CommandExitCode": 0
+            }
+          }
+        },
+        "7": {
+          "Name": "iShouldBeAbleToPerformAnAllowedCommand",
+          "Description": "Validate that 'ls' is executed successfully",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": {
+            "PodState": {
+              "PodName": "psp-test-pod-220221-103327-61",
+              "CreationError": null,
+              "ExpectedReason": null,
+              "CommandExitCode": 0
+            },
+            "Command": "ls",
+            "ExpectedExitCode": 0
+          }
         }
       }
     },
@@ -193,19 +356,14 @@
       "Name": "Prevent a deployment from running with the hostNetwork flag.",
       "Result": "Passed",
       "Tags": [
-        "@service/kubernetes",
-        "@control/family/pod_security_policy",
-        "@csp/azure",
-        "@csp/aws",
-        "@csp/gcp",
-        "@standard/cis/5.2",
-        "@control/type/preventative",
-        "@standard/cis/5.2.4"
+        "@k-psp",
+        "@probes/kubernetes/pod_security_policy",
+        "@k-psp-004"
       ],
       "Steps": {
         "1": {
           "Name": "aKubernetesClusterIsDeployed",
-          "Description": "Passes if Probr successfully connects to the specified cluster.",
+          "Description": "Validated that the k8s cluster specified in '/root/.kube/config' is deployed by checking the '' context; ",
           "Result": "Passed",
           "Error": "",
           "Payload": {
@@ -215,58 +373,99 @@
         },
         "2": {
           "Name": "someSystemExistsToPreventAKubernetesDeploymentFromRunningUsingTheHostNetworkInAnExistingKubernetesCluster",
-          "Description": "",
+          "Description": "Validate that at least on of the pod security policies has HostNetwork set to false; ",
           "Result": "Passed",
           "Error": "",
-          "Payload": null
+          "Payload": {
+            "PodState": {
+              "PodName": "",
+              "CreationError": null,
+              "ExpectedReason": null,
+              "CommandExitCode": 0
+            }
+          }
         },
         "3": {
-          "Name": "hostNetworkRequestIsMarkedForTheKubernetesDeployment",
-          "Description": "",
+          "Name": "aKubernetesDeploymentIsAppliedToAnExistingKubernetesCluster",
+          "Description": "PENDING IMPLEMENTATION",
           "Result": "Passed",
           "Error": "",
           "Payload": null
         },
         "4": {
-          "Name": "theOperationWillWithAnError",
-          "Description": "",
+          "Name": "hostNetworkRequestIsMarkedForTheKubernetesDeployment",
+          "Description": "Attempt to deploy a pod with host network request marked 'Not defined'; ",
           "Result": "Passed",
           "Error": "",
-          "Payload": null
+          "Payload": {
+            "PodState": {
+              "PodName": "psp-test-pod-220221-103330-73",
+              "CreationError": null,
+              "ExpectedReason": null,
+              "CommandExitCode": 0
+            }
+          }
         },
         "5": {
-          "Name": "iShouldNotBeAbleToPerformACommandThatProvidesAccessToTheHostNetworkNamespace",
-          "Description": "",
+          "Name": "theOperationWillWithAnError",
+          "Description": "Validate that the scenario state was updated in the previous step with a particular result and message; ",
           "Result": "Passed",
           "Error": "",
-          "Payload": null
+          "Payload": {
+            "ExpectedResult": "Succeed",
+            "ExpectedMessage": "No error would show",
+            "PodState": {
+              "PodName": "psp-test-pod-220221-103330-73",
+              "CreationError": null,
+              "ExpectedReason": null,
+              "CommandExitCode": 0
+            }
+          }
         },
         "6": {
-          "Name": "performAllowedCommand",
-          "Description": "",
+          "Name": "iShouldNotBeAbleToPerformACommandThatProvidesAccessToTheHostNetworkNamespace",
+          "Description": "Validate that the exit code for command 'nsenter -t 1 -n ps' is 1; ",
           "Result": "Passed",
           "Error": "",
-          "Payload": null
+          "Payload": {
+            "PodState": {
+              "PodName": "psp-test-pod-220221-103330-73",
+              "CreationError": null,
+              "ExpectedReason": null,
+              "CommandExitCode": 0
+            }
+          }
+        },
+        "7": {
+          "Name": "iShouldBeAbleToPerformAnAllowedCommand",
+          "Description": "Validate that 'ls' is executed successfully",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": {
+            "PodState": {
+              "PodName": "psp-test-pod-220221-103330-73",
+              "CreationError": null,
+              "ExpectedReason": null,
+              "CommandExitCode": 0
+            },
+            "Command": "ls",
+            "ExpectedExitCode": 0
+          }
         }
       }
     },
     "13": {
       "Name": "Prevent a deployment from running with the allowPrivilegeEscalation flag",
-      "Result": "Failed",
+      "Result": "Passed",
       "Tags": [
-        "@service/kubernetes",
-        "@control/family/pod_security_policy",
-        "@csp/azure",
-        "@csp/aws",
-        "@csp/gcp",
-        "@standard/cis/5.2",
-        "@control/type/preventative",
-        "@standard/cis/5.2.5"
+        "@k-psp",
+        "@probes/kubernetes/pod_security_policy",
+        "@k-psp-005"
       ],
       "Steps": {
         "1": {
           "Name": "aKubernetesClusterIsDeployed",
-          "Description": "Passes if Probr successfully connects to the specified cluster.",
+          "Description": "Validated that the k8s cluster specified in '/root/.kube/config' is deployed by checking the '' context; ",
           "Result": "Passed",
           "Error": "",
           "Payload": {
@@ -276,24 +475,100 @@
         },
         "2": {
           "Name": "someSystemExistsToPreventAKubernetesDeploymentFromRunningUsingTheAllowPrivilegeEscalationInAnExistingKubernetesCluster",
-          "Description": "",
+          "Description": "Validate that at least one of the pod security policies has AllowPrivilegeEscalation set to false; ",
           "Result": "Passed",
           "Error": "",
-          "Payload": null
+          "Payload": {
+            "PodState": {
+              "PodName": "",
+              "CreationError": null,
+              "ExpectedReason": null,
+              "CommandExitCode": 0
+            }
+          }
         },
         "3": {
-          "Name": "privilegedEscalationIsMarkedForTheKubernetesDeployment",
-          "Description": "",
+          "Name": "aKubernetesDeploymentIsAppliedToAnExistingKubernetesCluster",
+          "Description": "PENDING IMPLEMENTATION",
           "Result": "Passed",
           "Error": "",
           "Payload": null
         },
         "4": {
+          "Name": "privilegedEscalationIsMarkedForTheKubernetesDeployment",
+          "Description": "Parsing pod spec file '%s'; Attempt to create a pod with privilege escalation set to 'true'; ",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": {
+            "PodState": {
+              "PodName": "",
+              "CreationError": {
+                "ReasonCodes": {
+                  "2": 5
+                }
+              },
+              "ExpectedReason": 2,
+              "CommandExitCode": 0
+            }
+          }
+        },
+        "5": {
           "Name": "theOperationWillWithAnError",
-          "Description": "",
-          "Result": "Failed",
-          "Error": "pod not was created but failure reasons (map[podcreation-error: psp-container-no-privilege:podcreation-error: psp-container-no-privilege]) did not contain expected (podcreation-error: psp-container-no-privilege-escalation)- test failed",
-          "Payload": null
+          "Description": "Validate that the scenario state was updated in the previous step with a particular result and message; ",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": {
+            "ExpectedResult": "Fail",
+            "ExpectedMessage": "Containers cant run using the allowPrivilegeEscalation flag",
+            "PodState": {
+              "PodName": "",
+              "CreationError": {
+                "ReasonCodes": {
+                  "2": 5
+                }
+              },
+              "ExpectedReason": 2,
+              "CommandExitCode": 0
+            }
+          }
+        },
+        "6": {
+          "Name": "iShouldNotBeAbleToPerformASudoCommandThatRequiresPrivilegedAccess",
+          "Description": "Validate that the exit code for command 'sudo chroot .' is 1; ",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": {
+            "PodState": {
+              "PodName": "",
+              "CreationError": {
+                "ReasonCodes": {
+                  "2": 5
+                }
+              },
+              "ExpectedReason": 2,
+              "CommandExitCode": 0
+            }
+          }
+        },
+        "7": {
+          "Name": "iShouldBeAbleToPerformAnAllowedCommand",
+          "Description": "Validate that 'ls' is executed successfully",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": {
+            "PodState": {
+              "PodName": "",
+              "CreationError": {
+                "ReasonCodes": {
+                  "2": 5
+                }
+              },
+              "ExpectedReason": 2,
+              "CommandExitCode": 0
+            },
+            "Command": "ls",
+            "ExpectedExitCode": 0
+          }
         }
       }
     },
@@ -301,19 +576,14 @@
       "Name": "Prevent a deployment from running with the allowPrivilegeEscalation flag",
       "Result": "Passed",
       "Tags": [
-        "@service/kubernetes",
-        "@control/family/pod_security_policy",
-        "@csp/azure",
-        "@csp/aws",
-        "@csp/gcp",
-        "@standard/cis/5.2",
-        "@control/type/preventative",
-        "@standard/cis/5.2.5"
+        "@k-psp",
+        "@probes/kubernetes/pod_security_policy",
+        "@k-psp-005"
       ],
       "Steps": {
         "1": {
           "Name": "aKubernetesClusterIsDeployed",
-          "Description": "Passes if Probr successfully connects to the specified cluster.",
+          "Description": "Validated that the k8s cluster specified in '/root/.kube/config' is deployed by checking the '' context; ",
           "Result": "Passed",
           "Error": "",
           "Payload": {
@@ -323,38 +593,84 @@
         },
         "2": {
           "Name": "someSystemExistsToPreventAKubernetesDeploymentFromRunningUsingTheAllowPrivilegeEscalationInAnExistingKubernetesCluster",
-          "Description": "",
+          "Description": "Validate that at least one of the pod security policies has AllowPrivilegeEscalation set to false; ",
           "Result": "Passed",
           "Error": "",
-          "Payload": null
+          "Payload": {
+            "PodState": {
+              "PodName": "",
+              "CreationError": null,
+              "ExpectedReason": null,
+              "CommandExitCode": 0
+            }
+          }
         },
         "3": {
-          "Name": "privilegedEscalationIsMarkedForTheKubernetesDeployment",
-          "Description": "",
+          "Name": "aKubernetesDeploymentIsAppliedToAnExistingKubernetesCluster",
+          "Description": "PENDING IMPLEMENTATION",
           "Result": "Passed",
           "Error": "",
           "Payload": null
         },
         "4": {
-          "Name": "theOperationWillWithAnError",
-          "Description": "",
+          "Name": "privilegedEscalationIsMarkedForTheKubernetesDeployment",
+          "Description": "Parsing pod spec file '%s'; Attempt to create a pod with privilege escalation set to 'false'; ",
           "Result": "Passed",
           "Error": "",
-          "Payload": null
+          "Payload": {
+            "PodState": {
+              "PodName": "psp-test-pod-220221-103334-9",
+              "CreationError": null,
+              "ExpectedReason": null,
+              "CommandExitCode": 0
+            }
+          }
         },
         "5": {
-          "Name": "iShouldNotBeAbleToPerformACommandThatRequiresPrivilegedAccess",
-          "Description": "",
+          "Name": "theOperationWillWithAnError",
+          "Description": "Validate that the scenario state was updated in the previous step with a particular result and message; ",
           "Result": "Passed",
           "Error": "",
-          "Payload": null
+          "Payload": {
+            "ExpectedResult": "Succeed",
+            "ExpectedMessage": "No error would show",
+            "PodState": {
+              "PodName": "psp-test-pod-220221-103334-9",
+              "CreationError": null,
+              "ExpectedReason": null,
+              "CommandExitCode": 0
+            }
+          }
         },
         "6": {
-          "Name": "performAllowedCommand",
-          "Description": "",
+          "Name": "iShouldNotBeAbleToPerformASudoCommandThatRequiresPrivilegedAccess",
+          "Description": "Validate that the exit code for command 'sudo chroot .' is 1; ",
           "Result": "Passed",
           "Error": "",
-          "Payload": null
+          "Payload": {
+            "PodState": {
+              "PodName": "psp-test-pod-220221-103334-9",
+              "CreationError": null,
+              "ExpectedReason": null,
+              "CommandExitCode": 0
+            }
+          }
+        },
+        "7": {
+          "Name": "iShouldBeAbleToPerformAnAllowedCommand",
+          "Description": "Validate that 'ls' is executed successfully",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": {
+            "PodState": {
+              "PodName": "psp-test-pod-220221-103334-9",
+              "CreationError": null,
+              "ExpectedReason": null,
+              "CommandExitCode": 0
+            },
+            "Command": "ls",
+            "ExpectedExitCode": 0
+          }
         }
       }
     },
@@ -362,19 +678,14 @@
       "Name": "Prevent a deployment from running with the allowPrivilegeEscalation flag",
       "Result": "Passed",
       "Tags": [
-        "@service/kubernetes",
-        "@control/family/pod_security_policy",
-        "@csp/azure",
-        "@csp/aws",
-        "@csp/gcp",
-        "@standard/cis/5.2",
-        "@control/type/preventative",
-        "@standard/cis/5.2.5"
+        "@k-psp",
+        "@probes/kubernetes/pod_security_policy",
+        "@k-psp-005"
       ],
       "Steps": {
         "1": {
           "Name": "aKubernetesClusterIsDeployed",
-          "Description": "Passes if Probr successfully connects to the specified cluster.",
+          "Description": "Validated that the k8s cluster specified in '/root/.kube/config' is deployed by checking the '' context; ",
           "Result": "Passed",
           "Error": "",
           "Payload": {
@@ -384,38 +695,84 @@
         },
         "2": {
           "Name": "someSystemExistsToPreventAKubernetesDeploymentFromRunningUsingTheAllowPrivilegeEscalationInAnExistingKubernetesCluster",
-          "Description": "",
+          "Description": "Validate that at least one of the pod security policies has AllowPrivilegeEscalation set to false; ",
           "Result": "Passed",
           "Error": "",
-          "Payload": null
+          "Payload": {
+            "PodState": {
+              "PodName": "",
+              "CreationError": null,
+              "ExpectedReason": null,
+              "CommandExitCode": 0
+            }
+          }
         },
         "3": {
-          "Name": "privilegedEscalationIsMarkedForTheKubernetesDeployment",
-          "Description": "",
+          "Name": "aKubernetesDeploymentIsAppliedToAnExistingKubernetesCluster",
+          "Description": "PENDING IMPLEMENTATION",
           "Result": "Passed",
           "Error": "",
           "Payload": null
         },
         "4": {
-          "Name": "theOperationWillWithAnError",
-          "Description": "",
+          "Name": "privilegedEscalationIsMarkedForTheKubernetesDeployment",
+          "Description": "Parsing pod spec file '%s'; Attempt to create a pod with privilege escalation set to 'false'; ",
           "Result": "Passed",
           "Error": "",
-          "Payload": null
+          "Payload": {
+            "PodState": {
+              "PodName": "psp-test-pod-220221-103342-89",
+              "CreationError": null,
+              "ExpectedReason": null,
+              "CommandExitCode": 0
+            }
+          }
         },
         "5": {
-          "Name": "iShouldNotBeAbleToPerformACommandThatRequiresPrivilegedAccess",
-          "Description": "",
+          "Name": "theOperationWillWithAnError",
+          "Description": "Validate that the scenario state was updated in the previous step with a particular result and message; ",
           "Result": "Passed",
           "Error": "",
-          "Payload": null
+          "Payload": {
+            "ExpectedResult": "Succeed",
+            "ExpectedMessage": "No error would show",
+            "PodState": {
+              "PodName": "psp-test-pod-220221-103342-89",
+              "CreationError": null,
+              "ExpectedReason": null,
+              "CommandExitCode": 0
+            }
+          }
         },
         "6": {
-          "Name": "performAllowedCommand",
-          "Description": "",
+          "Name": "iShouldNotBeAbleToPerformASudoCommandThatRequiresPrivilegedAccess",
+          "Description": "Validate that the exit code for command 'sudo chroot .' is 1; ",
           "Result": "Passed",
           "Error": "",
-          "Payload": null
+          "Payload": {
+            "PodState": {
+              "PodName": "psp-test-pod-220221-103342-89",
+              "CreationError": null,
+              "ExpectedReason": null,
+              "CommandExitCode": 0
+            }
+          }
+        },
+        "7": {
+          "Name": "iShouldBeAbleToPerformAnAllowedCommand",
+          "Description": "Validate that 'ls' is executed successfully",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": {
+            "PodState": {
+              "PodName": "psp-test-pod-220221-103342-89",
+              "CreationError": null,
+              "ExpectedReason": null,
+              "CommandExitCode": 0
+            },
+            "Command": "ls",
+            "ExpectedExitCode": 0
+          }
         }
       }
     },
@@ -423,19 +780,14 @@
       "Name": "Prevent a deployment from running as the root user",
       "Result": "Passed",
       "Tags": [
-        "@service/kubernetes",
-        "@control/family/pod_security_policy",
-        "@csp/azure",
-        "@csp/aws",
-        "@csp/gcp",
-        "@standard/cis/5.2",
-        "@control/type/preventative",
-        "@standard/cis/5.2.6"
+        "@k-psp",
+        "@probes/kubernetes/pod_security_policy",
+        "@k-psp-006"
       ],
       "Steps": {
         "1": {
           "Name": "aKubernetesClusterIsDeployed",
-          "Description": "Passes if Probr successfully connects to the specified cluster.",
+          "Description": "Validated that the k8s cluster specified in '/root/.kube/config' is deployed by checking the '' context; ",
           "Result": "Passed",
           "Error": "",
           "Payload": {
@@ -445,38 +797,100 @@
         },
         "2": {
           "Name": "someSystemExistsToPreventAKubernetesDeploymentFromRunningAsTheRootUserInAnExistingKubernetesCluster",
-          "Description": "",
+          "Description": "Validate that at least one of the pod security policies has RunAsUser set to MustRunAsNonRoot; ",
           "Result": "Passed",
           "Error": "",
-          "Payload": null
+          "Payload": {
+            "PodState": {
+              "PodName": "",
+              "CreationError": null,
+              "ExpectedReason": null,
+              "CommandExitCode": 0
+            }
+          }
         },
         "3": {
-          "Name": "theUserRequestedIsForTheKubernetesDeployment",
-          "Description": "",
+          "Name": "aKubernetesDeploymentIsAppliedToAnExistingKubernetesCluster",
+          "Description": "PENDING IMPLEMENTATION",
           "Result": "Passed",
           "Error": "",
           "Payload": null
         },
         "4": {
-          "Name": "theOperationWillWithAnError",
-          "Description": "",
+          "Name": "theUserRequestedIsForTheKubernetesDeployment",
+          "Description": "Attempt to create a pod with the requested user 'Root'; ",
           "Result": "Passed",
           "Error": "",
-          "Payload": null
+          "Payload": {
+            "PodState": {
+              "PodName": "",
+              "CreationError": {
+                "ReasonCodes": {
+                  "3": 7
+                }
+              },
+              "ExpectedReason": 3,
+              "CommandExitCode": 0
+            }
+          }
         },
         "5": {
-          "Name": "theKubernetesDeploymentShouldRunWithANonrootUID",
-          "Description": "",
+          "Name": "theOperationWillWithAnError",
+          "Description": "Validate that the scenario state was updated in the previous step with a particular result and message; ",
           "Result": "Passed",
           "Error": "",
-          "Payload": null
+          "Payload": {
+            "ExpectedResult": "Fail",
+            "ExpectedMessage": "Containers cant run as root",
+            "PodState": {
+              "PodName": "",
+              "CreationError": {
+                "ReasonCodes": {
+                  "3": 7
+                }
+              },
+              "ExpectedReason": 3,
+              "CommandExitCode": 0
+            }
+          }
         },
         "6": {
-          "Name": "performAllowedCommand",
-          "Description": "",
+          "Name": "theKubernetesDeploymentShouldRunWithANonrootUID",
+          "Description": "Validate that the exit code for command 'id -u \u003e 0 ' is 1; ",
           "Result": "Passed",
           "Error": "",
-          "Payload": null
+          "Payload": {
+            "PodState": {
+              "PodName": "",
+              "CreationError": {
+                "ReasonCodes": {
+                  "3": 7
+                }
+              },
+              "ExpectedReason": 3,
+              "CommandExitCode": 0
+            }
+          }
+        },
+        "7": {
+          "Name": "iShouldBeAbleToPerformAnAllowedCommand",
+          "Description": "Validate that 'ls' is executed successfully",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": {
+            "PodState": {
+              "PodName": "",
+              "CreationError": {
+                "ReasonCodes": {
+                  "3": 7
+                }
+              },
+              "ExpectedReason": 3,
+              "CommandExitCode": 0
+            },
+            "Command": "ls",
+            "ExpectedExitCode": 0
+          }
         }
       }
     },
@@ -484,19 +898,14 @@
       "Name": "Prevent a deployment from running as the root user",
       "Result": "Passed",
       "Tags": [
-        "@service/kubernetes",
-        "@control/family/pod_security_policy",
-        "@csp/azure",
-        "@csp/aws",
-        "@csp/gcp",
-        "@standard/cis/5.2",
-        "@control/type/preventative",
-        "@standard/cis/5.2.6"
+        "@k-psp",
+        "@probes/kubernetes/pod_security_policy",
+        "@k-psp-006"
       ],
       "Steps": {
         "1": {
           "Name": "aKubernetesClusterIsDeployed",
-          "Description": "Passes if Probr successfully connects to the specified cluster.",
+          "Description": "Validated that the k8s cluster specified in '/root/.kube/config' is deployed by checking the '' context; ",
           "Result": "Passed",
           "Error": "",
           "Payload": {
@@ -506,38 +915,84 @@
         },
         "2": {
           "Name": "someSystemExistsToPreventAKubernetesDeploymentFromRunningAsTheRootUserInAnExistingKubernetesCluster",
-          "Description": "",
+          "Description": "Validate that at least one of the pod security policies has RunAsUser set to MustRunAsNonRoot; ",
           "Result": "Passed",
           "Error": "",
-          "Payload": null
+          "Payload": {
+            "PodState": {
+              "PodName": "",
+              "CreationError": null,
+              "ExpectedReason": null,
+              "CommandExitCode": 0
+            }
+          }
         },
         "3": {
-          "Name": "theUserRequestedIsForTheKubernetesDeployment",
-          "Description": "",
+          "Name": "aKubernetesDeploymentIsAppliedToAnExistingKubernetesCluster",
+          "Description": "PENDING IMPLEMENTATION",
           "Result": "Passed",
           "Error": "",
           "Payload": null
         },
         "4": {
-          "Name": "theOperationWillWithAnError",
-          "Description": "",
+          "Name": "theUserRequestedIsForTheKubernetesDeployment",
+          "Description": "Attempt to create a pod with the requested user 'Non-Root'; ",
           "Result": "Passed",
           "Error": "",
-          "Payload": null
+          "Payload": {
+            "PodState": {
+              "PodName": "psp-test-pod-220221-103347-5",
+              "CreationError": null,
+              "ExpectedReason": null,
+              "CommandExitCode": 0
+            }
+          }
         },
         "5": {
-          "Name": "theKubernetesDeploymentShouldRunWithANonrootUID",
-          "Description": "",
+          "Name": "theOperationWillWithAnError",
+          "Description": "Validate that the scenario state was updated in the previous step with a particular result and message; ",
           "Result": "Passed",
           "Error": "",
-          "Payload": null
+          "Payload": {
+            "ExpectedResult": "Succeed",
+            "ExpectedMessage": "",
+            "PodState": {
+              "PodName": "psp-test-pod-220221-103347-5",
+              "CreationError": null,
+              "ExpectedReason": null,
+              "CommandExitCode": 0
+            }
+          }
         },
         "6": {
-          "Name": "performAllowedCommand",
-          "Description": "",
+          "Name": "theKubernetesDeploymentShouldRunWithANonrootUID",
+          "Description": "Validate that the exit code for command 'id -u \u003e 0 ' is 1; ",
           "Result": "Passed",
           "Error": "",
-          "Payload": null
+          "Payload": {
+            "PodState": {
+              "PodName": "psp-test-pod-220221-103347-5",
+              "CreationError": null,
+              "ExpectedReason": null,
+              "CommandExitCode": 0
+            }
+          }
+        },
+        "7": {
+          "Name": "iShouldBeAbleToPerformAnAllowedCommand",
+          "Description": "Validate that 'ls' is executed successfully",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": {
+            "PodState": {
+              "PodName": "psp-test-pod-220221-103347-5",
+              "CreationError": null,
+              "ExpectedReason": null,
+              "CommandExitCode": 0
+            },
+            "Command": "ls",
+            "ExpectedExitCode": 0
+          }
         }
       }
     },
@@ -545,19 +1000,14 @@
       "Name": "Prevent a deployment from running as the root user",
       "Result": "Passed",
       "Tags": [
-        "@service/kubernetes",
-        "@control/family/pod_security_policy",
-        "@csp/azure",
-        "@csp/aws",
-        "@csp/gcp",
-        "@standard/cis/5.2",
-        "@control/type/preventative",
-        "@standard/cis/5.2.6"
+        "@k-psp",
+        "@probes/kubernetes/pod_security_policy",
+        "@k-psp-006"
       ],
       "Steps": {
         "1": {
           "Name": "aKubernetesClusterIsDeployed",
-          "Description": "Passes if Probr successfully connects to the specified cluster.",
+          "Description": "Validated that the k8s cluster specified in '/root/.kube/config' is deployed by checking the '' context; ",
           "Result": "Passed",
           "Error": "",
           "Payload": {
@@ -567,58 +1017,99 @@
         },
         "2": {
           "Name": "someSystemExistsToPreventAKubernetesDeploymentFromRunningAsTheRootUserInAnExistingKubernetesCluster",
-          "Description": "",
+          "Description": "Validate that at least one of the pod security policies has RunAsUser set to MustRunAsNonRoot; ",
           "Result": "Passed",
           "Error": "",
-          "Payload": null
+          "Payload": {
+            "PodState": {
+              "PodName": "",
+              "CreationError": null,
+              "ExpectedReason": null,
+              "CommandExitCode": 0
+            }
+          }
         },
         "3": {
-          "Name": "theUserRequestedIsForTheKubernetesDeployment",
-          "Description": "",
+          "Name": "aKubernetesDeploymentIsAppliedToAnExistingKubernetesCluster",
+          "Description": "PENDING IMPLEMENTATION",
           "Result": "Passed",
           "Error": "",
           "Payload": null
         },
         "4": {
-          "Name": "theOperationWillWithAnError",
-          "Description": "",
+          "Name": "theUserRequestedIsForTheKubernetesDeployment",
+          "Description": "Attempt to create a pod with the requested user 'Not Defined'; ",
           "Result": "Passed",
           "Error": "",
-          "Payload": null
+          "Payload": {
+            "PodState": {
+              "PodName": "psp-test-pod-220221-103350-35",
+              "CreationError": null,
+              "ExpectedReason": null,
+              "CommandExitCode": 0
+            }
+          }
         },
         "5": {
-          "Name": "theKubernetesDeploymentShouldRunWithANonrootUID",
-          "Description": "",
+          "Name": "theOperationWillWithAnError",
+          "Description": "Validate that the scenario state was updated in the previous step with a particular result and message; ",
           "Result": "Passed",
           "Error": "",
-          "Payload": null
+          "Payload": {
+            "ExpectedResult": "Succeed",
+            "ExpectedMessage": "",
+            "PodState": {
+              "PodName": "psp-test-pod-220221-103350-35",
+              "CreationError": null,
+              "ExpectedReason": null,
+              "CommandExitCode": 0
+            }
+          }
         },
         "6": {
-          "Name": "performAllowedCommand",
-          "Description": "",
+          "Name": "theKubernetesDeploymentShouldRunWithANonrootUID",
+          "Description": "Validate that the exit code for command 'id -u \u003e 0 ' is 1; ",
           "Result": "Passed",
           "Error": "",
-          "Payload": null
+          "Payload": {
+            "PodState": {
+              "PodName": "psp-test-pod-220221-103350-35",
+              "CreationError": null,
+              "ExpectedReason": null,
+              "CommandExitCode": 0
+            }
+          }
+        },
+        "7": {
+          "Name": "iShouldBeAbleToPerformAnAllowedCommand",
+          "Description": "Validate that 'ls' is executed successfully",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": {
+            "PodState": {
+              "PodName": "psp-test-pod-220221-103350-35",
+              "CreationError": null,
+              "ExpectedReason": null,
+              "CommandExitCode": 0
+            },
+            "Command": "ls",
+            "ExpectedExitCode": 0
+          }
         }
       }
     },
     "19": {
       "Name": "Prevent deployments from running with the NET_RAW capability.",
-      "Result": "Failed",
+      "Result": "Passed",
       "Tags": [
-        "@service/kubernetes",
-        "@control/family/pod_security_policy",
-        "@csp/azure",
-        "@csp/aws",
-        "@csp/gcp",
-        "@standard/cis/5.2",
-        "@control/type/preventative",
-        "@standard/cis/5.2.7"
+        "@k-psp",
+        "@probes/kubernetes/pod_security_policy",
+        "@k-psp-007"
       ],
       "Steps": {
         "1": {
           "Name": "aKubernetesClusterIsDeployed",
-          "Description": "Passes if Probr successfully connects to the specified cluster.",
+          "Description": "Validated that the k8s cluster specified in '/root/.kube/config' is deployed by checking the '' context; ",
           "Result": "Passed",
           "Error": "",
           "Payload": {
@@ -627,11 +1118,42 @@
           }
         },
         "2": {
-          "Name": "someSystemExistsToPreventAKubernetesDeploymentFromRunningWithNETRAWCapabilityInAnExistingKubernetesCluster",
-          "Description": "",
-          "Result": "Failed",
-          "Error": "NETRAWIsRestricted is NOT restricted (result: false)",
-          "Payload": null
+          "Name": "kubernetesDeploymentWithNETRAWCapability",
+          "Description": "Creating pod with NET_RAW added in the pod's capabilities; ",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": {
+            "PodState": {
+              "PodName": "",
+              "CreationError": {
+                "ReasonCodes": {
+                  "7": 5
+                }
+              },
+              "ExpectedReason": 7,
+              "CommandExitCode": 0
+            }
+          }
+        },
+        "3": {
+          "Name": "theOperationWillWithAnError",
+          "Description": "Validate that the scenario state was updated in the previous step with a particular result and message; ",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": {
+            "ExpectedResult": "Fail",
+            "ExpectedMessage": "Containers cant run with NET_RAW capabilities",
+            "PodState": {
+              "PodName": "",
+              "CreationError": {
+                "ReasonCodes": {
+                  "7": 5
+                }
+              },
+              "ExpectedReason": 7,
+              "CommandExitCode": 0
+            }
+          }
         }
       }
     },
@@ -639,19 +1161,14 @@
       "Name": "Prevent a deployment from running with privileged access",
       "Result": "Passed",
       "Tags": [
-        "@service/kubernetes",
-        "@control/family/pod_security_policy",
-        "@csp/azure",
-        "@csp/aws",
-        "@csp/gcp",
-        "@standard/cis/5.2",
-        "@control/type/preventative",
-        "@standard/cis/5.2.1"
+        "@k-psp",
+        "@probes/kubernetes/pod_security_policy",
+        "@k-psp-001"
       ],
       "Steps": {
         "1": {
           "Name": "aKubernetesClusterIsDeployed",
-          "Description": "Passes if Probr successfully connects to the specified cluster.",
+          "Description": "Validated that the k8s cluster specified in '/root/.kube/config' is deployed by checking the '' context; ",
           "Result": "Passed",
           "Error": "",
           "Payload": {
@@ -661,58 +1178,99 @@
         },
         "2": {
           "Name": "someControlExistsToPreventPrivilegedAccessForKubernetesDeploymentsToAnActiveKubernetesCluster",
-          "Description": "",
+          "Description": "Validate that the kube instance security context contains 'k8sazurecontainernoprivilege'; ",
           "Result": "Passed",
           "Error": "",
-          "Payload": null
+          "Payload": {
+            "PodState": {
+              "PodName": "",
+              "CreationError": null,
+              "ExpectedReason": null,
+              "CommandExitCode": 0
+            }
+          }
         },
         "3": {
-          "Name": "privilegedAccessRequestIsMarkedForTheKubernetesDeployment",
-          "Description": "",
+          "Name": "aKubernetesDeploymentIsAppliedToAnExistingKubernetesCluster",
+          "Description": "PENDING IMPLEMENTATION",
           "Result": "Passed",
           "Error": "",
           "Payload": null
         },
         "4": {
-          "Name": "theOperationWillWithAnError",
-          "Description": "",
+          "Name": "privilegedAccessRequestIsMarkedForTheKubernetesDeployment",
+          "Description": "Attempt to deploy a pod with priviledged access 'False'; ",
           "Result": "Passed",
           "Error": "",
-          "Payload": null
+          "Payload": {
+            "PodState": {
+              "PodName": "psp-test-pod-220221-103309-22",
+              "CreationError": null,
+              "ExpectedReason": null,
+              "CommandExitCode": 0
+            }
+          }
         },
         "5": {
-          "Name": "iShouldNotBeAbleToPerformACommandThatRequiresPrivilegedAccess",
-          "Description": "",
+          "Name": "theOperationWillWithAnError",
+          "Description": "Validate that the scenario state was updated in the previous step with a particular result and message; ",
           "Result": "Passed",
           "Error": "",
-          "Payload": null
+          "Payload": {
+            "ExpectedResult": "Succeed",
+            "ExpectedMessage": "No error would show",
+            "PodState": {
+              "PodName": "psp-test-pod-220221-103309-22",
+              "CreationError": null,
+              "ExpectedReason": null,
+              "CommandExitCode": 0
+            }
+          }
         },
         "6": {
-          "Name": "performAllowedCommand",
-          "Description": "",
+          "Name": "iShouldNotBeAbleToPerformACommandThatRequiresPrivilegedAccess",
+          "Description": "Validate that the command 'chroot .' fails to execute; ",
           "Result": "Passed",
           "Error": "",
-          "Payload": null
+          "Payload": {
+            "PodState": {
+              "PodName": "psp-test-pod-220221-103309-22",
+              "CreationError": null,
+              "ExpectedReason": null,
+              "CommandExitCode": 0
+            }
+          }
+        },
+        "7": {
+          "Name": "iShouldBeAbleToPerformAnAllowedCommand",
+          "Description": "Validate that 'ls' is executed successfully",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": {
+            "PodState": {
+              "PodName": "psp-test-pod-220221-103309-22",
+              "CreationError": null,
+              "ExpectedReason": null,
+              "CommandExitCode": 0
+            },
+            "Command": "ls",
+            "ExpectedExitCode": 0
+          }
         }
       }
     },
     "20": {
       "Name": "Prevent deployments from running with the NET_RAW capability.",
-      "Result": "Failed",
+      "Result": "Passed",
       "Tags": [
-        "@service/kubernetes",
-        "@control/family/pod_security_policy",
-        "@csp/azure",
-        "@csp/aws",
-        "@csp/gcp",
-        "@standard/cis/5.2",
-        "@control/type/preventative",
-        "@standard/cis/5.2.7"
+        "@k-psp",
+        "@probes/kubernetes/pod_security_policy",
+        "@k-psp-007"
       ],
       "Steps": {
         "1": {
           "Name": "aKubernetesClusterIsDeployed",
-          "Description": "Passes if Probr successfully connects to the specified cluster.",
+          "Description": "Validated that the k8s cluster specified in '/root/.kube/config' is deployed by checking the '' context; ",
           "Result": "Passed",
           "Error": "",
           "Payload": {
@@ -721,31 +1279,49 @@
           }
         },
         "2": {
-          "Name": "someSystemExistsToPreventAKubernetesDeploymentFromRunningWithNETRAWCapabilityInAnExistingKubernetesCluster",
-          "Description": "",
-          "Result": "Failed",
-          "Error": "NETRAWIsRestricted is NOT restricted (result: false)",
-          "Payload": null
+          "Name": "kubernetesDeploymentWithNETRAWCapability",
+          "Description": "Creating pod with NET_RAW dropped in the pod's capabilities; ",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": {
+            "PodState": {
+              "PodName": "psp-test-pod-220221-103353-71",
+              "CreationError": null,
+              "ExpectedReason": null,
+              "CommandExitCode": 0
+            }
+          }
+        },
+        "3": {
+          "Name": "theOperationWillWithAnError",
+          "Description": "Validate that the scenario state was updated in the previous step with a particular result and message; ",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": {
+            "ExpectedResult": "Succeed",
+            "ExpectedMessage": "",
+            "PodState": {
+              "PodName": "psp-test-pod-220221-103353-71",
+              "CreationError": null,
+              "ExpectedReason": null,
+              "CommandExitCode": 0
+            }
+          }
         }
       }
     },
     "21": {
       "Name": "Prevent deployments from running with the NET_RAW capability.",
-      "Result": "Failed",
+      "Result": "Passed",
       "Tags": [
-        "@service/kubernetes",
-        "@control/family/pod_security_policy",
-        "@csp/azure",
-        "@csp/aws",
-        "@csp/gcp",
-        "@standard/cis/5.2",
-        "@control/type/preventative",
-        "@standard/cis/5.2.7"
+        "@k-psp",
+        "@probes/kubernetes/pod_security_policy",
+        "@k-psp-007"
       ],
       "Steps": {
         "1": {
           "Name": "aKubernetesClusterIsDeployed",
-          "Description": "Passes if Probr successfully connects to the specified cluster.",
+          "Description": "Validated that the k8s cluster specified in '/root/.kube/config' is deployed by checking the '' context; ",
           "Result": "Passed",
           "Error": "",
           "Payload": {
@@ -754,31 +1330,57 @@
           }
         },
         "2": {
-          "Name": "someSystemExistsToPreventAKubernetesDeploymentFromRunningWithNETRAWCapabilityInAnExistingKubernetesCluster",
-          "Description": "",
-          "Result": "Failed",
-          "Error": "NETRAWIsRestricted is NOT restricted (result: false)",
-          "Payload": null
+          "Name": "kubernetesDeploymentWithNETRAWCapability",
+          "Description": "Creating pod with NET_RAW not defined in the pod's capabilities; ",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": {
+            "PodState": {
+              "PodName": "",
+              "CreationError": {
+                "ReasonCodes": {
+                  "7": 7
+                }
+              },
+              "ExpectedReason": 7,
+              "CommandExitCode": 0
+            }
+          }
+        },
+        "3": {
+          "Name": "theOperationWillWithAnError",
+          "Description": "Validate that the scenario state was updated in the previous step with a particular result and message; ",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": {
+            "ExpectedResult": "Fail",
+            "ExpectedMessage": "Containers cant run with NET_RAW capabilities",
+            "PodState": {
+              "PodName": "",
+              "CreationError": {
+                "ReasonCodes": {
+                  "7": 7
+                }
+              },
+              "ExpectedReason": 7,
+              "CommandExitCode": 0
+            }
+          }
         }
       }
     },
     "22": {
       "Name": "Prevent container running with capabilities beyond the default set.",
-      "Result": "Passed",
+      "Result": "Failed",
       "Tags": [
-        "@service/kubernetes",
-        "@control/family/pod_security_policy",
-        "@csp/azure",
-        "@csp/aws",
-        "@csp/gcp",
-        "@standard/cis/5.2",
-        "@control/type/preventative",
-        "@standard/cis/5.2.8"
+        "@k-psp",
+        "@probes/kubernetes/pod_security_policy",
+        "@k-psp-008"
       ],
       "Steps": {
         "1": {
           "Name": "aKubernetesClusterIsDeployed",
-          "Description": "Passes if Probr successfully connects to the specified cluster.",
+          "Description": "Validated that the k8s cluster specified in '/root/.kube/config' is deployed by checking the '' context; ",
           "Result": "Passed",
           "Error": "",
           "Payload": {
@@ -788,38 +1390,345 @@
         },
         "2": {
           "Name": "someSystemExistsToPreventKubernetesDeploymentsWithCapabilitiesBeyondTheDefaultSetFromBeingDeployedToAnExistingKubernetesCluster",
-          "Description": "",
+          "Description": "Validate that no pod security policies have any values in AllowedCapabilities; ",
           "Result": "Passed",
           "Error": "",
-          "Payload": null
+          "Payload": {
+            "PodState": {
+              "PodName": "",
+              "CreationError": null,
+              "ExpectedReason": null,
+              "CommandExitCode": 0
+            }
+          }
         },
         "3": {
-          "Name": "additionalCapabilitiesForTheKubernetesDeployment",
-          "Description": "",
+          "Name": "aKubernetesDeploymentIsAppliedToAnExistingKubernetesCluster",
+          "Description": "PENDING IMPLEMENTATION",
           "Result": "Passed",
           "Error": "",
           "Payload": null
         },
         "4": {
-          "Name": "theOperationWillWithAnError",
-          "Description": "",
+          "Name": "additionalCapabilitiesForTheKubernetesDeployment",
+          "Description": "Creating list of allowed capabilities from linux non-default capability list; Attempting to deploy pod with specified capabilities added; Attempting to deploy pod with specified capabilities added; Attempting to deploy pod with specified capabilities added; Attempting to deploy pod with specified capabilities added; Attempting to deploy pod with specified capabilities added; Attempting to deploy pod with specified capabilities added; Attempting to deploy pod with specified capabilities added; Attempting to deploy pod with specified capabilities added; Attempting to deploy pod with specified capabilities added; Attempting to deploy pod with specified capabilities added; Attempting to deploy pod with specified capabilities added; Attempting to deploy pod with specified capabilities added; Attempting to deploy pod with specified capabilities added; Attempting to deploy pod with specified capabilities added; Attempting to deploy pod with specified capabilities added; Attempting to deploy pod with specified capabilities added; Attempting to deploy pod with specified capabilities added; Attempting to deploy pod with specified capabilities added; Attempting to deploy pod with specified capabilities added; Attempting to deploy pod with specified capabilities added; Attempting to deploy pod with specified capabilities added; Attempting to deploy pod with specified capabilities added; Attempting to deploy pod with specified capabilities added; Attempting to deploy pod with specified capabilities added; Attempting to deploy pod with specified capabilities added; Attempting to deploy pod with specified capabilities added; Attempting to deploy pod with specified capabilities added; ",
           "Result": "Passed",
           "Error": "",
-          "Payload": null
+          "Payload": {
+            "PodState": {
+              "PodName": "",
+              "CreationError": null,
+              "ExpectedReason": null,
+              "CommandExitCode": 0
+            },
+            "Capabilities": [
+              "NET_ADMIN",
+              "SYS_BOOT",
+              "BPF",
+              "IPC_LOCK",
+              "SYS_ADMIN",
+              "SYS_MODULE",
+              "SYS_PTRACE",
+              "LEASE",
+              "MAC_ADMIN",
+              "MAC_OVERRIDE",
+              "SYSLOG",
+              "AUDIT_CONTROL",
+              "CHECKPOINT_RESTORE",
+              "SYS_NICE",
+              "SYS_PACCT",
+              "BLOCK_SUSPEND",
+              "IPC_OWNER",
+              "SYS_RESOURCE",
+              "SYS_TTY_CONFIG",
+              "DAC_READ_SEARCH",
+              "NET_BROADCAST",
+              "AUDIT_READ",
+              "LINUX_IMMUTABLE",
+              "PERFMON",
+              "SYS_RAWIO",
+              "SYS_TIME",
+              "WAKE_ALARM"
+            ]
+          }
         },
         "5": {
-          "Name": "iShouldNotBeAbleToPerformACommandThatRequiresCapabilitiesOutsideOfTheDefaultSet",
-          "Description": "",
-          "Result": "Passed",
-          "Error": "",
-          "Payload": null
-        },
-        "6": {
-          "Name": "performAllowedCommand",
-          "Description": "",
-          "Result": "Passed",
-          "Error": "",
-          "Payload": null
+          "Name": "allOperationsWillWithAnError",
+          "Description": "Validate that the scenario state was updated in the previous step with a list of pods with a particular result and message; ",
+          "Result": "Failed",
+          "Error": "\u003cnil\u003e; pod psp-test-pod-220221-103355-43 was created - test failed",
+          "Payload": {
+            "ExpectedResult": "Fail",
+            "ExpectedMessage": "Containers can't run with added capabilities",
+            "PodState": [
+              {
+                "PodName": "psp-test-pod-220221-103355-43",
+                "CreationError": null,
+                "ExpectedReason": null,
+                "CommandExitCode": 0
+              },
+              {
+                "PodName": "",
+                "CreationError": {
+                  "ReasonCodes": {
+                    "7": 8
+                  }
+                },
+                "ExpectedReason": 7,
+                "CommandExitCode": 0
+              },
+              {
+                "PodName": "",
+                "CreationError": {
+                  "ReasonCodes": {
+                    "7": 8
+                  }
+                },
+                "ExpectedReason": 7,
+                "CommandExitCode": 0
+              },
+              {
+                "PodName": "",
+                "CreationError": {
+                  "ReasonCodes": {
+                    "7": 4
+                  }
+                },
+                "ExpectedReason": 7,
+                "CommandExitCode": 0
+              },
+              {
+                "PodName": "",
+                "CreationError": {
+                  "ReasonCodes": {
+                    "7": 2
+                  }
+                },
+                "ExpectedReason": 7,
+                "CommandExitCode": 0
+              },
+              {
+                "PodName": "",
+                "CreationError": {
+                  "ReasonCodes": {
+                    "7": 3
+                  }
+                },
+                "ExpectedReason": 7,
+                "CommandExitCode": 0
+              },
+              {
+                "PodName": "",
+                "CreationError": {
+                  "ReasonCodes": {
+                    "7": 1
+                  }
+                },
+                "ExpectedReason": 7,
+                "CommandExitCode": 0
+              },
+              {
+                "PodName": "",
+                "CreationError": {
+                  "ReasonCodes": {
+                    "7": 7
+                  }
+                },
+                "ExpectedReason": 7,
+                "CommandExitCode": 0
+              },
+              {
+                "PodName": "",
+                "CreationError": {
+                  "ReasonCodes": {
+                    "7": 8
+                  }
+                },
+                "ExpectedReason": 7,
+                "CommandExitCode": 0
+              },
+              {
+                "PodName": "",
+                "CreationError": {
+                  "ReasonCodes": {
+                    "7": 8
+                  }
+                },
+                "ExpectedReason": 7,
+                "CommandExitCode": 0
+              },
+              {
+                "PodName": "",
+                "CreationError": {
+                  "ReasonCodes": {
+                    "7": 7
+                  }
+                },
+                "ExpectedReason": 7,
+                "CommandExitCode": 0
+              },
+              {
+                "PodName": "",
+                "CreationError": {
+                  "ReasonCodes": {
+                    "7": 9
+                  }
+                },
+                "ExpectedReason": 7,
+                "CommandExitCode": 0
+              },
+              {
+                "PodName": "",
+                "CreationError": {
+                  "ReasonCodes": {
+                    "7": 1
+                  }
+                },
+                "ExpectedReason": 7,
+                "CommandExitCode": 0
+              },
+              {
+                "PodName": "",
+                "CreationError": {
+                  "ReasonCodes": {
+                    "7": 6
+                  }
+                },
+                "ExpectedReason": 7,
+                "CommandExitCode": 0
+              },
+              {
+                "PodName": "",
+                "CreationError": {
+                  "ReasonCodes": {
+                    "7": 4
+                  }
+                },
+                "ExpectedReason": 7,
+                "CommandExitCode": 0
+              },
+              {
+                "PodName": "",
+                "CreationError": {
+                  "ReasonCodes": {
+                    "7": 7
+                  }
+                },
+                "ExpectedReason": 7,
+                "CommandExitCode": 0
+              },
+              {
+                "PodName": "",
+                "CreationError": {
+                  "ReasonCodes": {
+                    "7": 1
+                  }
+                },
+                "ExpectedReason": 7,
+                "CommandExitCode": 0
+              },
+              {
+                "PodName": "",
+                "CreationError": {
+                  "ReasonCodes": {
+                    "7": 1
+                  }
+                },
+                "ExpectedReason": 7,
+                "CommandExitCode": 0
+              },
+              {
+                "PodName": "",
+                "CreationError": {
+                  "ReasonCodes": {
+                    "7": 3
+                  }
+                },
+                "ExpectedReason": 7,
+                "CommandExitCode": 0
+              },
+              {
+                "PodName": "",
+                "CreationError": {
+                  "ReasonCodes": {
+                    "7": 2
+                  }
+                },
+                "ExpectedReason": 7,
+                "CommandExitCode": 0
+              },
+              {
+                "PodName": "",
+                "CreationError": {
+                  "ReasonCodes": {
+                    "7": 2
+                  }
+                },
+                "ExpectedReason": 7,
+                "CommandExitCode": 0
+              },
+              {
+                "PodName": "",
+                "CreationError": {
+                  "ReasonCodes": {
+                    "7": 4
+                  }
+                },
+                "ExpectedReason": 7,
+                "CommandExitCode": 0
+              },
+              {
+                "PodName": "",
+                "CreationError": {
+                  "ReasonCodes": {
+                    "7": 2
+                  }
+                },
+                "ExpectedReason": 7,
+                "CommandExitCode": 0
+              },
+              {
+                "PodName": "",
+                "CreationError": {
+                  "ReasonCodes": {
+                    "7": 5
+                  }
+                },
+                "ExpectedReason": 7,
+                "CommandExitCode": 0
+              },
+              {
+                "PodName": "",
+                "CreationError": {
+                  "ReasonCodes": {
+                    "7": 6
+                  }
+                },
+                "ExpectedReason": 7,
+                "CommandExitCode": 0
+              },
+              {
+                "PodName": "",
+                "CreationError": {
+                  "ReasonCodes": {
+                    "7": 1
+                  }
+                },
+                "ExpectedReason": 7,
+                "CommandExitCode": 0
+              },
+              {
+                "PodName": "",
+                "CreationError": {
+                  "ReasonCodes": {
+                    "7": 6
+                  }
+                },
+                "ExpectedReason": 7,
+                "CommandExitCode": 0
+              }
+            ]
+          }
         }
       }
     },
@@ -827,19 +1736,14 @@
       "Name": "Prevent container running with capabilities beyond the default set.",
       "Result": "Passed",
       "Tags": [
-        "@service/kubernetes",
-        "@control/family/pod_security_policy",
-        "@csp/azure",
-        "@csp/aws",
-        "@csp/gcp",
-        "@standard/cis/5.2",
-        "@control/type/preventative",
-        "@standard/cis/5.2.8"
+        "@k-psp",
+        "@probes/kubernetes/pod_security_policy",
+        "@k-psp-008"
       ],
       "Steps": {
         "1": {
           "Name": "aKubernetesClusterIsDeployed",
-          "Description": "Passes if Probr successfully connects to the specified cluster.",
+          "Description": "Validated that the k8s cluster specified in '/root/.kube/config' is deployed by checking the '' context; ",
           "Result": "Passed",
           "Error": "",
           "Payload": {
@@ -849,38 +1753,89 @@
         },
         "2": {
           "Name": "someSystemExistsToPreventKubernetesDeploymentsWithCapabilitiesBeyondTheDefaultSetFromBeingDeployedToAnExistingKubernetesCluster",
-          "Description": "",
+          "Description": "Validate that no pod security policies have any values in AllowedCapabilities; ",
           "Result": "Passed",
           "Error": "",
-          "Payload": null
+          "Payload": {
+            "PodState": {
+              "PodName": "",
+              "CreationError": null,
+              "ExpectedReason": null,
+              "CommandExitCode": 0
+            }
+          }
         },
         "3": {
-          "Name": "additionalCapabilitiesForTheKubernetesDeployment",
-          "Description": "",
+          "Name": "aKubernetesDeploymentIsAppliedToAnExistingKubernetesCluster",
+          "Description": "PENDING IMPLEMENTATION",
           "Result": "Passed",
           "Error": "",
           "Payload": null
         },
         "4": {
-          "Name": "theOperationWillWithAnError",
-          "Description": "",
+          "Name": "additionalCapabilitiesForTheKubernetesDeployment",
+          "Description": "Creating list of capabilities from config vars; Attempting to deploy pod with no capabilities added; ",
           "Result": "Passed",
           "Error": "",
-          "Payload": null
+          "Payload": {
+            "PodState": {
+              "PodName": "",
+              "CreationError": null,
+              "ExpectedReason": null,
+              "CommandExitCode": 0
+            },
+            "Capabilities": []
+          }
         },
         "5": {
-          "Name": "iShouldNotBeAbleToPerformACommandThatRequiresCapabilitiesOutsideOfTheDefaultSet",
-          "Description": "",
+          "Name": "allOperationsWillWithAnError",
+          "Description": "Validate that the scenario state was updated in the previous step with a list of pods with a particular result and message; ",
           "Result": "Passed",
           "Error": "",
-          "Payload": null
+          "Payload": {
+            "ExpectedResult": "Succeed",
+            "ExpectedMessage": "",
+            "PodState": [
+              {
+                "PodName": "psp-test-pod-220221-103406-53",
+                "CreationError": null,
+                "ExpectedReason": null,
+                "CommandExitCode": 0
+              }
+            ]
+          }
         },
         "6": {
-          "Name": "performAllowedCommand",
-          "Description": "",
+          "Name": "iShouldNotBeAbleToPerformACommandThatRequiresCapabilitiesOutsideOfTheDefaultSet",
+          "Description": "Validate that verification commands exit 2 for all non-default capabilities, except those that are specified as allowed in the config; ",
           "Result": "Passed",
           "Error": "",
-          "Payload": null
+          "Payload": {
+            "PodState": {
+              "PodName": "",
+              "CreationError": null,
+              "ExpectedReason": null,
+              "CommandExitCode": 0
+            }
+          }
+        },
+        "7": {
+          "Name": "iShouldBeAbleToPerformAnAllowedCommand",
+          "Description": "Validate that 'ls' is executed successfully for all pods specified in the scenario state",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": {
+            "PodStates": [
+              {
+                "PodName": "psp-test-pod-220221-103406-53",
+                "CreationError": null,
+                "ExpectedReason": null,
+                "CommandExitCode": 0
+              }
+            ],
+            "Command": "ls",
+            "ExpectedExitCode": 0
+          }
         }
       }
     },
@@ -888,19 +1843,14 @@
       "Name": "Prevent container running with capabilities beyond the default set.",
       "Result": "Passed",
       "Tags": [
-        "@service/kubernetes",
-        "@control/family/pod_security_policy",
-        "@csp/azure",
-        "@csp/aws",
-        "@csp/gcp",
-        "@standard/cis/5.2",
-        "@control/type/preventative",
-        "@standard/cis/5.2.8"
+        "@k-psp",
+        "@probes/kubernetes/pod_security_policy",
+        "@k-psp-008"
       ],
       "Steps": {
         "1": {
           "Name": "aKubernetesClusterIsDeployed",
-          "Description": "Passes if Probr successfully connects to the specified cluster.",
+          "Description": "Validated that the k8s cluster specified in '/root/.kube/config' is deployed by checking the '' context; ",
           "Result": "Passed",
           "Error": "",
           "Payload": {
@@ -910,58 +1860,104 @@
         },
         "2": {
           "Name": "someSystemExistsToPreventKubernetesDeploymentsWithCapabilitiesBeyondTheDefaultSetFromBeingDeployedToAnExistingKubernetesCluster",
-          "Description": "",
+          "Description": "Validate that no pod security policies have any values in AllowedCapabilities; ",
           "Result": "Passed",
           "Error": "",
-          "Payload": null
+          "Payload": {
+            "PodState": {
+              "PodName": "",
+              "CreationError": null,
+              "ExpectedReason": null,
+              "CommandExitCode": 0
+            }
+          }
         },
         "3": {
-          "Name": "additionalCapabilitiesForTheKubernetesDeployment",
-          "Description": "",
+          "Name": "aKubernetesDeploymentIsAppliedToAnExistingKubernetesCluster",
+          "Description": "PENDING IMPLEMENTATION",
           "Result": "Passed",
           "Error": "",
           "Payload": null
         },
         "4": {
-          "Name": "theOperationWillWithAnError",
-          "Description": "",
+          "Name": "additionalCapabilitiesForTheKubernetesDeployment",
+          "Description": "Attempting to deploy pod with no capabilities added; ",
           "Result": "Passed",
           "Error": "",
-          "Payload": null
+          "Payload": {
+            "PodState": {
+              "PodName": "",
+              "CreationError": null,
+              "ExpectedReason": null,
+              "CommandExitCode": 0
+            },
+            "Capabilities": null
+          }
         },
         "5": {
-          "Name": "iShouldNotBeAbleToPerformACommandThatRequiresCapabilitiesOutsideOfTheDefaultSet",
-          "Description": "",
+          "Name": "allOperationsWillWithAnError",
+          "Description": "Validate that the scenario state was updated in the previous step with a list of pods with a particular result and message; ",
           "Result": "Passed",
           "Error": "",
-          "Payload": null
+          "Payload": {
+            "ExpectedResult": "Succeed",
+            "ExpectedMessage": "",
+            "PodState": [
+              {
+                "PodName": "psp-test-pod-220221-103421-72",
+                "CreationError": null,
+                "ExpectedReason": null,
+                "CommandExitCode": 0
+              }
+            ]
+          }
         },
         "6": {
-          "Name": "performAllowedCommand",
-          "Description": "",
+          "Name": "iShouldNotBeAbleToPerformACommandThatRequiresCapabilitiesOutsideOfTheDefaultSet",
+          "Description": "Validate that verification commands exit 2 for all non-default capabilities, except those that are specified as allowed in the config; ",
           "Result": "Passed",
           "Error": "",
-          "Payload": null
+          "Payload": {
+            "PodState": {
+              "PodName": "",
+              "CreationError": null,
+              "ExpectedReason": null,
+              "CommandExitCode": 0
+            }
+          }
+        },
+        "7": {
+          "Name": "iShouldBeAbleToPerformAnAllowedCommand",
+          "Description": "Validate that 'ls' is executed successfully for all pods specified in the scenario state",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": {
+            "PodStates": [
+              {
+                "PodName": "psp-test-pod-220221-103421-72",
+                "CreationError": null,
+                "ExpectedReason": null,
+                "CommandExitCode": 0
+              }
+            ],
+            "Command": "ls",
+            "ExpectedExitCode": 0
+          }
         }
       }
     },
     "25": {
       "Name": "Prevent deployments from running with assigned capabilities.",
-      "Result": "Passed",
+      "Result": "Failed",
       "Tags": [
-        "@service/kubernetes",
-        "@control/family/pod_security_policy",
-        "@csp/azure",
-        "@csp/aws",
-        "@csp/gcp",
-        "@standard/cis/5.2",
-        "@control/type/preventative",
-        "@standard/cis/5.2.9"
+        "@k-psp",
+        "@probes/kubernetes/pod_security_policy",
+        "@k-psp-009"
       ],
       "Steps": {
         "1": {
           "Name": "aKubernetesClusterIsDeployed",
-          "Description": "Passes if Probr successfully connects to the specified cluster.",
+          "Description": "Validated that the k8s cluster specified in '/root/.kube/config' is deployed by checking the '' context; ",
           "Result": "Passed",
           "Error": "",
           "Payload": {
@@ -971,38 +1967,54 @@
         },
         "2": {
           "Name": "someSystemExistsToPreventKubernetesDeploymentsWithAssignedCapabilitiesFromBeingDeployedToAnExistingKubernetesCluster",
-          "Description": "",
+          "Description": "Validate that the kube instance security context contains 'k8sazureallowedcapabilities'; ",
           "Result": "Passed",
           "Error": "",
-          "Payload": null
+          "Payload": {
+            "PodState": {
+              "PodName": "",
+              "CreationError": null,
+              "ExpectedReason": null,
+              "CommandExitCode": 0
+            }
+          }
         },
         "3": {
-          "Name": "assignedCapabilitiesForTheKubernetesDeployment",
-          "Description": "",
+          "Name": "aKubernetesDeploymentIsAppliedToAnExistingKubernetesCluster",
+          "Description": "PENDING IMPLEMENTATION",
           "Result": "Passed",
           "Error": "",
           "Payload": null
         },
         "4": {
-          "Name": "theOperationWillWithAnError",
-          "Description": "",
+          "Name": "assignedCapabilitiesForTheKubernetesDeployment",
+          "Description": "Attempt to deploy a pod with the NET_ADMIN capability; ",
           "Result": "Passed",
           "Error": "",
-          "Payload": null
+          "Payload": {
+            "PodState": {
+              "PodName": "psp-test-pod-220221-103436-29",
+              "CreationError": null,
+              "ExpectedReason": null,
+              "CommandExitCode": 0
+            }
+          }
         },
         "5": {
-          "Name": "iShouldNotBeAbleToPerformACommandThatRequiresAnyCapabilities",
-          "Description": "",
-          "Result": "Passed",
-          "Error": "",
-          "Payload": null
-        },
-        "6": {
-          "Name": "performAllowedCommand",
-          "Description": "",
-          "Result": "Passed",
-          "Error": "",
-          "Payload": null
+          "Name": "theOperationWillWithAnError",
+          "Description": "Validate that the scenario state was updated in the previous step with a particular result and message; ",
+          "Result": "Failed",
+          "Error": "pod psp-test-pod-220221-103436-29 was created - test failed",
+          "Payload": {
+            "ExpectedResult": "Fail",
+            "ExpectedMessage": "Containers with assigned capabilities can't be deployed",
+            "PodState": {
+              "PodName": "psp-test-pod-220221-103436-29",
+              "CreationError": null,
+              "ExpectedReason": null,
+              "CommandExitCode": 0
+            }
+          }
         }
       }
     },
@@ -1010,19 +2022,14 @@
       "Name": "Prevent deployments from running with assigned capabilities.",
       "Result": "Passed",
       "Tags": [
-        "@service/kubernetes",
-        "@control/family/pod_security_policy",
-        "@csp/azure",
-        "@csp/aws",
-        "@csp/gcp",
-        "@standard/cis/5.2",
-        "@control/type/preventative",
-        "@standard/cis/5.2.9"
+        "@k-psp",
+        "@probes/kubernetes/pod_security_policy",
+        "@k-psp-009"
       ],
       "Steps": {
         "1": {
           "Name": "aKubernetesClusterIsDeployed",
-          "Description": "Passes if Probr successfully connects to the specified cluster.",
+          "Description": "Validated that the k8s cluster specified in '/root/.kube/config' is deployed by checking the '' context; ",
           "Result": "Passed",
           "Error": "",
           "Payload": {
@@ -1032,38 +2039,84 @@
         },
         "2": {
           "Name": "someSystemExistsToPreventKubernetesDeploymentsWithAssignedCapabilitiesFromBeingDeployedToAnExistingKubernetesCluster",
-          "Description": "",
+          "Description": "Validate that the kube instance security context contains 'k8sazureallowedcapabilities'; ",
           "Result": "Passed",
           "Error": "",
-          "Payload": null
+          "Payload": {
+            "PodState": {
+              "PodName": "",
+              "CreationError": null,
+              "ExpectedReason": null,
+              "CommandExitCode": 0
+            }
+          }
         },
         "3": {
-          "Name": "assignedCapabilitiesForTheKubernetesDeployment",
-          "Description": "",
+          "Name": "aKubernetesDeploymentIsAppliedToAnExistingKubernetesCluster",
+          "Description": "PENDING IMPLEMENTATION",
           "Result": "Passed",
           "Error": "",
           "Payload": null
         },
         "4": {
-          "Name": "theOperationWillWithAnError",
-          "Description": "",
+          "Name": "assignedCapabilitiesForTheKubernetesDeployment",
+          "Description": "Attempt to deploy a pod without the NET_ADMIN capability; ",
           "Result": "Passed",
           "Error": "",
-          "Payload": null
+          "Payload": {
+            "PodState": {
+              "PodName": "psp-test-pod-220221-103438-46",
+              "CreationError": null,
+              "ExpectedReason": null,
+              "CommandExitCode": 0
+            }
+          }
         },
         "5": {
-          "Name": "iShouldNotBeAbleToPerformACommandThatRequiresAnyCapabilities",
-          "Description": "",
+          "Name": "theOperationWillWithAnError",
+          "Description": "Validate that the scenario state was updated in the previous step with a particular result and message; ",
           "Result": "Passed",
           "Error": "",
-          "Payload": null
+          "Payload": {
+            "ExpectedResult": "Succeed",
+            "ExpectedMessage": "",
+            "PodState": {
+              "PodName": "psp-test-pod-220221-103438-46",
+              "CreationError": null,
+              "ExpectedReason": null,
+              "CommandExitCode": 0
+            }
+          }
         },
         "6": {
-          "Name": "performAllowedCommand",
-          "Description": "",
+          "Name": "iShouldNotBeAbleToPerformACommandThatRequiresAnyCapabilities",
+          "Description": "Validate that the exit code for command 'ip link add dummy0 type dummy' is 1; ",
           "Result": "Passed",
           "Error": "",
-          "Payload": null
+          "Payload": {
+            "PodState": {
+              "PodName": "psp-test-pod-220221-103438-46",
+              "CreationError": null,
+              "ExpectedReason": null,
+              "CommandExitCode": 0
+            }
+          }
+        },
+        "7": {
+          "Name": "iShouldBeAbleToPerformAnAllowedCommand",
+          "Description": "Validate that 'ls' is executed successfully",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": {
+            "PodState": {
+              "PodName": "psp-test-pod-220221-103438-46",
+              "CreationError": null,
+              "ExpectedReason": null,
+              "CommandExitCode": 0
+            },
+            "Command": "ls",
+            "ExpectedExitCode": 0
+          }
         }
       }
     },
@@ -1071,19 +2124,14 @@
       "Name": "Prevent deployments from running with assigned capabilities.",
       "Result": "Passed",
       "Tags": [
-        "@service/kubernetes",
-        "@control/family/pod_security_policy",
-        "@csp/azure",
-        "@csp/aws",
-        "@csp/gcp",
-        "@standard/cis/5.2",
-        "@control/type/preventative",
-        "@standard/cis/5.2.9"
+        "@k-psp",
+        "@probes/kubernetes/pod_security_policy",
+        "@k-psp-009"
       ],
       "Steps": {
         "1": {
           "Name": "aKubernetesClusterIsDeployed",
-          "Description": "Passes if Probr successfully connects to the specified cluster.",
+          "Description": "Validated that the k8s cluster specified in '/root/.kube/config' is deployed by checking the '' context; ",
           "Result": "Passed",
           "Error": "",
           "Payload": {
@@ -1093,58 +2141,99 @@
         },
         "2": {
           "Name": "someSystemExistsToPreventKubernetesDeploymentsWithAssignedCapabilitiesFromBeingDeployedToAnExistingKubernetesCluster",
-          "Description": "",
+          "Description": "Validate that the kube instance security context contains 'k8sazureallowedcapabilities'; ",
           "Result": "Passed",
           "Error": "",
-          "Payload": null
+          "Payload": {
+            "PodState": {
+              "PodName": "",
+              "CreationError": null,
+              "ExpectedReason": null,
+              "CommandExitCode": 0
+            }
+          }
         },
         "3": {
-          "Name": "assignedCapabilitiesForTheKubernetesDeployment",
-          "Description": "",
+          "Name": "aKubernetesDeploymentIsAppliedToAnExistingKubernetesCluster",
+          "Description": "PENDING IMPLEMENTATION",
           "Result": "Passed",
           "Error": "",
           "Payload": null
         },
         "4": {
-          "Name": "theOperationWillWithAnError",
-          "Description": "",
+          "Name": "assignedCapabilitiesForTheKubernetesDeployment",
+          "Description": "Attempt to deploy a pod without the NET_ADMIN capability; ",
           "Result": "Passed",
           "Error": "",
-          "Payload": null
+          "Payload": {
+            "PodState": {
+              "PodName": "psp-test-pod-220221-103441-4",
+              "CreationError": null,
+              "ExpectedReason": null,
+              "CommandExitCode": 0
+            }
+          }
         },
         "5": {
-          "Name": "iShouldNotBeAbleToPerformACommandThatRequiresAnyCapabilities",
-          "Description": "",
+          "Name": "theOperationWillWithAnError",
+          "Description": "Validate that the scenario state was updated in the previous step with a particular result and message; ",
           "Result": "Passed",
           "Error": "",
-          "Payload": null
+          "Payload": {
+            "ExpectedResult": "Succeed",
+            "ExpectedMessage": "",
+            "PodState": {
+              "PodName": "psp-test-pod-220221-103441-4",
+              "CreationError": null,
+              "ExpectedReason": null,
+              "CommandExitCode": 0
+            }
+          }
         },
         "6": {
-          "Name": "performAllowedCommand",
-          "Description": "",
+          "Name": "iShouldNotBeAbleToPerformACommandThatRequiresAnyCapabilities",
+          "Description": "Validate that the exit code for command 'ip link add dummy0 type dummy' is 1; ",
           "Result": "Passed",
           "Error": "",
-          "Payload": null
+          "Payload": {
+            "PodState": {
+              "PodName": "psp-test-pod-220221-103441-4",
+              "CreationError": null,
+              "ExpectedReason": null,
+              "CommandExitCode": 0
+            }
+          }
+        },
+        "7": {
+          "Name": "iShouldBeAbleToPerformAnAllowedCommand",
+          "Description": "Validate that 'ls' is executed successfully",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": {
+            "PodState": {
+              "PodName": "psp-test-pod-220221-103441-4",
+              "CreationError": null,
+              "ExpectedReason": null,
+              "CommandExitCode": 0
+            },
+            "Command": "ls",
+            "ExpectedExitCode": 0
+          }
         }
       }
     },
     "28": {
-      "Name": "Prevent deployments from accessing unapproved port range",
+      "Name": "Prevent deployments from accessing unapproved volume types",
       "Result": "Passed",
       "Tags": [
-        "@service/kubernetes",
-        "@control/family/pod_security_policy",
-        "@csp/azure",
-        "@csp/aws",
-        "@csp/gcp",
-        "@standard/cis/5.2",
-        "@control/type/preventative",
-        "@standard/none/psp-0.1"
+        "@k-psp",
+        "@probes/kubernetes/pod_security_policy",
+        "@k-psp-010"
       ],
       "Steps": {
         "1": {
           "Name": "aKubernetesClusterIsDeployed",
-          "Description": "Passes if Probr successfully connects to the specified cluster.",
+          "Description": "Validated that the k8s cluster specified in '/root/.kube/config' is deployed by checking the '' context; ",
           "Result": "Passed",
           "Error": "",
           "Payload": {
@@ -1153,59 +2242,82 @@
           }
         },
         "2": {
-          "Name": "someSystemExistsToPreventKubernetesDeploymentsWithUnapprovedPortRangeFromBeingDeployedToAnExistingKubernetesCluster",
-          "Description": "",
+          "Name": "someSystemExistsToPreventKubernetesDeploymentsWithUnapprovedVolumeTypesFromBeingDeployedToAnExistingKubernetesCluster",
+          "Description": "Validate that the kube instance security context contains 'k8sazurevolumetypes'; some systems exists to prevent kubernetes deployments without un approved volume types from being deployed existing kubernetes cluster",
           "Result": "Passed",
           "Error": "",
-          "Payload": null
+          "Payload": {
+            "PodState": {
+              "PodName": "",
+              "CreationError": null,
+              "ExpectedReason": null,
+              "CommandExitCode": 0
+            }
+          }
         },
         "3": {
-          "Name": "anPortRangeIsRequestedForTheKubernetesDeployment",
-          "Description": "",
+          "Name": "aKubernetesDeploymentIsAppliedToAnExistingKubernetesCluster",
+          "Description": "PENDING IMPLEMENTATION",
           "Result": "Passed",
           "Error": "",
           "Payload": null
         },
         "4": {
-          "Name": "theOperationWillWithAnError",
-          "Description": "",
+          "Name": "volumeTypesAreRequestedForTheKubernetesDeployment",
+          "Description": "Getting a list of supported volume types; removing Approved volume types; Preparing spec for volumes; Adding spec 'psp-azp-volumetypes-hostpath.yaml'; Attempting to deploy pods using each aforementioned spec; ",
           "Result": "Passed",
           "Error": "",
-          "Payload": null
+          "Payload": {
+            "PodStates": [
+              {
+                "PodName": "",
+                "CreationError": {
+                  "ReasonCodes": {
+                    "9": 2
+                  }
+                },
+                "ExpectedReason": 9,
+                "CommandExitCode": 0
+              }
+            ]
+          }
         },
         "5": {
-          "Name": "iShouldNotBeAbleToPerformACommandThatAccessAnUnapprovedPortRange",
-          "Description": "",
+          "Name": "allOperationsWillWithAnError",
+          "Description": "Validate that the scenario state was updated in the previous step with a list of pods with a particular result and message; ",
           "Result": "Passed",
           "Error": "",
-          "Payload": null
-        },
-        "6": {
-          "Name": "performAllowedCommand",
-          "Description": "",
-          "Result": "Passed",
-          "Error": "",
-          "Payload": null
+          "Payload": {
+            "ExpectedResult": "Fail",
+            "ExpectedMessage": "Cannot access unapproved volume type",
+            "PodState": [
+              {
+                "PodName": "",
+                "CreationError": {
+                  "ReasonCodes": {
+                    "9": 2
+                  }
+                },
+                "ExpectedReason": 9,
+                "CommandExitCode": 0
+              }
+            ]
+          }
         }
       }
     },
     "29": {
-      "Name": "Prevent deployments from accessing unapproved port range",
-      "Result": "Failed",
+      "Name": "Prevent deployments from accessing unapproved volume types",
+      "Result": "Passed",
       "Tags": [
-        "@service/kubernetes",
-        "@control/family/pod_security_policy",
-        "@csp/azure",
-        "@csp/aws",
-        "@csp/gcp",
-        "@standard/cis/5.2",
-        "@control/type/preventative",
-        "@standard/none/psp-0.1"
+        "@k-psp",
+        "@probes/kubernetes/pod_security_policy",
+        "@k-psp-010"
       ],
       "Steps": {
         "1": {
           "Name": "aKubernetesClusterIsDeployed",
-          "Description": "Passes if Probr successfully connects to the specified cluster.",
+          "Description": "Validated that the k8s cluster specified in '/root/.kube/config' is deployed by checking the '' context; ",
           "Result": "Passed",
           "Error": "",
           "Payload": {
@@ -1214,25 +2326,83 @@
           }
         },
         "2": {
-          "Name": "someSystemExistsToPreventKubernetesDeploymentsWithUnapprovedPortRangeFromBeingDeployedToAnExistingKubernetesCluster",
-          "Description": "",
+          "Name": "someSystemExistsToPreventKubernetesDeploymentsWithUnapprovedVolumeTypesFromBeingDeployedToAnExistingKubernetesCluster",
+          "Description": "Validate that the kube instance security context contains 'k8sazurevolumetypes'; some systems exists to prevent kubernetes deployments without un approved volume types from being deployed existing kubernetes cluster",
           "Result": "Passed",
           "Error": "",
-          "Payload": null
+          "Payload": {
+            "PodState": {
+              "PodName": "",
+              "CreationError": null,
+              "ExpectedReason": null,
+              "CommandExitCode": 0
+            }
+          }
         },
         "3": {
-          "Name": "anPortRangeIsRequestedForTheKubernetesDeployment",
-          "Description": "",
+          "Name": "aKubernetesDeploymentIsAppliedToAnExistingKubernetesCluster",
+          "Description": "PENDING IMPLEMENTATION",
           "Result": "Passed",
           "Error": "",
           "Payload": null
         },
         "4": {
-          "Name": "theOperationWillWithAnError",
-          "Description": "",
-          "Result": "Failed",
-          "Error": "pod was not created - test failed: pod creation error: map[podcreation-error: psp-container-allowed-images:podcreation-error: psp-host-network] admission webhook \"validation.gatekeeper.sh\" denied the request: [denied by azurepolicy-container-allowed-images-d0318bd54c8157a6fe8c] Container image busybox for container sec-ctx-demo has not been allowed.",
-          "Payload": null
+          "Name": "volumeTypesAreRequestedForTheKubernetesDeployment",
+          "Description": "Getting a list of approved volume types; Preparing spec for volumes; Adding spec 'psp-azp-volumetypes-configmap.yaml'; Adding spec 'psp-azp-volumetypes-emptydir.yaml'; Adding spec 'psp-azp-volumetypes-persistentvolumeclaim.yaml'; Attempting to deploy pods using each aforementioned spec; ",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": {
+            "PodStates": [
+              {
+                "PodName": "psp-test-pod-220221-103444-21",
+                "CreationError": null,
+                "ExpectedReason": null,
+                "CommandExitCode": 0
+              },
+              {
+                "PodName": "psp-test-pod-220221-103451-22",
+                "CreationError": null,
+                "ExpectedReason": null,
+                "CommandExitCode": 0
+              },
+              {
+                "PodName": "psp-test-pod-220221-103454-80",
+                "CreationError": null,
+                "ExpectedReason": null,
+                "CommandExitCode": 0
+              }
+            ]
+          }
+        },
+        "5": {
+          "Name": "allOperationsWillWithAnError",
+          "Description": "Validate that the scenario state was updated in the previous step with a list of pods with a particular result and message; ",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": {
+            "ExpectedResult": "Succeed",
+            "ExpectedMessage": "",
+            "PodState": [
+              {
+                "PodName": "psp-test-pod-220221-103444-21",
+                "CreationError": null,
+                "ExpectedReason": null,
+                "CommandExitCode": 0
+              },
+              {
+                "PodName": "psp-test-pod-220221-103451-22",
+                "CreationError": null,
+                "ExpectedReason": null,
+                "CommandExitCode": 0
+              },
+              {
+                "PodName": "psp-test-pod-220221-103454-80",
+                "CreationError": null,
+                "ExpectedReason": null,
+                "CommandExitCode": 0
+              }
+            ]
+          }
         }
       }
     },
@@ -1240,19 +2410,14 @@
       "Name": "Prevent a deployment from running with privileged access",
       "Result": "Passed",
       "Tags": [
-        "@service/kubernetes",
-        "@control/family/pod_security_policy",
-        "@csp/azure",
-        "@csp/aws",
-        "@csp/gcp",
-        "@standard/cis/5.2",
-        "@control/type/preventative",
-        "@standard/cis/5.2.1"
+        "@k-psp",
+        "@probes/kubernetes/pod_security_policy",
+        "@k-psp-001"
       ],
       "Steps": {
         "1": {
           "Name": "aKubernetesClusterIsDeployed",
-          "Description": "Passes if Probr successfully connects to the specified cluster.",
+          "Description": "Validated that the k8s cluster specified in '/root/.kube/config' is deployed by checking the '' context; ",
           "Result": "Passed",
           "Error": "",
           "Payload": {
@@ -1262,58 +2427,440 @@
         },
         "2": {
           "Name": "someControlExistsToPreventPrivilegedAccessForKubernetesDeploymentsToAnActiveKubernetesCluster",
-          "Description": "",
+          "Description": "Validate that the kube instance security context contains 'k8sazurecontainernoprivilege'; ",
           "Result": "Passed",
           "Error": "",
-          "Payload": null
+          "Payload": {
+            "PodState": {
+              "PodName": "",
+              "CreationError": null,
+              "ExpectedReason": null,
+              "CommandExitCode": 0
+            }
+          }
         },
         "3": {
-          "Name": "privilegedAccessRequestIsMarkedForTheKubernetesDeployment",
-          "Description": "",
+          "Name": "aKubernetesDeploymentIsAppliedToAnExistingKubernetesCluster",
+          "Description": "PENDING IMPLEMENTATION",
           "Result": "Passed",
           "Error": "",
           "Payload": null
         },
         "4": {
-          "Name": "theOperationWillWithAnError",
-          "Description": "",
+          "Name": "privilegedAccessRequestIsMarkedForTheKubernetesDeployment",
+          "Description": "Attempt to deploy a pod with priviledged access 'Not Defined'; ",
           "Result": "Passed",
           "Error": "",
-          "Payload": null
+          "Payload": {
+            "PodState": {
+              "PodName": "psp-test-pod-220221-103311-84",
+              "CreationError": null,
+              "ExpectedReason": null,
+              "CommandExitCode": 0
+            }
+          }
         },
         "5": {
-          "Name": "iShouldNotBeAbleToPerformACommandThatRequiresPrivilegedAccess",
-          "Description": "",
+          "Name": "theOperationWillWithAnError",
+          "Description": "Validate that the scenario state was updated in the previous step with a particular result and message; ",
           "Result": "Passed",
           "Error": "",
-          "Payload": null
+          "Payload": {
+            "ExpectedResult": "Succeed",
+            "ExpectedMessage": "No error would show",
+            "PodState": {
+              "PodName": "psp-test-pod-220221-103311-84",
+              "CreationError": null,
+              "ExpectedReason": null,
+              "CommandExitCode": 0
+            }
+          }
         },
         "6": {
-          "Name": "performAllowedCommand",
-          "Description": "",
+          "Name": "iShouldNotBeAbleToPerformACommandThatRequiresPrivilegedAccess",
+          "Description": "Validate that the command 'chroot .' fails to execute; ",
           "Result": "Passed",
           "Error": "",
-          "Payload": null
+          "Payload": {
+            "PodState": {
+              "PodName": "psp-test-pod-220221-103311-84",
+              "CreationError": null,
+              "ExpectedReason": null,
+              "CommandExitCode": 0
+            }
+          }
+        },
+        "7": {
+          "Name": "iShouldBeAbleToPerformAnAllowedCommand",
+          "Description": "Validate that 'ls' is executed successfully",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": {
+            "PodState": {
+              "PodName": "psp-test-pod-220221-103311-84",
+              "CreationError": null,
+              "ExpectedReason": null,
+              "CommandExitCode": 0
+            },
+            "Command": "ls",
+            "ExpectedExitCode": 0
+          }
         }
       }
     },
     "30": {
-      "Name": "Prevent deployments from accessing unapproved port range",
-      "Result": "Failed",
+      "Name": "Prevent deployments from running without approved seccomp profile",
+      "Result": "Passed",
       "Tags": [
-        "@service/kubernetes",
-        "@control/family/pod_security_policy",
-        "@csp/azure",
-        "@csp/aws",
-        "@csp/gcp",
-        "@standard/cis/5.2",
-        "@control/type/preventative",
-        "@standard/none/psp-0.1"
+        "@k-psp",
+        "@probes/kubernetes/pod_security_policy",
+        "@k-psp-011"
       ],
       "Steps": {
         "1": {
           "Name": "aKubernetesClusterIsDeployed",
-          "Description": "Passes if Probr successfully connects to the specified cluster.",
+          "Description": "Validated that the k8s cluster specified in '/root/.kube/config' is deployed by checking the '' context; ",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": {
+            "KubeConfigPath": "/root/.kube/config",
+            "KubeContext": ""
+          }
+        },
+        "2": {
+          "Name": "someSystemExistsToPreventKubernetesDeploymentsWithoutApprovedSeccompProfilesFromBeingDeployedToAnExistingKubernetesCluster",
+          "Description": "Validate that the kube instance security context contains 'k8sazureallowedseccomp'; ",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": {
+            "PodState": {
+              "PodName": "",
+              "CreationError": null,
+              "ExpectedReason": null,
+              "CommandExitCode": 0
+            }
+          }
+        },
+        "3": {
+          "Name": "aKubernetesDeploymentIsAppliedToAnExistingKubernetesCluster",
+          "Description": "PENDING IMPLEMENTATION",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": null
+        },
+        "4": {
+          "Name": "anSeccompProfileIsRequestedForTheKubernetesDeployment",
+          "Description": "Attempting to create pod with seccomp unapproved",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": {
+            "SpecPath": "psp-azp-seccomp-unapproved.yaml",
+            "PodState": {
+              "PodName": "",
+              "CreationError": {
+                "ReasonCodes": {
+                  "10": 7
+                }
+              },
+              "ExpectedReason": 10,
+              "CommandExitCode": 0
+            }
+          }
+        },
+        "5": {
+          "Name": "theOperationWillWithAnError",
+          "Description": "Validate that the scenario state was updated in the previous step with a particular result and message; ",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": {
+            "ExpectedResult": "Fail",
+            "ExpectedMessage": "Cannot request unapproved seccomp profile",
+            "PodState": {
+              "PodName": "",
+              "CreationError": {
+                "ReasonCodes": {
+                  "10": 7
+                }
+              },
+              "ExpectedReason": 10,
+              "CommandExitCode": 0
+            }
+          }
+        },
+        "6": {
+          "Name": "iShouldNotBeAbleToPerformASystemCallThatIsBlockedByTheSeccompProfile",
+          "Description": "Validate that the exit code for command 'unshare' is 1; ",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": {
+            "PodState": {
+              "PodName": "",
+              "CreationError": {
+                "ReasonCodes": {
+                  "10": 7
+                }
+              },
+              "ExpectedReason": 10,
+              "CommandExitCode": 0
+            }
+          }
+        },
+        "7": {
+          "Name": "iShouldBeAbleToPerformAnAllowedCommand",
+          "Description": "Validate that 'ls' is executed successfully",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": {
+            "PodState": {
+              "PodName": "",
+              "CreationError": {
+                "ReasonCodes": {
+                  "10": 7
+                }
+              },
+              "ExpectedReason": 10,
+              "CommandExitCode": 0
+            },
+            "Command": "ls",
+            "ExpectedExitCode": 0
+          }
+        }
+      }
+    },
+    "31": {
+      "Name": "Prevent deployments from running without approved seccomp profile",
+      "Result": "Passed",
+      "Tags": [
+        "@k-psp",
+        "@probes/kubernetes/pod_security_policy",
+        "@k-psp-011"
+      ],
+      "Steps": {
+        "1": {
+          "Name": "aKubernetesClusterIsDeployed",
+          "Description": "Validated that the k8s cluster specified in '/root/.kube/config' is deployed by checking the '' context; ",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": {
+            "KubeConfigPath": "/root/.kube/config",
+            "KubeContext": ""
+          }
+        },
+        "2": {
+          "Name": "someSystemExistsToPreventKubernetesDeploymentsWithoutApprovedSeccompProfilesFromBeingDeployedToAnExistingKubernetesCluster",
+          "Description": "Validate that the kube instance security context contains 'k8sazureallowedseccomp'; ",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": {
+            "PodState": {
+              "PodName": "",
+              "CreationError": null,
+              "ExpectedReason": null,
+              "CommandExitCode": 0
+            }
+          }
+        },
+        "3": {
+          "Name": "aKubernetesDeploymentIsAppliedToAnExistingKubernetesCluster",
+          "Description": "PENDING IMPLEMENTATION",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": null
+        },
+        "4": {
+          "Name": "anSeccompProfileIsRequestedForTheKubernetesDeployment",
+          "Description": "Attempting to create pod with seccomp approved",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": {
+            "SpecPath": "psp-azp-seccomp-approved.yaml",
+            "PodState": {
+              "PodName": "psp-test-pod-220221-103554-57",
+              "CreationError": null,
+              "ExpectedReason": null,
+              "CommandExitCode": 0
+            }
+          }
+        },
+        "5": {
+          "Name": "theOperationWillWithAnError",
+          "Description": "Validate that the scenario state was updated in the previous step with a particular result and message; ",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": {
+            "ExpectedResult": "Succeed",
+            "ExpectedMessage": "no error",
+            "PodState": {
+              "PodName": "psp-test-pod-220221-103554-57",
+              "CreationError": null,
+              "ExpectedReason": null,
+              "CommandExitCode": 0
+            }
+          }
+        },
+        "6": {
+          "Name": "iShouldNotBeAbleToPerformASystemCallThatIsBlockedByTheSeccompProfile",
+          "Description": "Validate that the exit code for command 'unshare' is 1; ",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": {
+            "PodState": {
+              "PodName": "psp-test-pod-220221-103554-57",
+              "CreationError": null,
+              "ExpectedReason": null,
+              "CommandExitCode": 0
+            }
+          }
+        },
+        "7": {
+          "Name": "iShouldBeAbleToPerformAnAllowedCommand",
+          "Description": "Validate that 'ls' is executed successfully",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": {
+            "PodState": {
+              "PodName": "psp-test-pod-220221-103554-57",
+              "CreationError": null,
+              "ExpectedReason": null,
+              "CommandExitCode": 0
+            },
+            "Command": "ls",
+            "ExpectedExitCode": 0
+          }
+        }
+      }
+    },
+    "32": {
+      "Name": "Prevent deployments from running without approved seccomp profile",
+      "Result": "Passed",
+      "Tags": [
+        "@k-psp",
+        "@probes/kubernetes/pod_security_policy",
+        "@k-psp-011"
+      ],
+      "Steps": {
+        "1": {
+          "Name": "aKubernetesClusterIsDeployed",
+          "Description": "Validated that the k8s cluster specified in '/root/.kube/config' is deployed by checking the '' context; ",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": {
+            "KubeConfigPath": "/root/.kube/config",
+            "KubeContext": ""
+          }
+        },
+        "2": {
+          "Name": "someSystemExistsToPreventKubernetesDeploymentsWithoutApprovedSeccompProfilesFromBeingDeployedToAnExistingKubernetesCluster",
+          "Description": "Validate that the kube instance security context contains 'k8sazureallowedseccomp'; ",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": {
+            "PodState": {
+              "PodName": "",
+              "CreationError": null,
+              "ExpectedReason": null,
+              "CommandExitCode": 0
+            }
+          }
+        },
+        "3": {
+          "Name": "aKubernetesDeploymentIsAppliedToAnExistingKubernetesCluster",
+          "Description": "PENDING IMPLEMENTATION",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": null
+        },
+        "4": {
+          "Name": "anSeccompProfileIsRequestedForTheKubernetesDeployment",
+          "Description": "Attempting to create pod with seccomp undefined",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": {
+            "SpecPath": "psp-azp-seccomp-undefined.yaml",
+            "PodState": {
+              "PodName": "",
+              "CreationError": {
+                "ReasonCodes": {
+                  "10": 10
+                }
+              },
+              "ExpectedReason": 10,
+              "CommandExitCode": 0
+            }
+          }
+        },
+        "5": {
+          "Name": "theOperationWillWithAnError",
+          "Description": "Validate that the scenario state was updated in the previous step with a particular result and message; ",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": {
+            "ExpectedResult": "Fail",
+            "ExpectedMessage": "Approved seccomp profile required",
+            "PodState": {
+              "PodName": "",
+              "CreationError": {
+                "ReasonCodes": {
+                  "10": 10
+                }
+              },
+              "ExpectedReason": 10,
+              "CommandExitCode": 0
+            }
+          }
+        },
+        "6": {
+          "Name": "iShouldNotBeAbleToPerformASystemCallThatIsBlockedByTheSeccompProfile",
+          "Description": "Validate that the exit code for command 'unshare' is 1; ",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": {
+            "PodState": {
+              "PodName": "",
+              "CreationError": {
+                "ReasonCodes": {
+                  "10": 10
+                }
+              },
+              "ExpectedReason": 10,
+              "CommandExitCode": 0
+            }
+          }
+        },
+        "7": {
+          "Name": "iShouldBeAbleToPerformAnAllowedCommand",
+          "Description": "Validate that 'ls' is executed successfully",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": {
+            "PodState": {
+              "PodName": "",
+              "CreationError": {
+                "ReasonCodes": {
+                  "10": 10
+                }
+              },
+              "ExpectedReason": 10,
+              "CommandExitCode": 0
+            },
+            "Command": "ls",
+            "ExpectedExitCode": 0
+          }
+        }
+      }
+    },
+    "33": {
+      "Name": "Prevent pods from exposing unapproved host ports",
+      "Result": "Passed",
+      "Tags": [
+        "@k-psp",
+        "@probes/kubernetes/pod_security_policy",
+        "@k-psp-012"
+      ],
+      "Steps": {
+        "1": {
+          "Name": "aKubernetesClusterIsDeployed",
+          "Description": "Validated that the k8s cluster specified in '/root/.kube/config' is deployed by checking the '' context; ",
           "Result": "Passed",
           "Error": "",
           "Payload": {
@@ -1323,192 +2870,80 @@
         },
         "2": {
           "Name": "someSystemExistsToPreventKubernetesDeploymentsWithUnapprovedPortRangeFromBeingDeployedToAnExistingKubernetesCluster",
-          "Description": "",
-          "Result": "Passed",
-          "Error": "",
-          "Payload": null
-        },
-        "3": {
-          "Name": "anPortRangeIsRequestedForTheKubernetesDeployment",
-          "Description": "",
-          "Result": "Passed",
-          "Error": "",
-          "Payload": null
-        },
-        "4": {
-          "Name": "theOperationWillWithAnError",
-          "Description": "",
-          "Result": "Failed",
-          "Error": "pod was not created - test failed: pod creation error: map[podcreation-error: psp-container-allowed-images:podcreation-error: psp-container-no-privilege] admission webhook \"validation.gatekeeper.sh\" denied the request: [denied by azurepolicy-container-allowed-images-d0318bd54c8157a6fe8c] Container image busybox for container sec-ctx-demo has not been allowed.",
-          "Payload": null
-        }
-      }
-    },
-    "31": {
-      "Name": "Prevent deployments from accessing unapproved volume types",
-      "Result": "Passed",
-      "Tags": [
-        "@service/kubernetes",
-        "@control/family/pod_security_policy",
-        "@csp/azure",
-        "@csp/aws",
-        "@csp/gcp",
-        "@standard/cis/5.2",
-        "@control/type/preventative",
-        "@standard/none/psp-0.2"
-      ],
-      "Steps": {
-        "1": {
-          "Name": "aKubernetesClusterIsDeployed",
-          "Description": "Passes if Probr successfully connects to the specified cluster.",
+          "Description": "Validate that the kube instance security context contains 'k8sazurehostnetworkingports'; ",
           "Result": "Passed",
           "Error": "",
           "Payload": {
-            "KubeConfigPath": "/root/.kube/config",
-            "KubeContext": ""
+            "PodState": {
+              "PodName": "",
+              "CreationError": null,
+              "ExpectedReason": null,
+              "CommandExitCode": 0
+            }
           }
         },
-        "2": {
-          "Name": "someSystemExistsToPreventKubernetesDeploymentsWithUnapprovedVolumeTypesFromBeingDeployedToAnExistingKubernetesCluster",
-          "Description": "",
-          "Result": "Passed",
-          "Error": "",
-          "Payload": null
-        },
         "3": {
-          "Name": "anVolumeTypeIsRequestedForTheKubernetesDeployment",
-          "Description": "",
+          "Name": "aKubernetesDeploymentIsAppliedToAnExistingKubernetesCluster",
+          "Description": "PENDING IMPLEMENTATION",
           "Result": "Passed",
           "Error": "",
           "Payload": null
         },
         "4": {
-          "Name": "theOperationWillWithAnError",
-          "Description": "",
+          "Name": "anPortRangeIsRequestedForTheKubernetesDeployment",
+          "Description": "Set unapproved port for pod spec: 22; unapproved port range is requested for kubernetes deployment. Port was 22.Attempting to create pod from yaml spec; ",
           "Result": "Passed",
           "Error": "",
-          "Payload": null
+          "Payload": {
+            "PodSpecPath": "psp-azp-hostport-unapproved.yaml",
+            "PodState": {
+              "PodName": "",
+              "CreationError": {
+                "ReasonCodes": {
+                  "6": 4,
+                  "8": 4
+                }
+              },
+              "ExpectedReason": 8,
+              "CommandExitCode": 0
+            }
+          }
         },
         "5": {
-          "Name": "performAllowedCommand",
-          "Description": "",
-          "Result": "Passed",
-          "Error": "",
-          "Payload": null
-        }
-      }
-    },
-    "32": {
-      "Name": "Prevent deployments from accessing unapproved volume types",
-      "Result": "Failed",
-      "Tags": [
-        "@service/kubernetes",
-        "@control/family/pod_security_policy",
-        "@csp/azure",
-        "@csp/aws",
-        "@csp/gcp",
-        "@standard/cis/5.2",
-        "@control/type/preventative",
-        "@standard/none/psp-0.2"
-      ],
-      "Steps": {
-        "1": {
-          "Name": "aKubernetesClusterIsDeployed",
-          "Description": "Passes if Probr successfully connects to the specified cluster.",
+          "Name": "theOperationWillWithAnError",
+          "Description": "Validate that the scenario state was updated in the previous step with a particular result and message; ",
           "Result": "Passed",
           "Error": "",
           "Payload": {
-            "KubeConfigPath": "/root/.kube/config",
-            "KubeContext": ""
+            "ExpectedResult": "Fail",
+            "ExpectedMessage": "Cannot access unapproved port range",
+            "PodState": {
+              "PodName": "",
+              "CreationError": {
+                "ReasonCodes": {
+                  "6": 4,
+                  "8": 4
+                }
+              },
+              "ExpectedReason": 8,
+              "CommandExitCode": 0
+            }
           }
-        },
-        "2": {
-          "Name": "someSystemExistsToPreventKubernetesDeploymentsWithUnapprovedVolumeTypesFromBeingDeployedToAnExistingKubernetesCluster",
-          "Description": "",
-          "Result": "Passed",
-          "Error": "",
-          "Payload": null
-        },
-        "3": {
-          "Name": "anVolumeTypeIsRequestedForTheKubernetesDeployment",
-          "Description": "",
-          "Result": "Passed",
-          "Error": "",
-          "Payload": null
-        },
-        "4": {
-          "Name": "theOperationWillWithAnError",
-          "Description": "",
-          "Result": "Failed",
-          "Error": "pod was not created - test failed: pod creation error: map[podcreation-error: psp-container-allowed-images:podcreation-error: psp-host-network] admission webhook \"validation.gatekeeper.sh\" denied the request: [denied by azurepolicy-container-allowed-images-d0318bd54c8157a6fe8c] Container image busybox for container sec-ctx-demo has not been allowed.",
-          "Payload": null
-        }
-      }
-    },
-    "33": {
-      "Name": "Prevent deployments from accessing unapproved volume types",
-      "Result": "Failed",
-      "Tags": [
-        "@service/kubernetes",
-        "@control/family/pod_security_policy",
-        "@csp/azure",
-        "@csp/aws",
-        "@csp/gcp",
-        "@standard/cis/5.2",
-        "@control/type/preventative",
-        "@standard/none/psp-0.2"
-      ],
-      "Steps": {
-        "1": {
-          "Name": "aKubernetesClusterIsDeployed",
-          "Description": "Passes if Probr successfully connects to the specified cluster.",
-          "Result": "Passed",
-          "Error": "",
-          "Payload": {
-            "KubeConfigPath": "/root/.kube/config",
-            "KubeContext": ""
-          }
-        },
-        "2": {
-          "Name": "someSystemExistsToPreventKubernetesDeploymentsWithUnapprovedVolumeTypesFromBeingDeployedToAnExistingKubernetesCluster",
-          "Description": "",
-          "Result": "Passed",
-          "Error": "",
-          "Payload": null
-        },
-        "3": {
-          "Name": "anVolumeTypeIsRequestedForTheKubernetesDeployment",
-          "Description": "",
-          "Result": "Passed",
-          "Error": "",
-          "Payload": null
-        },
-        "4": {
-          "Name": "theOperationWillWithAnError",
-          "Description": "",
-          "Result": "Failed",
-          "Error": "pod was not created - test failed: pod creation error: map[podcreation-error: psp-container-allowed-images:podcreation-error: psp-allowed-portrange] admission webhook \"validation.gatekeeper.sh\" denied the request: [denied by azurepolicy-container-allowed-images-d0318bd54c8157a6fe8c] Container image busybox for container sec-ctx-demo has not been allowed.",
-          "Payload": null
         }
       }
     },
     "34": {
-      "Name": "Prevent deployments from running without approved seccomp profile",
-      "Result": "Failed",
+      "Name": "Prevent pods from exposing unapproved host ports",
+      "Result": "Passed",
       "Tags": [
-        "@service/kubernetes",
-        "@control/family/pod_security_policy",
-        "@csp/azure",
-        "@csp/aws",
-        "@csp/gcp",
-        "@standard/cis/5.2",
-        "@control/type/preventative",
-        "@standard/none/psp-0.3"
+        "@k-psp",
+        "@probes/kubernetes/pod_security_policy",
+        "@k-psp-012"
       ],
       "Steps": {
         "1": {
           "Name": "aKubernetesClusterIsDeployed",
-          "Description": "Passes if Probr successfully connects to the specified cluster.",
+          "Description": "Validated that the k8s cluster specified in '/root/.kube/config' is deployed by checking the '' context; ",
           "Result": "Passed",
           "Error": "",
           "Payload": {
@@ -1517,45 +2952,71 @@
           }
         },
         "2": {
-          "Name": "someSystemExistsToPreventKubernetesDeploymentsWithoutApprovedSeccompProfilesFromBeingDeployedToAnExistingKubernetesCluster",
-          "Description": "",
+          "Name": "someSystemExistsToPreventKubernetesDeploymentsWithUnapprovedPortRangeFromBeingDeployedToAnExistingKubernetesCluster",
+          "Description": "Validate that the kube instance security context contains 'k8sazurehostnetworkingports'; ",
           "Result": "Passed",
           "Error": "",
-          "Payload": null
+          "Payload": {
+            "PodState": {
+              "PodName": "",
+              "CreationError": null,
+              "ExpectedReason": null,
+              "CommandExitCode": 0
+            }
+          }
         },
         "3": {
-          "Name": "anSeccompProfileIsRequestedForTheKubernetesDeployment",
-          "Description": "",
+          "Name": "aKubernetesDeploymentIsAppliedToAnExistingKubernetesCluster",
+          "Description": "PENDING IMPLEMENTATION",
           "Result": "Passed",
           "Error": "",
           "Payload": null
         },
         "4": {
+          "Name": "anPortRangeIsRequestedForTheKubernetesDeployment",
+          "Description": "not defined port range is requested for kubernetes deployment.Attempting to create pod from yaml spec; ",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": {
+            "PodSpecPath": "psp-azp-hostport-notdefined.yaml",
+            "PodState": {
+              "PodName": "psp-test-pod-220221-103600-47",
+              "CreationError": null,
+              "ExpectedReason": null,
+              "CommandExitCode": 0
+            }
+          }
+        },
+        "5": {
           "Name": "theOperationWillWithAnError",
-          "Description": "",
-          "Result": "Failed",
-          "Error": "pod  was created - test failed",
-          "Payload": null
+          "Description": "Validate that the scenario state was updated in the previous step with a particular result and message; ",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": {
+            "ExpectedResult": "Succeed",
+            "ExpectedMessage": "",
+            "PodState": {
+              "PodName": "psp-test-pod-220221-103600-47",
+              "CreationError": null,
+              "ExpectedReason": null,
+              "CommandExitCode": 0
+            }
+          }
         }
       }
     },
     "35": {
-      "Name": "Prevent deployments from running without approved seccomp profile",
-      "Result": "Failed",
+      "Name": "Prevent deployments from executing commands with the NET_RAW capability.",
+      "Result": "Passed",
       "Tags": [
-        "@service/kubernetes",
-        "@control/family/pod_security_policy",
-        "@csp/azure",
-        "@csp/aws",
-        "@csp/gcp",
-        "@standard/cis/5.2",
-        "@control/type/preventative",
-        "@standard/none/psp-0.3"
+        "@k-psp",
+        "@probes/kubernetes/pod_security_policy",
+        "@k-psp-013"
       ],
       "Steps": {
         "1": {
           "Name": "aKubernetesClusterIsDeployed",
-          "Description": "Passes if Probr successfully connects to the specified cluster.",
+          "Description": "Validated that the k8s cluster specified in '/root/.kube/config' is deployed by checking the '' context; ",
           "Result": "Passed",
           "Error": "",
           "Payload": {
@@ -1564,79 +3025,64 @@
           }
         },
         "2": {
-          "Name": "someSystemExistsToPreventKubernetesDeploymentsWithoutApprovedSeccompProfilesFromBeingDeployedToAnExistingKubernetesCluster",
-          "Description": "",
+          "Name": "kubernetesDeploymentWithNETRAWCapability",
+          "Description": "Creating pod with NET_RAW dropped in the pod's capabilities; ",
           "Result": "Passed",
           "Error": "",
-          "Payload": null
+          "Payload": {
+            "PodState": {
+              "PodName": "psp-test-pod-220221-103603-65",
+              "CreationError": null,
+              "ExpectedReason": null,
+              "CommandExitCode": 0
+            }
+          }
         },
         "3": {
-          "Name": "anSeccompProfileIsRequestedForTheKubernetesDeployment",
-          "Description": "",
+          "Name": "theOperationWillWithAnError",
+          "Description": "Validate that the scenario state was updated in the previous step with a particular result and message; ",
           "Result": "Passed",
           "Error": "",
-          "Payload": null
+          "Payload": {
+            "ExpectedResult": "Succeed",
+            "ExpectedMessage": "",
+            "PodState": {
+              "PodName": "psp-test-pod-220221-103603-65",
+              "CreationError": null,
+              "ExpectedReason": null,
+              "CommandExitCode": 0
+            }
+          }
         },
         "4": {
-          "Name": "theOperationWillWithAnError",
-          "Description": "",
+          "Name": "iShouldBeAbleToPerformAnAllowedCommand",
+          "Description": "Validate that 'ls' is executed successfully",
           "Result": "Passed",
           "Error": "",
-          "Payload": null
+          "Payload": {
+            "PodState": {
+              "PodName": "psp-test-pod-220221-103603-65",
+              "CreationError": null,
+              "ExpectedReason": null,
+              "CommandExitCode": 0
+            },
+            "Command": "ls",
+            "ExpectedExitCode": 0
+          }
         },
         "5": {
-          "Name": "iShouldNotBeAbleToPerformASystemCallThatIsBlockedByTheSeccompProfile",
-          "Description": "",
-          "Result": "Failed",
-          "Error": "Likely an internal Probr error. Error raised trying to execute verification command (unshare)",
-          "Payload": null
-        }
-      }
-    },
-    "36": {
-      "Name": "Prevent deployments from running without approved seccomp profile",
-      "Result": "Failed",
-      "Tags": [
-        "@service/kubernetes",
-        "@control/family/pod_security_policy",
-        "@csp/azure",
-        "@csp/aws",
-        "@csp/gcp",
-        "@standard/cis/5.2",
-        "@control/type/preventative",
-        "@standard/none/psp-0.3"
-      ],
-      "Steps": {
-        "1": {
-          "Name": "aKubernetesClusterIsDeployed",
-          "Description": "Passes if Probr successfully connects to the specified cluster.",
+          "Name": "iShouldNotBeAbleToPerformACommandThatRequiresNETRAWCapability",
+          "Description": "Validate that the exit code for command 'ping google.com' is 1; ",
           "Result": "Passed",
           "Error": "",
           "Payload": {
-            "KubeConfigPath": "/root/.kube/config",
-            "KubeContext": ""
+            "PodState": {
+              "PodName": "psp-test-pod-220221-103603-65",
+              "CreationError": null,
+              "ExpectedReason": null,
+              "CommandExitCode": 0
+            }
           }
-        },
-        "2": {
-          "Name": "someSystemExistsToPreventKubernetesDeploymentsWithoutApprovedSeccompProfilesFromBeingDeployedToAnExistingKubernetesCluster",
-          "Description": "",
-          "Result": "Passed",
-          "Error": "",
-          "Payload": null
-        },
-        "3": {
-          "Name": "anSeccompProfileIsRequestedForTheKubernetesDeployment",
-          "Description": "",
-          "Result": "Passed",
-          "Error": "",
-          "Payload": null
-        },
-        "4": {
-          "Name": "theOperationWillWithAnError",
-          "Description": "",
-          "Result": "Failed",
-          "Error": "pod  was created - test failed",
-          "Payload": null
         }
       }
     },
@@ -1644,19 +3090,14 @@
       "Name": "Prevent a deployment from running with the hostPID",
       "Result": "Passed",
       "Tags": [
-        "@service/kubernetes",
-        "@control/family/pod_security_policy",
-        "@csp/azure",
-        "@csp/aws",
-        "@csp/gcp",
-        "@standard/cis/5.2",
-        "@control/type/preventative",
-        "@standard/cis/5.2.2"
+        "@k-psp",
+        "@probes/kubernetes/pod_security_policy",
+        "@k-psp-002"
       ],
       "Steps": {
         "1": {
           "Name": "aKubernetesClusterIsDeployed",
-          "Description": "Passes if Probr successfully connects to the specified cluster.",
+          "Description": "Validated that the k8s cluster specified in '/root/.kube/config' is deployed by checking the '' context; ",
           "Result": "Passed",
           "Error": "",
           "Payload": {
@@ -1666,38 +3107,100 @@
         },
         "2": {
           "Name": "someSystemExistsToPreventAKubernetesContainerFromRunningUsingTheHostPIDOnTheActiveKubernetesCluster",
-          "Description": "",
+          "Description": "Validate that at least on of the cluster's pod security policies has HostPID set to false; ",
           "Result": "Passed",
           "Error": "",
-          "Payload": null
+          "Payload": {
+            "PodState": {
+              "PodName": "",
+              "CreationError": null,
+              "ExpectedReason": null,
+              "CommandExitCode": 0
+            }
+          }
         },
         "3": {
-          "Name": "hostPIDRequestIsMarkedForTheKubernetesDeployment",
-          "Description": "",
+          "Name": "aKubernetesDeploymentIsAppliedToAnExistingKubernetesCluster",
+          "Description": "PENDING IMPLEMENTATION",
           "Result": "Passed",
           "Error": "",
           "Payload": null
         },
         "4": {
-          "Name": "theOperationWillWithAnError",
-          "Description": "",
+          "Name": "hostPIDRequestIsMarkedForTheKubernetesDeployment",
+          "Description": "Attempt to deploy a pod with host PID 'True'; ",
           "Result": "Passed",
           "Error": "",
-          "Payload": null
+          "Payload": {
+            "PodState": {
+              "PodName": "",
+              "CreationError": {
+                "ReasonCodes": {
+                  "5": 8
+                }
+              },
+              "ExpectedReason": 5,
+              "CommandExitCode": 0
+            }
+          }
         },
         "5": {
-          "Name": "iShouldNotBeAbleToPerformACommandThatProvidesAccessToTheHostPIDNamespace",
-          "Description": "",
+          "Name": "theOperationWillWithAnError",
+          "Description": "Validate that the scenario state was updated in the previous step with a particular result and message; ",
           "Result": "Passed",
           "Error": "",
-          "Payload": null
+          "Payload": {
+            "ExpectedResult": "Fail",
+            "ExpectedMessage": "Containers cant run using hostPID",
+            "PodState": {
+              "PodName": "",
+              "CreationError": {
+                "ReasonCodes": {
+                  "5": 8
+                }
+              },
+              "ExpectedReason": 5,
+              "CommandExitCode": 0
+            }
+          }
         },
         "6": {
-          "Name": "performAllowedCommand",
-          "Description": "",
+          "Name": "iShouldNotBeAbleToPerformACommandThatProvidesAccessToTheHostPIDNamespace",
+          "Description": "Validate that the exit code for command 'nsenter -t 1 -p ps' is 1; ",
           "Result": "Passed",
           "Error": "",
-          "Payload": null
+          "Payload": {
+            "PodState": {
+              "PodName": "",
+              "CreationError": {
+                "ReasonCodes": {
+                  "5": 8
+                }
+              },
+              "ExpectedReason": 5,
+              "CommandExitCode": 0
+            }
+          }
+        },
+        "7": {
+          "Name": "iShouldBeAbleToPerformAnAllowedCommand",
+          "Description": "Validate that 'ls' is executed successfully",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": {
+            "PodState": {
+              "PodName": "",
+              "CreationError": {
+                "ReasonCodes": {
+                  "5": 8
+                }
+              },
+              "ExpectedReason": 5,
+              "CommandExitCode": 0
+            },
+            "Command": "ls",
+            "ExpectedExitCode": 0
+          }
         }
       }
     },
@@ -1705,19 +3208,14 @@
       "Name": "Prevent a deployment from running with the hostPID",
       "Result": "Passed",
       "Tags": [
-        "@service/kubernetes",
-        "@control/family/pod_security_policy",
-        "@csp/azure",
-        "@csp/aws",
-        "@csp/gcp",
-        "@standard/cis/5.2",
-        "@control/type/preventative",
-        "@standard/cis/5.2.2"
+        "@k-psp",
+        "@probes/kubernetes/pod_security_policy",
+        "@k-psp-002"
       ],
       "Steps": {
         "1": {
           "Name": "aKubernetesClusterIsDeployed",
-          "Description": "Passes if Probr successfully connects to the specified cluster.",
+          "Description": "Validated that the k8s cluster specified in '/root/.kube/config' is deployed by checking the '' context; ",
           "Result": "Passed",
           "Error": "",
           "Payload": {
@@ -1727,38 +3225,84 @@
         },
         "2": {
           "Name": "someSystemExistsToPreventAKubernetesContainerFromRunningUsingTheHostPIDOnTheActiveKubernetesCluster",
-          "Description": "",
+          "Description": "Validate that at least on of the cluster's pod security policies has HostPID set to false; ",
           "Result": "Passed",
           "Error": "",
-          "Payload": null
+          "Payload": {
+            "PodState": {
+              "PodName": "",
+              "CreationError": null,
+              "ExpectedReason": null,
+              "CommandExitCode": 0
+            }
+          }
         },
         "3": {
-          "Name": "hostPIDRequestIsMarkedForTheKubernetesDeployment",
-          "Description": "",
+          "Name": "aKubernetesDeploymentIsAppliedToAnExistingKubernetesCluster",
+          "Description": "PENDING IMPLEMENTATION",
           "Result": "Passed",
           "Error": "",
           "Payload": null
         },
         "4": {
-          "Name": "theOperationWillWithAnError",
-          "Description": "",
+          "Name": "hostPIDRequestIsMarkedForTheKubernetesDeployment",
+          "Description": "Attempt to deploy a pod with host PID 'False'; ",
           "Result": "Passed",
           "Error": "",
-          "Payload": null
+          "Payload": {
+            "PodState": {
+              "PodName": "psp-test-pod-220221-103315-43",
+              "CreationError": null,
+              "ExpectedReason": null,
+              "CommandExitCode": 0
+            }
+          }
         },
         "5": {
-          "Name": "iShouldNotBeAbleToPerformACommandThatProvidesAccessToTheHostPIDNamespace",
-          "Description": "",
+          "Name": "theOperationWillWithAnError",
+          "Description": "Validate that the scenario state was updated in the previous step with a particular result and message; ",
           "Result": "Passed",
           "Error": "",
-          "Payload": null
+          "Payload": {
+            "ExpectedResult": "Succeed",
+            "ExpectedMessage": "",
+            "PodState": {
+              "PodName": "psp-test-pod-220221-103315-43",
+              "CreationError": null,
+              "ExpectedReason": null,
+              "CommandExitCode": 0
+            }
+          }
         },
         "6": {
-          "Name": "performAllowedCommand",
-          "Description": "",
+          "Name": "iShouldNotBeAbleToPerformACommandThatProvidesAccessToTheHostPIDNamespace",
+          "Description": "Validate that the exit code for command 'nsenter -t 1 -p ps' is 1; ",
           "Result": "Passed",
           "Error": "",
-          "Payload": null
+          "Payload": {
+            "PodState": {
+              "PodName": "psp-test-pod-220221-103315-43",
+              "CreationError": null,
+              "ExpectedReason": null,
+              "CommandExitCode": 0
+            }
+          }
+        },
+        "7": {
+          "Name": "iShouldBeAbleToPerformAnAllowedCommand",
+          "Description": "Validate that 'ls' is executed successfully",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": {
+            "PodState": {
+              "PodName": "psp-test-pod-220221-103315-43",
+              "CreationError": null,
+              "ExpectedReason": null,
+              "CommandExitCode": 0
+            },
+            "Command": "ls",
+            "ExpectedExitCode": 0
+          }
         }
       }
     },
@@ -1766,19 +3310,14 @@
       "Name": "Prevent a deployment from running with the hostPID",
       "Result": "Passed",
       "Tags": [
-        "@service/kubernetes",
-        "@control/family/pod_security_policy",
-        "@csp/azure",
-        "@csp/aws",
-        "@csp/gcp",
-        "@standard/cis/5.2",
-        "@control/type/preventative",
-        "@standard/cis/5.2.2"
+        "@k-psp",
+        "@probes/kubernetes/pod_security_policy",
+        "@k-psp-002"
       ],
       "Steps": {
         "1": {
           "Name": "aKubernetesClusterIsDeployed",
-          "Description": "Passes if Probr successfully connects to the specified cluster.",
+          "Description": "Validated that the k8s cluster specified in '/root/.kube/config' is deployed by checking the '' context; ",
           "Result": "Passed",
           "Error": "",
           "Payload": {
@@ -1788,38 +3327,84 @@
         },
         "2": {
           "Name": "someSystemExistsToPreventAKubernetesContainerFromRunningUsingTheHostPIDOnTheActiveKubernetesCluster",
-          "Description": "",
+          "Description": "Validate that at least on of the cluster's pod security policies has HostPID set to false; ",
           "Result": "Passed",
           "Error": "",
-          "Payload": null
+          "Payload": {
+            "PodState": {
+              "PodName": "",
+              "CreationError": null,
+              "ExpectedReason": null,
+              "CommandExitCode": 0
+            }
+          }
         },
         "3": {
-          "Name": "hostPIDRequestIsMarkedForTheKubernetesDeployment",
-          "Description": "",
+          "Name": "aKubernetesDeploymentIsAppliedToAnExistingKubernetesCluster",
+          "Description": "PENDING IMPLEMENTATION",
           "Result": "Passed",
           "Error": "",
           "Payload": null
         },
         "4": {
-          "Name": "theOperationWillWithAnError",
-          "Description": "",
+          "Name": "hostPIDRequestIsMarkedForTheKubernetesDeployment",
+          "Description": "Attempt to deploy a pod with host PID 'Not Defined'; ",
           "Result": "Passed",
           "Error": "",
-          "Payload": null
+          "Payload": {
+            "PodState": {
+              "PodName": "psp-test-pod-220221-103318-21",
+              "CreationError": null,
+              "ExpectedReason": null,
+              "CommandExitCode": 0
+            }
+          }
         },
         "5": {
-          "Name": "iShouldNotBeAbleToPerformACommandThatProvidesAccessToTheHostPIDNamespace",
-          "Description": "",
+          "Name": "theOperationWillWithAnError",
+          "Description": "Validate that the scenario state was updated in the previous step with a particular result and message; ",
           "Result": "Passed",
           "Error": "",
-          "Payload": null
+          "Payload": {
+            "ExpectedResult": "Succeed",
+            "ExpectedMessage": "",
+            "PodState": {
+              "PodName": "psp-test-pod-220221-103318-21",
+              "CreationError": null,
+              "ExpectedReason": null,
+              "CommandExitCode": 0
+            }
+          }
         },
         "6": {
-          "Name": "performAllowedCommand",
-          "Description": "",
+          "Name": "iShouldNotBeAbleToPerformACommandThatProvidesAccessToTheHostPIDNamespace",
+          "Description": "Validate that the exit code for command 'nsenter -t 1 -p ps' is 1; ",
           "Result": "Passed",
           "Error": "",
-          "Payload": null
+          "Payload": {
+            "PodState": {
+              "PodName": "psp-test-pod-220221-103318-21",
+              "CreationError": null,
+              "ExpectedReason": null,
+              "CommandExitCode": 0
+            }
+          }
+        },
+        "7": {
+          "Name": "iShouldBeAbleToPerformAnAllowedCommand",
+          "Description": "Validate that 'ls' is executed successfully",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": {
+            "PodState": {
+              "PodName": "psp-test-pod-220221-103318-21",
+              "CreationError": null,
+              "ExpectedReason": null,
+              "CommandExitCode": 0
+            },
+            "Command": "ls",
+            "ExpectedExitCode": 0
+          }
         }
       }
     },
@@ -1827,19 +3412,14 @@
       "Name": "Prevent a deployment from running with the hostIPC flag.",
       "Result": "Passed",
       "Tags": [
-        "@service/kubernetes",
-        "@control/family/pod_security_policy",
-        "@csp/azure",
-        "@csp/aws",
-        "@csp/gcp",
-        "@standard/cis/5.2",
-        "@control/type/preventative",
-        "@standard/cis/5.2.3"
+        "@k-psp",
+        "@probes/kubernetes/pod_security_policy",
+        "@k-psp-003"
       ],
       "Steps": {
         "1": {
           "Name": "aKubernetesClusterIsDeployed",
-          "Description": "Passes if Probr successfully connects to the specified cluster.",
+          "Description": "Validated that the k8s cluster specified in '/root/.kube/config' is deployed by checking the '' context; ",
           "Result": "Passed",
           "Error": "",
           "Payload": {
@@ -1849,38 +3429,100 @@
         },
         "2": {
           "Name": "someSystemExistsToPreventAKubernetesDeploymentFromRunningUsingTheHostIPCInAnExistingKubernetesCluster",
-          "Description": "",
+          "Description": "Validate that at least on of the cluster's pod security policies has HostIPC set to false; ",
           "Result": "Passed",
           "Error": "",
-          "Payload": null
+          "Payload": {
+            "PodState": {
+              "PodName": "",
+              "CreationError": null,
+              "ExpectedReason": null,
+              "CommandExitCode": 0
+            }
+          }
         },
         "3": {
-          "Name": "hostIPCRequestIsMarkedForTheKubernetesDeployment",
-          "Description": "",
+          "Name": "aKubernetesDeploymentIsAppliedToAnExistingKubernetesCluster",
+          "Description": "PENDING IMPLEMENTATION",
           "Result": "Passed",
           "Error": "",
           "Payload": null
         },
         "4": {
-          "Name": "theOperationWillWithAnError",
-          "Description": "",
+          "Name": "hostIPCRequestIsMarkedForTheKubernetesDeployment",
+          "Description": "Attempt to deploy a pod with Host IPC requested: True; ",
           "Result": "Passed",
           "Error": "",
-          "Payload": null
+          "Payload": {
+            "PodState": {
+              "PodName": "",
+              "CreationError": {
+                "ReasonCodes": {
+                  "5": 2
+                }
+              },
+              "ExpectedReason": 5,
+              "CommandExitCode": 0
+            }
+          }
         },
         "5": {
-          "Name": "iShouldNotBeAbleToPerformACommandThatProvidesAccessToTheHostIPCNamespace",
-          "Description": "",
+          "Name": "theOperationWillWithAnError",
+          "Description": "Validate that the scenario state was updated in the previous step with a particular result and message; ",
           "Result": "Passed",
           "Error": "",
-          "Payload": null
+          "Payload": {
+            "ExpectedResult": "Fail",
+            "ExpectedMessage": "Containers with hostIPC access can't run",
+            "PodState": {
+              "PodName": "",
+              "CreationError": {
+                "ReasonCodes": {
+                  "5": 2
+                }
+              },
+              "ExpectedReason": 5,
+              "CommandExitCode": 0
+            }
+          }
         },
         "6": {
-          "Name": "performAllowedCommand",
-          "Description": "",
+          "Name": "iShouldNotBeAbleToPerformACommandThatProvidesAccessToTheHostIPCNamespace",
+          "Description": "Validate that the exit code for command 'nsenter -t 1 -i ps' is 1; ",
           "Result": "Passed",
           "Error": "",
-          "Payload": null
+          "Payload": {
+            "PodState": {
+              "PodName": "",
+              "CreationError": {
+                "ReasonCodes": {
+                  "5": 2
+                }
+              },
+              "ExpectedReason": 5,
+              "CommandExitCode": 0
+            }
+          }
+        },
+        "7": {
+          "Name": "iShouldBeAbleToPerformAnAllowedCommand",
+          "Description": "Validate that 'ls' is executed successfully",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": {
+            "PodState": {
+              "PodName": "",
+              "CreationError": {
+                "ReasonCodes": {
+                  "5": 2
+                }
+              },
+              "ExpectedReason": 5,
+              "CommandExitCode": 0
+            },
+            "Command": "ls",
+            "ExpectedExitCode": 0
+          }
         }
       }
     },
@@ -1888,19 +3530,14 @@
       "Name": "Prevent a deployment from running with the hostIPC flag.",
       "Result": "Passed",
       "Tags": [
-        "@service/kubernetes",
-        "@control/family/pod_security_policy",
-        "@csp/azure",
-        "@csp/aws",
-        "@csp/gcp",
-        "@standard/cis/5.2",
-        "@control/type/preventative",
-        "@standard/cis/5.2.3"
+        "@k-psp",
+        "@probes/kubernetes/pod_security_policy",
+        "@k-psp-003"
       ],
       "Steps": {
         "1": {
           "Name": "aKubernetesClusterIsDeployed",
-          "Description": "Passes if Probr successfully connects to the specified cluster.",
+          "Description": "Validated that the k8s cluster specified in '/root/.kube/config' is deployed by checking the '' context; ",
           "Result": "Passed",
           "Error": "",
           "Payload": {
@@ -1910,38 +3547,84 @@
         },
         "2": {
           "Name": "someSystemExistsToPreventAKubernetesDeploymentFromRunningUsingTheHostIPCInAnExistingKubernetesCluster",
-          "Description": "",
+          "Description": "Validate that at least on of the cluster's pod security policies has HostIPC set to false; ",
           "Result": "Passed",
           "Error": "",
-          "Payload": null
+          "Payload": {
+            "PodState": {
+              "PodName": "",
+              "CreationError": null,
+              "ExpectedReason": null,
+              "CommandExitCode": 0
+            }
+          }
         },
         "3": {
-          "Name": "hostIPCRequestIsMarkedForTheKubernetesDeployment",
-          "Description": "",
+          "Name": "aKubernetesDeploymentIsAppliedToAnExistingKubernetesCluster",
+          "Description": "PENDING IMPLEMENTATION",
           "Result": "Passed",
           "Error": "",
           "Payload": null
         },
         "4": {
-          "Name": "theOperationWillWithAnError",
-          "Description": "",
+          "Name": "hostIPCRequestIsMarkedForTheKubernetesDeployment",
+          "Description": "Attempt to deploy a pod with Host IPC requested: False; ",
           "Result": "Passed",
           "Error": "",
-          "Payload": null
+          "Payload": {
+            "PodState": {
+              "PodName": "psp-test-pod-220221-103321-21",
+              "CreationError": null,
+              "ExpectedReason": null,
+              "CommandExitCode": 0
+            }
+          }
         },
         "5": {
-          "Name": "iShouldNotBeAbleToPerformACommandThatProvidesAccessToTheHostIPCNamespace",
-          "Description": "",
+          "Name": "theOperationWillWithAnError",
+          "Description": "Validate that the scenario state was updated in the previous step with a particular result and message; ",
           "Result": "Passed",
           "Error": "",
-          "Payload": null
+          "Payload": {
+            "ExpectedResult": "Succeed",
+            "ExpectedMessage": "No error would show",
+            "PodState": {
+              "PodName": "psp-test-pod-220221-103321-21",
+              "CreationError": null,
+              "ExpectedReason": null,
+              "CommandExitCode": 0
+            }
+          }
         },
         "6": {
-          "Name": "performAllowedCommand",
-          "Description": "",
+          "Name": "iShouldNotBeAbleToPerformACommandThatProvidesAccessToTheHostIPCNamespace",
+          "Description": "Validate that the exit code for command 'nsenter -t 1 -i ps' is 1; ",
           "Result": "Passed",
           "Error": "",
-          "Payload": null
+          "Payload": {
+            "PodState": {
+              "PodName": "psp-test-pod-220221-103321-21",
+              "CreationError": null,
+              "ExpectedReason": null,
+              "CommandExitCode": 0
+            }
+          }
+        },
+        "7": {
+          "Name": "iShouldBeAbleToPerformAnAllowedCommand",
+          "Description": "Validate that 'ls' is executed successfully",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": {
+            "PodState": {
+              "PodName": "psp-test-pod-220221-103321-21",
+              "CreationError": null,
+              "ExpectedReason": null,
+              "CommandExitCode": 0
+            },
+            "Command": "ls",
+            "ExpectedExitCode": 0
+          }
         }
       }
     },
@@ -1949,19 +3632,14 @@
       "Name": "Prevent a deployment from running with the hostIPC flag.",
       "Result": "Passed",
       "Tags": [
-        "@service/kubernetes",
-        "@control/family/pod_security_policy",
-        "@csp/azure",
-        "@csp/aws",
-        "@csp/gcp",
-        "@standard/cis/5.2",
-        "@control/type/preventative",
-        "@standard/cis/5.2.3"
+        "@k-psp",
+        "@probes/kubernetes/pod_security_policy",
+        "@k-psp-003"
       ],
       "Steps": {
         "1": {
           "Name": "aKubernetesClusterIsDeployed",
-          "Description": "Passes if Probr successfully connects to the specified cluster.",
+          "Description": "Validated that the k8s cluster specified in '/root/.kube/config' is deployed by checking the '' context; ",
           "Result": "Passed",
           "Error": "",
           "Payload": {
@@ -1971,38 +3649,84 @@
         },
         "2": {
           "Name": "someSystemExistsToPreventAKubernetesDeploymentFromRunningUsingTheHostIPCInAnExistingKubernetesCluster",
-          "Description": "",
+          "Description": "Validate that at least on of the cluster's pod security policies has HostIPC set to false; ",
           "Result": "Passed",
           "Error": "",
-          "Payload": null
+          "Payload": {
+            "PodState": {
+              "PodName": "",
+              "CreationError": null,
+              "ExpectedReason": null,
+              "CommandExitCode": 0
+            }
+          }
         },
         "3": {
-          "Name": "hostIPCRequestIsMarkedForTheKubernetesDeployment",
-          "Description": "",
+          "Name": "aKubernetesDeploymentIsAppliedToAnExistingKubernetesCluster",
+          "Description": "PENDING IMPLEMENTATION",
           "Result": "Passed",
           "Error": "",
           "Payload": null
         },
         "4": {
-          "Name": "theOperationWillWithAnError",
-          "Description": "",
+          "Name": "hostIPCRequestIsMarkedForTheKubernetesDeployment",
+          "Description": "Attempt to deploy a pod with Host IPC requested: Not defined; ",
           "Result": "Passed",
           "Error": "",
-          "Payload": null
+          "Payload": {
+            "PodState": {
+              "PodName": "psp-test-pod-220221-103324-56",
+              "CreationError": null,
+              "ExpectedReason": null,
+              "CommandExitCode": 0
+            }
+          }
         },
         "5": {
-          "Name": "iShouldNotBeAbleToPerformACommandThatProvidesAccessToTheHostIPCNamespace",
-          "Description": "",
+          "Name": "theOperationWillWithAnError",
+          "Description": "Validate that the scenario state was updated in the previous step with a particular result and message; ",
           "Result": "Passed",
           "Error": "",
-          "Payload": null
+          "Payload": {
+            "ExpectedResult": "Succeed",
+            "ExpectedMessage": "No error would show",
+            "PodState": {
+              "PodName": "psp-test-pod-220221-103324-56",
+              "CreationError": null,
+              "ExpectedReason": null,
+              "CommandExitCode": 0
+            }
+          }
         },
         "6": {
-          "Name": "performAllowedCommand",
-          "Description": "",
+          "Name": "iShouldNotBeAbleToPerformACommandThatProvidesAccessToTheHostIPCNamespace",
+          "Description": "Validate that the exit code for command 'nsenter -t 1 -i ps' is 1; ",
           "Result": "Passed",
           "Error": "",
-          "Payload": null
+          "Payload": {
+            "PodState": {
+              "PodName": "psp-test-pod-220221-103324-56",
+              "CreationError": null,
+              "ExpectedReason": null,
+              "CommandExitCode": 0
+            }
+          }
+        },
+        "7": {
+          "Name": "iShouldBeAbleToPerformAnAllowedCommand",
+          "Description": "Validate that 'ls' is executed successfully",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": {
+            "PodState": {
+              "PodName": "psp-test-pod-220221-103324-56",
+              "CreationError": null,
+              "ExpectedReason": null,
+              "CommandExitCode": 0
+            },
+            "Command": "ls",
+            "ExpectedExitCode": 0
+          }
         }
       }
     }

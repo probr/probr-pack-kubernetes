@@ -1,6 +1,6 @@
 {
   "Name": "general",
-  "PodsDestroyed": 0,
+  "PodsDestroyed": 1,
   "ScenariosAttempted": 4,
   "ScenariosSucceeded": 3,
   "ScenariosFailed": 1,
@@ -10,15 +10,14 @@
       "Name": "Minimise wildcards in Roles and Cluster Roles",
       "Result": "Passed",
       "Tags": [
-        "@service/kubernetes",
-        "@control/family/general",
-        "@standard/cis/5.1.3",
-        "@control/type/preventative"
+        "@k-gen",
+        "@probes/kubernetes/general",
+        "@k-gen-001"
       ],
       "Steps": {
         "1": {
           "Name": "aKubernetesClusterIsDeployed",
-          "Description": "Passes if Probr successfully connects to the specified cluster.",
+          "Description": "Validated that the k8s cluster specified in '/root/.kube/config' is deployed by checking the '' context; ",
           "Result": "Passed",
           "Error": "",
           "Payload": {
@@ -28,10 +27,31 @@
         },
         "2": {
           "Name": "iInspectTheThatAreConfigured",
-          "Description": "Ensures that Roles are configured. Retains wildcard roles in state for following steps. Passes if retrieval command does not have error.",
+          "Description": "Retrieving instance roles; Stored any retrieved wildcard roles in state for following steps; ",
           "Result": "Passed",
           "Error": "",
-          "Payload": {}
+          "Payload": {
+            "PodState": {
+              "PodName": "",
+              "CreationError": null,
+              "ExpectedReason": null,
+              "CommandExitCode": 0
+            }
+          }
+        },
+        "3": {
+          "Name": "iShouldOnlyFindWildcardsInKnownAndAuthorisedConfigurations",
+          "Description": "Removing known entries from the cluster roles; Validate that no unexpected wildcards were found; ",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": {
+            "PodState": {
+              "PodName": "",
+              "CreationError": null,
+              "ExpectedReason": null,
+              "CommandExitCode": 0
+            }
+          }
         }
       }
     },
@@ -39,15 +59,14 @@
       "Name": "Minimise wildcards in Roles and Cluster Roles",
       "Result": "Passed",
       "Tags": [
-        "@service/kubernetes",
-        "@control/family/general",
-        "@standard/cis/5.1.3",
-        "@control/type/preventative"
+        "@k-gen",
+        "@probes/kubernetes/general",
+        "@k-gen-001"
       ],
       "Steps": {
         "1": {
           "Name": "aKubernetesClusterIsDeployed",
-          "Description": "Passes if Probr successfully connects to the specified cluster.",
+          "Description": "Validated that the k8s cluster specified in '/root/.kube/config' is deployed by checking the '' context; ",
           "Result": "Passed",
           "Error": "",
           "Payload": {
@@ -57,10 +76,31 @@
         },
         "2": {
           "Name": "iInspectTheThatAreConfigured",
-          "Description": "Ensures that Cluster Roles are configured. Retains wildcard roles in state for following steps. Passes if retrieval command does not have error.",
+          "Description": "Retrieving instance cluster roles; Stored any retrieved wildcard roles in state for following steps; ",
           "Result": "Passed",
           "Error": "",
-          "Payload": {}
+          "Payload": {
+            "PodState": {
+              "PodName": "",
+              "CreationError": null,
+              "ExpectedReason": null,
+              "CommandExitCode": 0
+            }
+          }
+        },
+        "3": {
+          "Name": "iShouldOnlyFindWildcardsInKnownAndAuthorisedConfigurations",
+          "Description": "Removing known entries from the cluster roles; Validate that no unexpected wildcards were found; ",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": {
+            "PodState": {
+              "PodName": "",
+              "CreationError": null,
+              "ExpectedReason": null,
+              "CommandExitCode": 0
+            }
+          }
         }
       }
     },
@@ -68,15 +108,14 @@
       "Name": "Ensure Security Contexts are enforced",
       "Result": "Failed",
       "Tags": [
-        "@service/kubernetes",
-        "@control/family/general",
-        "@standard/cis/5.6.3",
-        "@control/type/preventative"
+        "@k-gen",
+        "@probes/kubernetes/general",
+        "@k-gen-002"
       ],
       "Steps": {
         "1": {
           "Name": "aKubernetesClusterIsDeployed",
-          "Description": "Passes if Probr successfully connects to the specified cluster.",
+          "Description": "Validated that the k8s cluster specified in '/root/.kube/config' is deployed by checking the '' context; ",
           "Result": "Passed",
           "Error": "",
           "Payload": {
@@ -86,24 +125,80 @@
         },
         "2": {
           "Name": "iAttemptToCreateADeploymentWhichDoesNotHaveASecurityContext",
-          "Description": "Attempts to create a deployment without a security context. Retains the status of the deployment in scenario state for following steps. Passes if created, or if an expected error is encountered.",
+          "Description": "Create unique pod name; Attempt to deploy ProbeImage without a security context; Ensure failure to deploy returns 'podcreation-error: undefined'; ",
           "Result": "Passed",
           "Error": "",
           "Payload": {
             "Pod": {
               "metadata": {
-                "name": "probr-general-161120-214148-71",
+                "name": "probr-general-220221-103648-7",
                 "namespace": "probr-general-test-ns",
-                "selfLink": "/api/v1/namespaces/probr-general-test-ns/pods/probr-general-161120-214148-71",
-                "uid": "b612f450-d749-4199-aa4d-59b553dd3a1d",
-                "resourceVersion": "29785",
-                "creationTimestamp": "2020-11-16T21:41:49Z",
+                "selfLink": "/api/v1/namespaces/probr-general-test-ns/pods/probr-general-220221-103648-7",
+                "uid": "cbee56a9-96d5-4e9f-9ae5-fc3e1ee502ed",
+                "resourceVersion": "1308940",
+                "creationTimestamp": "2021-02-22T15:36:47Z",
                 "labels": {
                   "app": "demo"
                 },
                 "annotations": {
                   "seccomp.security.alpha.kubernetes.io/pod": "runtime/default"
-                }
+                },
+                "managedFields": [
+                  {
+                    "manager": "probr.exe",
+                    "operation": "Update",
+                    "apiVersion": "v1",
+                    "time": "2021-02-22T15:36:47Z",
+                    "fieldsType": "FieldsV1",
+                    "fieldsV1": {
+                      "f:metadata": {
+                        "f:annotations": {
+                          ".": {},
+                          "f:seccomp.security.alpha.kubernetes.io/pod": {}
+                        },
+                        "f:labels": {
+                          ".": {},
+                          "f:app": {}
+                        }
+                      },
+                      "f:spec": {
+                        "f:containers": {
+                          "k:{\"name\":\"probr-general\"}": {
+                            ".": {},
+                            "f:command": {},
+                            "f:image": {},
+                            "f:imagePullPolicy": {},
+                            "f:name": {},
+                            "f:resources": {},
+                            "f:securityContext": {
+                              ".": {},
+                              "f:allowPrivilegeEscalation": {},
+                              "f:capabilities": {
+                                ".": {},
+                                "f:drop": {}
+                              },
+                              "f:privileged": {}
+                            },
+                            "f:terminationMessagePath": {},
+                            "f:terminationMessagePolicy": {}
+                          }
+                        },
+                        "f:dnsPolicy": {},
+                        "f:enableServiceLinks": {},
+                        "f:restartPolicy": {},
+                        "f:schedulerName": {},
+                        "f:securityContext": {
+                          ".": {},
+                          "f:fsGroup": {},
+                          "f:runAsGroup": {},
+                          "f:runAsUser": {},
+                          "f:supplementalGroups": {}
+                        },
+                        "f:terminationGracePeriodSeconds": {}
+                      }
+                    }
+                  }
+                ]
               },
               "spec": {
                 "volumes": [
@@ -118,7 +213,7 @@
                 "containers": [
                   {
                     "name": "probr-general",
-                    "image": "citihubprod.azurecr.io/citihub/probr-probe:latest",
+                    "image": "citihubprod.azurecr.io/citihub/probr-probe",
                     "command": [
                       "sleep",
                       "3600"
@@ -135,6 +230,11 @@
                     "terminationMessagePolicy": "File",
                     "imagePullPolicy": "IfNotPresent",
                     "securityContext": {
+                      "capabilities": {
+                        "drop": [
+                          "NET_RAW"
+                        ]
+                      },
                       "privileged": false,
                       "allowPrivilegeEscalation": false
                     }
@@ -177,20 +277,27 @@
               }
             },
             "PodAudit": {
-              "PodName": "probr-general-161120-214148-71",
+              "PodName": "probr-general-220221-103648-7",
               "Namespace": "probr-general-test-ns",
               "ContainerName": "probr-general",
-              "Image": "citihubprod.azurecr.io/citihub/probr-probe:latest",
+              "Image": "citihubprod.azurecr.io/citihub/probr-probe",
               "SecurityContext": null
             }
           }
         },
         "3": {
           "Name": "theDeploymentIsRejected",
-          "Description": "Looks for a creation error on the current scenario state. Passes if error is found, because it should have been rejected.",
+          "Description": "Validates that an expected creation error occurred in the previous step; ",
           "Result": "Failed",
-          "Error": "pod probr-general-161120-214148-71 was created successfully. Test fail.",
-          "Payload": null
+          "Error": "pod probr-general-220221-103648-7 was created successfully. Test fail.",
+          "Payload": {
+            "PodState": {
+              "PodName": "probr-general-220221-103648-7",
+              "CreationError": null,
+              "ExpectedReason": null,
+              "CommandExitCode": 0
+            }
+          }
         }
       }
     },
@@ -198,15 +305,14 @@
       "Name": "Ensure Kubernetes Web UI is disabled",
       "Result": "Passed",
       "Tags": [
-        "@service/kubernetes",
-        "@control/family/general",
-        "@standard/cis/6.10.1",
-        "@control/type/detective"
+        "@k-gen",
+        "@probes/kubernetes/general",
+        "@k-gen-003"
       ],
       "Steps": {
         "1": {
           "Name": "aKubernetesClusterIsDeployed",
-          "Description": "Passes if Probr successfully connects to the specified cluster.",
+          "Description": "Validated that the k8s cluster specified in '/root/.kube/config' is deployed by checking the '' context; ",
           "Result": "Passed",
           "Error": "",
           "Payload": {
@@ -216,7 +322,23 @@
         },
         "2": {
           "Name": "theKubernetesWebUIIsDisabled",
-          "Description": "Attempts to find a pod in the 'kube-system' namespace with the prefix 'kubernetes-dashboard'. Passes if no pod is returned.",
+          "Description": "Attempts to find a pod in the 'kube-system' namespace with the prefix 'kubernetes-dashboard'; ",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": {
+            "PodState": {
+              "PodName": "",
+              "CreationError": null,
+              "ExpectedReason": null,
+              "CommandExitCode": 0
+            },
+            "PodName": "",
+            "PodDashBoardName": ""
+          }
+        },
+        "3": {
+          "Name": "iShouldNotBeAbleToAccessTheKubernetesWebUI",
+          "Description": "PENDING IMPLEMENTATION",
           "Result": "Passed",
           "Error": "",
           "Payload": null

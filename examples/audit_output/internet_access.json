@@ -1,61 +1,113 @@
 {
   "Name": "internet_access",
-  "PodsDestroyed": 0,
+  "PodsDestroyed": 1,
   "ScenariosAttempted": 3,
-  "ScenariosSucceeded": 0,
-  "ScenariosFailed": 3,
-  "Result": "Failed",
+  "ScenariosSucceeded": 3,
+  "ScenariosFailed": 0,
+  "Result": "Success",
   "Scenarios": {
     "1": {
       "Name": "Test outgoing connectivity of a deployed pod",
-      "Result": "Failed",
+      "Result": "Passed",
       "Tags": [
-        "@service/kubernetes",
-        "@control/family/network",
-        "@csp/azure",
-        "@csp/aws",
-        "@csp/gcp",
-        "@csp/openshift",
-        "@standard/citihub/CHC2-SVD030"
+        "@k-iaf",
+        "@probes/kubernetes/internet_access",
+        "@k-iaf-001"
       ],
       "Steps": {
         "1": {
           "Name": "aKubernetesClusterIsDeployed",
-          "Description": "Passes if Probr successfully connects to the specified cluster.",
+          "Description": "Validated that the k8s cluster specified in 'C:\\Users\\lcarrazana\\.kube\\config' is deployed by checking the '' context; ",
           "Result": "Passed",
           "Error": "",
           "Payload": {
-            "KubeConfigPath": "/root/.kube/config",
+            "KubeConfigPath": "C:\\Users\\lcarrazana\\.kube\\config",
             "KubeContext": ""
           }
         },
         "2": {
           "Name": "aPodIsDeployedInTheCluster",
-          "Description": "",
+          "Description": "Verifying the Pod  deployed in the cluster",
           "Result": "Passed",
           "Error": "",
           "Payload": {
             "Pod": {
               "metadata": {
-                "name": "na-test-pod-161120-214254-13",
-                "namespace": "probr-network-access-test-ns",
-                "selfLink": "/api/v1/namespaces/probr-network-access-test-ns/pods/na-test-pod-161120-214254-13",
-                "uid": "312536a2-b612-4993-ab21-bd44ccffe912",
-                "resourceVersion": "30145",
-                "creationTimestamp": "2020-11-16T21:42:55Z",
+                "name": "na-test-pod-220221-104829-11",
+                "namespace": "probr-general-test-ns",
+                "selfLink": "/api/v1/namespaces/probr-general-test-ns/pods/na-test-pod-220221-104829-11",
+                "uid": "e2888626-70db-469c-9ed8-2a514f918a72",
+                "resourceVersion": "1310722",
+                "creationTimestamp": "2021-02-22T15:48:28Z",
                 "labels": {
                   "app": "demo"
                 },
                 "annotations": {
                   "seccomp.security.alpha.kubernetes.io/pod": "runtime/default"
-                }
+                },
+                "managedFields": [
+                  {
+                    "manager": "probr.exe",
+                    "operation": "Update",
+                    "apiVersion": "v1",
+                    "time": "2021-02-22T15:48:28Z",
+                    "fieldsType": "FieldsV1",
+                    "fieldsV1": {
+                      "f:metadata": {
+                        "f:annotations": {
+                          ".": {},
+                          "f:seccomp.security.alpha.kubernetes.io/pod": {}
+                        },
+                        "f:labels": {
+                          ".": {},
+                          "f:app": {}
+                        }
+                      },
+                      "f:spec": {
+                        "f:containers": {
+                          "k:{\"name\":\"na-test\"}": {
+                            ".": {},
+                            "f:command": {},
+                            "f:image": {},
+                            "f:imagePullPolicy": {},
+                            "f:name": {},
+                            "f:resources": {},
+                            "f:securityContext": {
+                              ".": {},
+                              "f:allowPrivilegeEscalation": {},
+                              "f:capabilities": {
+                                ".": {},
+                                "f:drop": {}
+                              },
+                              "f:privileged": {}
+                            },
+                            "f:terminationMessagePath": {},
+                            "f:terminationMessagePolicy": {}
+                          }
+                        },
+                        "f:dnsPolicy": {},
+                        "f:enableServiceLinks": {},
+                        "f:restartPolicy": {},
+                        "f:schedulerName": {},
+                        "f:securityContext": {
+                          ".": {},
+                          "f:fsGroup": {},
+                          "f:runAsGroup": {},
+                          "f:runAsUser": {},
+                          "f:supplementalGroups": {}
+                        },
+                        "f:terminationGracePeriodSeconds": {}
+                      }
+                    }
+                  }
+                ]
               },
               "spec": {
                 "volumes": [
                   {
-                    "name": "default-token-9drq6",
+                    "name": "default-token-rsxsb",
                     "secret": {
-                      "secretName": "default-token-9drq6",
+                      "secretName": "default-token-rsxsb",
                       "defaultMode": 420
                     }
                   }
@@ -63,7 +115,7 @@
                 "containers": [
                   {
                     "name": "na-test",
-                    "image": "citihubprod.azurecr.io/citihub/probr-probe:latest",
+                    "image": "citihubprod.azurecr.io/citihub/probr-probe",
                     "command": [
                       "sleep",
                       "3600"
@@ -71,7 +123,7 @@
                     "resources": {},
                     "volumeMounts": [
                       {
-                        "name": "default-token-9drq6",
+                        "name": "default-token-rsxsb",
                         "readOnly": true,
                         "mountPath": "/var/run/secrets/kubernetes.io/serviceaccount"
                       }
@@ -80,6 +132,11 @@
                     "terminationMessagePolicy": "File",
                     "imagePullPolicy": "IfNotPresent",
                     "securityContext": {
+                      "capabilities": {
+                        "drop": [
+                          "NET_RAW"
+                        ]
+                      },
                       "privileged": false,
                       "allowPrivilegeEscalation": false
                     }
@@ -122,56 +179,66 @@
               }
             },
             "PodAudit": {
-              "PodName": "na-test-pod-161120-214254-13",
+              "PodName": "na-test-pod-220221-104829-11",
               "Namespace": "probr-general-test-ns",
               "ContainerName": "na-test",
-              "Image": "citihubprod.azurecr.io/citihub/probr-probe:latest",
+              "Image": "citihubprod.azurecr.io/citihub/probr-probe",
               "SecurityContext": null
             }
           }
         },
         "3": {
           "Name": "aProcessInsideThePodEstablishesADirectHTTPSConnectionTo",
-          "Description": "",
+          "Description": "Proces inside the pod established http connection with url 'www.google.com',",
           "Result": "Passed",
           "Error": "",
-          "Payload": null
+          "Payload": {
+            "PodState": {
+              "PodName": "",
+              "CreationError": null,
+              "ExpectedReason": null,
+              "CommandExitCode": 0
+            }
+          }
         },
         "4": {
           "Name": "accessIs",
-          "Description": "",
-          "Result": "Failed",
-          "Error": "got HTTP Status Code 200 - failed",
-          "Payload": null
+          "Description": "The access result is blocked,",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": {
+            "PodState": {
+              "PodName": "",
+              "CreationError": null,
+              "ExpectedReason": null,
+              "CommandExitCode": 0
+            }
+          }
         }
       }
     },
     "2": {
       "Name": "Test outgoing connectivity of a deployed pod",
-      "Result": "Failed",
+      "Result": "Passed",
       "Tags": [
-        "@service/kubernetes",
-        "@control/family/network",
-        "@csp/azure",
-        "@csp/aws",
-        "@csp/gcp",
-        "@csp/openshift",
-        "@standard/citihub/CHC2-SVD030"
+        "@k-iaf",
+        "@probes/kubernetes/internet_access",
+        "@k-iaf-001"
       ],
       "Steps": {
         "1": {
           "Name": "aKubernetesClusterIsDeployed",
-          "Description": "Passes if Probr successfully connects to the specified cluster.",
+          "Description": "Validated that the k8s cluster specified in 'C:\\Users\\lcarrazana\\.kube\\config' is deployed by checking the '' context; ",
           "Result": "Passed",
           "Error": "",
           "Payload": {
-            "KubeConfigPath": "/root/.kube/config",
+            "KubeConfigPath": "C:\\Users\\lcarrazana\\.kube\\config",
             "KubeContext": ""
           }
         },
         "2": {
           "Name": "aPodIsDeployedInTheCluster",
-          "Description": "",
+          "Description": "Verifying the Pod  deployed in the cluster",
           "Result": "Passed",
           "Error": "",
           "Payload": {
@@ -181,46 +248,56 @@
         },
         "3": {
           "Name": "aProcessInsideThePodEstablishesADirectHTTPSConnectionTo",
-          "Description": "",
+          "Description": "Proces inside the pod established http connection with url 'www.microsoft.com',",
           "Result": "Passed",
           "Error": "",
-          "Payload": null
+          "Payload": {
+            "PodState": {
+              "PodName": "",
+              "CreationError": null,
+              "ExpectedReason": null,
+              "CommandExitCode": 0
+            }
+          }
         },
         "4": {
           "Name": "accessIs",
-          "Description": "",
-          "Result": "Failed",
-          "Error": "got HTTP Status Code 200 - failed",
-          "Payload": null
+          "Description": "The access result is blocked,",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": {
+            "PodState": {
+              "PodName": "",
+              "CreationError": null,
+              "ExpectedReason": null,
+              "CommandExitCode": 0
+            }
+          }
         }
       }
     },
     "3": {
       "Name": "Test outgoing connectivity of a deployed pod",
-      "Result": "Failed",
+      "Result": "Passed",
       "Tags": [
-        "@service/kubernetes",
-        "@control/family/network",
-        "@csp/azure",
-        "@csp/aws",
-        "@csp/gcp",
-        "@csp/openshift",
-        "@standard/citihub/CHC2-SVD030"
+        "@k-iaf",
+        "@probes/kubernetes/internet_access",
+        "@k-iaf-001"
       ],
       "Steps": {
         "1": {
           "Name": "aKubernetesClusterIsDeployed",
-          "Description": "Passes if Probr successfully connects to the specified cluster.",
+          "Description": "Validated that the k8s cluster specified in 'C:\\Users\\lcarrazana\\.kube\\config' is deployed by checking the '' context; ",
           "Result": "Passed",
           "Error": "",
           "Payload": {
-            "KubeConfigPath": "/root/.kube/config",
+            "KubeConfigPath": "C:\\Users\\lcarrazana\\.kube\\config",
             "KubeContext": ""
           }
         },
         "2": {
           "Name": "aPodIsDeployedInTheCluster",
-          "Description": "",
+          "Description": "Verifying the Pod  deployed in the cluster",
           "Result": "Passed",
           "Error": "",
           "Payload": {
@@ -230,17 +307,31 @@
         },
         "3": {
           "Name": "aProcessInsideThePodEstablishesADirectHTTPSConnectionTo",
-          "Description": "",
+          "Description": "Proces inside the pod established http connection with url 'www.ubuntu.com',",
           "Result": "Passed",
           "Error": "",
-          "Payload": null
+          "Payload": {
+            "PodState": {
+              "PodName": "",
+              "CreationError": null,
+              "ExpectedReason": null,
+              "CommandExitCode": 0
+            }
+          }
         },
         "4": {
           "Name": "accessIs",
-          "Description": "",
-          "Result": "Failed",
-          "Error": "got HTTP Status Code 200 - failed",
-          "Payload": null
+          "Description": "The access result is blocked,",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": {
+            "PodState": {
+              "PodName": "",
+              "CreationError": null,
+              "ExpectedReason": null,
+              "CommandExitCode": 0
+            }
+          }
         }
       }
     }
