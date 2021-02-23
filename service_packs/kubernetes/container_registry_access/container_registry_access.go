@@ -65,28 +65,6 @@ func (s *scenarioState) iAmAuthorisedToPullFromAContainerRegistry() error {
 	return err
 }
 
-// PENDING IMPLEMENTATION
-func (s *scenarioState) iAttemptToPushToTheContainerRegistryUsingTheClusterIdentity() error {
-	// Standard auditing logic to ensures panics are also audited
-	stepTrace, payload, err := utils.AuditPlaceholders()
-	defer func() {
-		s.audit.AuditScenarioStep(stepTrace.String(), payload, err)
-	}()
-	stepTrace.WriteString("PENDING IMPLEMENTATION")
-	return godog.ErrPending
-}
-
-// PENDING IMPLEMENTATION
-func (s *scenarioState) thePushRequestIsRejectedDueToAuthorization() error {
-	// Standard auditing logic to ensures panics are also audited
-	stepTrace, payload, err := utils.AuditPlaceholders()
-	defer func() {
-		s.audit.AuditScenarioStep(stepTrace.String(), payload, err)
-	}()
-	stepTrace.WriteString("PENDING IMPLEMENTATION")
-	return godog.ErrPending
-}
-
 func (s *scenarioState) theDeploymentAttemptIsAllowed() error {
 	// Standard auditing logic to ensures panics are also audited
 	stepTrace, payload, err := utils.AuditPlaceholders()
@@ -182,11 +160,6 @@ func (p probeStruct) ScenarioInitialize(ctx *godog.ScenarioContext) {
 
 	//common
 	ctx.Step(`^a Kubernetes cluster is deployed$`, ps.aKubernetesClusterIsDeployed)
-
-	//CIS-6.1.3
-	ctx.Step(`^I am authorised to pull from a container registry$`, ps.iAmAuthorisedToPullFromAContainerRegistry)
-	ctx.Step(`^I attempt to push to the container registry using the cluster identity$`, ps.iAttemptToPushToTheContainerRegistryUsingTheClusterIdentity)
-	ctx.Step(`^the push request is rejected due to authorization$`, ps.thePushRequestIsRejectedDueToAuthorization)
 
 	//CIS-6.1.4
 	ctx.Step(`^a user attempts to deploy a container from an authorised registry$`, ps.iAmAuthorisedToPullFromAContainerRegistry) // TODO: This step should be modified in the feature file, or a unique function should be written for it
