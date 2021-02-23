@@ -1,3 +1,5 @@
+Feature: Pod Security Policy additions
+
 	@probes/kubernetes/pod_security_policy/1.9 @control_type/preventative @standard/none/PSP-0.1
 	Scenario Outline: Prevent deployments from accessing unapproved port range
 		Given a Kubernetes cluster exists which we can deploy into
