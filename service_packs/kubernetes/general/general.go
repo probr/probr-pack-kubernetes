@@ -165,8 +165,15 @@ func (s *scenarioState) theKubernetesWebUIIsDisabled() error {
 		s.audit.AuditScenarioStep(stepTrace.String(), payload, err)
 	}()
 
+	kubeSystemNamespace := config.Vars.ServicePacks.Kubernetes.SystemNamespace
+	dashboardPodNamePrefix := config.Vars.ServicePacks.Kubernetes.DashboardPodNamePrefix
+
+	// TODO: Minor bug leading to false positive
+	// If incorrect value for system namespace is specified in config, such as 'kube-system-invalid', then the test would still Pass as the namespace is not being parsed.
+	// Ideal implementation would first check if namespace is valid.
+
 	//look for the dashboard pod in the kube-system ns
-	pl, err := kubernetes.GetKubeInstance().GetPods("kube-system")
+	pl, err := kubernetes.GetKubeInstance().GetPods(kubeSystemNamespace)
 	var name string
 
 	if err != nil {
@@ -174,14 +181,14 @@ func (s *scenarioState) theKubernetesWebUIIsDisabled() error {
 	} else {
 		//a "pass" is the absence of a "kubernetes-dashboard" pod
 		for _, v := range pl.Items {
-			if strings.HasPrefix(v.Name, "kubernetes-dashboard") {
-				err = utils.ReformatError("kubernetes-dashboard pod found (%v) - test fail", v.Name)
+			if strings.HasPrefix(v.Name, dashboardPodNamePrefix) {
+				err = utils.ReformatError("(%v) pod found (%v) - test fail", dashboardPodNamePrefix, v.Name)
 				name = v.Name
 			}
 		}
 	}
 
-	stepTrace.WriteString("Attempts to find a pod in the 'kube-system' namespace with the prefix 'kubernetes-dashboard'; ")
+	stepTrace.WriteString(fmt.Sprintf("Attempt to find a pod in the '%s' namespace with the prefix '%s'; ", kubeSystemNamespace, dashboardPodNamePrefix))
 	payload = struct {
 		PodState         kubernetes.PodState
 		PodName          string

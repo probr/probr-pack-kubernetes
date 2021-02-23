@@ -43,6 +43,8 @@ type Kubernetes struct {
 	ContainerAllowedAddCapabilities   []string `yaml:"ContainerAllowedAddCapabilities"`
 	ApprovedVolumeTypes               []string `yaml:"ApprovedVolumeTypes"`
 	UnapprovedHostPort                string   `yaml:"UnapprovedHostPort"`
+	SystemNamespace                   string   `yaml:"SystemNamespace"`
+	DashboardPodNamePrefix            string   `yaml:"DashboardPodNamePrefix"`
 }
 
 type Storage struct {
