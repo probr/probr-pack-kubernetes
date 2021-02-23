@@ -761,10 +761,13 @@ func (s *scenarioState) additionalCapabilitiesForTheKubernetesDeployment(capabil
 		pd, cErr := psp.CreatePODSettingAttributes(nil, nil, &boolVal, s.probe)
 		err = kubernetes.ProcessPodCreationResult(&podState, pd, kubernetes.PSPHostNetwork, cErr)
 		s.podStates = append(s.podStates, podState)
+	} else {
+		stepTrace.WriteString(fmt.Sprintf(
+			"Attempting to deploy one pod for each specified capability (%v total); ",
+			len(capabilities)))
 	}
 
 	for _, capability := range capabilities {
-		stepTrace.WriteString("Attempting to deploy pod with specified capabilities added; ")
 		var podState kubernetes.PodState
 		c := []string{capability}
 		pd, cErr := psp.CreatePODSettingCapabilities(&c, s.probe)
