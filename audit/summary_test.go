@@ -50,12 +50,12 @@ func createSummaryStateWithMockProbe(probename string) summaryState {
 	sumstate.Probes = make(map[string]*Probe)
 	sumstate.Meta = make(map[string]interface{})
 	sumstate.Meta["names of pods created"] = []string{}
-	ap := filepath.Join(config.Vars.AuditDir(), (probename + ".json")) // Needed in both probe and probeAudit
+	ap := filepath.Join(config.Vars.AuditDir(), (probename + ".json")) // Needed in both probe and ProbeAudit
 	sumstate.Probes[probename] = &Probe{
 		name:          probename,
 		Meta:          make(map[string]interface{}),
 		PodsDestroyed: 0,
-		audit: &probeAudit{
+		audit: &ProbeAudit{
 			Name: probename,
 			path: ap,
 		},

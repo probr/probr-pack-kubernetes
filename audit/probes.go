@@ -7,7 +7,7 @@ import (
 // Probe is passed through various functions to audit the probe's progress
 type Probe struct {
 	name               string
-	audit              *probeAudit
+	audit              *ProbeAudit
 	Meta               map[string]interface{}
 	PodsCreated        int
 	PodsDestroyed      int

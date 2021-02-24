@@ -11,7 +11,8 @@ import (
 	"github.com/citihub/probr/utils"
 )
 
-type probeAudit struct {
+// ProbeAudit is used to hold all information related to probe execution
+type ProbeAudit struct {
 	path               string
 	Name               string
 	PodsDestroyed      *int
@@ -38,7 +39,7 @@ type stepAudit struct {
 	Payload     interface{} // Handles any values that are sent across the network
 }
 
-func (e *probeAudit) Write() {
+func (e *ProbeAudit) Write() {
 	if config.Vars.AuditEnabled == "true" && e.probeRan() {
 		_, err := os.Stat(e.path)
 		if err == nil && config.Vars.OverwriteHistoricalAudits == "false" {
@@ -89,7 +90,7 @@ func (p *ScenarioAudit) audit(stepName string, description string, payload inter
 		}
 	}
 }
-func (e *probeAudit) probeRan() bool {
+func (e *ProbeAudit) probeRan() bool {
 	if len(e.Scenarios) > 0 {
 		return true
 	}
