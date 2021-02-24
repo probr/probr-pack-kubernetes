@@ -27,3 +27,19 @@ Feature: General Cluster Security Configurations
         Given a Kubernetes cluster is deployed
         And the Kubernetes Web UI is disabled
         Then I should not be able to access the Kubernetes Web UI
+
+    @k-gen-004
+    Scenario Outline: Test outgoing connectivity of a deployed pod
+    Ensure that containers running inside Kubernetes clusters cannot directly access the Internet
+    So that Internet traffic can be inspected and controlled
+
+        Given a Kubernetes cluster is deployed
+        When a pod is deployed in the cluster
+        And a process inside the pod establishes a direct http(s) connection to "<url>"
+        Then access is "<result>"
+
+        Examples:
+            | url               | result  |
+            | www.google.com    | blocked |
+            | www.microsoft.com | blocked |
+            | www.ubuntu.com    | blocked |

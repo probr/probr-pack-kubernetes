@@ -4,8 +4,10 @@ package general
 
 import (
 	"fmt"
+	"log"
 	"strings"
 
+	apiv1 "k8s.io/api/core/v1"
 	rbacv1 "k8s.io/api/rbac/v1"
 	v1 "k8s.io/api/rbac/v1"
 
@@ -194,6 +196,98 @@ func (s *scenarioState) theKubernetesWebUIIsDisabled() error {
 		PodName          string
 		PodDashBoardName string
 	}{s.podState, s.podState.PodName, name}
+
+	return err
+}
+
+// NetworkAccess is the section of the kubernetes package which provides the kubernetes interactions required to support
+// network access scenarios.
+var na NetworkAccess
+
+// SetNetworkAccess allows injection of a specific NetworkAccess helper.
+func SetNetworkAccess(n NetworkAccess) {
+	na = n
+}
+
+func (s *scenarioState) aPodIsDeployedInTheCluster() error {
+	// Standard auditing logic to ensures panics are also audited
+	stepTrace, payload, err := utils.AuditPlaceholders()
+	defer func() {
+		s.audit.AuditScenarioStep(stepTrace.String(), payload, err)
+	}()
+
+	var podAudit *kubernetes.PodAudit
+	var pod *apiv1.Pod
+	if s.podName != "" {
+		//only one pod is needed for all scenarios in this probe
+		log.Printf("[DEBUG] Pod %v has already been created - reusing the pod", s.podName)
+	} else {
+		pd, pa, e := na.SetupNetworkAccessProbePod(s.probe)
+		podAudit = pa
+		pod = pd
+		if e != nil {
+			err = e
+		} else if pod == nil {
+			err = utils.ReformatError("Failed to setup network access test pod")
+			log.Print(err)
+		} else {
+			s.podName = pod.GetObjectMeta().GetName()
+		}
+	}
+
+	stepTrace.WriteString(fmt.Sprintf(
+		"Verifying the Pod %s deployed in the cluster", s.podState.PodName))
+	payload = kubernetes.PodPayload{Pod: pod, PodAudit: podAudit}
+
+	return err
+}
+
+func (s *scenarioState) aProcessInsideThePodEstablishesADirectHTTPSConnectionTo(url string) error {
+	// Standard auditing logic to ensures panics are also audited
+	stepTrace, payload, err := utils.AuditPlaceholders()
+	defer func() {
+		s.audit.AuditScenarioStep(stepTrace.String(), payload, err)
+	}()
+
+	code, err := na.AccessURL(&s.podName, &url)
+
+	if err != nil {
+		err = utils.ReformatError("[ERROR] Error raised when attempting to access URL: %v", err)
+		log.Print(err)
+	}
+
+	//hold on to the code
+	s.httpStatusCode = code
+
+	stepTrace.WriteString(fmt.Sprintf(
+		"Proces inside the pod established http connection with url '%s',", url))
+	payload = struct {
+		PodState kubernetes.PodState
+	}{s.podState}
+
+	return err
+}
+
+func (s *scenarioState) accessIs(accessResult string) error {
+	// Standard auditing logic to ensures panics are also audited
+	stepTrace, payload, err := utils.AuditPlaceholders()
+	defer func() {
+		s.audit.AuditScenarioStep(stepTrace.String(), payload, err)
+	}()
+
+	if accessResult == "blocked" {
+		//then the result should be anything other than 200
+		if s.httpStatusCode == 200 {
+			//it's a fail:
+			err = utils.ReformatError("got HTTP Status Code %v - failed", s.httpStatusCode)
+		}
+	}
+
+	stepTrace.WriteString(fmt.Sprintf(
+		"The access result is %s,", accessResult))
+	payload = struct {
+		PodState kubernetes.PodState
+	}{s.podState}
 
 	return err
 }
