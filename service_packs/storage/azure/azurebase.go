@@ -8,10 +8,6 @@ import (
 	"github.com/citihub/probr/utils"
 )
 
-const (
-	PolicyAssignmentManagementGroup string = "AZURE_POLICY_ASSIGNMENT_MANAGEMENT_GROUP"
-)
-
 var prefix string
 var rgName string
 

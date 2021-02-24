@@ -1,4 +1,4 @@
-package storage_pack
+package storagepack
 
 var (
 	tags = map[string][]string{

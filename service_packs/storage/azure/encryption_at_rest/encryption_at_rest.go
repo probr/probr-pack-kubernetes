@@ -1,4 +1,4 @@
-package encryption_at_rest
+package azureear
 
 import (
 	"context"
@@ -22,12 +22,12 @@ type scenarioState struct {
 	policyAssignmentMgmtGroup string
 }
 
-// Allows this probe to be added to the ProbeStore
+// ProbeStruct meets the interface allowing this probe to be added to the ProbeStore
 type ProbeStruct struct {
 	state scenarioState
 }
 
-// Allows this probe to be added to the ProbeStore
+// Probe meets the interface allowing this probe to be added to the ProbeStore
 var Probe ProbeStruct
 
 func (state *scenarioState) securityControlsThatRestrictDataFromBeingUnencryptedAtRest() error {
@@ -217,18 +217,19 @@ func (state *scenarioState) createResult(result string) error {
 	return nil
 }
 
-func (s *scenarioState) beforeScenario(probeName string, gs *godog.Scenario) {
-	s.name = gs.Name
-	s.probe = audit.State.GetProbeLog(probeName)
-	s.audit = audit.State.GetProbeLog(probeName).InitializeAuditor(gs.Name, gs.Tags)
+func (state *scenarioState) beforeScenario(probeName string, gs *godog.Scenario) {
+	state.name = gs.Name
+	state.probe = audit.State.GetProbeLog(probeName)
+	state.audit = audit.State.GetProbeLog(probeName).InitializeAuditor(gs.Name, gs.Tags)
 	coreengine.LogScenarioStart(gs)
 }
 
-// Return this probe's name
+// Name returns this probe's name
 func (p ProbeStruct) Name() string {
 	return "encryption_at_rest"
 }
 
+// Path returns the probe's feature file path
 func (p ProbeStruct) Path() string {
 	return coreengine.GetFeaturePath("service_packs", "storage", "azure", p.Name())
 }
@@ -244,7 +245,7 @@ func (p ProbeStruct) ProbeInitialize(ctx *godog.TestSuiteContext) {
 	ctx.AfterSuite(p.state.teardown)
 }
 
-// initialises the scenario
+// ScenarioInitialize initialises the scenario
 func (p ProbeStruct) ScenarioInitialize(ctx *godog.ScenarioContext) {
 
 	ctx.BeforeScenario(func(s *godog.Scenario) {

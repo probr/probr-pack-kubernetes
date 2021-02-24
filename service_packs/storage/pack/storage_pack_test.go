@@ -1,4 +1,4 @@
-package storage_pack
+package storagepack
 
 import (
 	"testing"

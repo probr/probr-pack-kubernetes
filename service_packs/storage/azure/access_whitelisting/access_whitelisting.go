@@ -1,4 +1,4 @@
-package access_whitelisting
+package azureaw
 
 import (
 	"context"
@@ -28,12 +28,12 @@ const (
 	storageRgEnvVar      = "STORAGE_ACCOUNT_RESOURCE_GROUP" // TODO: Should this be replaced with azureutil.ResourceGroup() - which not only checks in env var, but also config vars?
 )
 
-// Allows this probe to be added to the ProbeStore
+// ProbeStruct allows this probe to be added to the ProbeStore
 type ProbeStruct struct {
 	state scenarioState
 }
 
-// Allows this probe to be added to the ProbeStore
+// Probe allows this probe to be added to the ProbeStore
 var Probe ProbeStruct
 
 type scenarioState struct {
@@ -353,19 +353,20 @@ func (state *scenarioState) whitelistingIsConfigured() error {
 	return nil //TODO: Remove this line. This is temporary to ensure test doesn't halt and other steps are not skipped
 }
 
-func (s *scenarioState) beforeScenario(probeName string, gs *godog.Scenario) {
-	s.name = gs.Name
-	s.probe = audit.State.GetProbeLog(probeName)
-	s.audit = audit.State.GetProbeLog(probeName).InitializeAuditor(gs.Name, gs.Tags)
-	s.ctx = context.Background()
+func (state *scenarioState) beforeScenario(probeName string, gs *godog.Scenario) {
+	state.name = gs.Name
+	state.probe = audit.State.GetProbeLog(probeName)
+	state.audit = audit.State.GetProbeLog(probeName).InitializeAuditor(gs.Name, gs.Tags)
+	state.ctx = context.Background()
 	coreengine.LogScenarioStart(gs)
 }
 
-// Return this probe's name
+// Name returns this probe's name
 func (p ProbeStruct) Name() string {
 	return "access_whitelisting"
 }
 
+// Path returns this probe's feature file path
 func (p ProbeStruct) Path() string {
 	return coreengine.GetFeaturePath("service_packs", "storage", "azure", p.Name())
 }
@@ -381,7 +382,7 @@ func (p ProbeStruct) ProbeInitialize(ctx *godog.TestSuiteContext) {
 	ctx.AfterSuite(p.state.teardown)
 }
 
-// initialises the scenario
+// ScenarioInitialize initialises the scenario
 func (p ProbeStruct) ScenarioInitialize(ctx *godog.ScenarioContext) {
 
 	ctx.BeforeScenario(func(s *godog.Scenario) {

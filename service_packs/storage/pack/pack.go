@@ -1,14 +1,15 @@
-package storage_pack
+package storagepack
 
 import (
 	"github.com/citihub/probr/config"
 	"github.com/citihub/probr/service_packs/coreengine"
-	azure_access_whitelisting "github.com/citihub/probr/service_packs/storage/azure/access_whitelisting"
-	azure_encryption_at_rest "github.com/citihub/probr/service_packs/storage/azure/encryption_at_rest"
-	azure_encryption_in_flight "github.com/citihub/probr/service_packs/storage/azure/encryption_in_flight"
+	azureaw "github.com/citihub/probr/service_packs/storage/azure/access_whitelisting"
+	azureear "github.com/citihub/probr/service_packs/storage/azure/encryption_at_rest"
+	azureeif "github.com/citihub/probr/service_packs/storage/azure/encryption_in_flight"
 	"github.com/markbates/pkger"
 )
 
+// GetProbes returns a list of probe objects
 func GetProbes() []coreengine.Probe {
 	config.Vars.SetTags(tags)
 	if config.Vars.ServicePacks.Storage.IsExcluded() {
@@ -17,9 +18,9 @@ func GetProbes() []coreengine.Probe {
 	switch config.Vars.ServicePacks.Storage.Provider {
 	case "Azure":
 		return []coreengine.Probe{
-			azure_access_whitelisting.Probe,
-			azure_encryption_at_rest.Probe,
-			azure_encryption_in_flight.Probe,
+			azureaw.Probe,
+			azureear.Probe,
+			azureeif.Probe,
 		}
 	default:
 		return nil

@@ -1,4 +1,4 @@
-package encryption_in_flight
+package azureeif
 
 import (
 	"context"
@@ -32,12 +32,12 @@ type scenarioState struct {
 	storageAccounts           []string
 }
 
-// Allows this probe to be added to the ProbeStore
+// ProbeStruct allows this probe to be added to the ProbeStore
 type ProbeStruct struct {
 	state scenarioState
 }
 
-// Allows this probe to be added to the ProbeStore
+// Probe allows this probe to be added to the ProbeStore
 var Probe ProbeStruct
 
 func (state *scenarioState) setup() {
@@ -308,19 +308,20 @@ func (state *scenarioState) encryptedDataTrafficIsEnforced() error {
 	return nil
 }
 
-func (s *scenarioState) beforeScenario(probeName string, gs *godog.Scenario) {
-	s.name = gs.Name
-	s.probe = audit.State.GetProbeLog(probeName)
-	s.audit = audit.State.GetProbeLog(probeName).InitializeAuditor(gs.Name, gs.Tags)
-	s.ctx = context.Background()
+func (state *scenarioState) beforeScenario(probeName string, gs *godog.Scenario) {
+	state.name = gs.Name
+	state.probe = audit.State.GetProbeLog(probeName)
+	state.audit = audit.State.GetProbeLog(probeName).InitializeAuditor(gs.Name, gs.Tags)
+	state.ctx = context.Background()
 	coreengine.LogScenarioStart(gs)
 }
 
-// Return this probe's name
+// Name will return this probe's name
 func (p ProbeStruct) Name() string {
 	return "encryption_in_flight"
 }
 
+// Path will return this probe's feature path
 func (p ProbeStruct) Path() string {
 	return coreengine.GetFeaturePath("service_packs", "storage", "azure", p.Name())
 }
@@ -335,7 +336,7 @@ func (p ProbeStruct) ProbeInitialize(ctx *godog.TestSuiteContext) {
 	ctx.AfterSuite(p.state.teardown)
 }
 
-// initialises the scenario
+// ScenarioInitialize initialises the scenario
 func (p ProbeStruct) ScenarioInitialize(ctx *godog.ScenarioContext) {
 
 	ctx.BeforeScenario(func(s *godog.Scenario) {
