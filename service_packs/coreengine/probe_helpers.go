@@ -14,7 +14,7 @@ import (
 	"github.com/citihub/probr/utils"
 )
 
-// Service Packs should use this interface to export probes
+// Probe is an interface used by probes that are to be exported from any service pack
 type Probe interface {
 	ProbeInitialize(*godog.TestSuiteContext)
 	ScenarioInitialize(*godog.ScenarioContext)
@@ -67,6 +67,7 @@ func getOutputPath(t string) (*os.File, error) {
 	return os.Create(filepath.Join(cucumberDirFunc(), fn))
 }
 
+// GetFeaturePath parses a list of strings into a standardized file path
 func GetFeaturePath(path ...string) string {
 	featureName := path[len(path)-1] + ".feature"
 	dirPath := ""

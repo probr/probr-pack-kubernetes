@@ -1,12 +1,13 @@
-package apim_pack
+package apimpack
 
 import (
 	"github.com/citihub/probr/config"
-	"github.com/citihub/probr/service_packs/apim/azure/endpoint_security"
+	azurees "github.com/citihub/probr/service_packs/apim/azure/endpoint_security"
 	"github.com/citihub/probr/service_packs/coreengine"
 	"github.com/markbates/pkger"
 )
 
+// GetProbes returns a list of probe objects
 func GetProbes() []coreengine.Probe {
 	//	config.Vars.SetTags(tags)
 	if config.Vars.ServicePacks.APIM.IsExcluded() {
@@ -15,7 +16,7 @@ func GetProbes() []coreengine.Probe {
 	switch config.Vars.ServicePacks.APIM.Provider {
 	case "Azure":
 		return []coreengine.Probe{
-			endpoint_security.Probe,
+			azurees.Probe,
 		}
 	default:
 		return nil

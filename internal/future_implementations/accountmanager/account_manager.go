@@ -1,4 +1,4 @@
-package clouddriver_probes
+package clouddriverprobes
 
 import (
 	"github.com/cucumber/godog"

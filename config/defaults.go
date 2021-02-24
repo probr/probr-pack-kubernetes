@@ -8,7 +8,7 @@ import (
 )
 
 // setEnvOrDefaults will set value from os.Getenv and default to the specified value
-func setFromEnvOrDefaults(e *ConfigVars) {
+func setFromEnvOrDefaults(e *VarOptions) {
 
 	e.set(&e.Tags, "PROBR_TAGS", "")
 	e.set(&e.AuditEnabled, "PROBR_AUDIT_ENABLED", "true")
@@ -53,8 +53,8 @@ func homeDir() string {
 	return os.Getenv("USERPROFILE") // windows
 }
 
-// set fetches the env var or sets the default value as needed for the specified field from ConfigVars
-func (e *ConfigVars) set(field interface{}, varName string, defaultValue interface{}) {
+// set fetches the env var or sets the default value as needed for the specified field from VarOptions
+func (e *VarOptions) set(field interface{}, varName string, defaultValue interface{}) {
 	switch v := field.(type) {
 	default:
 		log.Fatalf("unexpected type for %v, %T", varName, v)

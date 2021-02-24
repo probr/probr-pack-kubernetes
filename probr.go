@@ -5,17 +5,17 @@ import (
 	"os"
 
 	"github.com/citihub/probr/config"
-	"github.com/citihub/probr/service_packs"
+	servicepacks "github.com/citihub/probr/service_packs"
 	"github.com/citihub/probr/service_packs/coreengine"
 )
 
-// This variable points to the function. It is used in oder to be able to mock oiginal behavior during testing.
-var tmpDirFunc = config.Vars.TmpDir // See TestGetAllProbeResults
+var tmpDirFunc = config.Vars.TmpDir // TODO: revise this
 
+// RunAllProbes retrieves and executes all probes that have been included
 func RunAllProbes() (int, *coreengine.ProbeStore, error) {
 	ts := coreengine.NewProbeStore()
 
-	for _, probe := range service_packs.GetAllProbes() {
+	for _, probe := range servicepacks.GetAllProbes() {
 		ts.AddProbe(probe)
 	}
 

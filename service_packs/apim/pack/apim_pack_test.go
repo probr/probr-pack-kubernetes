@@ -1,4 +1,4 @@
-package apim_pack
+package apimpack
 
 import (
 	"testing"

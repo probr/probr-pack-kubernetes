@@ -1,4 +1,4 @@
-package endpoint_security
+package azurees
 
 import (
 	"context"
@@ -17,12 +17,12 @@ type scenarioState struct {
 	ctx   context.Context
 }
 
-// Allows this probe to be added to the ProbeStore
+// ProbeStruct allows this probe to be added to the ProbeStore
 type ProbeStruct struct {
 	state scenarioState
 }
 
-// Allows this probe to be added to the ProbeStore
+// Probe allows this probe to be added to the ProbeStore
 var Probe ProbeStruct
 
 func (s *scenarioState) beforeScenario(probeName string, gs *godog.Scenario) {
@@ -32,11 +32,12 @@ func (s *scenarioState) beforeScenario(probeName string, gs *godog.Scenario) {
 	coreengine.LogScenarioStart(gs)
 }
 
-// Return this probe's name
+// Name returns this probe's name
 func (p ProbeStruct) Name() string {
 	return "endpoint_security"
 }
 
+// Path returns the path to this probe's feature file
 func (p ProbeStruct) Path() string {
 	return coreengine.GetFeaturePath("service_packs", "apim", "azure", p.Name())
 }
@@ -53,14 +54,14 @@ func (p ProbeStruct) ProbeInitialize(ctx *godog.TestSuiteContext) {
 }
 
 // PENDING IMPLEMENTATION
-func (state *scenarioState) anAPIIsDeployedToAPIM() error {
+func (s *scenarioState) anAPIIsDeployedToAPIM() error {
 
 	var err error
 	var stepTrace strings.Builder
 	payload := struct {
 	}{}
 	defer func() {
-		state.audit.AuditScenarioStep(stepTrace.String(), payload, err)
+		s.audit.AuditScenarioStep(stepTrace.String(), payload, err)
 	}()
 	err = fmt.Errorf("Not Implemented")
 	stepTrace.WriteString("TODO: Pending implementation;")
@@ -70,14 +71,14 @@ func (state *scenarioState) anAPIIsDeployedToAPIM() error {
 }
 
 // PENDING IMPLEMENTATION
-func (state *scenarioState) eachEndpointHasMTLSEmabled() error {
+func (s *scenarioState) eachEndpointHasMTLSEmabled() error {
 
 	var err error
 	var stepTrace strings.Builder
 	payload := struct {
 	}{}
 	defer func() {
-		state.audit.AuditScenarioStep(stepTrace.String(), payload, err)
+		s.audit.AuditScenarioStep(stepTrace.String(), payload, err)
 	}()
 	err = fmt.Errorf("Not Implemented")
 	stepTrace.WriteString("TODO: Pending implementation;")
@@ -87,14 +88,14 @@ func (state *scenarioState) eachEndpointHasMTLSEmabled() error {
 }
 
 // PENDING IMPLEMENTATION
-func (state *scenarioState) allEndpointsAreRetrievedFromAPIM() error {
+func (s *scenarioState) allEndpointsAreRetrievedFromAPIM() error {
 
 	var err error
 	var stepTrace strings.Builder
 	payload := struct {
 	}{}
 	defer func() {
-		state.audit.AuditScenarioStep(stepTrace.String(), payload, err)
+		s.audit.AuditScenarioStep(stepTrace.String(), payload, err)
 	}()
 	err = fmt.Errorf("Not Implemented")
 	stepTrace.WriteString("TODO: Pending implementation;")
@@ -103,7 +104,7 @@ func (state *scenarioState) allEndpointsAreRetrievedFromAPIM() error {
 
 }
 
-// initialises the scenario
+// ScenarioInitialize initialises the scenario
 func (p ProbeStruct) ScenarioInitialize(ctx *godog.ScenarioContext) {
 
 	ctx.BeforeScenario(func(s *godog.Scenario) {

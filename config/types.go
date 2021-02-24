@@ -1,8 +1,8 @@
 package config
 
-// ConfigVars contains all possible config vars
-type ConfigVars struct {
-	// NOTE: Env and Defaults are ONLY available if corresponding logic is added to defaults.go and getters.go
+// VarOptions contains all top-level config vars
+type VarOptions struct {
+	// NOTE: Env and Defaults are ONLY available if corresponding logic is added to defaults.go
 	ServicePacks              ServicePacks   `yaml:"ServicePacks"`
 	CloudProviders            CloudProviders `yaml:"CloudProviders"`
 	OutputType                string         `yaml:"OutputType"`
@@ -19,16 +19,19 @@ type ConfigVars struct {
 	ResultsFormat             string         // set by flags only
 }
 
+// Meta config options
 type Meta struct {
 	RunOnly string // set by CLI 'run' option
 }
 
+// ServicePacks config options
 type ServicePacks struct {
 	Kubernetes Kubernetes `yaml:"Kubernetes"`
 	Storage    Storage    `yaml:"Storage"`
 	APIM       APIM       `yaml:"APIM"`
 }
 
+// Kubernetes config options
 type Kubernetes struct {
 	exclusionLogged                   bool
 	KeepPods                          string   `yaml:"KeepPods"`
@@ -47,33 +50,39 @@ type Kubernetes struct {
 	DashboardPodNamePrefix            string   `yaml:"DashboardPodNamePrefix"`
 }
 
+// Storage config options
 type Storage struct {
 	exclusionLogged bool
 	Provider        string  `yaml:"Provider"` // Placeholder!
 	Probes          []Probe `yaml:"Probes"`
 }
 
+// APIM  config options
 type APIM struct {
 	exclusionLogged bool
 	Provider        string  `yaml:"Provider"` // Placeholder!
 	Probes          []Probe `yaml:"Probes"`
 }
 
+// Probe config options
 type Probe struct {
 	Name      string     `yaml:"Name"`
 	Excluded  string     `yaml:"Excluded"`
 	Scenarios []Scenario `yaml:"Scenarios"`
 }
 
+// Scenario config options
 type Scenario struct {
 	Name     string `yaml:"Name"`
 	Excluded string `yaml:"Excluded"`
 }
 
+// CloudProviders config options
 type CloudProviders struct {
 	Azure Azure `yaml:"Azure"`
 }
 
+// Azure config options
 type Azure struct {
 	Excluded         string `yaml:"Excluded"`
 	TenantID         string `yaml:"TenantID"`
@@ -89,7 +98,7 @@ type Azure struct {
 	}
 }
 
-// For testing
+// Excludable is used for testing purposes only
 type Excludable interface {
 	IsExcluded() bool
 }

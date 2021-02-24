@@ -19,7 +19,7 @@ func Test_setFromEnvOrDefaults(t *testing.T) {
 	envVarValuePROBR_WRITE_DIRECTORY := "ValueFromEnvVar_WriteDirectory"
 
 	type args struct {
-		e *ConfigVars
+		e *VarOptions
 	}
 	tests := []struct {
 		testName                     string
@@ -29,13 +29,13 @@ func Test_setFromEnvOrDefaults(t *testing.T) {
 	}{
 		{
 			testName:                     "setFromEnvOrDefaults_GivenEnvVar_ShouldSetConfigVarToEnvVarValue",
-			testArgs:                     args{e: &ConfigVars{}},
+			testArgs:                     args{e: &VarOptions{}},
 			setEnvVar:                    true,
 			expectedResultWriteDirectory: envVarValuePROBR_WRITE_DIRECTORY,
 		},
 		{
 			testName:                     "setFromEnvOrDefaults_WithoutEnvVar_ShouldSetConfigVarToDefaultValue",
-			testArgs:                     args{e: &ConfigVars{}},
+			testArgs:                     args{e: &VarOptions{}},
 			setEnvVar:                    false,
 			expectedResultWriteDirectory: defaultValuePROBR_WRITE_DIRECTORY,
 		},

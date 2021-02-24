@@ -14,19 +14,19 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-// Vars is a singleton instance of ConfigVars
-var Vars ConfigVars
+// Vars is a singleton instance of VarOptions
+var Vars VarOptions
 var Spinner *spinner.Spinner
 
 // GetTags returns Tags, prioritising command line parameter over vars file
-func (ctx *ConfigVars) GetTags() string {
+func (ctx *VarOptions) GetTags() string {
 	if ctx.Tags == "" {
 		ctx.handleTagExclusions() // only process tag exclusions from vars file if not supplied via the command line
 	}
 	return ctx.Tags
 }
 
-func (ctx *ConfigVars) SetTags(tags map[string][]string) {
+func (ctx *VarOptions) SetTags(tags map[string][]string) {
 	configTags := strings.Split(ctx.GetTags(), ",")
 	for _, configTag := range configTags {
 		for _, tag := range tags[configTag] {
@@ -37,7 +37,7 @@ func (ctx *ConfigVars) SetTags(tags map[string][]string) {
 }
 
 // Handle tag exclusions provided via the config vars file
-func (ctx *ConfigVars) handleTagExclusions() {
+func (ctx *VarOptions) handleTagExclusions() {
 	for _, tag := range ctx.TagExclusions {
 		if ctx.Tags == "" {
 			ctx.Tags = "~@" + tag
@@ -68,9 +68,9 @@ func Init(configPath string) error {
 }
 
 // NewConfig overrides the current config.Vars values
-func NewConfig(c string) (ConfigVars, error) {
+func NewConfig(c string) (VarOptions, error) {
 	// Create config structure
-	config := ConfigVars{}
+	config := VarOptions{}
 	if c == "" {
 		return config, nil // No file path provided, return empty config
 	}
@@ -114,38 +114,38 @@ func LogConfigState() {
 }
 
 // TmpDir creates and returns -tmp- directory within WriteDirectory
-func (ctx *ConfigVars) TmpDir() string {
+func (ctx *VarOptions) TmpDir() string {
 	tmpDir := filepath.Join(ctx.GetWriteDirectory(), "tmp")
 	_ = os.Mkdir(tmpDir, 0755) // Creates if not already existing
 	return tmpDir
 }
 
 // AuditDir creates and returns -audit- directory within WriteDirectory
-func (ctx *ConfigVars) AuditDir() string {
+func (ctx *VarOptions) AuditDir() string {
 	auditDir := filepath.Join(ctx.GetWriteDirectory(), "audit")
 	_ = os.Mkdir(auditDir, 0755) // Creates if not already existing
 	return auditDir
 }
 
 // CucumberDir creates and returns -cucumber- directory within WriteDirectory
-func (ctx *ConfigVars) CucumberDir() string {
+func (ctx *VarOptions) CucumberDir() string {
 	cucumberDir := filepath.Join(ctx.GetWriteDirectory(), "cucumber")
 	_ = os.Mkdir(cucumberDir, 0755) // Creates if not already existing
 	return cucumberDir
 }
 
 // GetWriteDirectory creates and returns the output folder specified in settings
-func (ctx *ConfigVars) GetWriteDirectory() string {
+func (ctx *VarOptions) GetWriteDirectory() string {
 	_ = os.Mkdir(ctx.WriteDirectory, 0755) // Creates if not already existing
 	return ctx.WriteDirectory
 }
 
-func (ctx *ConfigVars) handleConfigFileExclusions() {
+func (ctx *VarOptions) handleConfigFileExclusions() {
 	ctx.handleProbeExclusions("kubernetes", ctx.ServicePacks.Kubernetes.Probes)
 	ctx.handleProbeExclusions("storage", ctx.ServicePacks.Storage.Probes)
 }
 
-func (ctx *ConfigVars) handleProbeExclusions(packName string, probes []Probe) {
+func (ctx *VarOptions) handleProbeExclusions(packName string, probes []Probe) {
 	for _, probe := range probes {
 		if probe.IsExcluded() {
 			ctx.addExclusion(fmt.Sprintf("probes/%s/%s", packName, probe.Name))
@@ -159,7 +159,7 @@ func (ctx *ConfigVars) handleProbeExclusions(packName string, probes []Probe) {
 	}
 }
 
-func (ctx *ConfigVars) addExclusion(tag string) {
+func (ctx *VarOptions) addExclusion(tag string) {
 	if len(ctx.Tags) > 0 {
 		ctx.Tags = ctx.Tags + " && "
 	}

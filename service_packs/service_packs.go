@@ -1,4 +1,4 @@
-package service_packs
+package servicepacks
 
 import (
 	apim_pack "github.com/citihub/probr/service_packs/apim/pack"
@@ -27,6 +27,7 @@ func makeGodogProbe(pack string, p coreengine.Probe) *coreengine.GodogProbe {
 	}
 }
 
+// GetAllProbes returns a list of probes that are ready to be run by Godog
 func GetAllProbes() []*coreengine.GodogProbe {
 	var allProbes []*coreengine.GodogProbe
 

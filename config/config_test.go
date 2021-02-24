@@ -24,7 +24,7 @@ func assertIsExcluded(obj Excludable, t *testing.T) {
 	}
 }
 
-func newConfigWithScenarioExclusionAndInclusion() (config ConfigVars, excludedTag string) {
+func newConfigWithScenarioExclusionAndInclusion() (config VarOptions, excludedTag string) {
 	config, _ = NewConfig("")
 	excludedTag = "that guy"
 	config.ServicePacks.Kubernetes.Probes = append(
@@ -45,12 +45,12 @@ func newConfigWithScenarioExclusionAndInclusion() (config ConfigVars, excludedTa
 }
 
 // Checks scenarios excluded by newConfigWithScenarioExclusionAndInclusion
-func checkPreformattedScenarioExclusions(config ConfigVars, t *testing.T) {
+func checkPreformattedScenarioExclusions(config VarOptions, t *testing.T) {
 	assertIsNotExcluded(config.ServicePacks.Kubernetes.Probes[0].Scenarios[0], t)
 	assertIsExcluded(config.ServicePacks.Kubernetes.Probes[0].Scenarios[1], t)
 }
 
-func checkTagsContainExclusion(config ConfigVars, tag string, t *testing.T) {
+func checkTagsContainExclusion(config VarOptions, tag string, t *testing.T) {
 	// Only log one of these possible failures, they won't overlap
 	if len(config.Tags) == 0 {
 		t.Log("Tags string was not modified by addExclusion")
@@ -78,9 +78,9 @@ func TestNewConfig(t *testing.T) {
 		t.Fail()
 	}
 	switch interface{}(config).(type) {
-	case ConfigVars:
+	case VarOptions:
 	default:
-		t.Log("NewConfig did not create a ConfigVars object")
+		t.Log("NewConfig did not create a VarOptions object")
 		t.Fail()
 	}
 }
@@ -163,7 +163,7 @@ func TestSetTags(t *testing.T) {
 		}
 	}
 	if expected != 2 {
-		t.Errorf("Tag name and tag ID were not found in Vars.Tags")
+		t.Errorf("Tag name and tag ID were not found in VarOptions.Tags")
 	}
 }
 
