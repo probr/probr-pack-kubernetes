@@ -1,4 +1,4 @@
-package pod_security_policy
+package psp
 
 import (
 	"log"

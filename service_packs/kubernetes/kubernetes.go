@@ -15,9 +15,10 @@ import (
 	"github.com/citihub/probr/utils"
 )
 
+// AssetsDir is set during init() and dictates the central location for probe assets
 var AssetsDir string
 
-// podState captures useful pod state data for use in a scenario's state.
+// PodState captures useful pod state data for use in a scenario's state.
 type PodState struct {
 	PodName         string
 	CreationError   *PodCreationError
@@ -37,9 +38,11 @@ type scenarioState struct {
 }
 
 const (
+	// Namespace is the default namespace used in each probe
 	Namespace = "probr-general-test-ns"
 )
 
+// PodPayload contains the apiv1 and probr information regarding a pod creation attempt
 type PodPayload struct {
 	Pod      *apiv1.Pod
 	PodAudit *PodAudit
@@ -57,6 +60,7 @@ func init() {
 //
 // Helper Functions
 
+// BeforeScenario is a DRY helper designed to be run in each probe's beforeScenario function
 func BeforeScenario(s *scenarioState, probeName string, gs *godog.Scenario) {
 	s.setup()
 	s.name = gs.Name

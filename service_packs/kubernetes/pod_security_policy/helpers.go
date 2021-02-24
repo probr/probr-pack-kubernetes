@@ -1,4 +1,4 @@
-package pod_security_policy
+package psp
 
 import (
 	"context"
@@ -29,8 +29,8 @@ const (
 	WithoutPrivilegedAccess
 )
 
-// PSPProbeCommand type enumerating the commands that can be used to test pods for compliance with Pod Security Policies
-type PSPProbeCommand int
+// ProbeCommand type enumerating the commands that can be used to test pods for compliance with Pod Security Policies
+type ProbeCommand int
 
 type scenarioState struct {
 	name      string
@@ -41,15 +41,15 @@ type scenarioState struct {
 	info      []interface{} //used to pass arbitrary information between steps
 }
 
-// PSPVerificationProbe encapsulates the command and expected result to be used in a Pod Security Policy probe.
+// VerificationProbe encapsulates the command and expected result to be used in a Pod Security Policy probe.
 type VerificationProbe struct {
-	Cmd              PSPProbeCommand
+	Cmd              ProbeCommand
 	ExpectedExitCode int
 }
 
-// enumn supporting PSPProbeCommand type
+// enumn supporting ProbeCommand type
 const (
-	Chroot PSPProbeCommand = iota
+	Chroot ProbeCommand = iota
 	EnterHostPIDNS
 	EnterHostIPCNS
 	EnterHostNetworkNS
@@ -59,7 +59,7 @@ const (
 	NetCat
 	Unshare
 	Ls
-	SudoChroot PSPProbeCommand = iota
+	SudoChroot ProbeCommand = iota
 )
 
 func getSupportedVolumeTypes() []string {
@@ -130,7 +130,7 @@ func getLinuxNonDefaultCapabilities() map[string]string {
 	}
 }
 
-func (c PSPProbeCommand) String() string {
+func (c ProbeCommand) String() string {
 	return [...]string{"chroot .",
 		"nsenter -t 1 -p ps",
 		"nsenter -t 1 -i ps",
@@ -171,7 +171,7 @@ type PodSecurityPolicy interface {
 	CreatePODSettingCapabilities(c *[]string, probe *audit.Probe) (*apiv1.Pod, error)
 	CreatePODWithCapabilities(capAdd []string, capDrop []string, probe *audit.Probe) (*apiv1.Pod, error)
 	CreatePodFromYaml(y []byte, probe *audit.Probe) (*apiv1.Pod, error)
-	ExecPSPProbeCmd(pName *string, cmd PSPProbeCommand, probe *audit.Probe) (*kubernetes.CmdExecutionResult, error)
+	ExecPSPProbeCmd(pName *string, cmd ProbeCommand, probe *audit.Probe) (*kubernetes.CmdExecutionResult, error)
 	ExecCmd(pName *string, cmd string, probe *audit.Probe) (*kubernetes.CmdExecutionResult, error)
 	TeardownPodSecurityProbe(p string, e string) error
 	CreateConfigMap() error
@@ -647,8 +647,8 @@ func (psp *PSP) CreatePodFromYaml(y []byte, probe *audit.Probe) (*apiv1.Pod, err
 	return psp.k.CreatePodFromYaml(y, pname, kubernetes.Namespace, psp.probeImage, "", true, probe)
 }
 
-// ExecPSPProbeCmd executes the given PSPProbeCommand against the supplied pod name.
-func (psp *PSP) ExecPSPProbeCmd(pName *string, cmd PSPProbeCommand, probe *audit.Probe) (*kubernetes.CmdExecutionResult, error) {
+// ExecPSPProbeCmd executes the given ProbeCommand against the supplied pod name.
+func (psp *PSP) ExecPSPProbeCmd(pName *string, cmd ProbeCommand, probe *audit.Probe) (*kubernetes.CmdExecutionResult, error) {
 	return psp.ExecCmd(pName, cmd.String(), probe)
 }
 

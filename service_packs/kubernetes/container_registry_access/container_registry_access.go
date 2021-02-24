@@ -1,6 +1,6 @@
-// Package container_registry_access provides the implementation required to execute the
+// Package cra provides the implementation required to execute the
 // feature based test cases described in the the 'events' directory.
-package container_registry_access
+package cra
 
 import (
 	"fmt"

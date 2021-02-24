@@ -444,7 +444,7 @@ func (k *Kube) ExecCommand(cmd string, ns string, pn *string) (s *CmdExecutionRe
 
 // DeletePod deletes the given pod in the specified namespace.
 func (k *Kube) DeletePod(podName string, ns string, probeName string) error {
-	_, err := k.PodStatus(podName, ns)
+	_, err := k.podStatus(podName, ns)
 	if err != nil {
 		return err // If pod does not exist, it cannot be deleted
 	}
@@ -470,7 +470,7 @@ func (k *Kube) DeletePod(podName string, ns string, probeName string) error {
 	return nil
 }
 
-func (k *Kube) PodStatus(name, ns string) (apiv1.PodStatus, error) {
+func (k *Kube) podStatus(name, ns string) (apiv1.PodStatus, error) {
 	client, err := k.GetClient()
 	if err != nil {
 		return apiv1.PodStatus{}, err

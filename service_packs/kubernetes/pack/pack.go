@@ -1,25 +1,26 @@
-package kubernetes_pack
+package kubernetespack
 
 import (
 	"github.com/citihub/probr/config"
 	"github.com/citihub/probr/service_packs/coreengine"
-	"github.com/citihub/probr/service_packs/kubernetes/container_registry_access"
+	cra "github.com/citihub/probr/service_packs/kubernetes/container_registry_access"
 	"github.com/citihub/probr/service_packs/kubernetes/general"
 	"github.com/citihub/probr/service_packs/kubernetes/iam"
 	"github.com/citihub/probr/service_packs/kubernetes/internet_access"
-	"github.com/citihub/probr/service_packs/kubernetes/pod_security_policy"
+	psp "github.com/citihub/probr/service_packs/kubernetes/pod_security_policy"
 	"github.com/markbates/pkger"
 )
 
+// GetProbes returns a list of probe objects
 func GetProbes() []coreengine.Probe {
 	config.Vars.SetTags(tags)
 	if config.Vars.ServicePacks.Kubernetes.IsExcluded() {
 		return nil
 	}
 	return []coreengine.Probe{
-		container_registry_access.Probe,
+		cra.Probe,
 		general.Probe,
-		pod_security_policy.Probe,
+		psp.Probe,
 		internet_access.Probe,
 		iam.Probe,
 	}

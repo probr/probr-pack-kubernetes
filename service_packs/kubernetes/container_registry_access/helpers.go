@@ -1,4 +1,4 @@
-package container_registry_access
+package cra
 
 import (
 	"strings"
