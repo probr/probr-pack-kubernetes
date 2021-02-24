@@ -4,9 +4,10 @@ import (
 	"github.com/cucumber/messages-go/v10"
 )
 
+// Probe is passed through various functions to audit the probe's progress
 type Probe struct {
 	name               string
-	audit              *ProbeAudit
+	audit              *probeAudit
 	Meta               map[string]interface{}
 	PodsCreated        int
 	PodsDestroyed      int
@@ -39,6 +40,7 @@ func (e *Probe) countResults() {
 	}
 }
 
+// InitializeAuditor creates a new audit entry for the specified scenario
 func (e *Probe) InitializeAuditor(name string, tags []*messages.Pickle_PickleTag) *ScenarioAudit {
 	if e.audit.Scenarios == nil {
 		e.audit.Scenarios = make(map[int]*ScenarioAudit)
@@ -50,7 +52,7 @@ func (e *Probe) InitializeAuditor(name string, tags []*messages.Pickle_PickleTag
 	}
 	e.audit.Scenarios[scenarioCounter] = &ScenarioAudit{
 		Name:  name,
-		Steps: make(map[int]*StepAudit),
+		Steps: make(map[int]*stepAudit),
 		Tags:  t,
 	}
 	return e.audit.Scenarios[scenarioCounter]

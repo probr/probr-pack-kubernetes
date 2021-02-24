@@ -1,4 +1,4 @@
-package cli_flags
+package cliflags
 
 import (
 	"flag"
@@ -11,7 +11,9 @@ import (
 
 type flagHandlerFunc func(v interface{})
 
+// Flag holds the user-provided value for the flag, and the function to be run within executeHandler
 type Flag struct {
+	// exported to avoid conflict with the default `flag` provided in go
 	Handler flagHandlerFunc
 	Value   interface{}
 }
@@ -22,6 +24,7 @@ func (f Flag) executeHandler() {
 	f.Handler(f.Value)
 }
 
+// HandleFlags executes the logic for any flags that are provided via `./probr (--<FLAG>)`
 func HandleFlags() {
 
 	stringFlag("varsfile", "path to config file", varsFileHandler)

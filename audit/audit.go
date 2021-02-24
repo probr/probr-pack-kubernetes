@@ -11,7 +11,7 @@ import (
 	"github.com/citihub/probr/utils"
 )
 
-type ProbeAudit struct {
+type probeAudit struct {
 	path               string
 	Name               string
 	PodsDestroyed      *int
@@ -22,14 +22,15 @@ type ProbeAudit struct {
 	Scenarios          map[int]*ScenarioAudit
 }
 
+// ScenarioAudit is used by scenario states to audit progress through each step
 type ScenarioAudit struct {
 	Name   string
 	Result string // Passed / Failed / Given Not Met
 	Tags   []string
-	Steps  map[int]*StepAudit
+	Steps  map[int]*stepAudit
 }
 
-type StepAudit struct {
+type stepAudit struct {
 	Name        string
 	Description string      // Long-form explanation of anything happening in the step
 	Result      string      // Passed / Failed
@@ -37,7 +38,7 @@ type StepAudit struct {
 	Payload     interface{} // Handles any values that are sent across the network
 }
 
-func (e *ProbeAudit) Write() {
+func (e *probeAudit) Write() {
 	if config.Vars.AuditEnabled == "true" && e.probeRan() {
 		_, err := os.Stat(e.path)
 		if err == nil && config.Vars.OverwriteHistoricalAudits == "false" {
@@ -55,7 +56,7 @@ func (e *ProbeAudit) Write() {
 	}
 }
 
-// auditScenarioStep sets description, payload, and pass/fail based on err parameter.
+// AuditScenarioStep sets description, payload, and pass/fail based on err parameter.
 // This function should be deferred to catch panic behavior, otherwise the audit will not be logged on panic
 func (p *ScenarioAudit) AuditScenarioStep(description string, payload interface{}, err error) {
 	stepName := utils.CallerName(2) // returns name if deferred and not panicking
@@ -70,7 +71,7 @@ func (p *ScenarioAudit) AuditScenarioStep(description string, payload interface{
 
 func (p *ScenarioAudit) audit(stepName string, description string, payload interface{}, err error) {
 	stepNumber := len(p.Steps) + 1
-	p.Steps[stepNumber] = &StepAudit{
+	p.Steps[stepNumber] = &stepAudit{
 		Name:        stepName,
 		Description: description,
 		Payload:     payload,
@@ -88,7 +89,7 @@ func (p *ScenarioAudit) audit(stepName string, description string, payload inter
 		}
 	}
 }
-func (e *ProbeAudit) probeRan() bool {
+func (e *probeAudit) probeRan() bool {
 	if len(e.Scenarios) > 0 {
 		return true
 	}

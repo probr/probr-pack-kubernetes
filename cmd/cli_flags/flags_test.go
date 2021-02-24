@@ -1,4 +1,4 @@
-package cli_flags
+package cliflags
 
 import (
 	"os"

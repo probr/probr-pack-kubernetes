@@ -12,7 +12,7 @@ import (
 
 func TestSummaryState_LogPodName(t *testing.T) {
 
-	var fakeSummaryState SummaryState
+	var fakeSummaryState summaryState
 	fakeSummaryState.Probes = make(map[string]*Probe)
 	fakeSummaryState.Meta = make(map[string]interface{})
 	fakeSummaryState.Meta["names of pods created"] = []string{}
@@ -22,7 +22,7 @@ func TestSummaryState_LogPodName(t *testing.T) {
 	}
 	tests := []struct {
 		testName string
-		s        *SummaryState
+		s        *summaryState
 		args     args
 	}{
 		{
@@ -44,18 +44,18 @@ func TestSummaryState_LogPodName(t *testing.T) {
 	}
 }
 
-// createMockProbe - creates a mock SummaryState and probe object in it and returns SummaryState object.
-func createSummaryStateWithMockProbe(probename string) SummaryState {
-	var sumstate SummaryState
+// createMockProbe - creates a mock summaryState and probe object in it and returns summaryState object.
+func createSummaryStateWithMockProbe(probename string) summaryState {
+	var sumstate summaryState
 	sumstate.Probes = make(map[string]*Probe)
 	sumstate.Meta = make(map[string]interface{})
 	sumstate.Meta["names of pods created"] = []string{}
-	ap := filepath.Join(config.Vars.AuditDir(), (probename + ".json")) // Needed in both Probe and ProbeAudit
+	ap := filepath.Join(config.Vars.AuditDir(), (probename + ".json")) // Needed in both probe and probeAudit
 	sumstate.Probes[probename] = &Probe{
 		name:          probename,
 		Meta:          make(map[string]interface{}),
 		PodsDestroyed: 0,
-		audit: &ProbeAudit{
+		audit: &probeAudit{
 			Name: probename,
 			path: ap,
 		},
@@ -79,7 +79,7 @@ func TestSummaryState_initProbe(t *testing.T) {
 
 	tests := []struct {
 		testName string
-		s        *SummaryState
+		s        *summaryState
 		args     args
 	}{
 		{
@@ -113,7 +113,7 @@ func TestSummaryState_SetProbrStatus(t *testing.T) {
 	}
 	tests := []struct {
 		testName       string
-		s              *SummaryState
+		s              *summaryState
 		expectedResult string
 		args           args
 	}{
@@ -146,7 +146,7 @@ func TestSummaryState_SetProbrStatus(t *testing.T) {
 
 func TestSummaryState_LogProbeMeta(t *testing.T) {
 
-	var mockSummaryState SummaryState
+	var mockSummaryState summaryState
 	mockSummaryState.Probes = make(map[string]*Probe)
 	mockSummaryState.Meta = make(map[string]interface{})
 	mockSummaryState.Meta["names of pods created"] = []string{}
@@ -158,7 +158,7 @@ func TestSummaryState_LogProbeMeta(t *testing.T) {
 	}
 	tests := []struct {
 		testName       string
-		s              *SummaryState
+		s              *summaryState
 		expectedResult string
 		args           args
 	}{
@@ -181,7 +181,7 @@ func TestSummaryState_LogProbeMeta(t *testing.T) {
 
 func TestSummaryState_GetProbeLog(t *testing.T) {
 	var probeName = "testProbe"
-	var mockSummaryState SummaryState
+	var mockSummaryState summaryState
 	mockSummaryState.Probes = make(map[string]*Probe)
 	mockSummaryState.Meta = make(map[string]interface{})
 	mockSummaryState.Meta["names of pods created"] = []string{}
@@ -192,7 +192,7 @@ func TestSummaryState_GetProbeLog(t *testing.T) {
 	}
 	tests := []struct {
 		testName string
-		s        *SummaryState
+		s        *summaryState
 		want     *Probe
 		args     args
 	}{
@@ -207,7 +207,7 @@ func TestSummaryState_GetProbeLog(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.testName, func(t *testing.T) {
 			if got := tt.s.GetProbeLog(tt.args.name); strings.Compare(got.name, tt.want.name) > 0 {
-				t.Errorf("SummaryState.GetProbeLog() = %v, want %v", got, tt.want)
+				t.Errorf("summaryState.GetProbeLog() = %v, want %v", got, tt.want)
 			}
 		})
 	}
@@ -223,7 +223,7 @@ func TestSummaryState_completeProbe(t *testing.T) {
 	mockSummaryState.Probes[probeName].Result = "Excluded"
 	mockSummaryState.Probes[probeName].audit.Scenarios[scenarioCounter] = &ScenarioAudit{
 		Name:  "scena1",
-		Steps: make(map[int]*StepAudit),
+		Steps: make(map[int]*stepAudit),
 		Tags:  []string{"scenario"},
 	}
 	mockSummaryState.Probes[probeName].ScenariosFailed = 0
@@ -234,7 +234,7 @@ func TestSummaryState_completeProbe(t *testing.T) {
 	}
 	tests := []struct {
 		testName string
-		s        *SummaryState
+		s        *summaryState
 		args
 		expectedResult string
 	}{
@@ -250,7 +250,7 @@ func TestSummaryState_completeProbe(t *testing.T) {
 			tt.s.completeProbe(tt.args.e)
 
 			if strings.Compare(tt.args.e.Result, tt.expectedResult) > 0 {
-				t.Errorf("SummaryState.completeProbe() = %v, want %v", tt.args.e.Result, tt.expectedResult)
+				t.Errorf("summaryState.completeProbe() = %v, want %v", tt.args.e.Result, tt.expectedResult)
 			}
 
 		})

@@ -12,7 +12,7 @@ import (
 
 	"github.com/citihub/probr"
 	"github.com/citihub/probr/audit"
-	"github.com/citihub/probr/cmd/cli_flags"
+	cliflags "github.com/citihub/probr/cmd/cli_flags"
 	"github.com/citihub/probr/config"
 )
 
@@ -29,12 +29,12 @@ func main() {
 
 	if len(os.Args[1:]) > 0 {
 		log.Printf("[DEBUG] Checking for CLI options or flags")
-		cli_flags.HandleRequestForRequiredVars()
-		cli_flags.HandlePackOption()
+		cliflags.HandleRequestForRequiredVars()
+		cliflags.HandlePackOption()
 		// TODO: Find a way to get loglevel handling to work ABOVE this point,
 		// or to move the Options handlers below the flags handler
 		// Currently only ERROR will print prior to HandleFlags()
-		cli_flags.HandleFlags()
+		cliflags.HandleFlags()
 	}
 
 	config.LogConfigState()

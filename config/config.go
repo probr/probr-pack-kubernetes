@@ -16,6 +16,8 @@ import (
 
 // Vars is a singleton instance of VarOptions
 var Vars VarOptions
+
+// Spinner holds the current state of the CLI spinner
 var Spinner *spinner.Spinner
 
 // GetTags returns Tags, prioritising command line parameter over vars file
@@ -26,6 +28,7 @@ func (ctx *VarOptions) GetTags() string {
 	return ctx.Tags
 }
 
+// SetTags will parse the tags specified in Vars.Tags
 func (ctx *VarOptions) SetTags(tags map[string][]string) {
 	configTags := strings.Split(ctx.GetTags(), ",")
 	for _, configTag := range configTags {
@@ -108,6 +111,7 @@ func ValidateConfigPath(path string) error {
 	return nil
 }
 
+// LogConfigState will print the config state as a NOTICE in the log
 func LogConfigState() {
 	s, _ := json.MarshalIndent(Vars, "", "  ")
 	log.Printf("[NOTICE] Config State: %s", s)
@@ -166,22 +170,22 @@ func (ctx *VarOptions) addExclusion(tag string) {
 	ctx.Tags = fmt.Sprintf("%s~@%s", ctx.Tags, tag)
 }
 
-// Log and return exclusion configuration
+// IsExcluded will log and return exclusion configuration
 func (k Kubernetes) IsExcluded() bool {
 	return validatePackRequirements("Kubernetes", k)
 }
 
-// Log and return exclusion configuration
+// IsExcluded will log and return exclusion configuration
 func (s Storage) IsExcluded() bool {
 	return validatePackRequirements("Storage", s)
 }
 
-// Log and return exclusion configuration
+// IsExcluded will log and return exclusion configuration
 func (a APIM) IsExcluded() bool {
 	return validatePackRequirements("APIM", a)
 }
 
-// Log and return exclusion configuration
+// IsExcluded will log and return exclusion configuration
 func (p Probe) IsExcluded() bool {
 	if p.Excluded != "" {
 		log.Printf("[NOTICE] Excluding %s probe. Justification: %s", strings.Replace(p.Name, "_", " ", -1), p.Excluded)
@@ -190,7 +194,7 @@ func (p Probe) IsExcluded() bool {
 	return false
 }
 
-// Log and return exclusion configuration
+// IsExcluded will log and return exclusion configuration
 func (s Scenario) IsExcluded() bool {
 	if s.Excluded != "" {
 		log.Printf("[NOTICE] Excluding scenario '%s'. Justification: %s", s.Name, s.Excluded)
@@ -221,7 +225,7 @@ func validatePackRequirements(name string, object interface{}) bool {
 	return false
 }
 
-// Returns a list of pack names (as specified by internal/config/requirements.go)
+// GetPacks returns a list of pack names (as specified by internal/config/requirements.go)
 func GetPacks() (keys []string) {
 	for value := range Requirements {
 		keys = append(keys, value)

@@ -1,4 +1,4 @@
-package cli_flags
+package cliflags
 
 import (
 	"fmt"
@@ -9,6 +9,7 @@ import (
 	"github.com/citihub/probr/config"
 )
 
+// HandleRequestForRequiredVars will execute the logic for `./probr show-requirements (<PACK>)`
 func HandleRequestForRequiredVars() {
 	if os.Args[1] == "show-requirements" {
 		log.Printf("[INFO] CLI option 'show-requirements' was found")
@@ -35,6 +36,7 @@ func respond(pack string, vars ...string) {
 	}
 }
 
+// HandlePackOption will execute the logic necessary for `./probr run <PACK>`
 func HandlePackOption() {
 	if os.Args[1] == "run" {
 		log.Printf("[DEBUG] CLI option 'run' was found. Args: %s", os.Args)

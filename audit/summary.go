@@ -9,7 +9,7 @@ import (
 	"github.com/citihub/probr/config"
 )
 
-type SummaryState struct {
+type summaryState struct {
 	Meta          map[string]interface{}
 	Status        string
 	ProbesPassed  int
@@ -18,7 +18,8 @@ type SummaryState struct {
 	Probes        map[string]*Probe
 }
 
-var State SummaryState
+// State holds the values for all probe and scenario audits throughout the runtime
+var State summaryState
 
 func init() {
 	State.Probes = make(map[string]*Probe)
@@ -27,7 +28,7 @@ func init() {
 }
 
 // PrintSummary will print the current Probes object state, formatted to JSON, if NoSummary is not "true"
-func (s *SummaryState) PrintSummary() {
+func (s *summaryState) PrintSummary() {
 	if config.Vars.NoSummary == true {
 		log.Printf("[NOTICE] Summary Log suppressed by configuration NoSummary=true.")
 	} else {
@@ -36,8 +37,8 @@ func (s *SummaryState) PrintSummary() {
 	}
 }
 
-// SetProbrStatus evaluates the current SummaryState state to set the Status
-func (s *SummaryState) SetProbrStatus() {
+// SetProbrStatus evaluates the current summaryState state to set the Status
+func (s *summaryState) SetProbrStatus() {
 	if s.ProbesPassed > 0 && s.ProbesFailed == 0 {
 		s.Status = "Complete - All Probes Completed Successfully"
 	} else {
@@ -46,42 +47,42 @@ func (s *SummaryState) SetProbrStatus() {
 }
 
 // LogProbeMeta accepts a test name with a key and value to insert to the meta logs for that test. Overwrites key if already present.
-func (s *SummaryState) LogProbeMeta(name string, key string, value interface{}) {
+func (s *summaryState) LogProbeMeta(name string, key string, value interface{}) {
 	e := s.GetProbeLog(name)
 	e.Meta[key] = value
 	s.Probes[name] = e
-	s.Probes[name].name = name // Probe must be able to access its own name, but it is not publicly printed
+	s.Probes[name].name = name // probe must be able to access its own name, but it is not publicly printed
 }
 
 // ProbeComplete takes an probe name and status then updates the summary & probe meta information
-func (s *SummaryState) ProbeComplete(name string) {
+func (s *summaryState) ProbeComplete(name string) {
 	e := s.GetProbeLog(name)
 	s.completeProbe(e)
 	e.audit.Write()
 }
 
 // GetProbeLog initializes or returns existing log probe for the provided test name
-func (s *SummaryState) GetProbeLog(n string) *Probe {
+func (s *summaryState) GetProbeLog(n string) *Probe {
 	s.initProbe(n)
 	return s.Probes[n]
 }
 
 // LogPodName adds pod names to a list for user's debugging purposes
-func (s *SummaryState) LogPodName(n string) {
+func (s *summaryState) LogPodName(n string) {
 	podNames := s.Meta["names of pods created"].([]string)
 	podNames = append(podNames, n)
 
 	s.Meta["names of pods created"] = podNames
 }
 
-func (s *SummaryState) initProbe(n string) {
+func (s *summaryState) initProbe(n string) {
 	if s.Probes[n] == nil {
-		ap := filepath.Join(config.Vars.AuditDir(), (n + ".json")) // Needed in both Probe and ProbeAudit
+		ap := filepath.Join(config.Vars.AuditDir(), (n + ".json")) // Needed in both probe and probeAudit
 		s.Probes[n] = &Probe{
 			name:          n,
 			Meta:          make(map[string]interface{}),
 			PodsDestroyed: 0,
-			audit: &ProbeAudit{
+			audit: &probeAudit{
 				Name: n,
 				path: ap,
 			},
@@ -97,7 +98,7 @@ func (s *SummaryState) initProbe(n string) {
 	}
 }
 
-func (s *SummaryState) completeProbe(e *Probe) {
+func (s *summaryState) completeProbe(e *Probe) {
 	e.countResults()
 	if e.Result == "Excluded" {
 		e.Meta["audit_path"] = ""

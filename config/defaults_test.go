@@ -11,12 +11,12 @@ func Test_setFromEnvOrDefaults(t *testing.T) {
 	// This test is only verifying WriteDirectory.
 	// It could be extended to test other config vars, or all. If so, it should be refactored to avoid code duplication. Keeping it simple for now (YAGNI).
 
-	envVarCurrentValuePROBR_WRITE_DIRECTORY := os.Getenv("PROBR_WRITE_DIRECTORY") // Used to restore env to original state after test
+	envVarCurrentValuePROBRWRITEDIRECTORY := os.Getenv("PROBR_WRITE_DIRECTORY") // Used to restore env to original state after test
 	defer func() {
-		os.Setenv("PROBR_WRITE_DIRECTORY", envVarCurrentValuePROBR_WRITE_DIRECTORY)
+		os.Setenv("PROBR_WRITE_DIRECTORY", envVarCurrentValuePROBRWRITEDIRECTORY)
 	}()
-	defaultValuePROBR_WRITE_DIRECTORY := "probr_output"
-	envVarValuePROBR_WRITE_DIRECTORY := "ValueFromEnvVar_WriteDirectory"
+	defaultValuePROBRWRITEDIRECTORY := "probr_output"
+	envVarValuePROBRWRITEDIRECTORY := "ValueFromEnvVar_WriteDirectory"
 
 	type args struct {
 		e *VarOptions
@@ -31,13 +31,13 @@ func Test_setFromEnvOrDefaults(t *testing.T) {
 			testName:                     "setFromEnvOrDefaults_GivenEnvVar_ShouldSetConfigVarToEnvVarValue",
 			testArgs:                     args{e: &VarOptions{}},
 			setEnvVar:                    true,
-			expectedResultWriteDirectory: envVarValuePROBR_WRITE_DIRECTORY,
+			expectedResultWriteDirectory: envVarValuePROBRWRITEDIRECTORY,
 		},
 		{
 			testName:                     "setFromEnvOrDefaults_WithoutEnvVar_ShouldSetConfigVarToDefaultValue",
 			testArgs:                     args{e: &VarOptions{}},
 			setEnvVar:                    false,
-			expectedResultWriteDirectory: defaultValuePROBR_WRITE_DIRECTORY,
+			expectedResultWriteDirectory: defaultValuePROBRWRITEDIRECTORY,
 		},
 	}
 	for _, tt := range tests {
@@ -45,7 +45,7 @@ func Test_setFromEnvOrDefaults(t *testing.T) {
 
 			//Based on test case, modify env vars
 			if tt.setEnvVar {
-				os.Setenv("PROBR_WRITE_DIRECTORY", envVarValuePROBR_WRITE_DIRECTORY)
+				os.Setenv("PROBR_WRITE_DIRECTORY", envVarValuePROBRWRITEDIRECTORY)
 			} else {
 				os.Setenv("PROBR_WRITE_DIRECTORY", "")
 			}
