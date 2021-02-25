@@ -58,11 +58,10 @@ func inMemGodogProbeHandler(gd *GodogProbe) (int, *bytes.Buffer, error) {
 func runTestSuite(o io.Writer, gd *GodogProbe) (int, error) {
 	tags := config.Vars.GetTags()
 	opts := godog.Options{
-		Concurrency: 2,
-		Format:      config.Vars.ResultsFormat,
-		Output:      colors.Colored(o),
-		Paths:       []string{gd.FeaturePath},
-		Tags:        tags,
+		Format: config.Vars.ResultsFormat,
+		Output: colors.Colored(o),
+		Paths:  []string{gd.FeaturePath},
+		Tags:   tags,
 	}
 
 	status := godog.TestSuite{
