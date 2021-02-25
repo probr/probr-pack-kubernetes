@@ -32,6 +32,7 @@ func setFromEnvOrDefaults(e *VarOptions) {
 	e.set(&e.ServicePacks.Kubernetes.UnapprovedHostPort, "PROBR_UNAPPROVED_HOSTPORT", "22")
 	e.set(&e.ServicePacks.Kubernetes.SystemNamespace, "PROBR_K8S_SYSTEM_NAMESPACE", "kube-system")
 	e.set(&e.ServicePacks.Kubernetes.DashboardPodNamePrefix, "PROBR_K8S_DASHBOARD_PODNAMEPREFIX", "kubernetes-dashboard")
+	e.set(&e.ServicePacks.Kubernetes.Azure.DefaultNamespaceAIB, "DEFAULT_NS_AZURE_IDENTITY_BINDING", "probr-aib")
 
 	e.set(&e.CloudProviders.Azure.TenantID, "AZURE_TENANT_ID", "")
 	e.set(&e.CloudProviders.Azure.SubscriptionID, "AZURE_SUBSCRIPTION_ID", "")
@@ -39,8 +40,6 @@ func setFromEnvOrDefaults(e *VarOptions) {
 	e.set(&e.CloudProviders.Azure.ClientSecret, "AZURE_CLIENT_SECRET", "")
 	e.set(&e.CloudProviders.Azure.ResourceGroup, "AZURE_RESOURCE_GROUP", "")
 	e.set(&e.CloudProviders.Azure.ResourceLocation, "AZURE_RESOURCE_LOCATION", "")
-	e.set(&e.CloudProviders.Azure.Identity.DefaultNamespaceAI, "DEFAULT_NS_AZURE_IDENTITY", "probr-probe")
-	e.set(&e.CloudProviders.Azure.Identity.DefaultNamespaceAIB, "DEFAULT_NS_AZURE_IDENTITY_BINDING", "probr-aib")
 }
 
 func getDefaultKubeConfigPath() string {

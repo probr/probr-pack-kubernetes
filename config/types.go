@@ -49,16 +49,22 @@ type Kubernetes struct {
 	UnapprovedHostPort                string   `yaml:"UnapprovedHostPort"`
 	SystemNamespace                   string   `yaml:"SystemNamespace"`
 	DashboardPodNamePrefix            string   `yaml:"DashboardPodNamePrefix"`
+	Azure                             K8sAzure `yaml:"Azure"`
 }
 
-// Storage config options
+// K8sAzure contains Azure-specific options for the Kubernetes service pack
+type K8sAzure struct {
+	DefaultNamespaceAIB string
+}
+
+// Storage service pack config options
 type Storage struct {
 	exclusionLogged bool
 	Provider        string  `yaml:"Provider"` // Placeholder!
 	Probes          []Probe `yaml:"Probes"`
 }
 
-// APIM  config options
+// APIM service pack config options
 type APIM struct {
 	exclusionLogged bool
 	Provider        string  `yaml:"Provider"` // Placeholder!
@@ -83,7 +89,7 @@ type CloudProviders struct {
 	Azure Azure `yaml:"Azure"`
 }
 
-// Azure config options
+// Azure config options that may be required by any service pack
 type Azure struct {
 	Excluded         string `yaml:"Excluded"`
 	TenantID         string `yaml:"TenantID"`
@@ -93,10 +99,6 @@ type Azure struct {
 	ResourceGroup    string `yaml:"ResourceGroup"`
 	ResourceLocation string `yaml:"ResourceLocation"`
 	ManagementGroup  string `yaml:"ManagementGroup"`
-	Identity         struct {
-		DefaultNamespaceAI  string `yaml:"DefaultNamespaceAI"`
-		DefaultNamespaceAIB string `yaml:"DefaultNamespaceAIB"`
-	}
 }
 
 // Excludable is used for testing purposes only

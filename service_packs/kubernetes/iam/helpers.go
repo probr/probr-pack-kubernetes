@@ -258,7 +258,7 @@ func (i *IAM) getAadPodIDBinding(useDefaultNS bool, aibName string) *string {
 		//this can be specified via config file or env and could vary
 		//between deployment situations.  If not supplied the default
 		//will be returned.
-		b = config.Vars.CloudProviders.Azure.Identity.DefaultNamespaceAIB
+		b = config.Vars.ServicePacks.Kubernetes.Azure.DefaultNamespaceAIB
 	} else {
 		//if not the default namespace, then we are testing a specific
 		//identity binding set up as part of the probr run.

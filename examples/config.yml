@@ -4,6 +4,9 @@ WriteDirectory: probr_output
 OverwriteHistoricalAudits: true
 ServicePacks:
   Kubernetes:
+    Azure:
+      DefaultNamespaceAIB:
+
     KubeConfig:
     KubeContext:
     AuthorisedContainerRegistry: myprodregistry.azurecr.io # required
@@ -36,8 +39,5 @@ CloudProviders:
     ManagementGroup:
     ResourceGroup: ProbrRG
     ResourceLocation: "westeurope"
-    Identity:
-      DefaultNamespaceAI:
-      DefaultNamespaceAIB:
 Tags: # allows user to create their own string of tag inclusions and/or exclusions
 TagExclusions: # allows specific controls/scenarios to be disabled via a list of tags
