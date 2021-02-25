@@ -36,7 +36,6 @@ func main() {
 		// Currently only ERROR will print prior to HandleFlags()
 		cliflags.HandleFlags()
 	}
-
 	config.LogConfigState()
 
 	if showIndicator() {
@@ -61,6 +60,8 @@ func main() {
 		)
 	}
 	audit.State.PrintSummary()
+	audit.State.WriteSummary()
+
 	exit(s)
 }
 

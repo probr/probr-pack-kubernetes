@@ -3,10 +3,12 @@ package audit
 import (
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"path/filepath"
 
 	"github.com/citihub/probr/config"
+	"github.com/citihub/probr/utils"
 )
 
 type summaryState struct {
@@ -34,6 +36,18 @@ func (s *summaryState) PrintSummary() {
 	} else {
 		summary, _ := json.MarshalIndent(s, "", "  ")
 		log.Printf("Finished\n%s", summary) // Summary output should not be handled by log levels
+	}
+}
+
+// WriteSummary will write the summary to the audit directory
+func (s *summaryState) WriteSummary() {
+	if config.Vars.AuditEnabled == "true" {
+		path := filepath.Join(config.Vars.GetWriteDirectory(), "summary.json")
+		if utils.WriteAllowed(path, config.Vars.Overwrite()) {
+			json, _ := json.MarshalIndent(s, "", "  ")
+			data := []byte(json)
+			ioutil.WriteFile(path, data, 0755)
+		}
 	}
 }
 

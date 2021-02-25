@@ -7,6 +7,7 @@ import (
 	"os"
 	"path/filepath"
 	"reflect"
+	"strconv"
 	"strings"
 
 	"github.com/briandowns/spinner"
@@ -122,6 +123,16 @@ func (ctx *VarOptions) TmpDir() string {
 	tmpDir := filepath.Join(ctx.GetWriteDirectory(), "tmp")
 	_ = os.Mkdir(tmpDir, 0755) // Creates if not already existing
 	return tmpDir
+}
+
+// Overwrite returns the string value of the OverwriteHistoricalAudits in bool format
+func (ctx *VarOptions) Overwrite() bool {
+	value, err := strconv.ParseBool(ctx.OverwriteHistoricalAudits)
+	if err != nil {
+		log.Printf("[ERROR] Could not parse value '%s' for OverwriteHistoricalAudits %s", ctx.OverwriteHistoricalAudits, err)
+		return false
+	}
+	return value
 }
 
 // AuditDir creates and returns -audit- directory within WriteDirectory

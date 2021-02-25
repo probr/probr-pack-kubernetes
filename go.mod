@@ -15,7 +15,6 @@ require (
 	github.com/cucumber/messages-go/v10 v10.0.3
 	github.com/hashicorp/logutils v1.0.0
 	github.com/markbates/pkger v0.17.1
-	github.com/stretchr/testify v1.6.1
 	gopkg.in/yaml.v2 v2.2.8
 	k8s.io/api v0.19.2
 	k8s.io/apimachinery v0.19.2

@@ -167,6 +167,20 @@ func TestSetTags(t *testing.T) {
 	}
 }
 
+// TestOverwrite ...
+func TestOverwrite(t *testing.T) {
+	vars, _ := NewConfig("")
+	vars.OverwriteHistoricalAudits = "true"
+	if vars.Overwrite() != true {
+		t.Errorf("Overwrite() should return a bool of 'true'")
+	}
+
+	vars.OverwriteHistoricalAudits = "false"
+	if vars.Overwrite() != false {
+		t.Errorf("Overwrite() should return a bool of 'false'")
+	}
+}
+
 // Pending... these may be too integration-y for a unit test
 func TestInit(t *testing.T)                       {}
 func TestValidateConfigPath(t *testing.T)         {}
