@@ -16,6 +16,7 @@ func setFromEnvOrDefaults(e *VarOptions) {
 	e.set(&e.WriteDirectory, "PROBR_WRITE_DIRECTORY", "probr_output")
 	e.set(&e.LogLevel, "PROBR_LOG_LEVEL", "ERROR")
 	e.set(&e.OverwriteHistoricalAudits, "OVERWRITE_AUDITS", "true")
+	e.set(&e.WriteConfig, "PROBR_LOG_CONFIG", "true")
 	e.set(&e.ResultsFormat, "PROBR_RESULTS_FORMAT", "cucumber")
 
 	e.set(&e.ServicePacks.Kubernetes.KeepPods, "PROBR_KEEP_PODS", "false")

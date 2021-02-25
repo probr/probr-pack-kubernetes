@@ -3,6 +3,7 @@ package config
 import (
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"os"
 	"path/filepath"
@@ -112,10 +113,16 @@ func ValidateConfigPath(path string) error {
 	return nil
 }
 
-// LogConfigState will print the config state as a NOTICE in the log
-func LogConfigState() {
-	s, _ := json.MarshalIndent(Vars, "", "  ")
-	log.Printf("[NOTICE] Config State: %s", s)
+// LogConfigState will write the config file to the write directory
+func (ctx *VarOptions) LogConfigState() {
+	json, _ := json.MarshalIndent(Vars, "", "  ")
+	log.Printf("[INFO] Config State: %s", json)
+	path := filepath.Join(ctx.GetWriteDirectory(), "config.json")
+	if ctx.WriteConfig == "true" && utils.WriteAllowed(path, ctx.Overwrite()) {
+		data := []byte(json)
+		ioutil.WriteFile(path, data, 0644)
+		log.Printf("[NOTICE] Config State written to file %s", path)
+	}
 }
 
 // TmpDir creates and returns -tmp- directory within WriteDirectory

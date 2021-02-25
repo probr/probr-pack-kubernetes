@@ -11,6 +11,7 @@ type VarOptions struct {
 	LogLevel                  string         `yaml:"LogLevel"`
 	OverwriteHistoricalAudits string         `yaml:"OverwriteHistoricalAudits"`
 	TagExclusions             []string       `yaml:"TagExclusions"`
+	WriteConfig               string         `yaml:"WriteConfig"`
 	Tags                      string         // set by flags
 	VarsFile                  string         // set by flags only
 	NoSummary                 bool           // set by flags only
