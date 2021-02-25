@@ -1,8 +1,8 @@
 {
   "Name": "general",
   "PodsDestroyed": 1,
-  "ScenariosAttempted": 4,
-  "ScenariosSucceeded": 3,
+  "ScenariosAttempted": 7,
+  "ScenariosSucceeded": 6,
   "ScenariosFailed": 1,
   "Result": "Failed",
   "Scenarios": {
@@ -17,11 +17,11 @@
       "Steps": {
         "1": {
           "Name": "aKubernetesClusterIsDeployed",
-          "Description": "Validated that the k8s cluster specified in '/root/.kube/config' is deployed by checking the '' context; ",
+          "Description": "Validated that the k8s cluster specified in 'C:\\Users\\eknight\\.kube\\config' is deployed by checking the '' context; ",
           "Result": "Passed",
           "Error": "",
           "Payload": {
-            "KubeConfigPath": "/root/.kube/config",
+            "KubeConfigPath": "C:\\Users\\eknight\\.kube\\config",
             "KubeContext": ""
           }
         },
@@ -66,11 +66,11 @@
       "Steps": {
         "1": {
           "Name": "aKubernetesClusterIsDeployed",
-          "Description": "Validated that the k8s cluster specified in '/root/.kube/config' is deployed by checking the '' context; ",
+          "Description": "Validated that the k8s cluster specified in 'C:\\Users\\eknight\\.kube\\config' is deployed by checking the '' context; ",
           "Result": "Passed",
           "Error": "",
           "Payload": {
-            "KubeConfigPath": "/root/.kube/config",
+            "KubeConfigPath": "C:\\Users\\eknight\\.kube\\config",
             "KubeContext": ""
           }
         },
@@ -115,11 +115,11 @@
       "Steps": {
         "1": {
           "Name": "aKubernetesClusterIsDeployed",
-          "Description": "Validated that the k8s cluster specified in '/root/.kube/config' is deployed by checking the '' context; ",
+          "Description": "Validated that the k8s cluster specified in 'C:\\Users\\eknight\\.kube\\config' is deployed by checking the '' context; ",
           "Result": "Passed",
           "Error": "",
           "Payload": {
-            "KubeConfigPath": "/root/.kube/config",
+            "KubeConfigPath": "C:\\Users\\eknight\\.kube\\config",
             "KubeContext": ""
           }
         },
@@ -131,12 +131,12 @@
           "Payload": {
             "Pod": {
               "metadata": {
-                "name": "probr-general-220221-103648-7",
+                "name": "probr-general-250221-123234-0",
                 "namespace": "probr-general-test-ns",
-                "selfLink": "/api/v1/namespaces/probr-general-test-ns/pods/probr-general-220221-103648-7",
-                "uid": "cbee56a9-96d5-4e9f-9ae5-fc3e1ee502ed",
-                "resourceVersion": "1308940",
-                "creationTimestamp": "2021-02-22T15:36:47Z",
+                "selfLink": "/api/v1/namespaces/probr-general-test-ns/pods/probr-general-250221-123234-0",
+                "uid": "730062e2-3255-4ecf-b8eb-3b92aa8fc2ab",
+                "resourceVersion": "193776",
+                "creationTimestamp": "2021-02-25T17:32:34Z",
                 "labels": {
                   "app": "demo"
                 },
@@ -145,10 +145,10 @@
                 },
                 "managedFields": [
                   {
-                    "manager": "probr.exe",
+                    "manager": "main.exe",
                     "operation": "Update",
                     "apiVersion": "v1",
-                    "time": "2021-02-22T15:36:47Z",
+                    "time": "2021-02-25T17:32:34Z",
                     "fieldsType": "FieldsV1",
                     "fieldsV1": {
                       "f:metadata": {
@@ -203,9 +203,9 @@
               "spec": {
                 "volumes": [
                   {
-                    "name": "default-token-lc5lg",
+                    "name": "default-token-zchh9",
                     "secret": {
-                      "secretName": "default-token-lc5lg",
+                      "secretName": "default-token-zchh9",
                       "defaultMode": 420
                     }
                   }
@@ -221,7 +221,7 @@
                     "resources": {},
                     "volumeMounts": [
                       {
-                        "name": "default-token-lc5lg",
+                        "name": "default-token-zchh9",
                         "readOnly": true,
                         "mountPath": "/var/run/secrets/kubernetes.io/serviceaccount"
                       }
@@ -277,7 +277,7 @@
               }
             },
             "PodAudit": {
-              "PodName": "probr-general-220221-103648-7",
+              "PodName": "probr-general-250221-123234-0",
               "Namespace": "probr-general-test-ns",
               "ContainerName": "probr-general",
               "Image": "citihubprod.azurecr.io/citihub/probr-probe",
@@ -289,10 +289,10 @@
           "Name": "theDeploymentIsRejected",
           "Description": "Validates that an expected creation error occurred in the previous step; ",
           "Result": "Failed",
-          "Error": "pod probr-general-220221-103648-7 was created successfully. Test fail.",
+          "Error": "pod probr-general-250221-123234-0 was created successfully. Test fail.",
           "Payload": {
             "PodState": {
-              "PodName": "probr-general-220221-103648-7",
+              "PodName": "probr-general-250221-123234-0",
               "CreationError": null,
               "ExpectedReason": null,
               "CommandExitCode": 0
@@ -312,17 +312,17 @@
       "Steps": {
         "1": {
           "Name": "aKubernetesClusterIsDeployed",
-          "Description": "Validated that the k8s cluster specified in '/root/.kube/config' is deployed by checking the '' context; ",
+          "Description": "Validated that the k8s cluster specified in 'C:\\Users\\eknight\\.kube\\config' is deployed by checking the '' context; ",
           "Result": "Passed",
           "Error": "",
           "Payload": {
-            "KubeConfigPath": "/root/.kube/config",
+            "KubeConfigPath": "C:\\Users\\eknight\\.kube\\config",
             "KubeContext": ""
           }
         },
         "2": {
           "Name": "theKubernetesWebUIIsDisabled",
-          "Description": "Attempts to find a pod in the 'kube-system' namespace with the prefix 'kubernetes-dashboard'; ",
+          "Description": "Attempt to find a pod in the 'kube-system' namespace with the prefix 'kubernetes-dashboard'; ",
           "Result": "Passed",
           "Error": "",
           "Payload": {
@@ -342,6 +342,69 @@
           "Result": "Passed",
           "Error": "",
           "Payload": null
+        }
+      }
+    },
+    "5": {
+      "Name": "Test outgoing connectivity of a deployed pod",
+      "Result": "Passed",
+      "Tags": [
+        "@k-gen",
+        "@probes/kubernetes/general",
+        "@k-gen-004"
+      ],
+      "Steps": {
+        "1": {
+          "Name": "aKubernetesClusterIsDeployed",
+          "Description": "Validated that the k8s cluster specified in 'C:\\Users\\eknight\\.kube\\config' is deployed by checking the '' context; ",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": {
+            "KubeConfigPath": "C:\\Users\\eknight\\.kube\\config",
+            "KubeContext": ""
+          }
+        }
+      }
+    },
+    "6": {
+      "Name": "Test outgoing connectivity of a deployed pod",
+      "Result": "Passed",
+      "Tags": [
+        "@k-gen",
+        "@probes/kubernetes/general",
+        "@k-gen-004"
+      ],
+      "Steps": {
+        "1": {
+          "Name": "aKubernetesClusterIsDeployed",
+          "Description": "Validated that the k8s cluster specified in 'C:\\Users\\eknight\\.kube\\config' is deployed by checking the '' context; ",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": {
+            "KubeConfigPath": "C:\\Users\\eknight\\.kube\\config",
+            "KubeContext": ""
+          }
+        }
+      }
+    },
+    "7": {
+      "Name": "Test outgoing connectivity of a deployed pod",
+      "Result": "Passed",
+      "Tags": [
+        "@k-gen",
+        "@probes/kubernetes/general",
+        "@k-gen-004"
+      ],
+      "Steps": {
+        "1": {
+          "Name": "aKubernetesClusterIsDeployed",
+          "Description": "Validated that the k8s cluster specified in 'C:\\Users\\eknight\\.kube\\config' is deployed by checking the '' context; ",
+          "Result": "Passed",
+          "Error": "",
+          "Payload": {
+            "KubeConfigPath": "C:\\Users\\eknight\\.kube\\config",
+            "KubeContext": ""
+          }
         }
       }
     }

@@ -1,56 +1,12 @@
 {
   "Name": "container_registry_access",
-  "PodsDestroyed": 2,
-  "ScenariosAttempted": 3,
-  "ScenariosSucceeded": 3,
+  "PodsDestroyed": 1,
+  "ScenariosAttempted": 2,
+  "ScenariosSucceeded": 2,
   "ScenariosFailed": 0,
   "Result": "Success",
   "Scenarios": {
     "1": {
-      "Name": "Ensure container image registries are read-only",
-      "Result": "Passed",
-      "Tags": [
-        "@k-cra",
-        "@probes/kubernetes/container_registry_access",
-        "@k-cra-001"
-      ],
-      "Steps": {
-        "1": {
-          "Name": "aKubernetesClusterIsDeployed",
-          "Description": "Validated that the k8s cluster specified in '/root/.kube/config' is deployed by checking the '' context; ",
-          "Result": "Passed",
-          "Error": "",
-          "Payload": {
-            "KubeConfigPath": "/root/.kube/config",
-            "KubeContext": ""
-          }
-        },
-        "2": {
-          "Name": "iAmAuthorisedToPullFromAContainerRegistry",
-          "Description": "Attempted to create a new pod using an image pulled from authorized registry; ",
-          "Result": "Passed",
-          "Error": "",
-          "Payload": {
-            "AuthorizedRegistry": "citihubprod.azurecr.io",
-            "PodAudit": {
-              "PodName": "ca-test-citihubprod-azurecr-io-220221-103710-96",
-              "Namespace": "probr-general-test-ns",
-              "ContainerName": "container-access-test",
-              "Image": "citihubprod.azurecr.io/citihub/probr-probe",
-              "SecurityContext": null
-            }
-          }
-        },
-        "3": {
-          "Name": "iAttemptToPushToTheContainerRegistryUsingTheClusterIdentity",
-          "Description": "PENDING IMPLEMENTATION",
-          "Result": "Passed",
-          "Error": "",
-          "Payload": null
-        }
-      }
-    },
-    "2": {
       "Name": "Ensure deployment from an authorised container registry is allowed",
       "Result": "Passed",
       "Tags": [
@@ -61,11 +17,11 @@
       "Steps": {
         "1": {
           "Name": "aKubernetesClusterIsDeployed",
-          "Description": "Validated that the k8s cluster specified in '/root/.kube/config' is deployed by checking the '' context; ",
+          "Description": "Validated that the k8s cluster specified in 'C:\\Users\\eknight\\.kube\\config' is deployed by checking the '' context; ",
           "Result": "Passed",
           "Error": "",
           "Payload": {
-            "KubeConfigPath": "/root/.kube/config",
+            "KubeConfigPath": "C:\\Users\\eknight\\.kube\\config",
             "KubeContext": ""
           }
         },
@@ -77,7 +33,7 @@
           "Payload": {
             "AuthorizedRegistry": "citihubprod.azurecr.io",
             "PodAudit": {
-              "PodName": "ca-test-citihubprod-azurecr-io-220221-103713-86",
+              "PodName": "ca-test-citihubprod-azurecr-io-250221-123524-69",
               "Namespace": "probr-general-test-ns",
               "ContainerName": "container-access-test",
               "Image": "citihubprod.azurecr.io/citihub/probr-probe",
@@ -92,7 +48,7 @@
           "Error": "",
           "Payload": {
             "PodState": {
-              "PodName": "ca-test-citihubprod-azurecr-io-220221-103713-86",
+              "PodName": "ca-test-citihubprod-azurecr-io-250221-123524-69",
               "CreationError": null,
               "ExpectedReason": null,
               "CommandExitCode": 0
@@ -101,7 +57,7 @@
         }
       }
     },
-    "3": {
+    "2": {
       "Name": "Ensure deployment from an unauthorised container registry is denied",
       "Result": "Passed",
       "Tags": [
@@ -112,11 +68,11 @@
       "Steps": {
         "1": {
           "Name": "aKubernetesClusterIsDeployed",
-          "Description": "Validated that the k8s cluster specified in '/root/.kube/config' is deployed by checking the '' context; ",
+          "Description": "Validated that the k8s cluster specified in 'C:\\Users\\eknight\\.kube\\config' is deployed by checking the '' context; ",
           "Result": "Passed",
           "Error": "",
           "Payload": {
-            "KubeConfigPath": "/root/.kube/config",
+            "KubeConfigPath": "C:\\Users\\eknight\\.kube\\config",
             "KubeContext": ""
           }
         },
@@ -128,7 +84,7 @@
           "Payload": {
             "UnauthorizedRegistry": "docker.io",
             "PodAudit": {
-              "PodName": "ca-test-docker-io-220221-103717-99",
+              "PodName": "ca-test-docker-io-250221-123526-17",
               "Namespace": "probr-general-test-ns",
               "ContainerName": "container-access-test",
               "Image": "docker.io/citihub/probr-probe",
@@ -146,7 +102,7 @@
               "PodName": "",
               "CreationError": {
                 "ReasonCodes": {
-                  "4": 9
+                  "4": 1
                 }
               },
               "ExpectedReason": 4,
