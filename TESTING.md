@@ -62,7 +62,7 @@ As a pre-requisite, please review the following materials to understand Go's tes
 # Environment Setup
 
 A simple way to install useful tools in VS Code
-- To check wich tools are installed:
+- To check which tools are installed:
   - Press *Ctrl+Shift+P* to open Command Palette
   - Type *Go: Locate Configured Go Tools*
   - See output report

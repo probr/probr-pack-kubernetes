@@ -48,6 +48,7 @@ type Kubernetes struct {
 	ApprovedVolumeTypes               []string `yaml:"ApprovedVolumeTypes"`
 	UnapprovedHostPort                string   `yaml:"UnapprovedHostPort"`
 	SystemNamespace                   string   `yaml:"SystemNamespace"`
+	ProbeNamespace                    string   `yaml:"ProbeNamespace"`
 	DashboardPodNamePrefix            string   `yaml:"DashboardPodNamePrefix"`
 	Azure                             K8sAzure `yaml:"Azure"`
 }
