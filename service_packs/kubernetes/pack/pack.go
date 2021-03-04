@@ -30,6 +30,5 @@ func init() {
 	pkger.Include("/service_packs/kubernetes/container_registry_access/container_registry_access.feature")
 	pkger.Include("/service_packs/kubernetes/general/general.feature")
 	pkger.Include("/service_packs/kubernetes/pod_security_policy/pod_security_policy.feature")
-	pkger.Include("/service_packs/kubernetes/internet_access/internet_access.feature")
 	pkger.Include("/service_packs/kubernetes/iam/iam.feature")
 }

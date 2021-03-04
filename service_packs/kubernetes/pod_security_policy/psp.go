@@ -179,7 +179,8 @@ func (scenario *scenarioState) theExecutionOfAXCommandInsideThePodIsY(permission
 	case "privileged":
 		cmd = "sudo ls"
 	default:
-		return utils.ReformatError("Unexpected value provided for command permission type: %s", permission) // No payload is necessary if an invalid value was provided
+		err = utils.ReformatError("Unexpected value provided for command permission type: %s", permission) // No payload is necessary if an invalid value was provided
+		return err
 	}
 
 	var expectedExitCode int
@@ -190,7 +191,8 @@ func (scenario *scenarioState) theExecutionOfAXCommandInsideThePodIsY(permission
 		expectedExitCode = 126 // If a command is found but is not executable, the return status is 126
 		// Known issue: we can't guarantee that the 126 recieved by kubectl isn't a masked 127
 	default:
-		return utils.ReformatError("Unexpected value provided for expected command result: %s", result) // No payload is necessary if an invalid value was provided
+		err = utils.ReformatError("Unexpected value provided for expected command result: %s", result) // No payload is necessary if an invalid value was provided
+		return err
 
 	}
 	stepTrace.WriteString("Attempt to run a command in the pod that was created by the previous step; ")
