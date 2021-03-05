@@ -28,7 +28,7 @@ var Probe probeStruct
 func (s *scenarioState) aKubernetesClusterIsDeployed() error {
 	description, payload, error := kubernetes.ClusterIsDeployed()
 	defer func() {
-		s.audit.AuditScenarioStep(description, payload, error)
+		s.audit.AuditScenarioStep(s.currentStep, description, payload, error)
 	}()
 	return error //  ClusterIsDeployed will create a fatal error if kubeconfig doesn't validate
 }
@@ -39,7 +39,7 @@ func (s *scenarioState) iInspectTheThatAreConfigured(roleLevel string) error {
 	stepTrace, payload, err := utils.AuditPlaceholders()
 	defer func() {
 		// Standard auditing logic to ensures panics are also audited
-		s.audit.AuditScenarioStep(stepTrace.String(), payload, err)
+		s.audit.AuditScenarioStep(s.currentStep, stepTrace.String(), payload, err)
 	}()
 
 	if roleLevel == "Cluster Roles" {
@@ -68,7 +68,7 @@ func (s *scenarioState) iShouldOnlyFindWildcardsInKnownAndAuthorisedConfiguratio
 	// Standard auditing logic to ensures panics are also audited
 	stepTrace, payload, err := utils.AuditPlaceholders()
 	defer func() {
-		s.audit.AuditScenarioStep(stepTrace.String(), payload, err)
+		s.audit.AuditScenarioStep(s.currentStep, stepTrace.String(), payload, err)
 	}()
 
 	//we strip out system/known entries in the cluster roles & roles call
@@ -102,7 +102,7 @@ func (s *scenarioState) iAttemptToCreateADeploymentWhichDoesNotHaveASecurityCont
 	// Standard auditing logic to ensures panics are also audited
 	stepTrace, payload, err := utils.AuditPlaceholders()
 	defer func() {
-		s.audit.AuditScenarioStep(stepTrace.String(), payload, err)
+		s.audit.AuditScenarioStep(s.currentStep, stepTrace.String(), payload, err)
 	}()
 
 	stepTrace.WriteString("Create unique pod name; ")
@@ -125,7 +125,7 @@ func (s *scenarioState) theDeploymentIsRejected() error {
 	// Standard auditing logic to ensures panics are also audited
 	stepTrace, payload, err := utils.AuditPlaceholders()
 	defer func() {
-		s.audit.AuditScenarioStep(stepTrace.String(), payload, err)
+		s.audit.AuditScenarioStep(s.currentStep, stepTrace.String(), payload, err)
 	}()
 
 	//looking for a non-nil creation error
@@ -154,7 +154,7 @@ func (s *scenarioState) iShouldNotBeAbleToAccessTheKubernetesWebUI() error {
 	// Standard auditing logic to ensures panics are also audited
 	stepTrace, payload, err := utils.AuditPlaceholders()
 	defer func() {
-		s.audit.AuditScenarioStep(stepTrace.String(), payload, err)
+		s.audit.AuditScenarioStep(s.currentStep, stepTrace.String(), payload, err)
 	}()
 	stepTrace.WriteString("PENDING IMPLEMENTATION")
 	return godog.ErrPending
@@ -164,7 +164,7 @@ func (s *scenarioState) theKubernetesWebUIIsDisabled() error {
 	// Standard auditing logic to ensures panics are also audited
 	stepTrace, payload, err := utils.AuditPlaceholders()
 	defer func() {
-		s.audit.AuditScenarioStep(stepTrace.String(), payload, err)
+		s.audit.AuditScenarioStep(s.currentStep, stepTrace.String(), payload, err)
 	}()
 
 	kubeSystemNamespace := config.Vars.ServicePacks.Kubernetes.SystemNamespace
@@ -213,7 +213,7 @@ func (s *scenarioState) aPodIsDeployedInTheCluster() error {
 	// Standard auditing logic to ensures panics are also audited
 	stepTrace, payload, err := utils.AuditPlaceholders()
 	defer func() {
-		s.audit.AuditScenarioStep(stepTrace.String(), payload, err)
+		s.audit.AuditScenarioStep(s.currentStep, stepTrace.String(), payload, err)
 	}()
 
 	var podAudit *kubernetes.PodAudit
@@ -246,7 +246,7 @@ func (s *scenarioState) aProcessInsideThePodEstablishesADirectHTTPSConnectionTo(
 	// Standard auditing logic to ensures panics are also audited
 	stepTrace, payload, err := utils.AuditPlaceholders()
 	defer func() {
-		s.audit.AuditScenarioStep(stepTrace.String(), payload, err)
+		s.audit.AuditScenarioStep(s.currentStep, stepTrace.String(), payload, err)
 	}()
 
 	code, err := na.AccessURL(&s.podName, &url)
@@ -272,7 +272,7 @@ func (s *scenarioState) accessIs(accessResult string) error {
 	// Standard auditing logic to ensures panics are also audited
 	stepTrace, payload, err := utils.AuditPlaceholders()
 	defer func() {
-		s.audit.AuditScenarioStep(stepTrace.String(), payload, err)
+		s.audit.AuditScenarioStep(s.currentStep, stepTrace.String(), payload, err)
 	}()
 
 	if accessResult == "blocked" {
@@ -340,5 +340,13 @@ func (p probeStruct) ScenarioInitialize(ctx *godog.ScenarioContext) {
 	ctx.AfterScenario(func(s *godog.Scenario, err error) {
 		kubernetes.GetKubeInstance().DeletePod(ps.podState.PodName, kubernetes.Namespace, p.Name())
 		coreengine.LogScenarioEnd(s)
+	})
+
+	ctx.BeforeStep(func(st *godog.Step) {
+		ps.currentStep = st.Text
+	})
+
+	ctx.AfterStep(func(st *godog.Step, err error) {
+		ps.currentStep = ""
 	})
 }

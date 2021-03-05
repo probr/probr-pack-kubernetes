@@ -30,6 +30,7 @@ type ScenarioAudit struct {
 }
 
 type stepAudit struct {
+	Function    string
 	Name        string
 	Description string      // Long-form explanation of anything happening in the step
 	Result      string      // Passed / Failed
@@ -49,20 +50,23 @@ func (e *ProbeAudit) Write() {
 
 // AuditScenarioStep sets description, payload, and pass/fail based on err parameter.
 // This function should be deferred to catch panic behavior, otherwise the audit will not be logged on panic
-func (p *ScenarioAudit) AuditScenarioStep(description string, payload interface{}, err error) {
-	stepName := utils.CallerName(2) // returns name if deferred and not panicking
-	switch stepName {
+func (p *ScenarioAudit) AuditScenarioStep(stepName, description string, payload interface{}, err error) {
+	stepFunctionName := utils.CallerName(2) // returns name if deferred and not panicking
+	switch stepFunctionName {
 	case "call":
-		stepName = utils.CallerName(1) // returns name if this function was not deferred in the caller
+		stepFunctionName = utils.CallerName(1) // returns name if this function was not deferred in the caller
 	case "gopanic":
-		stepName = utils.CallerName(3) // returns name if caller panicked and this function was deferred
+		stepFunctionName = utils.CallerName(3) // returns name if caller panicked and this function was deferred
 	}
-	p.audit(stepName, description, payload, err)
+
+	p.audit(stepFunctionName, stepName, description, payload, err)
 }
 
-func (p *ScenarioAudit) audit(stepName string, description string, payload interface{}, err error) {
+func (p *ScenarioAudit) audit(functionName string, stepName string, description string, payload interface{}, err error) {
+	// TODO: This function should replace audit. Added here to avoid breaking existing probes.
 	stepNumber := len(p.Steps) + 1
 	p.Steps[stepNumber] = &stepAudit{
+		Function:    functionName,
 		Name:        stepName,
 		Description: description,
 		Payload:     payload,

@@ -34,7 +34,7 @@ func (s *scenarioState) aKubernetesClusterIsDeployed() error {
 	// Standard auditing logic to ensures panics are also audited
 	stepTrace, payload, err := utils.AuditPlaceholders()
 	defer func() {
-		s.audit.AuditScenarioStep(stepTrace.String(), payload, err)
+		s.audit.AuditScenarioStep(s.currentStep, stepTrace.String(), payload, err)
 	}()
 	description, payload, err := kubernetes.ClusterIsDeployed()
 	stepTrace.WriteString(description)
@@ -47,7 +47,7 @@ func (s *scenarioState) iAmAuthorisedToPullFromAContainerRegistry() error {
 	// Standard auditing logic to ensures panics are also audited
 	stepTrace, payload, err := utils.AuditPlaceholders()
 	defer func() {
-		s.audit.AuditScenarioStep(stepTrace.String(), payload, err)
+		s.audit.AuditScenarioStep(s.currentStep, stepTrace.String(), payload, err)
 	}()
 
 	// TODO: We are assuming too much here- if the image successfully pulls but fails to build, this will still fail
@@ -69,7 +69,7 @@ func (s *scenarioState) theDeploymentAttemptIsAllowed() error {
 	// Standard auditing logic to ensures panics are also audited
 	stepTrace, payload, err := utils.AuditPlaceholders()
 	defer func() {
-		s.audit.AuditScenarioStep(stepTrace.String(), payload, err)
+		s.audit.AuditScenarioStep(s.currentStep, stepTrace.String(), payload, err)
 	}()
 
 	// TODO: Extending the comment in iAmAuthorisedToPullFromAContainerRegistry...
@@ -89,7 +89,7 @@ func (s *scenarioState) aUserAttemptsToDeployUnauthorisedContainer() error {
 	// Standard auditing logic to ensures panics are also audited
 	stepTrace, payload, err := utils.AuditPlaceholders()
 	defer func() {
-		s.audit.AuditScenarioStep(stepTrace.String(), payload, err)
+		s.audit.AuditScenarioStep(s.currentStep, stepTrace.String(), payload, err)
 	}()
 
 	pod, podAudit, err := cra.SetupContainerAccessProbePod(config.Vars.ServicePacks.Kubernetes.UnauthorisedContainerRegistry, s.probe)
@@ -113,7 +113,7 @@ func (s *scenarioState) theDeploymentAttemptIsDenied() error {
 	// Standard auditing logic to ensures panics are also audited
 	stepTrace, payload, err := utils.AuditPlaceholders()
 	defer func() {
-		s.audit.AuditScenarioStep(stepTrace.String(), payload, err)
+		s.audit.AuditScenarioStep(s.currentStep, stepTrace.String(), payload, err)
 	}()
 
 	err = kubernetes.AssertResult(&s.podState, "denied", "")
@@ -173,5 +173,13 @@ func (p probeStruct) ScenarioInitialize(ctx *godog.ScenarioContext) {
 		cra.TeardownContainerAccessProbePod(ps.podState.PodName, p.Name())
 
 		coreengine.LogScenarioEnd(s)
+	})
+
+	ctx.BeforeStep(func(st *godog.Step) {
+		ps.currentStep = st.Text
+	})
+
+	ctx.AfterStep(func(st *godog.Step, err error) {
+		ps.currentStep = ""
 	})
 }

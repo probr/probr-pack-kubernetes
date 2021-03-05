@@ -21,6 +21,7 @@ const (
 
 type scenarioState struct {
 	name           string
+	currentStep    string
 	audit          *audit.ScenarioAudit
 	probe          *audit.Probe
 	podState       kubernetes.PodState

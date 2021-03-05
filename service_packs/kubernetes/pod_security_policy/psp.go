@@ -26,12 +26,13 @@ var conn connection.Connection
 
 // scenarioState holds the steps and state for any scenario in this probe
 type scenarioState struct {
-	name       string
-	namespace  string
-	probeAudit *audit.Probe
-	audit      *audit.ScenarioAudit
-	pods       []string
-	given      bool
+	name        string
+	currentStep string
+	namespace   string
+	probeAudit  *audit.Probe
+	audit       *audit.ScenarioAudit
+	pods        []string
+	given       bool
 }
 
 // Probe meets the service pack interface for adding the logic from this file
@@ -50,7 +51,7 @@ func (scenario *scenarioState) aKubernetesClusterIsDeployed() error {
 	// Standard auditing logic to ensures panics are also audited
 	stepTrace, payload, err := utils.AuditPlaceholders()
 	defer func() {
-		scenario.audit.AuditScenarioStep(stepTrace.String(), payload, err)
+		scenario.audit.AuditScenarioStep(scenario.currentStep, stepTrace.String(), payload, err)
 	}()
 	stepTrace.WriteString(fmt.Sprintf("Validate that a cluster can be reached using the specified kube config and context; "))
 
@@ -82,7 +83,7 @@ func (scenario *scenarioState) podCreationResultsWithXSetToYInThePodSpec(result,
 
 	stepTrace, payload, err := utils.AuditPlaceholders()
 	defer func() {
-		scenario.audit.AuditScenarioStep(stepTrace.String(), payload, err)
+		scenario.audit.AuditScenarioStep(scenario.currentStep, stepTrace.String(), payload, err)
 	}()
 	var boolValue, useValue, shouldCreate bool
 
@@ -163,7 +164,7 @@ func (scenario *scenarioState) theExecutionOfAXCommandInsideThePodIsY(permission
 
 	stepTrace, payload, err := utils.AuditPlaceholders()
 	defer func() {
-		scenario.audit.AuditScenarioStep(stepTrace.String(), payload, err)
+		scenario.audit.AuditScenarioStep(scenario.currentStep, stepTrace.String(), payload, err)
 	}()
 
 	// Guard clause
@@ -255,6 +256,14 @@ func (probe probeStruct) ScenarioInitialize(ctx *godog.ScenarioContext) {
 
 	ctx.AfterScenario(func(s *godog.Scenario, err error) {
 		afterScenario(scenario, probe, s, err)
+	})
+
+	ctx.BeforeStep(func(st *godog.Step) {
+		scenario.currentStep = st.Text
+	})
+
+	ctx.AfterStep(func(st *godog.Step, err error) {
+		scenario.currentStep = ""
 	})
 }
 

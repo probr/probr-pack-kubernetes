@@ -33,12 +33,13 @@ const (
 type ProbeCommand int
 
 type scenarioState struct {
-	name      string
-	audit     *audit.ScenarioAudit
-	probe     *audit.Probe
-	podState  kubernetes.PodState
-	podStates []kubernetes.PodState
-	info      []interface{} //used to pass arbitrary information between steps
+	name        string
+	currentStep string
+	audit       *audit.ScenarioAudit
+	probe       *audit.Probe
+	podState    kubernetes.PodState
+	podStates   []kubernetes.PodState
+	info        []interface{} //used to pass arbitrary information between steps
 }
 
 // VerificationProbe encapsulates the command and expected result to be used in a Pod Security Policy probe.

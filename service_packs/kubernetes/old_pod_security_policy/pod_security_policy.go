@@ -33,7 +33,7 @@ func (s *scenarioState) creationWillWithAMessage(arg1, arg2 string) error {
 	// Standard auditing logic to ensures panics are also audited
 	stepTrace, payload, err := utils.AuditPlaceholders()
 	defer func() {
-		s.audit.AuditScenarioStep(stepTrace.String(), payload, err)
+		s.audit.AuditScenarioStep(s.currentStep, stepTrace.String(), payload, err)
 	}()
 	stepTrace.WriteString("PENDING IMPLEMENTATION")
 	return godog.ErrPending
@@ -44,7 +44,7 @@ func (s *scenarioState) aKubernetesClusterIsDeployed() error {
 	description, payload, err := kubernetes.ClusterIsDeployed()
 	stepTrace.WriteString(description)
 	defer func() {
-		s.audit.AuditScenarioStep(stepTrace.String(), payload, err)
+		s.audit.AuditScenarioStep(s.currentStep, stepTrace.String(), payload, err)
 	}()
 	return err //  ClusterIsDeployed will create a fatal error if kubeconfig doesn't validate
 }
@@ -54,7 +54,7 @@ func (s *scenarioState) aKubernetesDeploymentIsAppliedToAnExistingKubernetesClus
 	// Standard auditing logic to ensures panics are also audited
 	stepTrace, payload, err := utils.AuditPlaceholders()
 	defer func() {
-		s.audit.AuditScenarioStep(stepTrace.String(), payload, err)
+		s.audit.AuditScenarioStep(s.currentStep, stepTrace.String(), payload, err)
 	}()
 
 	//TODO: not sure this step is adding value ... return "pass" for now ...
@@ -67,7 +67,7 @@ func (s *scenarioState) theOperationWillWithAnError(result, message string) erro
 	// Standard auditing logic to ensures panics are also audited
 	stepTrace, payload, err := utils.AuditPlaceholders()
 	defer func() {
-		s.audit.AuditScenarioStep(stepTrace.String(), payload, err)
+		s.audit.AuditScenarioStep(s.currentStep, stepTrace.String(), payload, err)
 	}()
 
 	stepTrace.WriteString("Validate that the scenario state was updated in the previous step with a particular result and message; ")
@@ -85,7 +85,7 @@ func (s *scenarioState) allOperationsWillWithAnError(result, message string) err
 	// Standard auditing logic to ensures panics are also audited
 	stepTrace, payload, err := utils.AuditPlaceholders()
 	defer func() {
-		s.audit.AuditScenarioStep(stepTrace.String(), payload, err)
+		s.audit.AuditScenarioStep(s.currentStep, stepTrace.String(), payload, err)
 	}()
 
 	var kubeErrors []error
@@ -113,7 +113,7 @@ func (s *scenarioState) iShouldBeAbleToPerformAnAllowedCommand() error {
 	// Standard auditing logic to ensures panics are also audited
 	stepTrace, payload, err := utils.AuditPlaceholders()
 	defer func() {
-		s.audit.AuditScenarioStep(stepTrace.String(), payload, err)
+		s.audit.AuditScenarioStep(s.currentStep, stepTrace.String(), payload, err)
 	}()
 
 	if len(s.podStates) == 0 {
@@ -292,7 +292,7 @@ func (s *scenarioState) privilegedAccessRequestIsMarkedForTheKubernetesDeploymen
 	// Standard auditing logic to ensures panics are also audited
 	stepTrace, payload, err := utils.AuditPlaceholders()
 	defer func() {
-		s.audit.AuditScenarioStep(stepTrace.String(), payload, err)
+		s.audit.AuditScenarioStep(s.currentStep, stepTrace.String(), payload, err)
 	}()
 
 	var pa bool
@@ -318,7 +318,7 @@ func (s *scenarioState) someControlExistsToPreventPrivilegedAccessForKubernetesD
 	// Standard auditing logic to ensures panics are also audited
 	stepTrace, payload, err := utils.AuditPlaceholders()
 	defer func() {
-		s.audit.AuditScenarioStep(stepTrace.String(), payload, err)
+		s.audit.AuditScenarioStep(s.currentStep, stepTrace.String(), payload, err)
 	}()
 
 	// TODO: This entire process needs refactored for readability, and to remove holistic dependency on azure security context
@@ -336,7 +336,7 @@ func (s *scenarioState) iShouldNotBeAbleToPerformACommandThatRequiresPrivilegedA
 	// Standard auditing logic to ensures panics are also audited
 	stepTrace, payload, err := utils.AuditPlaceholders()
 	defer func() {
-		s.audit.AuditScenarioStep(stepTrace.String(), payload, err)
+		s.audit.AuditScenarioStep(s.currentStep, stepTrace.String(), payload, err)
 	}()
 
 	stepTrace.WriteString(fmt.Sprintf(
@@ -356,7 +356,7 @@ func (s *scenarioState) hostPIDRequestIsMarkedForTheKubernetesDeployment(hostPID
 	// Standard auditing logic to ensures panics are also audited
 	stepTrace, payload, err := utils.AuditPlaceholders()
 	defer func() {
-		s.audit.AuditScenarioStep(stepTrace.String(), payload, err)
+		s.audit.AuditScenarioStep(s.currentStep, stepTrace.String(), payload, err)
 	}()
 
 	var hostPID bool
@@ -381,7 +381,7 @@ func (s *scenarioState) someSystemExistsToPreventAKubernetesContainerFromRunning
 	// Standard auditing logic to ensures panics are also audited
 	stepTrace, payload, err := utils.AuditPlaceholders()
 	defer func() {
-		s.audit.AuditScenarioStep(stepTrace.String(), payload, err)
+		s.audit.AuditScenarioStep(s.currentStep, stepTrace.String(), payload, err)
 	}()
 
 	stepTrace.WriteString("Validate that at least on of the cluster's pod security policies has HostPID set to false; ")
@@ -398,7 +398,7 @@ func (s *scenarioState) iShouldNotBeAbleToPerformACommandThatProvidesAccessToThe
 	// Standard auditing logic to ensures panics are also audited
 	stepTrace, payload, err := utils.AuditPlaceholders()
 	defer func() {
-		s.audit.AuditScenarioStep(stepTrace.String(), payload, err)
+		s.audit.AuditScenarioStep(s.currentStep, stepTrace.String(), payload, err)
 	}()
 
 	stepTrace.WriteString(fmt.Sprintf(
@@ -417,7 +417,7 @@ func (s *scenarioState) hostIPCRequestIsMarkedForTheKubernetesDeployment(hostIPC
 	// Standard auditing logic to ensures panics are also audited
 	stepTrace, payload, err := utils.AuditPlaceholders()
 	defer func() {
-		s.audit.AuditScenarioStep(stepTrace.String(), payload, err)
+		s.audit.AuditScenarioStep(s.currentStep, stepTrace.String(), payload, err)
 	}()
 
 	var hostIPC bool
@@ -443,7 +443,7 @@ func (s *scenarioState) someSystemExistsToPreventAKubernetesDeploymentFromRunnin
 	// Standard auditing logic to ensures panics are also audited
 	stepTrace, payload, err := utils.AuditPlaceholders()
 	defer func() {
-		s.audit.AuditScenarioStep(stepTrace.String(), payload, err)
+		s.audit.AuditScenarioStep(s.currentStep, stepTrace.String(), payload, err)
 	}()
 
 	stepTrace.WriteString("Validate that at least on of the cluster's pod security policies has HostIPC set to false; ")
@@ -460,7 +460,7 @@ func (s *scenarioState) iShouldNotBeAbleToPerformACommandThatProvidesAccessToThe
 	// Standard auditing logic to ensures panics are also audited
 	stepTrace, payload, err := utils.AuditPlaceholders()
 	defer func() {
-		s.audit.AuditScenarioStep(stepTrace.String(), payload, err)
+		s.audit.AuditScenarioStep(s.currentStep, stepTrace.String(), payload, err)
 	}()
 
 	stepTrace.WriteString(fmt.Sprintf(
@@ -479,7 +479,7 @@ func (s *scenarioState) hostNetworkRequestIsMarkedForTheKubernetesDeployment(hos
 	// Standard auditing logic to ensures panics are also audited
 	stepTrace, payload, err := utils.AuditPlaceholders()
 	defer func() {
-		s.audit.AuditScenarioStep(stepTrace.String(), payload, err)
+		s.audit.AuditScenarioStep(s.currentStep, stepTrace.String(), payload, err)
 	}()
 
 	var hostNetwork bool
@@ -505,7 +505,7 @@ func (s *scenarioState) someSystemExistsToPreventAKubernetesDeploymentFromRunnin
 	// Standard auditing logic to ensures panics are also audited
 	stepTrace, payload, err := utils.AuditPlaceholders()
 	defer func() {
-		s.audit.AuditScenarioStep(stepTrace.String(), payload, err)
+		s.audit.AuditScenarioStep(s.currentStep, stepTrace.String(), payload, err)
 	}()
 
 	stepTrace.WriteString("Validate that at least on of the pod security policies has HostNetwork set to false; ")
@@ -522,7 +522,7 @@ func (s *scenarioState) iShouldNotBeAbleToPerformACommandThatProvidesAccessToThe
 	// Standard auditing logic to ensures panics are also audited
 	stepTrace, payload, err := utils.AuditPlaceholders()
 	defer func() {
-		s.audit.AuditScenarioStep(stepTrace.String(), payload, err)
+		s.audit.AuditScenarioStep(s.currentStep, stepTrace.String(), payload, err)
 	}()
 
 	stepTrace.WriteString(fmt.Sprintf(
@@ -541,7 +541,7 @@ func (s *scenarioState) privilegedEscalationIsMarkedForTheKubernetesDeployment(p
 	// Standard auditing logic to ensures panics are also audited
 	stepTrace, payload, err := utils.AuditPlaceholders()
 	defer func() {
-		s.audit.AuditScenarioStep(stepTrace.String(), payload, err)
+		s.audit.AuditScenarioStep(s.currentStep, stepTrace.String(), payload, err)
 	}()
 
 	allowPrivilegeEscalation := "true"
@@ -571,7 +571,7 @@ func (s *scenarioState) someSystemExistsToPreventAKubernetesDeploymentFromRunnin
 	// Standard auditing logic to ensures panics are also audited
 	stepTrace, payload, err := utils.AuditPlaceholders()
 	defer func() {
-		s.audit.AuditScenarioStep(stepTrace.String(), payload, err)
+		s.audit.AuditScenarioStep(s.currentStep, stepTrace.String(), payload, err)
 	}()
 
 	stepTrace.WriteString(
@@ -589,7 +589,7 @@ func (s *scenarioState) iShouldNotBeAbleToPerformASudoCommandThatRequiresPrivile
 	// Standard auditing logic to ensures panics are also audited
 	stepTrace, payload, err := utils.AuditPlaceholders()
 	defer func() {
-		s.audit.AuditScenarioStep(stepTrace.String(), payload, err)
+		s.audit.AuditScenarioStep(s.currentStep, stepTrace.String(), payload, err)
 	}()
 
 	stepTrace.WriteString(fmt.Sprintf(
@@ -608,7 +608,7 @@ func (s *scenarioState) theUserRequestedIsForTheKubernetesDeployment(requestedUs
 	// Standard auditing logic to ensures panics are also audited
 	stepTrace, payload, err := utils.AuditPlaceholders()
 	defer func() {
-		s.audit.AuditScenarioStep(stepTrace.String(), payload, err)
+		s.audit.AuditScenarioStep(s.currentStep, stepTrace.String(), payload, err)
 	}()
 
 	var runAsUser int64
@@ -634,7 +634,7 @@ func (s *scenarioState) someSystemExistsToPreventAKubernetesDeploymentFromRunnin
 	// Standard auditing logic to ensures panics are also audited
 	stepTrace, payload, err := utils.AuditPlaceholders()
 	defer func() {
-		s.audit.AuditScenarioStep(stepTrace.String(), payload, err)
+		s.audit.AuditScenarioStep(s.currentStep, stepTrace.String(), payload, err)
 	}()
 
 	stepTrace.WriteString(
@@ -652,7 +652,7 @@ func (s *scenarioState) theKubernetesDeploymentShouldRunWithANonrootUID() error 
 	// Standard auditing logic to ensures panics are also audited
 	stepTrace, payload, err := utils.AuditPlaceholders()
 	defer func() {
-		s.audit.AuditScenarioStep(stepTrace.String(), payload, err)
+		s.audit.AuditScenarioStep(s.currentStep, stepTrace.String(), payload, err)
 	}()
 
 	stepTrace.WriteString(fmt.Sprintf(
@@ -670,7 +670,7 @@ func (s *scenarioState) kubernetesDeploymentWithNETRAWCapability(netRawRequested
 	// Standard auditing logic to ensures panics are also audited
 	stepTrace, payload, err := utils.AuditPlaceholders()
 	defer func() {
-		s.audit.AuditScenarioStep(stepTrace.String(), payload, err)
+		s.audit.AuditScenarioStep(s.currentStep, stepTrace.String(), payload, err)
 	}()
 
 	var capAdd, capDrop []string
@@ -702,7 +702,7 @@ func (s *scenarioState) iShouldNotBeAbleToPerformACommandThatRequiresNETRAWCapab
 	// Standard auditing logic to ensures panics are also audited
 	stepTrace, payload, err := utils.AuditPlaceholders()
 	defer func() {
-		s.audit.AuditScenarioStep(stepTrace.String(), payload, err)
+		s.audit.AuditScenarioStep(s.currentStep, stepTrace.String(), payload, err)
 	}()
 
 	stepTrace.WriteString(fmt.Sprintf(
@@ -721,7 +721,7 @@ func (s *scenarioState) additionalCapabilitiesForTheKubernetesDeployment(capabil
 	// Standard auditing logic to ensures panics are also audited
 	stepTrace, payload, err := utils.AuditPlaceholders()
 	defer func() {
-		s.audit.AuditScenarioStep(stepTrace.String(), payload, err)
+		s.audit.AuditScenarioStep(s.currentStep, stepTrace.String(), payload, err)
 	}()
 
 	var capabilities []string
@@ -789,7 +789,7 @@ func (s *scenarioState) someSystemExistsToPreventKubernetesDeploymentsWithCapabi
 	// Standard auditing logic to ensures panics are also audited
 	stepTrace, payload, err := utils.AuditPlaceholders()
 	defer func() {
-		s.audit.AuditScenarioStep(stepTrace.String(), payload, err)
+		s.audit.AuditScenarioStep(s.currentStep, stepTrace.String(), payload, err)
 	}()
 
 	stepTrace.WriteString("Validate that no pod security policies have any values in AllowedCapabilities; ")
@@ -806,7 +806,7 @@ func (s *scenarioState) iShouldNotBeAbleToPerformACommandThatRequiresCapabilitie
 	// Standard auditing logic to ensures panics are also audited
 	stepTrace, payload, err := utils.AuditPlaceholders()
 	defer func() {
-		s.audit.AuditScenarioStep(stepTrace.String(), payload, err)
+		s.audit.AuditScenarioStep(s.currentStep, stepTrace.String(), payload, err)
 	}()
 
 	stepTrace.WriteString(
@@ -826,7 +826,7 @@ func (s *scenarioState) assignedCapabilitiesForTheKubernetesDeployment(assignCap
 	// Standard auditing logic to ensures panics are also audited
 	stepTrace, payload, err := utils.AuditPlaceholders()
 	defer func() {
-		s.audit.AuditScenarioStep(stepTrace.String(), payload, err)
+		s.audit.AuditScenarioStep(s.currentStep, stepTrace.String(), payload, err)
 	}()
 
 	var c []string
@@ -857,7 +857,7 @@ func (s *scenarioState) someSystemExistsToPreventKubernetesDeploymentsWithAssign
 	// Standard auditing logic to ensures panics are also audited
 	stepTrace, payload, err := utils.AuditPlaceholders()
 	defer func() {
-		s.audit.AuditScenarioStep(stepTrace.String(), payload, err)
+		s.audit.AuditScenarioStep(s.currentStep, stepTrace.String(), payload, err)
 	}()
 
 	stepTrace.WriteString("Validate that the kube instance security context contains 'k8sazureallowedcapabilities'; ")
@@ -874,7 +874,7 @@ func (s *scenarioState) iShouldNotBeAbleToPerformACommandThatRequiresAnyCapabili
 	// Standard auditing logic to ensures panics are also audited
 	stepTrace, payload, err := utils.AuditPlaceholders()
 	defer func() {
-		s.audit.AuditScenarioStep(stepTrace.String(), payload, err)
+		s.audit.AuditScenarioStep(s.currentStep, stepTrace.String(), payload, err)
 	}()
 
 	stepTrace.WriteString(fmt.Sprintf(
@@ -893,7 +893,7 @@ func (s *scenarioState) anPortRangeIsRequestedForTheKubernetesDeployment(portRan
 	// Standard auditing logic to ensures panics are also audited
 	stepTrace, payload, err := utils.AuditPlaceholders()
 	defer func() {
-		s.audit.AuditScenarioStep(stepTrace.String(), payload, err)
+		s.audit.AuditScenarioStep(s.currentStep, stepTrace.String(), payload, err)
 	}()
 
 	var y []byte
@@ -939,7 +939,7 @@ func (s *scenarioState) someSystemExistsToPreventKubernetesDeploymentsWithUnappr
 	// Standard auditing logic to ensures panics are also audited
 	stepTrace, payload, err := utils.AuditPlaceholders()
 	defer func() {
-		s.audit.AuditScenarioStep(stepTrace.String(), payload, err)
+		s.audit.AuditScenarioStep(s.currentStep, stepTrace.String(), payload, err)
 	}()
 
 	stepTrace.WriteString("Validate that the kube instance security context contains 'k8sazurehostnetworkingports'; ")
@@ -956,7 +956,7 @@ func (s *scenarioState) iShouldNotBeAbleToPerformACommandThatAccessAnUnapprovedP
 	// Standard auditing logic to ensures panics are also audited
 	stepTrace, payload, err := utils.AuditPlaceholders()
 	defer func() {
-		s.audit.AuditScenarioStep(stepTrace.String(), payload, err)
+		s.audit.AuditScenarioStep(s.currentStep, stepTrace.String(), payload, err)
 	}()
 
 	stepTrace.WriteString(fmt.Sprintf(
@@ -975,7 +975,7 @@ func (s *scenarioState) volumeTypesAreRequestedForTheKubernetesDeployment(volume
 	// Standard auditing logic to ensures panics are also audited
 	stepTrace, payload, err := utils.AuditPlaceholders()
 	defer func() {
-		s.audit.AuditScenarioStep(stepTrace.String(), payload, err)
+		s.audit.AuditScenarioStep(s.currentStep, stepTrace.String(), payload, err)
 	}()
 
 	var volumeTypes []string
@@ -1031,7 +1031,7 @@ func (s *scenarioState) someSystemExistsToPreventKubernetesDeploymentsWithUnappr
 	// Standard auditing logic to ensures panics are also audited
 	stepTrace, payload, err := utils.AuditPlaceholders()
 	defer func() {
-		s.audit.AuditScenarioStep(stepTrace.String(), payload, err)
+		s.audit.AuditScenarioStep(s.currentStep, stepTrace.String(), payload, err)
 	}()
 
 	stepTrace.WriteString("Validate that the kube instance security context contains 'k8sazurevolumetypes'; ")
@@ -1050,7 +1050,7 @@ func (s *scenarioState) iShouldNotBeAbleToPerformACommandThatAccessesAnUnapprove
 	// Standard auditing logic to ensures panics are also audited
 	stepTrace, payload, err := utils.AuditPlaceholders()
 	defer func() {
-		s.audit.AuditScenarioStep(stepTrace.String(), payload, err)
+		s.audit.AuditScenarioStep(s.currentStep, stepTrace.String(), payload, err)
 	}()
 
 	stepTrace.WriteString("PENDING IMPLEMENTATION")
@@ -1063,7 +1063,7 @@ func (s *scenarioState) anSeccompProfileIsRequestedForTheKubernetesDeployment(se
 	// Standard auditing logic to ensures panics are also audited
 	stepTrace, payload, err := utils.AuditPlaceholders()
 	defer func() {
-		s.audit.AuditScenarioStep(stepTrace.String(), payload, err)
+		s.audit.AuditScenarioStep(s.currentStep, stepTrace.String(), payload, err)
 	}()
 
 	var y []byte
@@ -1099,7 +1099,7 @@ func (s *scenarioState) someSystemExistsToPreventKubernetesDeploymentsWithoutApp
 	// Standard auditing logic to ensures panics are also audited
 	stepTrace, payload, err := utils.AuditPlaceholders()
 	defer func() {
-		s.audit.AuditScenarioStep(stepTrace.String(), payload, err)
+		s.audit.AuditScenarioStep(s.currentStep, stepTrace.String(), payload, err)
 	}()
 
 	stepTrace.WriteString("Validate that the kube instance security context contains 'k8sazureallowedseccomp'; ")
@@ -1116,7 +1116,7 @@ func (s *scenarioState) iShouldNotBeAbleToPerformASystemCallThatIsBlockedByTheSe
 	// Standard auditing logic to ensures panics are also audited
 	stepTrace, payload, err := utils.AuditPlaceholders()
 	defer func() {
-		s.audit.AuditScenarioStep(stepTrace.String(), payload, err)
+		s.audit.AuditScenarioStep(s.currentStep, stepTrace.String(), payload, err)
 	}()
 
 	stepTrace.WriteString(fmt.Sprintf(
@@ -1249,5 +1249,13 @@ func (p probeStruct) ScenarioInitialize(ctx *godog.ScenarioContext) {
 		ps.podState.PodName = ""
 		ps.podState.CreationError = nil
 		coreengine.LogScenarioEnd(s)
+	})
+
+	ctx.BeforeStep(func(st *godog.Step) {
+		ps.currentStep = st.Text
+	})
+
+	ctx.AfterStep(func(st *godog.Step, err error) {
+		ps.currentStep = ""
 	})
 }

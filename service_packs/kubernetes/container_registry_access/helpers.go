@@ -29,10 +29,11 @@ type CRA struct {
 }
 
 type scenarioState struct {
-	name     string
-	audit    *audit.ScenarioAudit
-	probe    *audit.Probe
-	podState kubernetes.PodState
+	name        string
+	currentStep string
+	audit       *audit.ScenarioAudit
+	probe       *audit.Probe
+	podState    kubernetes.PodState
 }
 
 // NewCRA creates a new CRA with the supplied kubernetes instance.

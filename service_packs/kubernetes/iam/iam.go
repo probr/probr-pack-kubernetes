@@ -56,7 +56,7 @@ func (s *scenarioState) aKubernetesClusterIsDeployed() error {
 	description, payload, err := kubernetes.ClusterIsDeployed()
 	stepTrace.WriteString(description)
 	defer func() {
-		s.audit.AuditScenarioStep(stepTrace.String(), payload, err)
+		s.audit.AuditScenarioStep(s.currentStep, stepTrace.String(), payload, err)
 	}()
 	return err //  ClusterIsDeployed will create a fatal error if kubeconfig doesn't validate
 }
@@ -66,7 +66,7 @@ func (s *scenarioState) aNamedAzureIdentityBindingExistsInNamedNS(aibName string
 	// Standard auditing logic to ensures panics are also audited
 	stepTrace, payload, err := utils.AuditPlaceholders()
 	defer func() {
-		s.audit.AuditScenarioStep(stepTrace.String(), payload, err)
+		s.audit.AuditScenarioStep(s.currentStep, stepTrace.String(), payload, err)
 	}()
 
 	stepTrace.WriteString(fmt.Sprintf(
@@ -80,7 +80,7 @@ func (s *scenarioState) iCreateASimplePodInNamespaceAssignedWithThatAzureIdentit
 	// Standard auditing logic to ensures panics are also audited
 	stepTrace, payload, err := utils.AuditPlaceholders()
 	defer func() {
-		s.audit.AuditScenarioStep(stepTrace.String(), payload, err)
+		s.audit.AuditScenarioStep(s.currentStep, stepTrace.String(), payload, err)
 	}()
 
 	specPath := "iam-azi-test-aib-curl.yaml"
@@ -112,7 +112,7 @@ func (s *scenarioState) thePodIsDeployedSuccessfully() error {
 	// Standard auditing logic to ensures panics are also audited
 	stepTrace, payload, err := utils.AuditPlaceholders()
 	defer func() {
-		s.audit.AuditScenarioStep(stepTrace.String(), payload, err)
+		s.audit.AuditScenarioStep(s.currentStep, stepTrace.String(), payload, err)
 	}()
 
 	stepTrace.WriteString("Validate that the pod was deployed successfully; ")
@@ -145,7 +145,7 @@ func (s *scenarioState) anAttemptToObtainAnAccessTokenFromThatPodShould(expected
 	// Standard auditing logic to ensures panics are also audited
 	stepTrace, payload, err := utils.AuditPlaceholders()
 	defer func() {
-		s.audit.AuditScenarioStep(stepTrace.String(), payload, err)
+		s.audit.AuditScenarioStep(s.currentStep, stepTrace.String(), payload, err)
 	}()
 
 	// TODO: Pod creation is checked in previous step. This may not be necessary.
@@ -195,7 +195,7 @@ func (s *scenarioState) aNamedAzureIdentityExistsInNamedNS(namespace string, aiN
 	// Standard auditing logic to ensures panics are also audited
 	stepTrace, payload, err := utils.AuditPlaceholders()
 	defer func() {
-		s.audit.AuditScenarioStep(stepTrace.String(), payload, err)
+		s.audit.AuditScenarioStep(s.currentStep, stepTrace.String(), payload, err)
 	}()
 
 	stepTrace.WriteString(fmt.Sprintf(
@@ -215,7 +215,7 @@ func (s *scenarioState) iCreateAnAzureIdentityBindingCalledInANondefaultNamespac
 	// Standard auditing logic to ensures panics are also audited
 	stepTrace, payload, err := utils.AuditPlaceholders()
 	defer func() {
-		s.audit.AuditScenarioStep(stepTrace.String(), payload, err)
+		s.audit.AuditScenarioStep(s.currentStep, stepTrace.String(), payload, err)
 	}()
 
 	stepTrace.WriteString(fmt.Sprintf(
@@ -236,7 +236,7 @@ func (s *scenarioState) iDeployAPodAssignedWithTheAzureIdentityBindingIntoThePro
 	// Standard auditing logic to ensures panics are also audited
 	stepTrace, payload, err := utils.AuditPlaceholders()
 	defer func() {
-		s.audit.AuditScenarioStep(stepTrace.String(), payload, err)
+		s.audit.AuditScenarioStep(s.currentStep, stepTrace.String(), payload, err)
 	}()
 
 	specPath := "iam-azi-test-aib-curl.yaml"
@@ -268,7 +268,7 @@ func (s *scenarioState) theClusterHasManagedIdentityComponentsDeployed() error {
 	// Standard auditing logic to ensures panics are also audited
 	stepTrace, payload, err := utils.AuditPlaceholders()
 	defer func() {
-		s.audit.AuditScenarioStep(stepTrace.String(), payload, err)
+		s.audit.AuditScenarioStep(s.currentStep, stepTrace.String(), payload, err)
 	}()
 
 	stepTrace.WriteString(fmt.Sprintf(
@@ -308,7 +308,7 @@ func (s *scenarioState) iExecuteTheCommandAgainstTheMICPod(arg1 string) error {
 	// Standard auditing logic to ensures panics are also audited
 	stepTrace, payload, err := utils.AuditPlaceholders()
 	defer func() {
-		s.audit.AuditScenarioStep(stepTrace.String(), payload, err)
+		s.audit.AuditScenarioStep(s.currentStep, stepTrace.String(), payload, err)
 	}()
 
 	stepTrace.WriteString(fmt.Sprintf(
@@ -344,7 +344,7 @@ func (s *scenarioState) kubernetesShouldPreventMeFromRunningTheCommand() error {
 	// Standard auditing logic to ensures panics are also audited
 	stepTrace, payload, err := utils.AuditPlaceholders()
 	defer func() {
-		s.audit.AuditScenarioStep(stepTrace.String(), payload, err)
+		s.audit.AuditScenarioStep(s.currentStep, stepTrace.String(), payload, err)
 	}()
 
 	stepTrace.WriteString("Examine scenario state to ensure that verification command exit code was not 0; ")
@@ -429,5 +429,13 @@ func (p probeStruct) ScenarioInitialize(ctx *godog.ScenarioContext) {
 	ctx.AfterScenario(func(s *godog.Scenario, err error) {
 		iam.DeleteIAMProbePod(ps.podState.PodName, ps.useDefaultNS, p.Name())
 		coreengine.LogScenarioEnd(s)
+	})
+
+	ctx.BeforeStep(func(st *godog.Step) {
+		ps.currentStep = st.Text
+	})
+
+	ctx.AfterStep(func(st *godog.Step, err error) {
+		ps.currentStep = ""
 	})
 }
