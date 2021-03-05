@@ -35,7 +35,7 @@ type ServicePacks struct {
 // Kubernetes config options
 type Kubernetes struct {
 	exclusionLogged                   bool
-	KeepPods                          string   `yaml:"KeepPods"`
+	KeepPods                          string   `yaml:"KeepPods"` // TODO: Change type to bool, this would allow us to remove logic from kubernetes.GetKeepPodsFromConfig()
 	Probes                            []Probe  `yaml:"Probes"`
 	KubeConfigPath                    string   `yaml:"KubeConfig"`
 	KubeContext                       string   `yaml:"KubeContext"`
