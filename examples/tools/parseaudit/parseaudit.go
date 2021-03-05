@@ -27,6 +27,7 @@ type flatObj struct {
 	ScenarioID      int
 	ScenarioName    string
 	StepID          int
+	StepName        string
 	StepDescription string
 	StepFunction    string
 	StepPayload     string
@@ -75,8 +76,9 @@ func main() {
 				flatRow.ScenarioName = scenario.Name
 
 				flatRow.StepID = stepID
+				flatRow.StepName = step.Name
 				flatRow.StepDescription = step.Description
-				flatRow.StepFunction = step.Name
+				flatRow.StepFunction = step.Function
 
 				flatRows = append(flatRows, flatRow)
 			}
@@ -132,6 +134,7 @@ func writeCSVFile(filePath string, rows []flatObj, addHeader bool) error {
 		row = append(row, "ScenarioID")
 		row = append(row, "ScenarioName")
 		row = append(row, "StepID")
+		row = append(row, "StepName")
 		row = append(row, "StepDescription")
 		row = append(row, "StepFunction")
 		writer.Write(row)
@@ -143,6 +146,7 @@ func writeCSVFile(filePath string, rows []flatObj, addHeader bool) error {
 		row = append(row, strconv.Itoa(r.ScenarioID))
 		row = append(row, r.ScenarioName)
 		row = append(row, strconv.Itoa(r.StepID))
+		row = append(row, r.StepName)
 		row = append(row, r.StepDescription)
 		row = append(row, r.StepFunction)
 		writer.Write(row)
