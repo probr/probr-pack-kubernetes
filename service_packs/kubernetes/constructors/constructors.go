@@ -41,10 +41,7 @@ func PodSpec(baseName string, namespace string, containerSecurityContext *apiv1.
 					Name:            containerName,
 					Image:           DefaultProbrImageName(),
 					ImagePullPolicy: apiv1.PullIfNotPresent,
-					Command: []string{
-						"sleep",
-						"3600",
-					},
+					Command:         DefaultEntrypoint(),
 					SecurityContext: containerSecurityContext,
 				},
 			},
@@ -80,6 +77,14 @@ func DefaultProbrImageName() string {
 		"%s/%s",
 		config.Vars.ServicePacks.Kubernetes.AuthorisedContainerRegistry,
 		config.Vars.ServicePacks.Kubernetes.ProbeImage)
+}
+
+// DefaultEntrypoint is used by all default pods
+func DefaultEntrypoint() []string {
+	return []string{
+		"sleep",
+		"3600",
+	}
 }
 
 // GetContainerDropCapabilitiesFromConfig returns a Capability object with the drop caps specified in config vars

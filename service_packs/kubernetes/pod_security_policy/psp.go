@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"strconv"
+	"strings"
 
 	"github.com/cucumber/godog"
 
@@ -67,6 +68,18 @@ func (scenario *scenarioState) aKubernetesClusterIsDeployed() error {
 	return err
 }
 
+func (scenario *scenarioState) toDo(todo string) error {
+	stepTrace, payload, err := utils.AuditPlaceholders()
+	defer func() {
+		scenario.audit.AuditScenarioStep(scenario.currentStep, stepTrace.String(), payload, err)
+	}()
+	stepTrace.WriteString(fmt.Sprintf("This step was included to inform developers that a scenario is incomplete; "))
+	payload = struct {
+		TODO string
+	}{TODO: todo}
+	return godog.ErrPending
+}
+
 // Attempt to deploy a pod from a default pod spec, with specified modification
 func (scenario *scenarioState) podCreationResultsWithXSetToYInThePodSpec(result, key, value string) error {
 	// Supported results:
@@ -75,6 +88,8 @@ func (scenario *scenarioState) podCreationResultsWithXSetToYInThePodSpec(result,
 	//
 	// Supported keys:
 	//    'allowPrivilegeEscalation'
+	//    'hostPID'
+	//    'hostIPC'
 	//
 	// Supported values:
 	//    'true'
@@ -93,14 +108,16 @@ func (scenario *scenarioState) podCreationResultsWithXSetToYInThePodSpec(result,
 	case "fails":
 		shouldCreate = false
 	default:
-		return utils.ReformatError("Unexpected value provided for expected pod creation result: %s", result) // No payload is necessary if an invalid value was provided
+		err = utils.ReformatError("Unexpected value provided for expected pod creation result: %s", result) // No payload is necessary if an invalid value was provided
+		return err
 	}
 
 	if value != "not have a value provided" {
 		useValue = true
 		boolValue, err = strconv.ParseBool(value)
 		if err != nil {
-			return utils.ReformatError("Expected 'true' or 'false' but found '%s'", value) // No payload is necessary if an invalid value was provided
+			err = utils.ReformatError("Expected 'true' or 'false' but found '%s'", value) // No payload is necessary if an invalid value was provided
+			return err
 		}
 	}
 
@@ -114,8 +131,13 @@ func (scenario *scenarioState) podCreationResultsWithXSetToYInThePodSpec(result,
 		switch key {
 		case "allowPrivilegeEscalation":
 			podObject.Spec.Containers[0].SecurityContext.AllowPrivilegeEscalation = &boolValue
+		case "hostPID":
+			podObject.Spec.HostPID = boolValue
+		case "hostIPC":
+			podObject.Spec.HostIPC = boolValue
 		default:
-			return utils.ReformatError("Unsupported key provided: %s", key) // No payload is necessary if an invalid key was provided
+			err = utils.ReformatError("Unsupported key provided: %s", key) // No payload is necessary if an invalid key was provided
+			return err
 		}
 	}
 
@@ -197,7 +219,7 @@ func (scenario *scenarioState) theExecutionOfAXCommandInsideThePodIsY(permission
 
 	}
 	stepTrace.WriteString("Attempt to run a command in the pod that was created by the previous step; ")
-	exitCode, err := conn.ExecCommand(cmd, scenario.namespace, scenario.pods[0])
+	exitCode, _, err := conn.ExecCommand(cmd, scenario.namespace, scenario.pods[0])
 
 	payload = struct {
 		Command          string
@@ -213,6 +235,64 @@ func (scenario *scenarioState) theExecutionOfAXCommandInsideThePodIsY(permission
 		err = nil
 	}
 	return err
+}
+
+func (scenario *scenarioState) aXInspectionShouldOnlyShowTheContainerProcesses(inspectionType string) (err error) {
+	// Supported inspection types:
+	//     'process'
+	//     'namespace'
+
+	stepTrace, payload, err := utils.AuditPlaceholders()
+	defer func() {
+		scenario.audit.AuditScenarioStep(scenario.currentStep, stepTrace.String(), payload, err)
+	}()
+	var command string
+	switch inspectionType {
+	case "process":
+		command = "ps"
+	case "namespace":
+		command = "lsns -n"
+	default:
+		err = utils.ReformatError("Unsupported value provided for inspection type")
+		return
+	}
+	entrypoint := strings.Join(constructors.DefaultEntrypoint(), " ")
+	exitCode, stdout, err := conn.ExecCommand(command, scenario.namespace, scenario.pods[0])
+
+	if err != nil {
+		// TODO: Validate that this fails as expected
+		switch command {
+		case "ps":
+			stepTrace.WriteString("Validate that the container's entrypoint is PID 1 in the process tree; ")
+			// NOTE: This particular expectation depends on using DefaultPodSecurityContext during the previous step
+			//       Also, this explicitly assumes that we're using the alpine distro 'ps' (output is different for ubuntu, for example)
+			expected := fmt.Sprintf("1 1000      0:00 %s", entrypoint)
+			if !strings.Contains(stdout, expected) {
+				err = utils.ReformatError("An entrypoint different from the container's was found for PID 1, suggesting hostPID was used")
+			}
+		case "lsns -n":
+			stepTrace.WriteString("Validate that no namespace has an entrypoint different from the container's entrypoint; ")
+			stdoutLines := strings.Split(stdout, "\n")
+			for _, entry := range stdoutLines {
+				if entry != "" && !strings.Contains(entry, entrypoint) {
+					err = utils.ReformatError("A namespace is visible that uses a different entrypoint from the container, suggesting that hostIPC was used")
+				}
+			}
+		}
+	}
+
+	payload = struct {
+		Command    string
+		ExitCode   int
+		Stdout     string
+		Entrypoint string
+	}{
+		Command:    command,
+		ExitCode:   exitCode,
+		Stdout:     stdout,
+		Entrypoint: entrypoint,
+	}
+	return
 }
 
 // Name presents the name of this probe for external reference
@@ -236,10 +316,7 @@ func (probe probeStruct) ProbeInitialize(ctx *godog.TestSuiteContext) {
 	})
 }
 
-// ScenarioInitialize initialises the specific test steps.  This is essentially the creation of the test
-// which reflects the tests described in the events directory.  There must be a test step registered for
-// each line in the feature files. Note: Godog will output stub steps and implementations if it doesn't find
-// a step / function defined.  See: https://github.com/cucumber/godog#example.
+// ScenarioInitialize initializes the specific test steps
 func (probe probeStruct) ScenarioInitialize(ctx *godog.ScenarioContext) {
 
 	ctx.BeforeScenario(func(s *godog.Scenario) {
@@ -249,10 +326,14 @@ func (probe probeStruct) ScenarioInitialize(ctx *godog.ScenarioContext) {
 	// Background
 	ctx.Step(`^a Kubernetes cluster exists which we can deploy into$`, scenario.aKubernetesClusterIsDeployed)
 
-	// Scenarios
+	// Use for steps that have yet to be written
+	ctx.Step(`^TODO: "([^"]*)"$`, scenario.toDo)
+
+	// Parameterized Scenarios
 	ctx.Step(`^pod creation "([^"]*)" with "([^"]*)" set to "([^"]*)" in the pod spec$`, scenario.podCreationResultsWithXSetToYInThePodSpec)
 	ctx.Step(`^pod creation "([^"]*)" with "([^"]*)" set to "([^"]*)" in the pod spec$`, scenario.podCreationResultsWithXSetToYInThePodSpec)
 	ctx.Step(`^the execution of a "([^"]*)" command inside the Pod is "([^"]*)"$`, scenario.theExecutionOfAXCommandInsideThePodIsY)
+	ctx.Step(`^a "([^"]*)" inspection should only show the container processes$`, scenario.aXInspectionShouldOnlyShowTheContainerProcesses)
 
 	ctx.AfterScenario(func(s *godog.Scenario, err error) {
 		afterScenario(scenario, probe, s, err)
