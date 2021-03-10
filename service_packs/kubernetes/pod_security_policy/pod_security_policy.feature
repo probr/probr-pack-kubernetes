@@ -105,3 +105,30 @@ Feature: Maximise security through Pod Security Policies
             | VALUE                     |
             | not have a value provided |
             | false                     |
+
+    @k-psp-007
+    Scenario: Prevent a deployment from running with access to the host's network namespace
+
+        The HostNetwork flag controls whether the pod may use the node network namespace. Doing so gives the pod access
+        to the loopback device, services listening on localhost, and could be used to snoop on network activity of other
+        pods on the same node.
+
+        See https://kubernetes.io/docs/concepts/policy/pod-security-policy/#host-namespaces
+
+        When pod creation "succeeds" with "hostNetwork" set to "false" in the pod spec
+        Then pod creation "fails" with "hostNetwork" set to "true" in the pod spec
+
+    @k-psp-008
+    Scenario: Prevent execution of commands that allow access to the host's network namespace access by default
+
+        By default Pods that don't specify whether access to host's network namespace is required should not be able to access the host's network namespace.
+
+        See https://kubernetes.io/docs/concepts/policy/pod-security-policy/#privileged
+
+        When pod creation "succeeds" with "hostNetwork" set to "<VALUE>" in the pod spec
+        Then the PodIP and HostIP have different values
+
+        Examples:
+            | VALUE                     |
+            | not have a value provided |
+            | false                     |

@@ -90,6 +90,7 @@ func (scenario *scenarioState) podCreationResultsWithXSetToYInThePodSpec(result,
 	//    'allowPrivilegeEscalation'
 	//    'hostPID'
 	//    'hostIPC'
+	//    'hostNetwork'
 	//
 	// Supported values:
 	//    'true'
@@ -135,6 +136,8 @@ func (scenario *scenarioState) podCreationResultsWithXSetToYInThePodSpec(result,
 			podObject.Spec.HostPID = boolValue
 		case "hostIPC":
 			podObject.Spec.HostIPC = boolValue
+		case "hostNetwork":
+			podObject.Spec.HostNetwork = boolValue
 		default:
 			err = utils.ReformatError("Unsupported key provided: %s", key) // No payload is necessary if an invalid key was provided
 			return err
@@ -161,7 +164,6 @@ func (scenario *scenarioState) podCreationResultsWithXSetToYInThePodSpec(result,
 			}
 		}
 	}
-
 	payload = struct {
 		RequestedPod  *apiv1.Pod
 		CreatedPod    *apiv1.Pod
@@ -295,6 +297,32 @@ func (scenario *scenarioState) aXInspectionShouldOnlyShowTheContainerProcesses(i
 	return
 }
 
+func (scenario *scenarioState) thePodIPAndHostIPHaveDifferentValues() (err error) {
+	stepTrace, payload, err := utils.AuditPlaceholders()
+	defer func() {
+		scenario.audit.AuditScenarioStep(scenario.currentStep, stepTrace.String(), payload, err)
+	}()
+
+	stepTrace.WriteString(fmt.Sprintf("Retrieve IP values from created pod; "))
+	podIP, hostIP, err := conn.GetPodIPs(config.Vars.ServicePacks.Kubernetes.ProbeNamespace, scenario.pods[0])
+
+	stepTrace.WriteString(fmt.Sprintf("Validate that PodIP and HostIP have different values; "))
+	if err != nil && podIP == hostIP {
+		err = utils.ReformatError("Pod IP and Host IP are identical, but should not be")
+	}
+
+	payload = struct {
+		PodName string
+		PodIP   string
+		HostIP  string
+	}{
+		PodName: scenario.pods[0],
+		PodIP:   podIP,
+		HostIP:  hostIP,
+	}
+	return
+}
+
 // Name presents the name of this probe for external reference
 func (probe probeStruct) Name() string {
 	return "pod_security_policy"
@@ -334,6 +362,7 @@ func (probe probeStruct) ScenarioInitialize(ctx *godog.ScenarioContext) {
 	ctx.Step(`^pod creation "([^"]*)" with "([^"]*)" set to "([^"]*)" in the pod spec$`, scenario.podCreationResultsWithXSetToYInThePodSpec)
 	ctx.Step(`^the execution of a "([^"]*)" command inside the Pod is "([^"]*)"$`, scenario.theExecutionOfAXCommandInsideThePodIsY)
 	ctx.Step(`^a "([^"]*)" inspection should only show the container processes$`, scenario.aXInspectionShouldOnlyShowTheContainerProcesses)
+	ctx.Step(`^the PodIP and HostIP have different values$`, scenario.thePodIPAndHostIPHaveDifferentValues)
 
 	ctx.AfterScenario(func(s *godog.Scenario, err error) {
 		afterScenario(scenario, probe, s, err)
