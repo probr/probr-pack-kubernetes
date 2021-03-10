@@ -201,24 +201,18 @@ func (connection *Conn) ExecCommand(cmd, namespace, podName string) (status int,
 	return
 }
 
-// GetPodIPs will return a pod if it exists, waiting for pod to enter running state if necessary
-func (connection *Conn) GetPodIPs(namespace, podName string) (string, string, error) {
+// GetPodIPs will retrieve a pod by name and return its IP and its host's IP
+func (connection *Conn) GetPodIPs(namespace, podName string) (podIP string, hostIP string, err error) {
 	connection.waitForPod(namespace, podName)
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	pods, err := connection.clientSet.CoreV1().Pods(namespace).List(ctx, metav1.ListOptions{})
+	pod, err := connection.clientSet.CoreV1().Pods(namespace).Get(ctx, podName, metav1.GetOptions{})
 	if err != nil {
-		return "", "", err
+		return
 	}
-	log.Printf("[DEBUG] searching for pod %s among pods [%v]", podName, pods)
-	for _, pod := range pods.Items {
-		if pod.Name == podName {
-			return pod.Status.PodIP, pod.Status.HostIP, nil
-		}
-	}
-	return "", "", utils.ReformatError("Pod not found")
+	return pod.Status.PodIP, pod.Status.HostIP, nil
 }
 
 func (connection *Conn) setClientConfig() {

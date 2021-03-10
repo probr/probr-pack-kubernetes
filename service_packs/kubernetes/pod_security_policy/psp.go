@@ -91,17 +91,24 @@ func (scenario *scenarioState) podCreationResultsWithXSetToYInThePodSpec(result,
 	//    'hostPID'
 	//    'hostIPC'
 	//    'hostNetwork'
+	//    'user'
 	//
 	// Supported values:
 	//    'true'
 	//    'false'
 	//    'not have a value provided'
+	//    Any whole number such as '0' or '1000'
 
 	stepTrace, payload, err := utils.AuditPlaceholders()
 	defer func() {
 		scenario.audit.AuditScenarioStep(scenario.currentStep, stepTrace.String(), payload, err)
 	}()
 	var boolValue, useValue, shouldCreate bool
+	var intValue int64
+
+	stepTrace.WriteString(fmt.Sprintf("Build a pod spec with default values; "))
+	securityContext := constructors.DefaultContainerSecurityContext()
+	podObject := constructors.PodSpec(Probe.Name(), config.Vars.ServicePacks.Kubernetes.ProbeNamespace, securityContext)
 
 	switch result {
 	case "succeeds":
@@ -113,7 +120,14 @@ func (scenario *scenarioState) podCreationResultsWithXSetToYInThePodSpec(result,
 		return err
 	}
 
-	if value != "not have a value provided" {
+	if key == "user" {
+		intValue, err = strconv.ParseInt(value, 10, 64)
+		if err != nil {
+			err = utils.ReformatError("Expected value to be a whole number, but found '%s' (%s)", value, err) // No payload is necessary if an invalid value was provided
+			return err
+		}
+		podObject.Spec.SecurityContext.RunAsUser = &intValue
+	} else if value != "not have a value provided" {
 		useValue = true
 		boolValue, err = strconv.ParseBool(value)
 		if err != nil {
@@ -121,11 +135,6 @@ func (scenario *scenarioState) podCreationResultsWithXSetToYInThePodSpec(result,
 			return err
 		}
 	}
-
-	stepTrace.WriteString(fmt.Sprintf("Build a pod spec with default values; "))
-	securityContext := constructors.DefaultContainerSecurityContext()
-	podObject := constructors.PodSpec(Probe.Name(), config.Vars.ServicePacks.Kubernetes.ProbeNamespace, securityContext)
-	//TODO: Unit test that this always is true: len(podObject.Spec.Containers) > 0
 
 	if useValue {
 		stepTrace.WriteString(fmt.Sprintf("Set '%v' to '%v' in pod spec; ", key, value))
@@ -201,8 +210,10 @@ func (scenario *scenarioState) theExecutionOfAXCommandInsideThePodIsY(permission
 	switch permission {
 	case "non-privileged":
 		cmd = "ls"
-	case "privileged":
+	case "sudo":
 		cmd = "sudo ls"
+	case "root":
+		cmd = "touch /dev/probr"
 	default:
 		err = utils.ReformatError("Unexpected value provided for command permission type: %s", permission) // No payload is necessary if an invalid value was provided
 		return err
@@ -212,9 +223,12 @@ func (scenario *scenarioState) theExecutionOfAXCommandInsideThePodIsY(permission
 	switch result {
 	case "successful":
 		expectedExitCode = 0
-	case "rejected":
-		expectedExitCode = 126 // If a command is found but is not executable, the return status is 126
+	case "unsuccessful":
+		expectedExitCode = 1
+	case "not executable":
+		// If a command is found but is not executable, the return status is 126
 		// Known issue: we can't guarantee that the 126 recieved by kubectl isn't a masked 127
+		expectedExitCode = 126
 	default:
 		err = utils.ReformatError("Unexpected value provided for expected command result: %s", result) // No payload is necessary if an invalid value was provided
 		return err
