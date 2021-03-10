@@ -1,352 +1,283 @@
-// Package general provides the implementation required to execute the feature-based test cases
-// described in the the 'events' directory.
+// Package general provides the implementation required to execute the BDD tests described in general.feature file
 package general
 
 import (
 	"fmt"
 	"log"
+	"net/url"
 	"strings"
 
 	apiv1 "k8s.io/api/core/v1"
-	rbacv1 "k8s.io/api/rbac/v1"
-	v1 "k8s.io/api/rbac/v1"
 
 	"github.com/cucumber/godog"
 
+	"github.com/citihub/probr/audit"
 	"github.com/citihub/probr/config"
 	"github.com/citihub/probr/service_packs/coreengine"
 	"github.com/citihub/probr/service_packs/kubernetes"
+	"github.com/citihub/probr/service_packs/kubernetes/connection"
+	"github.com/citihub/probr/service_packs/kubernetes/constructors"
 	"github.com/citihub/probr/utils"
 )
 
 type probeStruct struct{}
 
+var conn connection.Connection
+
+type scenarioState struct {
+	name        string
+	currentStep string
+	namespace   string
+	audit       *audit.ScenarioAudit
+	probe       *audit.Probe
+	pods        []string
+}
+
 // Probe meets the service pack interface for adding the logic from this file
 var Probe probeStruct
+var scenario scenarioState
 
-// General
-func (s *scenarioState) aKubernetesClusterIsDeployed() error {
-	description, payload, error := kubernetes.ClusterIsDeployed()
-	defer func() {
-		s.audit.AuditScenarioStep(s.currentStep, description, payload, error)
-	}()
-	return error //  ClusterIsDeployed will create a fatal error if kubeconfig doesn't validate
-}
-
-//@CIS-5.1.3
-// I inspect the "<Roles / Cluster Roles>" that are configured
-func (s *scenarioState) iInspectTheThatAreConfigured(roleLevel string) error {
-	stepTrace, payload, err := utils.AuditPlaceholders()
-	defer func() {
-		// Standard auditing logic to ensures panics are also audited
-		s.audit.AuditScenarioStep(s.currentStep, stepTrace.String(), payload, err)
-	}()
-
-	if roleLevel == "Cluster Roles" {
-		stepTrace.WriteString("Retrieving instance cluster roles; ")
-		l, e := kubernetes.GetKubeInstance().GetClusterRolesByResource("*")
-		err = e
-		s.wildcardRoles = l
-	} else if roleLevel == "Roles" {
-		stepTrace.WriteString("Retrieving instance roles; ")
-		l, e := kubernetes.GetKubeInstance().GetRolesByResource("*")
-		err = e
-		s.wildcardRoles = l
-	}
-	if err != nil {
-		err = utils.ReformatError("Could not retrieve role level '%v': %v", roleLevel, err)
-	}
-
-	stepTrace.WriteString("Stored any retrieved wildcard roles in state for following steps; ")
-	payload = struct {
-		PodState kubernetes.PodState
-	}{s.podState}
-	return err
-}
-
-func (s *scenarioState) iShouldOnlyFindWildcardsInKnownAndAuthorisedConfigurations() error {
+func (scenario *scenarioState) aKubernetesClusterIsDeployed() error {
 	// Standard auditing logic to ensures panics are also audited
 	stepTrace, payload, err := utils.AuditPlaceholders()
 	defer func() {
-		s.audit.AuditScenarioStep(s.currentStep, stepTrace.String(), payload, err)
+		scenario.audit.AuditScenarioStep(scenario.currentStep, stepTrace.String(), payload, err)
 	}()
-
-	//we strip out system/known entries in the cluster roles & roles call
-	var wildcardCount int
-	//	wildcardCount := len(s.wildcardRoles.([]interface{}))
-	stepTrace.WriteString("Removing known entries from the cluster roles; ")
-	switch s.wildcardRoles.(type) {
-	case *[]v1.Role:
-		wildCardRoles := s.wildcardRoles.(*[]rbacv1.Role)
-		wildcardCount = len(*wildCardRoles)
-	case *[]v1.ClusterRole:
-		wildCardRoles := s.wildcardRoles.(*[]rbacv1.ClusterRole)
-		wildcardCount = len(*wildCardRoles)
-	default:
-	}
-
-	stepTrace.WriteString("Validate that no unexpected wildcards were found; ")
-	if wildcardCount > 0 {
-		err = utils.ReformatError("roles exist with wildcarded resources")
-	}
+	stepTrace.WriteString(fmt.Sprintf("Validate that a cluster can be reached using the specified kube config and context; "))
 
 	payload = struct {
-		PodState kubernetes.PodState
-	}{s.podState}
-
-	return err
-}
-
-//@CIS-5.6.3
-func (s *scenarioState) iAttemptToCreateADeploymentWhichDoesNotHaveASecurityContext() error {
-	// Standard auditing logic to ensures panics are also audited
-	stepTrace, payload, err := utils.AuditPlaceholders()
-	defer func() {
-		s.audit.AuditScenarioStep(s.currentStep, stepTrace.String(), payload, err)
-	}()
-
-	stepTrace.WriteString("Create unique pod name; ")
-	cname := "probr-general"
-	podName := kubernetes.GenerateUniquePodName(cname)
-
-	stepTrace.WriteString("Attempt to deploy ProbeImage without a security context; ")
-	image := config.Vars.ServicePacks.Kubernetes.AuthorisedContainerRegistry + "/" + config.Vars.ServicePacks.Kubernetes.ProbeImage
-	pod, podAudit, err := kubernetes.GetKubeInstance().CreatePod(podName, "probr-general-test-ns", cname, image, true, nil, s.probe)
-
-	stepTrace.WriteString(fmt.Sprintf(
-		"Ensure failure to deploy returns '%s'; ", kubernetes.UndefinedPodCreationErrorReason))
-	err = kubernetes.ProcessPodCreationResult(&s.podState, pod, kubernetes.UndefinedPodCreationErrorReason, err)
-
-	payload = kubernetes.PodPayload{Pod: pod, PodAudit: podAudit}
-	return err
-}
-
-func (s *scenarioState) theDeploymentIsRejected() error {
-	// Standard auditing logic to ensures panics are also audited
-	stepTrace, payload, err := utils.AuditPlaceholders()
-	defer func() {
-		s.audit.AuditScenarioStep(s.currentStep, stepTrace.String(), payload, err)
-	}()
-
-	//looking for a non-nil creation error
-	if s.podState.CreationError == nil {
-		err = utils.ReformatError("pod %v was created successfully. Test fail.", s.podState.PodName)
+		KubeConfigPath string
+		KubeContext    string
+	}{
+		config.Vars.ServicePacks.Kubernetes.KubeConfigPath,
+		config.Vars.ServicePacks.Kubernetes.KubeContext,
 	}
 
-	stepTrace.WriteString("Validates that an expected creation error occurred in the previous step; ")
-	payload = struct {
-		PodState kubernetes.PodState
-	}{s.podState}
-
+	err = conn.ClusterIsDeployed() // Must be assigned to 'err' be audited
 	return err
 }
 
-//@CIS-6.10.1
-// PENDING IMPLEMENTATION
-func (s *scenarioState) iShouldNotBeAbleToAccessTheKubernetesWebUI() error {
-	//TODO: will be difficult to test this.  To access it, a proxy needs to be created:
-	//az aks browse --resource-group rg-probr-all-policies --name ProbrAllPolicies
-	//which will then open a browser at:
-	//http://127.0.0.1:8001/api/v1/namespaces/kube-system/services/https:kubernetes-dashboard:/proxy/#/login
-	//I don't think this is going to be easy to do from here
-	//Is there another test?  Or is it sufficient to verify that no kube-dashboard is running?
+func (scenario *scenarioState) theKubernetesWebUIIsDisabled() error {
 
-	// Standard auditing logic to ensures panics are also audited
 	stepTrace, payload, err := utils.AuditPlaceholders()
 	defer func() {
-		s.audit.AuditScenarioStep(s.currentStep, stepTrace.String(), payload, err)
-	}()
-	stepTrace.WriteString("PENDING IMPLEMENTATION")
-	return godog.ErrPending
-}
-
-func (s *scenarioState) theKubernetesWebUIIsDisabled() error {
-	// Standard auditing logic to ensures panics are also audited
-	stepTrace, payload, err := utils.AuditPlaceholders()
-	defer func() {
-		s.audit.AuditScenarioStep(s.currentStep, stepTrace.String(), payload, err)
+		scenario.audit.AuditScenarioStep(scenario.currentStep, stepTrace.String(), payload, err)
 	}()
 
 	kubeSystemNamespace := config.Vars.ServicePacks.Kubernetes.SystemNamespace
 	dashboardPodNamePrefix := config.Vars.ServicePacks.Kubernetes.DashboardPodNamePrefix
-
-	// TODO: Minor bug leading to false positive
-	// If incorrect value for system namespace is specified in config, such as 'kube-system-invalid', then the test would still Pass as the namespace is not being parsed.
-	// Ideal implementation would first check if namespace is valid.
-
-	//look for the dashboard pod in the kube-system ns
-	pl, err := kubernetes.GetKubeInstance().GetPods(kubeSystemNamespace)
-	var name string
-
-	if err != nil {
-		err = utils.ReformatError("Probe step not run. Error raised when trying to retrieve pods: %v", err)
-	} else {
-		//a "pass" is the absence of a "kubernetes-dashboard" pod
-		for _, v := range pl.Items {
-			if strings.HasPrefix(v.Name, dashboardPodNamePrefix) {
-				err = utils.ReformatError("(%v) pod found (%v) - test fail", dashboardPodNamePrefix, v.Name)
-				name = v.Name
-			}
-		}
-	}
-
 	stepTrace.WriteString(fmt.Sprintf("Attempt to find a pod in the '%s' namespace with the prefix '%s'; ", kubeSystemNamespace, dashboardPodNamePrefix))
-	payload = struct {
-		PodState         kubernetes.PodState
-		PodName          string
-		PodDashBoardName string
-	}{s.podState, s.podState.PodName, name}
 
-	return err
-}
+	stepTrace.WriteString(fmt.Sprintf("Get all pods from '%s' namespace; ", kubeSystemNamespace))
+	podList, getError := conn.GetPodsByNamespace(kubeSystemNamespace) // Also validates if provided namespace is valid
+	if getError != nil {
+		err = utils.ReformatError("An error occurred while retrieving pods from '%s' namespace. Error: %s", kubeSystemNamespace, getError)
+		return err
+	}
 
-// NetworkAccess is the section of the kubernetes package which provides the kubernetes interactions required to support
-// network access scenarios.
-var na NetworkAccess
-
-// SetNetworkAccess allows injection of a specific NetworkAccess helper.
-func SetNetworkAccess(n NetworkAccess) {
-	na = n
-}
-
-func (s *scenarioState) aPodIsDeployedInTheCluster() error {
-	// Standard auditing logic to ensures panics are also audited
-	stepTrace, payload, err := utils.AuditPlaceholders()
-	defer func() {
-		s.audit.AuditScenarioStep(s.currentStep, stepTrace.String(), payload, err)
-	}()
-
-	var podAudit *kubernetes.PodAudit
-	var pod *apiv1.Pod
-	if s.podName != "" {
-		//only one pod is needed for all scenarios in this probe
-		log.Printf("[DEBUG] Pod %v has already been created - reusing the pod", s.podName)
-	} else {
-		pd, pa, e := na.SetupNetworkAccessProbePod(s.probe)
-		podAudit = pa
-		pod = pd
-		if e != nil {
-			err = e
-		} else if pod == nil {
-			err = utils.ReformatError("Failed to setup network access test pod")
-			log.Print(err)
-		} else {
-			s.podName = pod.GetObjectMeta().GetName()
+	stepTrace.WriteString(fmt.Sprintf("Confirm a pod with '%s' prefix doesn't exist; ", dashboardPodNamePrefix))
+	for _, pod := range podList.Items {
+		if strings.HasPrefix(pod.Name, dashboardPodNamePrefix) {
+			err = utils.ReformatError("Dashboard UI Pod was found: '%s'", pod.Name)
+			break
 		}
 	}
 
-	stepTrace.WriteString(fmt.Sprintf(
-		"Verifying the Pod %s deployed in the cluster", s.podState.PodName))
-	payload = kubernetes.PodPayload{Pod: pod, PodAudit: podAudit}
+	payload = struct {
+		KubeSystemNamespace    string
+		DashboardPodNamePrefix string
+	}{
+		KubeSystemNamespace:    kubeSystemNamespace,
+		DashboardPodNamePrefix: dashboardPodNamePrefix,
+	}
 
 	return err
 }
 
-func (s *scenarioState) aProcessInsideThePodEstablishesADirectHTTPSConnectionTo(url string) error {
+func (scenario *scenarioState) aPodIsDeployedInTheCluster() error {
+
 	// Standard auditing logic to ensures panics are also audited
 	stepTrace, payload, err := utils.AuditPlaceholders()
 	defer func() {
-		s.audit.AuditScenarioStep(s.currentStep, stepTrace.String(), payload, err)
+		scenario.audit.AuditScenarioStep(scenario.currentStep, stepTrace.String(), payload, err)
 	}()
 
-	code, err := na.AccessURL(&s.podName, &url)
+	stepTrace.WriteString(fmt.Sprintf("Build a pod spec with default values; "))
+	securityContext := constructors.DefaultContainerSecurityContext()
+	podObject := constructors.PodSpec(Probe.Name(), config.Vars.ServicePacks.Kubernetes.ProbeNamespace, securityContext)
 
-	if err != nil {
-		err = utils.ReformatError("[ERROR] Error raised when attempting to access URL: %v", err)
-		log.Print(err)
+	stepTrace.WriteString(fmt.Sprintf("Create pod from spec; "))
+	createdPodObject, creationErr := scenario.createPodfromObject(podObject)
+
+	if creationErr != nil {
+		err = utils.ReformatError("Pod creation did not succeed: %v", creationErr)
 	}
 
-	//hold on to the code
-	s.httpStatusCode = code
-
-	stepTrace.WriteString(fmt.Sprintf(
-		"Proces inside the pod established http connection with url '%s',", url))
 	payload = struct {
-		PodState kubernetes.PodState
-	}{s.podState}
+		RequestedPod  *apiv1.Pod
+		CreatedPod    *apiv1.Pod
+		CreationError error
+	}{
+		RequestedPod:  podObject,
+		CreatedPod:    createdPodObject,
+		CreationError: creationErr,
+	}
 
 	return err
 }
 
-func (s *scenarioState) accessIs(accessResult string) error {
+func (scenario *scenarioState) theResultOfAProcessInsideThePodEstablishingADirectHTTPConnectionToXIsY(urlAddress, result string) error {
+	// Supported values for urlAddress:
+	//	A valid absolute path URL with http(s) prefix
+	//
+	// Supported values for result:
+	//	'blocked'
+
 	// Standard auditing logic to ensures panics are also audited
 	stepTrace, payload, err := utils.AuditPlaceholders()
 	defer func() {
-		s.audit.AuditScenarioStep(s.currentStep, stepTrace.String(), payload, err)
+		scenario.audit.AuditScenarioStep(scenario.currentStep, stepTrace.String(), payload, err)
 	}()
 
-	if accessResult == "blocked" {
-		//then the result should be anything other than 200
-		if s.httpStatusCode == 200 {
-			//it's a fail:
-			err = utils.ReformatError("got HTTP Status Code %v - failed", s.httpStatusCode)
-		}
+	// Guard clause - Validate url
+	if _, urlErr := url.ParseRequestURI(urlAddress); urlErr != nil {
+		err = utils.ReformatError("Invalid url provided.")
+		return err
 	}
 
-	stepTrace.WriteString(fmt.Sprintf(
-		"The access result is %s,", accessResult))
+	// Guard clause - Ensure pod was created in previous step
+	if len(scenario.pods) == 0 {
+		err = utils.ReformatError("Pod failed to create in the previous step")
+		return err
+	}
+
+	// Validate input value
+	var expectedCurlExitCode int
+	switch result {
+	case "blocked":
+		expectedCurlExitCode = 6
+		// Expecting curl exit code 6 (Couldn't resolve host) //TODO Confirm exit code is 7 in GCP
+		// Ref: https://everything.curl.dev/usingcurl/returns
+	default:
+		err = utils.ReformatError("Unexpected value provided for expected command result: %s", result)
+		return err
+	}
+
+	// Create a curl command to access the supplied url and only show http response in stdout.
+	cmd := "curl -s -o /dev/null -I -L -w %{http_code} " + urlAddress
+
+	stepTrace.WriteString(fmt.Sprintf("Attempt to run command in the pod: '%s'; ", cmd))
+	exitCode, stdOut, cmdErr := conn.ExecCommand(cmd, scenario.namespace, scenario.pods[0])
+
+	// Validate that no internal error occurred during execution of curl command
+	if cmdErr != nil && exitCode == -1 {
+		err = utils.ReformatError("Error raised when attempting to execute curl command inside container: %v", cmdErr)
+		return err
+	}
+
+	// TODO: Confirm this implementation:
+	// Expected Exit Code from Curl command is:	6
+
+	stepTrace.WriteString("Check expected exit code was raised from curl command; ")
+	if exitCode != expectedCurlExitCode {
+		err = utils.ReformatError("Unexpected exit code: %d Error: %v", exitCode, cmdErr)
+		return err
+	}
+
 	payload = struct {
-		PodState kubernetes.PodState
-	}{s.podState}
+		PodName              string
+		Namespace            string
+		Command              string
+		ExpectedCurlExitCode int
+		CurlExitCode         int
+		StdOut               string
+	}{
+		PodName:              scenario.pods[0],
+		Namespace:            scenario.namespace,
+		Command:              cmd,
+		ExpectedCurlExitCode: expectedCurlExitCode,
+		CurlExitCode:         exitCode,
+		StdOut:               stdOut,
+	}
 
 	return err
 }
 
 // Name presents the name of this probe for external reference
-func (p probeStruct) Name() string {
+func (probe probeStruct) Name() string {
 	return "general"
 }
 
 // Path presents the path of these feature files for external reference
-func (p probeStruct) Path() string {
-	return coreengine.GetFeaturePath("service_packs", "kubernetes", p.Name())
+func (probe probeStruct) Path() string {
+	return coreengine.GetFeaturePath("service_packs", "kubernetes", probe.Name())
 }
 
 // ProbeInitialize handles any overall Test Suite initialisation steps.  This is registered with the
 // test handler as part of the init() function.
-func (p probeStruct) ProbeInitialize(ctx *godog.TestSuiteContext) {
+func (probe probeStruct) ProbeInitialize(ctx *godog.TestSuiteContext) {
 
-	ctx.BeforeSuite(func() {}) //nothing for now
+	ctx.BeforeSuite(func() {
+		conn = connection.Get()
+	})
 
 	ctx.AfterSuite(func() {})
 
 }
 
-// ScenarioInitialize initialises the specific test steps.  This is essentially the creation of the test
-// which reflects the tests described in the events directory.  There must be a test step registered for
-// each line in the feature files. Note: Godog will output stub steps and implementations if it doesn't find
-// a step / function defined.  See: https://github.com/cucumber/godog#example.
-func (p probeStruct) ScenarioInitialize(ctx *godog.ScenarioContext) {
-	ps := scenarioState{}
+// ScenarioInitialize provides initialization logic before each scenario is executed
+func (probe probeStruct) ScenarioInitialize(ctx *godog.ScenarioContext) {
 
 	ctx.BeforeScenario(func(s *godog.Scenario) {
-		beforeScenario(&ps, p.Name(), s)
+		beforeScenario(&scenario, probe.Name(), s)
 	})
 
-	//general
-	ctx.Step(`^a Kubernetes cluster is deployed$`, ps.aKubernetesClusterIsDeployed)
+	// Background
+	ctx.Step(`^a Kubernetes cluster exists which we can deploy into$`, scenario.aKubernetesClusterIsDeployed)
 
-	//@CIS-5.1.3
-	ctx.Step(`^I inspect the "([^"]*)" that are configured$`, ps.iInspectTheThatAreConfigured)
-	ctx.Step(`^I should only find wildcards in known and authorised configurations$`, ps.iShouldOnlyFindWildcardsInKnownAndAuthorisedConfigurations)
-
-	//@CIS-5.6.3
-	ctx.Step(`^I attempt to create a deployment which does not have a Security Context$`, ps.iAttemptToCreateADeploymentWhichDoesNotHaveASecurityContext)
-	ctx.Step(`^the deployment is rejected$`, ps.theDeploymentIsRejected)
-
-	ctx.Step(`^I should not be able to access the Kubernetes Web UI$`, ps.iShouldNotBeAbleToAccessTheKubernetesWebUI)
-	ctx.Step(`^the Kubernetes Web UI is disabled$`, ps.theKubernetesWebUIIsDisabled)
+	// Steps
+	ctx.Step(`^the Kubernetes Web UI is disabled$`, scenario.theKubernetesWebUIIsDisabled)
+	ctx.Step(`^a pod is deployed in the cluster$`, scenario.aPodIsDeployedInTheCluster)
+	ctx.Step(`^the result of a process inside the pod establishing a direct http\(s\) connection to "([^"]*)" is "([^"]*)"$`, scenario.theResultOfAProcessInsideThePodEstablishingADirectHTTPConnectionToXIsY)
 
 	ctx.AfterScenario(func(s *godog.Scenario, err error) {
-		kubernetes.GetKubeInstance().DeletePod(ps.podState.PodName, kubernetes.Namespace, p.Name())
-		coreengine.LogScenarioEnd(s)
+		afterScenario(scenario, probe, s, err)
 	})
 
 	ctx.BeforeStep(func(st *godog.Step) {
-		ps.currentStep = st.Text
+		scenario.currentStep = st.Text
 	})
 
 	ctx.AfterStep(func(st *godog.Step, err error) {
-		ps.currentStep = ""
+		scenario.currentStep = ""
 	})
+}
+
+func beforeScenario(s *scenarioState, probeName string, gs *godog.Scenario) {
+	s.name = gs.Name
+	s.probe = audit.State.GetProbeLog(probeName)
+	s.audit = audit.State.GetProbeLog(probeName).InitializeAuditor(gs.Name, gs.Tags)
+	s.pods = make([]string, 0)
+	s.namespace = config.Vars.ServicePacks.Kubernetes.ProbeNamespace
+	coreengine.LogScenarioStart(gs)
+}
+
+func afterScenario(scenario scenarioState, probe probeStruct, gs *godog.Scenario, err error) {
+	if kubernetes.GetKeepPodsFromConfig() == false {
+		for _, podName := range scenario.pods {
+			err = conn.DeletePodIfExists(podName, scenario.namespace, probe.Name())
+			if err != nil {
+				log.Printf(fmt.Sprintf("[ERROR] Could not retrieve pod from namespace '%s' for deletion: %s", scenario.namespace, err))
+			}
+		}
+	}
+	coreengine.LogScenarioEnd(gs)
+}
+
+func (scenario *scenarioState) createPodfromObject(podObject *apiv1.Pod) (createdPodObject *apiv1.Pod, err error) {
+	createdPodObject, err = conn.CreatePodFromObject(podObject, Probe.Name())
+	if err == nil {
+		scenario.pods = append(scenario.pods, createdPodObject.ObjectMeta.Name)
+	}
+	return
 }

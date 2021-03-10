@@ -32,7 +32,7 @@ func setFromEnvOrDefaults(e *VarOptions) {
 	e.set(&e.ServicePacks.Kubernetes.UnapprovedHostPort, "PROBR_UNAPPROVED_HOSTPORT", "22")
 	e.set(&e.ServicePacks.Kubernetes.SystemNamespace, "PROBR_K8S_SYSTEM_NAMESPACE", "kube-system")
 	e.set(&e.ServicePacks.Kubernetes.DashboardPodNamePrefix, "PROBR_K8S_DASHBOARD_PODNAMEPREFIX", "kubernetes-dashboard")
-	e.set(&e.ServicePacks.Kubernetes.ProbeNamespace, "PROBR_K8S_PROBE_NAMESPACE", "probr")
+	e.set(&e.ServicePacks.Kubernetes.ProbeNamespace, "PROBR_K8S_PROBE_NAMESPACE", "probr-general-test-ns")
 	e.set(&e.ServicePacks.Kubernetes.Azure.DefaultNamespaceAIB, "DEFAULT_NS_AZURE_IDENTITY_BINDING", "probr-aib")
 
 	e.set(&e.CloudProviders.Azure.TenantID, "AZURE_TENANT_ID", "")

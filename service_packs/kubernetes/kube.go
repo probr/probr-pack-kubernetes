@@ -81,8 +81,6 @@ type Kubernetes interface {
 	DeleteConfigMap(name string) error
 	GetConstraintTemplates(prefix string) (*map[string]interface{}, error)
 	GetRawResourcesByGrp(g string) (*K8SJSON, error)
-	GetClusterRolesByResource(r string) (*[]rbacv1.ClusterRole, error)
-	GetClusterRoles() (*rbacv1.ClusterRoleList, error)
 }
 
 // Kube provides an implementation of Kubernetes.
@@ -617,50 +615,6 @@ func (k *Kube) GetRawResourcesByGrp(g string) (*K8SJSON, error) {
 	return &j, nil
 }
 
-// GetClusterRolesByResource returns a collection of cluster roles filtered by
-// the supplied resource type.
-func (k *Kube) GetClusterRolesByResource(r string) (*[]rbacv1.ClusterRole, error) {
-	var crs []rbacv1.ClusterRole
-
-	crl, err := k.GetClusterRoles()
-	if err != nil {
-		return &crs, err
-	}
-
-	for _, cr := range crl.Items {
-		log.Printf("[DEBUG] ClusterRole: %+v", cr)
-		if k.meetsResourceFilter(r, &cr.ObjectMeta, &cr.Rules) {
-			//add to results
-			log.Printf("[DEBUG] ClusterRole meets resource filter (%v): %+v", r, cr)
-			crs = append(crs, cr)
-		}
-	}
-
-	return &crs, nil
-}
-
-// GetRolesByResource returns a collection of roles filtered by
-// the supplied resource type.
-func (k *Kube) GetRolesByResource(r string) (*[]rbacv1.Role, error) {
-	var ros []rbacv1.Role
-
-	rl, err := k.GetRoles()
-	if err != nil {
-		return &ros, err
-	}
-
-	for _, ro := range rl.Items {
-		log.Printf("[DEBUG] Role: %+v", ro)
-		if k.meetsResourceFilter(r, &ro.ObjectMeta, &ro.Rules) {
-			//add to results
-			log.Printf("[DEBUG] Role meets resource filter (%v): %+v", r, ro)
-			ros = append(ros, ro)
-		}
-	}
-
-	return &ros, nil
-}
-
 func (k *Kube) meetsResourceFilter(f string, m *v1.ObjectMeta, p *[]rbacv1.PolicyRule) bool {
 
 	//skip system/known roles
@@ -705,36 +659,6 @@ func (k *Kube) skipSystemRole(m *v1.ObjectMeta) bool {
 	}
 
 	return false
-}
-
-// GetClusterRoles retrieves all cluster roles associated with the active cluster.
-func (k *Kube) GetClusterRoles() (*rbacv1.ClusterRoleList, error) {
-	c, err := k.GetClient()
-	if err != nil {
-		// return nil, err
-	}
-
-	cr := c.RbacV1().ClusterRoles()
-
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
-
-	return cr.List(ctx, metav1.ListOptions{LabelSelector: "gatekeeper.sh/system!=yes"})
-}
-
-//GetRoles retrieves all roles associated with the active cluster.
-func (k *Kube) GetRoles() (*rbacv1.RoleList, error) {
-	c, err := k.GetClient()
-	if err != nil {
-		// return nil, err
-	}
-
-	r := c.RbacV1().Roles("")
-
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
-
-	return r.List(ctx, metav1.ListOptions{LabelSelector: "gatekeeper.sh/system!=yes"})
 }
 
 func (k *Kube) toPodCreationErrorCode(err error) *map[PodCreationErrorReason]*PodCreationErrorReason {
