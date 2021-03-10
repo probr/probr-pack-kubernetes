@@ -82,6 +82,8 @@ func (scenario *scenarioState) toDo(todo string) error {
 
 // Attempt to deploy a pod from a default pod spec, with specified modification
 func (scenario *scenarioState) podCreationResultsWithXSetToYInThePodSpec(result, key, value string) error {
+	// TODO: Refactor for readability. Organize similar keys together, such as those accepting similar values
+	//
 	// Supported results:
 	//     'succeeds'
 	//     'fails'
@@ -92,6 +94,7 @@ func (scenario *scenarioState) podCreationResultsWithXSetToYInThePodSpec(result,
 	//    'hostIPC'
 	//    'hostNetwork'
 	//    'user'
+	//    'annotations'
 	//
 	// Supported values:
 	//    'true'
@@ -103,7 +106,7 @@ func (scenario *scenarioState) podCreationResultsWithXSetToYInThePodSpec(result,
 	defer func() {
 		scenario.audit.AuditScenarioStep(scenario.currentStep, stepTrace.String(), payload, err)
 	}()
-	var boolValue, useValue, shouldCreate bool
+	var boolValue, shouldCreate bool
 	var intValue int64
 
 	stepTrace.WriteString(fmt.Sprintf("Build a pod spec with default values; "))
@@ -120,35 +123,43 @@ func (scenario *scenarioState) podCreationResultsWithXSetToYInThePodSpec(result,
 		return err
 	}
 
-	if key == "user" {
+	switch key {
+	case "user":
 		intValue, err = strconv.ParseInt(value, 10, 64)
 		if err != nil {
 			err = utils.ReformatError("Expected value to be a whole number, but found '%s' (%s)", value, err) // No payload is necessary if an invalid value was provided
 			return err
 		}
 		podObject.Spec.SecurityContext.RunAsUser = &intValue
-	} else if value != "not have a value provided" {
-		useValue = true
-		boolValue, err = strconv.ParseBool(value)
-		if err != nil {
-			err = utils.ReformatError("Expected 'true' or 'false' but found '%s'", value) // No payload is necessary if an invalid value was provided
+	case "annotations":
+		switch value {
+		case "include seccomp profile":
+			// continue with default pod spec
+		case "not include seccomp profile":
+			podObject.ObjectMeta.Annotations = nil
+		default:
+			err = utils.ReformatError("Expected 'include seccomp profile' or 'not include seccomp profile', but found '%s'", value) // No payload is necessary if an invalid value was provided
 			return err
 		}
-	}
-
-	if useValue {
-		stepTrace.WriteString(fmt.Sprintf("Set '%v' to '%v' in pod spec; ", key, value))
-		switch key {
-		case "allowPrivilegeEscalation":
-			podObject.Spec.Containers[0].SecurityContext.AllowPrivilegeEscalation = &boolValue
-		case "hostPID":
-			podObject.Spec.HostPID = boolValue
-		case "hostIPC":
-			podObject.Spec.HostIPC = boolValue
-		case "hostNetwork":
-			podObject.Spec.HostNetwork = boolValue
-		default:
-			err = utils.ReformatError("Unsupported key provided: %s", key) // No payload is necessary if an invalid key was provided
+	default:
+		if value == "true" || value == "false" {
+			boolValue, err = strconv.ParseBool(value)
+			stepTrace.WriteString(fmt.Sprintf("Set '%v' to '%v' in pod spec; ", key, value))
+			switch key {
+			case "allowPrivilegeEscalation":
+				podObject.Spec.Containers[0].SecurityContext.AllowPrivilegeEscalation = &boolValue
+			case "hostPID":
+				podObject.Spec.HostPID = boolValue
+			case "hostIPC":
+				podObject.Spec.HostIPC = boolValue
+			case "hostNetwork":
+				podObject.Spec.HostNetwork = boolValue
+			default:
+				err = utils.ReformatError("Unsupported key provided: %s", key) // No payload is necessary if an invalid key was provided
+				return err
+			}
+		} else if value != "not have a value provided" {
+			err = utils.ReformatError("Expected 'true', 'false', or 'not have a value provided', but found '%s'", value) // No payload is necessary if an invalid value was provided
 			return err
 		}
 	}
