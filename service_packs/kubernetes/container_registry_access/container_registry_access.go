@@ -100,8 +100,7 @@ func (scenario *scenarioState) podCreationXWithContainerImageFromYRegistry(expec
 	imageRegistry := getImageFromConfig(isRegistryAuthorized)
 
 	stepTrace.WriteString(fmt.Sprintf("Build a pod spec with default values; "))
-	securityContext := constructors.DefaultContainerSecurityContext()
-	podObject := constructors.PodSpec(Probe.Name(), scenario.namespace, securityContext)
+	podObject := constructors.PodSpec(Probe.Name(), scenario.namespace)
 
 	stepTrace.WriteString(fmt.Sprintf("Set container image registry to appropriate value in pod spec; "))
 	podObject.Spec.Containers[0].Image = imageRegistry

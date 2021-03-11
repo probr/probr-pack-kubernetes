@@ -16,7 +16,7 @@ import (
 )
 
 // PodSpec constructs a simple pod object
-func PodSpec(baseName string, namespace string, containerSecurityContext *apiv1.SecurityContext) *apiv1.Pod {
+func PodSpec(baseName string, namespace string) *apiv1.Pod {
 	name := strings.Replace(baseName, "_", "-", -1)
 	podName := uniquePodName(name)
 	containerName := fmt.Sprintf("%s-probe-pod", name)
@@ -42,7 +42,7 @@ func PodSpec(baseName string, namespace string, containerSecurityContext *apiv1.
 					Image:           DefaultProbrImageName(),
 					ImagePullPolicy: apiv1.PullIfNotPresent,
 					Command:         DefaultEntrypoint(),
-					SecurityContext: containerSecurityContext,
+					SecurityContext: DefaultContainerSecurityContext(),
 				},
 			},
 		},

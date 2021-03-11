@@ -56,9 +56,8 @@ func TestPodSpec(t *testing.T) {
 		{
 			name: "Pod's security context is always the default security context",
 			args: args{
-				baseName:                 "pod",
-				namespace:                "pod",
-				containerSecurityContext: nil,
+				baseName:  "pod",
+				namespace: "pod",
 			},
 			want: func(gotPod *apiv1.Pod, args args, t *testing.T) {
 				if !reflect.DeepEqual(gotPod.Spec.SecurityContext, DefaultPodSecurityContext()) {
@@ -69,28 +68,13 @@ func TestPodSpec(t *testing.T) {
 		{
 			name: "Pod has at least one container",
 			args: args{
-				baseName:                 "pod1",
-				namespace:                "pod1",
-				containerSecurityContext: nil,
+				baseName:  "pod1",
+				namespace: "pod1",
 			},
 			want: func(gotPod *apiv1.Pod, want args, t *testing.T) {
 				gotContainers := gotPod.Spec.Containers
 				if !(len(gotContainers) > 0) {
 					t.Error("PodSpec() did not create a container object, but wanted at least one")
-				}
-			},
-		},
-		{
-			name: "Container security context uses provided value",
-			args: args{
-				baseName:                 "pod2",
-				namespace:                "pod2",
-				containerSecurityContext: DefaultContainerSecurityContext(),
-			},
-			want: func(gotPod *apiv1.Pod, args args, t *testing.T) {
-				gotContainerSC := gotPod.Spec.Containers[0].SecurityContext
-				if !reflect.DeepEqual(gotContainerSC, args.containerSecurityContext) {
-					t.Errorf("PodSpec() got security context %v, but wanted %v", gotContainerSC, args.containerSecurityContext)
 				}
 			},
 		},
@@ -111,9 +95,8 @@ func TestPodSpec(t *testing.T) {
 		{
 			name: "Container uses the default probr image name",
 			args: args{
-				baseName:                 "pod4",
-				namespace:                "pod4",
-				containerSecurityContext: nil,
+				baseName:  "pod4",
+				namespace: "pod4",
 			},
 			want: func(gotPod *apiv1.Pod, args args, t *testing.T) {
 				gotImageName := gotPod.Spec.Containers[0].Image
@@ -126,9 +109,8 @@ func TestPodSpec(t *testing.T) {
 		{
 			name: "Pod uses the provided name",
 			args: args{
-				baseName:                 "pod5",
-				namespace:                "pod5",
-				containerSecurityContext: nil,
+				baseName:  "pod5",
+				namespace: "pod5",
 			},
 			want: func(gotPod *apiv1.Pod, want args, t *testing.T) {
 				gotName := gotPod.ObjectMeta.Name
@@ -140,9 +122,8 @@ func TestPodSpec(t *testing.T) {
 		{
 			name: "Pod uses the provided namespace",
 			args: args{
-				baseName:                 "pod6",
-				namespace:                "pod6",
-				containerSecurityContext: nil,
+				baseName:  "pod6",
+				namespace: "pod6",
 			},
 			want: func(gotPod *apiv1.Pod, want args, t *testing.T) {
 				gotNamespace := gotPod.ObjectMeta.Namespace
@@ -154,7 +135,7 @@ func TestPodSpec(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := PodSpec(tt.args.baseName, tt.args.namespace, tt.args.containerSecurityContext)
+			got := PodSpec(tt.args.baseName, tt.args.namespace)
 			tt.want(got, tt.args, t)
 		})
 	}

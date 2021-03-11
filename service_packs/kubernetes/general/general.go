@@ -103,8 +103,7 @@ func (scenario *scenarioState) aPodIsDeployedInTheCluster() error {
 	}()
 
 	stepTrace.WriteString(fmt.Sprintf("Build a pod spec with default values; "))
-	securityContext := constructors.DefaultContainerSecurityContext()
-	podObject := constructors.PodSpec(Probe.Name(), config.Vars.ServicePacks.Kubernetes.ProbeNamespace, securityContext)
+	podObject := constructors.PodSpec(Probe.Name(), config.Vars.ServicePacks.Kubernetes.ProbeNamespace)
 
 	stepTrace.WriteString(fmt.Sprintf("Create pod from spec; "))
 	createdPodObject, creationErr := scenario.createPodfromObject(podObject)
