@@ -56,6 +56,7 @@ type Kubernetes struct {
 // K8sAzure contains Azure-specific options for the Kubernetes service pack
 type K8sAzure struct {
 	DefaultNamespaceAIB string
+	IdentityNamespace   string
 }
 
 // Storage service pack config options

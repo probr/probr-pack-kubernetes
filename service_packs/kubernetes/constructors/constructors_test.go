@@ -132,6 +132,32 @@ func TestPodSpec(t *testing.T) {
 				}
 			},
 		},
+		{
+			name: "Pod Labels is not nil",
+			args: args{
+				baseName:                 "pod7",
+				namespace:                "pod7",
+				containerSecurityContext: nil,
+			},
+			want: func(gotPod *apiv1.Pod, want args, t *testing.T) {
+				if gotPod.Labels == nil {
+					t.Error("PodSpec() did not create a Labels object, but wanted at least an empty map")
+				}
+			},
+		},
+		{
+			name: "Node Selector contains 'kubernetes.io/os':'linux'",
+			args: args{
+				baseName:                 "pod8",
+				namespace:                "pod8",
+				containerSecurityContext: nil,
+			},
+			want: func(gotPod *apiv1.Pod, want args, t *testing.T) {
+				if gotPod.Spec.NodeSelector["kubernetes.io/os"] != "linux" {
+					t.Error("PodSpec() did not include a node selector 'kubernetes.io/os':'linux'")
+				}
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

@@ -4,6 +4,7 @@ package connection
 import (
 	"bytes"
 	"context"
+	"encoding/json"
 	"fmt"
 	"log"
 	"strings"
@@ -40,6 +41,15 @@ type Connection interface {
 	ExecCommand(command, namespace, podName string) (status int, stdout string, err error)
 	GetPodsByNamespace(namespace string) (*apiv1.PodList, error)
 	GetPodIPs(namespace, podName string) (string, string, error)
+	GetRawResourceByName(apiEndPoint, namespace, resourceType, resourceName string) (resource APIResource, err error)
+	PostRawResource(apiEndPoint string, namespace string, resourceName string, resourceBody interface{}) (resource APIResource, err error)
+}
+
+// APIResource encapsulates the response from a raw/rest call to the Kubernetes API when getting a resource by name
+type APIResource struct {
+	APIVersion string
+	Kind       string
+	Metadata   map[string]string
 }
 
 var instance *Conn
@@ -242,6 +252,80 @@ func (connection *Conn) GetPodIPs(namespace, podName string) (podIP string, host
 		return
 	}
 	return pod.Status.PodIP, pod.Status.HostIP, nil
+}
+
+// GetRawResourceByName makes a 'raw' REST call to the specified K8s api endpoint to get a resource by name and namespace.
+// This is used to interact with available custom resources in the cluster, such as azureidentitybindings.
+// An empty value for 'namespace' means retrieving all resources accross all namespaces
+// Sample request params:
+//	apiEndPoint:	apis/aadpodidentity.k8s.io/v1
+//	namespace:		"demo-ns"
+//	resourceName:	"azureidentitybindings"
+func (connection *Conn) GetRawResourceByName(apiEndPoint, namespace, resourceType, resourceName string) (resource APIResource, err error) {
+
+	restClient := connection.clientSet.CoreV1().RESTClient()
+	log.Printf("[DEBUG] REST request: %+v", restClient)
+
+	getRequest := restClient.Get().
+		AbsPath(apiEndPoint).
+		Namespace(namespace).
+		Resource(resourceType).
+		Name(resourceName)
+
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	response := getRequest.Do(ctx)
+	if response.Error() != nil {
+		err = response.Error()
+		return
+	}
+
+	responseBytes, _ := response.Raw()
+	responseJSON := string(responseBytes)
+	log.Printf("[DEBUG] STRING result: %v", responseJSON)
+
+	resource = APIResource{}
+	json.Unmarshal(responseBytes, &resource)
+
+	log.Printf("[DEBUG] JSON result: %+v", resource)
+
+	return
+}
+
+// PostRawResource makes a 'raw' POST call to the specified K8s api endpoint to create a resource.
+// This is used to interact with available custom resources in the cluster, such as azureidentitybindings.
+// Sample request params:
+//	apiEndPoint:	apis/aadpodidentity.k8s.io/v1
+//	namespace:		"demo-ns"
+//	resourceName:	"azureidentitybindings"
+//	resourceBody:	"{...}"
+func (connection *Conn) PostRawResource(apiEndPoint string, namespace string, resourceName string, resourceBody interface{}) (resource APIResource, err error) {
+
+	restClient := connection.clientSet.CoreV1().RESTClient()
+	postRequest := restClient.Post().
+		AbsPath(apiEndPoint).
+		Namespace(namespace).
+		Resource(resourceName).
+		Body(resourceBody)
+
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	response := postRequest.Do(ctx)
+	if response.Error() != nil {
+		err = response.Error()
+		return
+	}
+
+	responseBytes, _ := response.Raw()
+	responseJSON := string(responseBytes)
+	log.Printf("[DEBUG] STRING result: %v", responseJSON)
+
+	resource = APIResource{}
+	json.Unmarshal(responseBytes, &resource)
+
+	return
 }
 
 func (connection *Conn) setClientConfig() {

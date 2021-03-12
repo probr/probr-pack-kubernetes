@@ -45,6 +45,9 @@ func PodSpec(baseName string, namespace string) *apiv1.Pod {
 					SecurityContext: DefaultContainerSecurityContext(),
 				},
 			},
+			NodeSelector: map[string]string{
+				"kubernetes.io/os": "linux",
+			},
 		},
 	}
 }
