@@ -6,7 +6,7 @@ import (
 	cra "github.com/citihub/probr/service_packs/kubernetes/container_registry_access"
 	"github.com/citihub/probr/service_packs/kubernetes/general"
 	"github.com/citihub/probr/service_packs/kubernetes/iam"
-	psp "github.com/citihub/probr/service_packs/kubernetes/pod_security_policy"
+	"github.com/citihub/probr/service_packs/kubernetes/podsecurity"
 	"github.com/markbates/pkger"
 )
 
@@ -19,7 +19,7 @@ func GetProbes() []coreengine.Probe {
 	return []coreengine.Probe{
 		cra.Probe,
 		general.Probe,
-		psp.Probe,
+		podsecurity.Probe,
 		iam.Probe,
 	}
 }

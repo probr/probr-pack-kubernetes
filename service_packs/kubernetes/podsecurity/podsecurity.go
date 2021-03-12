@@ -1,4 +1,4 @@
-package psp
+package podsecurity
 
 import (
 	"fmt"
@@ -407,7 +407,7 @@ func boolPodSpecModifier(pod *apiv1.Pod, key, value string) (err error) {
 func annotationsPodSpecModifier(pod *apiv1.Pod, value string) (err error) {
 	switch value {
 	case "include seccomp profile":
-		return
+		return // default
 	case "not include seccomp profile":
 		pod.ObjectMeta.Annotations = nil
 	default:
