@@ -29,6 +29,6 @@ func init() {
 	// See: https://github.com/markbates/pkger
 	pkger.Include("/service_packs/kubernetes/container_registry_access/container_registry_access.feature")
 	pkger.Include("/service_packs/kubernetes/general/general.feature")
-	pkger.Include("/service_packs/kubernetes/pod_security_policy/pod_security_policy.feature")
+	pkger.Include("/service_packs/kubernetes/podsecurity/podsecurity.feature")
 	pkger.Include("/service_packs/kubernetes/iam/iam.feature")
 }
