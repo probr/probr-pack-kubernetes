@@ -304,7 +304,7 @@ func (scenario *scenarioState) thePodIPAndHostIPHaveDifferentValues() (err error
 
 // Name presents the name of this probe for external reference
 func (probe probeStruct) Name() string {
-	return "pod_security_policy"
+	return "podsecurity"
 }
 
 // Path presents the path of these feature files for external reference
