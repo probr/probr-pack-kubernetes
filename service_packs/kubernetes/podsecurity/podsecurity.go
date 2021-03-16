@@ -339,7 +339,7 @@ func (probe probeStruct) ScenarioInitialize(ctx *godog.ScenarioContext) {
 	// Parameterized Scenarios
 	ctx.Step(`^pod creation "([^"]*)" with "([^"]*)" set to "([^"]*)" in the pod spec$`, scenario.podCreationResultsWithXSetToYInThePodSpec)
 	ctx.Step(`^pod creation "([^"]*)" with "([^"]*)" set to "([^"]*)" in the pod spec$`, scenario.podCreationResultsWithXSetToYInThePodSpec)
-	ctx.Step(`^the execution of a "([^"]*)" command inside the Pod is "([^"]*)"$`, scenario.theExecutionOfAXCommandInsideThePodIsY)
+	ctx.Step(`^the execution of a "([^"]*)" command inside the pod is "([^"]*)"$`, scenario.theExecutionOfAXCommandInsideThePodIsY)
 	ctx.Step(`^a "([^"]*)" inspection should only show the container processes$`, scenario.aXInspectionShouldOnlyShowTheContainerProcesses)
 	ctx.Step(`^the PodIP and HostIP have different values$`, scenario.thePodIPAndHostIPHaveDifferentValues)
 
