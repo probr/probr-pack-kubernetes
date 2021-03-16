@@ -1,4 +1,4 @@
-package kubernetespack
+package kubernetes
 
 import (
 	"github.com/citihub/probr/config"
@@ -12,7 +12,6 @@ import (
 
 // GetProbes returns a list of probe objects
 func GetProbes() []coreengine.Probe {
-	config.Vars.SetTags(tags)
 	if config.Vars.ServicePacks.Kubernetes.IsExcluded() {
 		return nil
 	}

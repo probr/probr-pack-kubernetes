@@ -1,4 +1,4 @@
-package apimpack
+package apim
 
 import (
 	"github.com/citihub/probr/config"

@@ -15,10 +15,10 @@ import (
 
 	"github.com/citihub/probr/audit"
 	"github.com/citihub/probr/service_packs/coreengine"
-	"github.com/citihub/probr/service_packs/storage"
 	azureutil "github.com/citihub/probr/service_packs/storage/azure"
 	"github.com/citihub/probr/service_packs/storage/azure/group"
 	"github.com/citihub/probr/service_packs/storage/azure/policy"
+	"github.com/citihub/probr/service_packs/storage/connection"
 
 	"github.com/citihub/probr/utils"
 )
@@ -193,7 +193,7 @@ func (state *scenarioState) createWithWhitelist(ipRange string) error {
 	}
 
 	stepTrace.WriteString("Creating storage bucket with Network Rule Set within Resource Group;")
-	state.storageAccount, state.runningErr = storage.CreateWithNetworkRuleSet(state.ctx, state.bucketName, azureutil.ResourceGroup(), state.tags, true, &networkRuleSet)
+	state.storageAccount, state.runningErr = connection.CreateWithNetworkRuleSet(state.ctx, state.bucketName, azureutil.ResourceGroup(), state.tags, true, &networkRuleSet)
 
 	//Audit log
 	err = state.runningErr
@@ -295,7 +295,7 @@ func (state *scenarioState) examineStorageContainer(containerNameEnvVar string) 
 	}
 
 	stepTrace.WriteString("Retrieving storage account details from Azure;")
-	state.storageAccount, state.runningErr = storage.AccountProperties(state.ctx, resourceGroup, accountName)
+	state.storageAccount, state.runningErr = connection.AccountProperties(state.ctx, resourceGroup, accountName)
 	if state.runningErr != nil {
 		err = state.runningErr
 		return err

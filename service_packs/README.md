@@ -16,16 +16,19 @@ written, please review the
 ### Feature Scenarios and Steps
 
 Each control that is to be validated takes the form of a Cucumber _scenario_.
-A _scenario_ is executed as a sequence of _steps_- each of which is described
+
+A _scenario_ is executed as a sequence of _steps_- each of which is present
 in the feature file as an english language statement, beginning with a reserved
-word (Given, And, When, Then). The functions that define each step can be found
-in the `.go` file that has the name of the associated probe. (For example,
+word (Given, And, When, Then).
+
+The functions that define each step can be found in the `.go` file
+in the same directory as the `.feature` file. (For example,
 "container registry access" steps are defined in `container_registry_access.go`)
 
 Within the probe's go file, functions must be defined to execute each of the
 steps specified in the corresponding feature file.
 
-For example, the `container_registry_access.feature` file specifies a step
+For example, the `container_registry_access.feature` file may specify a step
 `When I attempt to push to the container registry using the cluster identity`.
 Within the `container_registry_access.go` file, a ScenarioState method
 `iAttemptToPushToTheContainerRegistryUsingTheClusterIdentity` is defined and
@@ -48,10 +51,16 @@ of step functions.
       - encryption_in_flight.go - implementation code for the probe
       - encryption_in_flight_test.go - unit test code
 
-1. Create a subdirectory that will import all of your newly created probes. Directory must be named "pack" (e.g. `storage_packs/storage/pack`) and must contain a function named `GetProbes`.
+1. Create a file at the top level of the pack that will import all of your newly created probes. The package should be named after the service pack, and must contain a function named `GetProbes`.
 
    ```go
-      // storage_packs/storage/pack/pack.go
+      // storage_packs/storage/storage.go
+      package storage
+      import (
+         "storage_packs/storage/access_whitelisting"
+         "storage_packs/storage/encryption_at_rest"
+         "storage_packs/storage/encryption_in_flight"
+      )
       func GetProbes() []coreengine.Probe {
          ...
          return []coreengine.Probe{
@@ -62,15 +71,15 @@ of step functions.
       }
    ```
 
-   - A function named `init` must also be added to the `pack.go` file, containing logic to include all feature files in pkger bundle.
+   - A function named `init` must also be added to the `packname.go` file, containing logic to include all feature files in pkger bundle.
+   Logic has been added to the Makefile to aid in packaging any files that are listed in this way (`make binary`).
    For more information about pkger, please review the [official pkger docs](https://github.com/markbates/pkger)
    ```go
       func init() {
          // This line will ensure that all static files are bundled into pkged.go file when using pkger cli tool
          // See: https://github.com/markbates/pkger
          pkger.Include("/service_packs/kubernetes/general/general.feature")
-         pkger.Include("/service_packs/kubernetes/pod_security_policy/pod_security_policy.feature")
-         pkger.Include("/service_packs/kubernetes/internet_access/internet_access.feature")
+         pkger.Include("/service_packs/kubernetes/podsecurity/podsecurity.feature")
          pkger.Include("/service_packs/kubernetes/iam/iam.feature")
       }
    ```
@@ -134,12 +143,12 @@ of step functions.
       // service_packs/service_packs.go
       import (
          ...   
-         storage_pack "github.com/citihub/probr/service_packs/storage/pack"
+         "github.com/citihub/probr/service_packs/storage"
       )
       ...
       func packs() (packs map[string][]coreengine.Probe) {
          ...
-         packs["storage"] = storage_pack.GetProbes()
+         packs["storage"] = storage.GetProbes()
          return
       }
       ```

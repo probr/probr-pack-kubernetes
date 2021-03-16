@@ -1,18 +1,18 @@
 package servicepacks
 
 import (
-	apim_pack "github.com/citihub/probr/service_packs/apim/pack"
+	"github.com/citihub/probr/service_packs/apim"
 	"github.com/citihub/probr/service_packs/coreengine"
-	kubernetes_pack "github.com/citihub/probr/service_packs/kubernetes/pack"
-	storage_pack "github.com/citihub/probr/service_packs/storage/pack"
+	"github.com/citihub/probr/service_packs/kubernetes"
+	"github.com/citihub/probr/service_packs/storage"
 )
 
 func packs() (packs map[string][]coreengine.Probe) {
 	packs = make(map[string][]coreengine.Probe)
 
-	packs["kubernetes"] = kubernetes_pack.GetProbes()
-	packs["storage"] = storage_pack.GetProbes()
-	packs["apim"] = apim_pack.GetProbes()
+	packs["kubernetes"] = kubernetes.GetProbes()
+	packs["storage"] = storage.GetProbes()
+	packs["apim"] = apim.GetProbes()
 
 	return
 }

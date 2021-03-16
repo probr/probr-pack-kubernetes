@@ -14,9 +14,9 @@ import (
 
 	"github.com/citihub/probr/audit"
 	"github.com/citihub/probr/service_packs/coreengine"
-	"github.com/citihub/probr/service_packs/storage"
 	azureutil "github.com/citihub/probr/service_packs/storage/azure"
 	"github.com/citihub/probr/service_packs/storage/azure/group"
+	"github.com/citihub/probr/service_packs/storage/connection"
 	"github.com/citihub/probr/utils"
 )
 
@@ -50,7 +50,7 @@ func (state *scenarioState) setup() {
 func (state *scenarioState) teardown() {
 	for _, account := range state.storageAccounts {
 		log.Printf("[DEBUG] need to delete the storageAccount: %s", account)
-		err := storage.DeleteAccount(state.ctx, azureutil.ResourceGroup(), account)
+		err := connection.DeleteAccount(state.ctx, azureutil.ResourceGroup(), account)
 
 		if err != nil {
 			log.Printf("[ERROR] error deleting the storageAccount: %v", err)
@@ -177,19 +177,19 @@ func (state *scenarioState) creationWillWithAnErrorMatching(expectation, errDesc
 		stepTrace.WriteString(fmt.Sprintf(
 			"Creating Storage Account with HTTPS: %v;", false))
 		log.Printf("[DEBUG] Creating Storage Account with HTTPS: %v;", false)
-		_, err = storage.CreateWithNetworkRuleSet(state.ctx, accountName,
+		_, err = connection.CreateWithNetworkRuleSet(state.ctx, accountName,
 			azureutil.ResourceGroup(), state.tags, false, &networkRuleSet)
 	} else if state.httpsOption {
 		stepTrace.WriteString(fmt.Sprintf(
 			"Creating Storage Account with HTTPS: %v;", state.httpsOption))
 		log.Printf("[DEBUG] Creating Storage Account with HTTPS: %v", state.httpsOption)
-		_, err = storage.CreateWithNetworkRuleSet(state.ctx, accountName,
+		_, err = connection.CreateWithNetworkRuleSet(state.ctx, accountName,
 			azureutil.ResourceGroup(), state.tags, state.httpsOption, &networkRuleSet)
 	} else if state.httpOption {
 		stepTrace.WriteString(fmt.Sprintf(
 			"Creating Storage Account with HTTPS: %v;", state.httpsOption))
 		log.Printf("[DEBUG] Creating Storage Account with HTTPS: %v", state.httpsOption)
-		_, err = storage.CreateWithNetworkRuleSet(state.ctx, accountName,
+		_, err = connection.CreateWithNetworkRuleSet(state.ctx, accountName,
 			azureutil.ResourceGroup(), state.tags, state.httpsOption, &networkRuleSet)
 	}
 	if err == nil {
