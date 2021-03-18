@@ -35,7 +35,7 @@ Feature: Pod Security
 
         When pod creation "succeeds" with "allowPrivilegeEscalation" set to "<VALUE>" in the pod spec
         Then the execution of a "non-privileged" command inside the pod is "successful"
-        But the execution of a "sudo" command inside the pod is "not executable"
+        But the execution of a "privileged" command inside the pod is "prevented by restricted permissions"
 
         Examples:
             | VALUE                     |
@@ -43,7 +43,7 @@ Feature: Pod Security
             | false                     |
 
     @k-pod-003
-    Scenario Outline: Prevent a deployment from running in the host's process tree namespace
+    Scenario: Prevent a deployment from running in the host's process tree namespace
 
         HostPID controls whether a pod's containers can share the host process ID namespace.
         If paired with ptrace, this can be used to escalate privileges outside of the container.
@@ -56,7 +56,7 @@ Feature: Pod Security
         Then pod creation "fails" with "hostPID" set to "true" in the pod spec
 
     @k-pod-004
-    Scenario: Prevent execution of commands that allow privileged access
+    Scenario Outline: Prevent execution of commands that allow privileged access
 
         By default pods that don't specify a value for hostPID should not have the ability to
         gain access to processes outside of the pod's process tree.
@@ -88,7 +88,7 @@ Feature: Pod Security
         Then pod creation "fails" with "hostIPC" set to "true" in the pod spec
 
     @k-pod-006
-    Scenario: Prevent a deployment from running with access to the shared host IPC namespace
+    Scenario Outline: Prevent a deployment from running with access to the shared host IPC namespace
 
         By default pods that don't specify whether Host IPC namespace mode is set should not
         be able to access the shared host IPC namespace.
@@ -121,7 +121,7 @@ Feature: Pod Security
         Then pod creation "fails" with "hostNetwork" set to "true" in the pod spec
 
     @k-pod-008
-    Scenario: Prevent execution of commands that allow access to the host's network namespace access
+    Scenario Outline: Prevent execution of commands that allow access to the host's network namespace access
 
         By default pods that don't specify whether access to host's network namespace is required should not be able to access the host's network namespace.
 

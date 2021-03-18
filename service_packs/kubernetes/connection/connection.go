@@ -38,7 +38,7 @@ type Connection interface {
 	ClusterIsDeployed() error
 	CreatePodFromObject(pod *apiv1.Pod, probeName string) (*apiv1.Pod, error)
 	DeletePodIfExists(podName, namespace, probeName string) error
-	ExecCommand(command, namespace, podName string) (status int, stdout string, err error)
+	ExecCommand(command, namespace, podName string) (status int, stdout string, stderr string, err error)
 	GetPodsByNamespace(namespace string) (*apiv1.PodList, error)
 	GetPodIPs(namespace, podName string) (string, string, error)
 	GetRawResourceByName(apiEndPoint, namespace, resourceType, resourceName string) (resource APIResource, err error)
@@ -154,7 +154,7 @@ func (connection *Conn) DeletePodIfExists(podName, namespace, probeName string) 
 }
 
 // ExecCommand executes the supplied command on the given pod name in the specified namespace.
-func (connection *Conn) ExecCommand(cmd, namespace, podName string) (status int, stdout string, err error) {
+func (connection *Conn) ExecCommand(cmd, namespace, podName string) (status int, stdout string, stderr string, err error) {
 	status = -1
 	if cmd == "" {
 		err = utils.ReformatError("Command string not provided to ExecCommand")
@@ -198,11 +198,12 @@ func (connection *Conn) ExecCommand(cmd, namespace, podName string) (status int,
 		Tty:    false,
 	})
 	stdout = stdoutBuffer.String()
+	stderr = stderrBuffer.String()
 	if err != nil {
 		if exit, ok := err.(executil.CodeExitError); ok {
 			//the command has been executed on the container, but the underlying command raised an error
 			//this is an 'external' error and represents a successful communication with the cluster
-			err = utils.ReformatError(fmt.Sprintf("err: %s ; stdout: %s ; stderr: %s", err, stdout, stderrBuffer.String()))
+			err = utils.ReformatError(fmt.Sprintf("err: %s ; stderr: %s", err, stderrBuffer.String()))
 			status = exit.Code
 			return
 		}

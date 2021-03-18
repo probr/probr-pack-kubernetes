@@ -235,7 +235,7 @@ func (scenario *scenarioState) anAttemptToObtainAnAccessTokenFromThatPodShouldX(
 	cmd := "curl http://169.254.169.254/metadata/identity/oauth2/token?api-version=2018-02-01&resource=https%3A%2F%2Fmanagement.azure.com%2F -H Metadata:true -s"
 
 	stepTrace.WriteString(fmt.Sprintf("Attempt to run command in the pod: '%s'; ", cmd))
-	_, stdOut, cmdErr := conn.ExecCommand(cmd, scenario.namespace, podName)
+	_, stdOut, _, cmdErr := conn.ExecCommand(cmd, scenario.namespace, podName)
 
 	// Validate that no internal error occurred during execution of curl command
 	if cmdErr != nil {
@@ -396,7 +396,7 @@ func (scenario *scenarioState) theExecutionOfAXCommandInsideTheMICPodIsY(command
 	identityPodsNamespace := config.Vars.ServicePacks.Kubernetes.Azure.IdentityNamespace
 	stepTrace.WriteString(fmt.Sprintf(
 		"Attempt to execute command '%s' in MIC pod '%s'; ", cmd, scenario.micPodName))
-	exitCode, stdOut, cmdErr := conn.ExecCommand(cmd, identityPodsNamespace, scenario.micPodName)
+	exitCode, stdOut, _, cmdErr := conn.ExecCommand(cmd, identityPodsNamespace, scenario.micPodName)
 
 	// Validate that no internal error occurred during execution of curl command
 	if cmdErr != nil && exitCode == -1 {
