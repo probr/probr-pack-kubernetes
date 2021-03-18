@@ -179,8 +179,11 @@ Feature: Pod Security
     @k-pod-012
     Scenario Outline: Ensure that containers cannot deploy with the NET_RAW ability
 
+        With Docker as the container runtime the NET_RAW capability is enabled,
+        which may be misused by malicious containers.
+
         Security Standard References:
-            - CIS Kubernetes Benchmark v1.6.0 - 5.7.?
+            - CIS Kubernetes Benchmark v1.6.0 - 5.2.7
 
         Then pod creation "<RESULT>" with "capabilities" set to "<VALUE>" in the pod spec
 
