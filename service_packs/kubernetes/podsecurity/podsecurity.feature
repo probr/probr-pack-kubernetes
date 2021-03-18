@@ -160,7 +160,7 @@ Feature: Pod Security
             - CIS Kubernetes Benchmark v1.6.0 - 5.2.6
 
         When pod creation "succeeds" with "user" set to "1000" in the pod spec
-        But the execution of a "root" command inside the pod is "unsuccessful"
+        Then the execution of a "root" command inside the pod is "unsuccessful"
 
     @k-pod-011
     Scenario: Ensure that the seccomp profile is set to docker/default in all pod definitions
@@ -192,3 +192,15 @@ Feature: Pod Security
             | fails    | not have a value provided |
             | fails    | add NET_RAW               |
             | succeeds | drop NET_RAW              |
+
+    @k-pod-013
+    Scenario: Ensure that containers are not permitted to use ping
+
+        If the linux capability for NET_RAW has been properly dropped,
+        ping will not be permitted within the container
+        
+        Security Standard References:
+            - CIS Kubernetes Benchmark v1.6.0 - 5.2.7
+
+        When pod creation "succeeds" with "capabilities" set to "drop NET_RAW" in the pod spec
+        Then the execution of a "ping" command inside the pod is "unsuccessful"

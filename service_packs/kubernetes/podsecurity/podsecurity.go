@@ -183,6 +183,8 @@ func (scenario *scenarioState) theExecutionOfAXCommandInsideThePodIsY(permission
 		cmd = "mount /fake /fake"
 	case "root":
 		cmd = "touch /dev/probr"
+	case "ping":
+		cmd = "ping google.com"
 	default:
 		err = utils.ReformatError("Unexpected value provided for command permission type: %s", permission) // No payload is necessary if an invalid value was provided
 		return err
