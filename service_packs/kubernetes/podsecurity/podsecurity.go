@@ -104,6 +104,7 @@ func (scenario *scenarioState) podCreationResultsWithXSetToYInThePodSpec(result,
 	pod := constructors.PodSpec(Probe.Name(), config.Vars.ServicePacks.Kubernetes.ProbeNamespace)
 
 	// Any key that expects a non-bool value should have it's own case here to handle the pod modification
+
 	switch key {
 	case "user":
 		err = userPodSpecModifier(pod, value)
@@ -157,6 +158,7 @@ func (scenario *scenarioState) theExecutionOfAXCommandInsideThePodIsY(permission
 	// Supported permissions:
 	//     'non-privileged'
 	//     'privileged'
+	//     'root'
 	//
 	// Supported results:
 	//     'successful'
@@ -421,9 +423,13 @@ func annotationsPodSpecModifier(pod *apiv1.Pod, value string) (err error) {
 
 func capabilitiesPodSpecModifier(pod *apiv1.Pod, value string) (err error) {
 	switch value {
-	case "include NET_RAW":
-
-	case "not include NET_RAW":
+	case "drop NET_RAW":
+		// default probe pod does this already
+	case "add NET_RAW":
+		pod.Spec.Containers[0].SecurityContext.Capabilities.Drop = []apiv1.Capability{} // clear default cap drop
+		pod.Spec.Containers[0].SecurityContext.Capabilities.Add = append(pod.Spec.Containers[0].SecurityContext.Capabilities.Add, "NET_RAW")
+	case "not have a value provided":
+		pod.Spec.Containers[0].SecurityContext.Capabilities.Drop = []apiv1.Capability{}
 	default:
 		err = utils.ReformatError("Expected 'include NET_RAW' or 'not include NET_RAW', but found '%s'", value) // No payload is necessary if an invalid value was provided
 	}

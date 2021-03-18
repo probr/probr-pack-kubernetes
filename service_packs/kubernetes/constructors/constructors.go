@@ -58,7 +58,7 @@ func DefaultContainerSecurityContext() *apiv1.SecurityContext {
 		Privileged:               utils.BoolPtr(false),
 		AllowPrivilegeEscalation: utils.BoolPtr(false),
 		Capabilities: &apiv1.Capabilities{
-			Drop: GetContainerDropCapabilitiesFromConfig(),
+			Drop: CapabilityObjectList([]string{"NET_RAW"}),
 		},
 	}
 }
@@ -88,11 +88,6 @@ func DefaultEntrypoint() []string {
 		"sleep",
 		"3600",
 	}
-}
-
-// GetContainerDropCapabilitiesFromConfig returns a Capability object with the drop caps specified in config vars
-func GetContainerDropCapabilitiesFromConfig() []apiv1.Capability {
-	return CapabilityObjectList(config.Vars.ServicePacks.Kubernetes.ContainerRequiredDropCapabilities)
 }
 
 // CapabilityObjectList converts a list of strings into a list of capability objects

@@ -178,7 +178,7 @@ func TestDefaultContainerSecurityContext(t *testing.T) {
 				Privileged:               utils.BoolPtr(false),
 				AllowPrivilegeEscalation: utils.BoolPtr(false),
 				Capabilities: &apiv1.Capabilities{
-					Drop: GetContainerDropCapabilitiesFromConfig(),
+					Drop: CapabilityObjectList([]string{"NET_RAW"}),
 				},
 			},
 		},
@@ -198,7 +198,7 @@ func TestDefaultPodSecurityContext(t *testing.T) {
 		want *apiv1.PodSecurityContext
 	}{
 		{
-			name: "Very strict test to enforce expectations of DefaultContainerSecurityContext",
+			name: "Very strict test to enforce expectations of DefaultPodSecurityContext",
 			want: &apiv1.PodSecurityContext{
 				RunAsUser:          utils.Int64Ptr(1000),
 				FSGroup:            utils.Int64Ptr(2000),
@@ -242,39 +242,6 @@ func TestDefaultProbrImageName(t *testing.T) {
 			config.Vars.ServicePacks.Kubernetes.ProbeImage = tt.image
 			if got := DefaultProbrImageName(); got != tt.want {
 				t.Errorf("DefaultProbrImageName() = %v, want %v", got, tt.want)
-			}
-		})
-	}
-}
-
-func TestGetContainerDropCapabilitiesFromConfig(t *testing.T) {
-	tests := []struct {
-		name         string
-		capabilities []string
-		want         []apiv1.Capability
-	}{
-		{
-			name:         "Ensure list of capabilities is populated from convig vars",
-			capabilities: []string{"value1", "value2"},
-			want: []apiv1.Capability{
-				apiv1.Capability("value1"),
-				apiv1.Capability("value2"),
-			},
-		},
-		{
-			name:         "Ensure list of capabilities is populated from convig vars",
-			capabilities: []string{"cap1", "cap2"},
-			want: []apiv1.Capability{
-				apiv1.Capability("cap1"),
-				apiv1.Capability("cap2"),
-			},
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			config.Vars.ServicePacks.Kubernetes.ContainerRequiredDropCapabilities = tt.capabilities
-			if got := GetContainerDropCapabilitiesFromConfig(); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("GetContainerDropCapabilitiesFromConfig() = %v, want %v", got, tt.want)
 			}
 		})
 	}
