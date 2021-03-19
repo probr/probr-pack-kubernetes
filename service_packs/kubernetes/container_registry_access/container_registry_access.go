@@ -95,16 +95,14 @@ func (scenario *scenarioState) podCreationXWithContainerImageFromYRegistry(expec
 		return err
 	}
 
-	stepTrace.WriteString(fmt.Sprintf("Get appropriate container image from an '%s' registry; ", registryAccess))
-	imageRegistry := getImageFromConfig(isRegistryAuthorized)
-
-	stepTrace.WriteString(fmt.Sprintf("Build a pod spec with default values; "))
+	stepTrace.WriteString("Build a pod spec with default values; ")
 	podObject := constructors.PodSpec(Probe.Name(), scenario.namespace)
 
-	stepTrace.WriteString(fmt.Sprintf("Set container image registry to appropriate value in pod spec; "))
+	stepTrace.WriteString(fmt.Sprintf("Set container image registry to '%s' value in pod spec; ", registryAccess))
+	imageRegistry := getImageFromConfig(isRegistryAuthorized)
 	podObject.Spec.Containers[0].Image = imageRegistry
 
-	stepTrace.WriteString(fmt.Sprintf("Create pod from spec; "))
+	stepTrace.WriteString("Create pod from spec; ")
 	createdPodObject, creationErr := scenario.createPodfromObject(podObject) // Pod name is saved to scenario state if successful
 
 	stepTrace.WriteString(fmt.Sprintf("Validate pod creation %s; ", expectedResult))
