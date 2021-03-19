@@ -15,13 +15,8 @@ Feature: Ensure stringent authentication and authorisation
             - AZ-AAD-AI-1.0
 
         Given an "AzureIdentityBinding" called "probr-aib" exists in the namespace called "default"
-        Then I succeed to create a simple pod in "<NAMESPACE>" namespace assigned with the "probr-aib" AzureIdentityBinding
-        But an attempt to obtain an access token from that pod should "<RESULT>"
-
-        Examples:
-			| NAMESPACE     | RESULT  |
-			| the probr     | Fail    |
-			| the default   | Succeed |
+        Then I succeed to create a simple pod in "the probr" namespace assigned with the "probr-aib" AzureIdentityBinding
+        But an attempt to obtain an access token from that pod should "Fail"
 
     @k-iam-002
     Scenario: Prevent cross namespace Azure Identity Bindings
