@@ -37,7 +37,7 @@ func (g *ServicePack) Greet() string {
 var handshakeConfig = hcplugin.HandshakeConfig{
 	ProtocolVersion:  1,
 	MagicCookieKey:   "BASIC_PLUGIN",
-	MagicCookieValue: "probr.servicepack.probr",
+	MagicCookieValue: "probr.servicepack.kubernetes",
 }
 
 func main() {
@@ -53,7 +53,7 @@ func main() {
 	}
 	// hcpluginMap is the map of hcplugins we can dispense.
 	var hcpluginMap = map[string]hcplugin.Plugin{
-		"spProbr": &plugin.ServicePackPlugin{Impl: spProbr},
+		"kubernetes": &plugin.ServicePackPlugin{Impl: spProbr},
 	}
 
 	logger.Debug("message from Probr hcplugin", "foo", "bar")
