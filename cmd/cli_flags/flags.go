@@ -2,7 +2,6 @@ package cliflags
 
 import (
 	"flag"
-	"log"
 	"os"
 
 	"github.com/citihub/probr/config"
@@ -69,19 +68,19 @@ func boolFlag(name string, usage string, handler flagHandlerFunc) {
 func varsFileHandler(v interface{}) {
 	err := config.Init(*v.(*string))
 	if err != nil {
-		log.Fatalf("[ERROR] error returned from config.Init: %v", err)
+		//log.Fatalf("[ERROR] error returned from config.Init: %v", err)
 	} else if len(*v.(*string)) > 0 {
 		config.Vars.VarsFile = *v.(*string)
-		log.Printf("[INFO] Config read from file '%v', but may still be overridden by CLI flags.", v.(*string))
+		//log.Printf("[INFO] Config read from file '%v', but may still be overridden by CLI flags.", v.(*string))
 	} else {
-		log.Printf("[NOTICE] No configuration variables file specified. Using environment variabls and defaults only.")
+		//log.Printf("[NOTICE] No configuration variables file specified. Using environment variabls and defaults only.")
 	}
 }
 
 // writeDirHandler
 func writeDirHandler(v interface{}) {
 	if len(*v.(*string)) > 0 {
-		log.Printf("[NOTICE] Output Directory has been overridden via command line")
+		//log.Printf("[NOTICE] Output Directory has been overridden via command line")
 		config.Vars.WriteDirectory = *v.(*string)
 	}
 }
@@ -92,7 +91,7 @@ func loglevelHandler(v interface{}) {
 		levels := []string{"DEBUG", "INFO", "NOTICE", "WARN", "ERROR"}
 		_, found := utils.FindString(levels, *v.(*string))
 		if !found {
-			log.Fatalf("[ERROR] Unknown loglevel specified: '%s'. Must be one of %v", *v.(*string), levels)
+			//log.Fatalf("[ERROR] Unknown loglevel specified: '%s'. Must be one of %v", *v.(*string), levels)
 		} else {
 			config.Vars.LogLevel = *v.(*string)
 			config.SetLogFilter(config.Vars.LogLevel, os.Stderr)
@@ -105,7 +104,7 @@ func resultsformatHandler(v interface{}) {
 		options := []string{"cucumber", "events", "junit", "pretty", "progress"}
 		_, found := utils.FindString(options, *v.(*string))
 		if !found {
-			log.Fatalf("[ERROR] Unknown resultsformat specified: '%s'. Must be one of %v", *v.(*string), options)
+			//log.Fatalf("[ERROR] Unknown resultsformat specified: '%s'. Must be one of %v", *v.(*string), options)
 		} else {
 			config.Vars.ResultsFormat = *v.(*string)
 			config.SetLogFilter(config.Vars.ResultsFormat, os.Stderr)
@@ -116,17 +115,17 @@ func resultsformatHandler(v interface{}) {
 func tagsHandler(v interface{}) {
 	if len(*v.(*string)) > 0 {
 		config.Vars.Tags = *v.(*string)
-		log.Printf("[INFO] tags have been added via command line.")
+		//log.Printf("[INFO] tags have been added via command line.")
 	}
 }
 
 func kubeConfigHandler(v interface{}) {
 	if len(*v.(*string)) > 0 {
 		config.Vars.ServicePacks.Kubernetes.KubeConfigPath = *v.(*string)
-		log.Printf("[NOTICE] Kubeconfig path has been overridden via command line")
+		//log.Printf("[NOTICE] Kubeconfig path has been overridden via command line")
 	}
 	if len(config.Vars.ServicePacks.Kubernetes.KubeConfigPath) == 0 {
-		log.Printf("[NOTICE] No kubeconfig path specified. Falling back to default paths.")
+		//log.Printf("[NOTICE] No kubeconfig path specified. Falling back to default paths.")
 	}
 }
 

@@ -4,7 +4,6 @@ package constructors
 
 import (
 	"fmt"
-	"log"
 	"math/rand"
 	"strings"
 	"time"
@@ -20,7 +19,7 @@ func PodSpec(baseName string, namespace string) *apiv1.Pod {
 	name := strings.Replace(baseName, "_", "-", -1)
 	podName := uniquePodName(name)
 	containerName := fmt.Sprintf("%s-probe-pod", name)
-	log.Printf(fmt.Sprintf("[DEBUG] Creating pod spec with podName=%s and containerName=%s", podName, containerName))
+	//log.Printf(fmt.Sprintf("[DEBUG] Creating pod spec with podName=%s and containerName=%s", podName, containerName))
 
 	annotations := make(map[string]string)
 	annotations["seccomp.security.alpha.kubernetes.io/pod"] = "runtime/default"

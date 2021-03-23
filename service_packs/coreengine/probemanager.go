@@ -5,7 +5,6 @@ package coreengine
 
 import (
 	"errors"
-	"log"
 	"sync"
 
 	"github.com/citihub/probr/audit"
@@ -112,7 +111,7 @@ func (ps *ProbeStore) ExecAllProbes() (int, error) {
 		audit.State.ProbeComplete(name)
 		if err != nil {
 			//log but continue with remaining probe
-			log.Printf("[ERROR] error executing probe: %v", err)
+			//log.Printf("[ERROR] error executing probe: %v", err)
 		}
 		if st > status {
 			status = st

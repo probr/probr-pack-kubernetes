@@ -44,7 +44,7 @@ func (aks *AKS) CreateAIB(namespace, aibName, aiName string) (resource connectio
 	apiPath := "apis/aadpodidentity.k8s.io/v1"
 
 	resource, err = aks.conn.PostRawResource(apiPath, namespace, "azureidentitybindings", runtimeAib)
-	log.Printf("Resource %v", resource)
+	//log.Printf("Resource %v", resource)
 
 	return
 }

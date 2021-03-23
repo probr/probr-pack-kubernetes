@@ -4,7 +4,6 @@ package iam
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 
 	"github.com/cucumber/godog"
 	apiv1 "k8s.io/api/core/v1"
@@ -286,7 +285,7 @@ func (scenario *scenarioState) iCreateAnAzureIdentityBindingCalledInANondefaultN
 	createdAIB, err := azureCreateAIB(probrNameSpace, aibName, aiName) // create an AIB in a non-default NS if it doesn't already exist
 	if err != nil {
 		err = utils.ReformatError("An error occurred while creating '%s' binding: %v", aibName, err)
-		log.Print(err)
+		//log.Print(err)
 	}
 	// TODO:
 	//	- Delete AIB at the end of test scenario
@@ -513,7 +512,7 @@ func afterScenario(scenario scenarioState, probe probeStruct, gs *godog.Scenario
 		for _, podName := range scenario.pods {
 			err = conn.DeletePodIfExists(podName, scenario.namespace, probe.Name())
 			if err != nil {
-				log.Printf(fmt.Sprintf("[ERROR] Could not retrieve pod from namespace '%s' for deletion: %s", scenario.namespace, err))
+				//log.Printf(fmt.Sprintf("[ERROR] Could not retrieve pod from namespace '%s' for deletion: %s", scenario.namespace, err))
 			}
 		}
 	}

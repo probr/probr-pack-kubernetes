@@ -11,27 +11,27 @@ import (
 // PENDING IMPLEMENTATION
 func aResourceCanBeDeployedIntoTheAccountUsingTheLinkedCredential(arg1, arg2 string) error {
 	// return godog.ErrPending
-	//log.Printf("[DEBUG] *** THEN: resource can be deployed ACCOUNT: %v | *** CREDENTIAL: %v \n", arg1, arg2)
+	////log.Printf("[DEBUG] *** THEN: resource can be deployed ACCOUNT: %v | *** CREDENTIAL: %v \n", arg1, arg2)
 	return nil
 }
 
 // PENDING IMPLEMENTATION
 func credentialWithAccessToTheAccountIsAlreadyConfiguredInTheSystem(arg1, arg2 string) error {
 	// return godog.ErrPending
-	//log.Printf("[DEBUG] *** AND: CREDENTIAL: %v with access to ACCOUNT: %v ALREADY EXISTS \n", arg1, arg2)
+	////log.Printf("[DEBUG] *** AND: CREDENTIAL: %v with access to ACCOUNT: %v ALREADY EXISTS \n", arg1, arg2)
 	return nil
 }
 
 // PENDING IMPLEMENTATION
 func iAddTheAccountDetailsToTheSystem(arg1 string) error {
-	//log.Printf("[DEBUG] *** WHEN: ADD ACCOUNT: %v to the system \n", arg1)
+	////log.Printf("[DEBUG] *** WHEN: ADD ACCOUNT: %v to the system \n", arg1)
 	// return godog.ErrPending
 	return nil
 }
 
 // PENDING IMPLEMENTATION
 func iAmConfiguringAAccount(arg1 string) error {
-	//log.Printf("[DEBUG] *** GIVEN: Configuring ACCOUNT: %v \n", arg1)
+	////log.Printf("[DEBUG] *** GIVEN: Configuring ACCOUNT: %v \n", arg1)
 	// return godog.ErrPending
 	return nil
 }
@@ -39,13 +39,13 @@ func iAmConfiguringAAccount(arg1 string) error {
 // PENDING IMPLEMENTATION
 func iLinkTheCredentialToTheAccount(arg1, arg2 string) error {
 	// return godog.ErrPending
-	//log.Printf("[DEBUG] *** CREDENTIAL: %v | *** ACCOUNT: %v \n", arg1, arg2)
+	////log.Printf("[DEBUG] *** CREDENTIAL: %v | *** ACCOUNT: %v \n", arg1, arg2)
 	return nil
 }
 
 // PENDING IMPLEMENTATION
 func aResourceDeploymentWillWithTheMessage(arg1, arg2 string) error {
-	//log.Printf("[DEBUG] *** THEN: %v %v", arg1, arg2)
+	////log.Printf("[DEBUG] *** THEN: %v %v", arg1, arg2)
 	return nil
 }
 

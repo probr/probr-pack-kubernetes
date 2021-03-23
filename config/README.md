@@ -11,15 +11,15 @@ Probr Log Levels:
 - **INFO** - Non-verbose information that doesn't fit the above criteria
 - **DEBUG** - Any potentially helpful information that doesn't fit the above criteria
 
-Multi-line logs should be formatted prior to `log.Printf(...)`. By using this command multiple times, each line will get a separate timestamp and will appear to be separate entries.
+Multi-line logs should be formatted prior to `//log.Printf(...)`. By using this command multiple times, each line will get a separate timestamp and will appear to be separate entries.
 
 For example, `Results: ` could be read as if an empty string was being output.
 
-However, by misusing `log.Printf` we may cause a similar appearance:
+However, by misusing `//log.Printf` we may cause a similar appearance:
 
 ```
-log.Printf("[NOTICE] Results:")
-log.Printf("[NOTICE] %s", myVar)
+//log.Printf("[NOTICE] Results:")
+//log.Printf("[NOTICE] %s", myVar)
 // Prints:
 // 2020/09/28 11:18:01 [NOTICE] Results:
 // 2020/09/28 11:18:01 [NOTICE] {"some": "information"}

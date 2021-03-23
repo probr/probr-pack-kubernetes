@@ -1,7 +1,6 @@
 package azure
 
 import (
-	"log"
 	"os"
 
 	"github.com/citihub/probr/config"
@@ -14,7 +13,7 @@ var rgName string
 //TenantID returns the azure Tenant in which the tests should be executed, configured by the user and may be set by the environment variable AZURE_TENANT_ID.
 func TenantID() string {
 	if config.Vars.CloudProviders.Azure.TenantID == "" {
-		log.Printf("[ERROR] Azure connection config var not set: config.Vars.CloudProviders.Azure.TenantID")
+		//log.Printf("[ERROR] Azure connection config var not set: config.Vars.CloudProviders.Azure.TenantID")
 	}
 	return config.Vars.CloudProviders.Azure.TenantID
 }
@@ -22,7 +21,7 @@ func TenantID() string {
 //ClientID returns the client (typically a service principal) that must be authorized for performing operations within the azure tenant, configured by the user and may be set by the environment variable AZURE_CLIENT_ID.
 func ClientID() string {
 	if config.Vars.CloudProviders.Azure.ClientID == "" {
-		log.Printf("[ERROR] Azure connection config var not set: config.Vars.CloudProviders.Azure.ClientID")
+		//log.Printf("[ERROR] Azure connection config var not set: config.Vars.CloudProviders.Azure.ClientID")
 	}
 	return config.Vars.CloudProviders.Azure.ClientID
 }
@@ -30,7 +29,7 @@ func ClientID() string {
 //ClientSecret returns the client secret to allow client authetication and authorization, configured by the user and may be set by the environment variable AZURE_CLIENT_SECRET.
 func ClientSecret() string {
 	if config.Vars.CloudProviders.Azure.ClientSecret == "" {
-		log.Printf("[ERROR] Azure connection config var not set: config.Vars.CloudProviders.Azure.ClientSecret")
+		//log.Printf("[ERROR] Azure connection config var not set: config.Vars.CloudProviders.Azure.ClientSecret")
 	}
 	return config.Vars.CloudProviders.Azure.ClientSecret
 }
@@ -38,7 +37,7 @@ func ClientSecret() string {
 //SubscriptionID returns the azure Subscription in which the tests should be executed, configured by the user and may be set by the environment variable AZURE_SUBSCRIPTION_ID.
 func SubscriptionID() string {
 	if config.Vars.CloudProviders.Azure.SubscriptionID == "" {
-		log.Printf("[ERROR] Azure connection config var not set: config.Vars.CloudProviders.Azure.SubscriptionID")
+		//log.Printf("[ERROR] Azure connection config var not set: config.Vars.CloudProviders.Azure.SubscriptionID")
 	}
 	return config.Vars.CloudProviders.Azure.SubscriptionID
 }
@@ -46,7 +45,7 @@ func SubscriptionID() string {
 //ResourceGroup returns the Probr user's azure resource group in which resurces should be created fpr testing, configured by the user and may be set by the environment variable AZURE_RESOURCE_GROUP.
 func ResourceGroup() string {
 	if config.Vars.CloudProviders.Azure.ResourceGroup == "" {
-		log.Printf("[ERROR] Azure connection config var not set: config.Vars.CloudProviders.Azure.ResourceGroup")
+		//log.Printf("[ERROR] Azure connection config var not set: config.Vars.CloudProviders.Azure.ResourceGroup")
 	}
 	return config.Vars.CloudProviders.Azure.ResourceGroup
 }
@@ -54,7 +53,7 @@ func ResourceGroup() string {
 //ResourceLocation returns the default location in which azure resources should be created, configured by the user and may be set by the environment variable AZURE_LOCATION.
 func ResourceLocation() string {
 	if config.Vars.CloudProviders.Azure.ResourceLocation == "" {
-		log.Printf("[ERROR] Azure connection config var not set: config.Vars.CloudProviders.Azure.ResourceLocation")
+		//log.Printf("[ERROR] Azure connection config var not set: config.Vars.CloudProviders.Azure.ResourceLocation")
 	}
 	return config.Vars.CloudProviders.Azure.ResourceLocation
 }
@@ -74,7 +73,7 @@ func randomPrefix() string {
 func getFromEnvVar(varName string) string {
 	v, b := os.LookupEnv(varName)
 	if !b {
-		log.Printf("[ERROR] Environment variable \"%v\" is not defined", varName)
+		//log.Printf("[ERROR] Environment variable \"%v\" is not defined", varName)
 	}
 	return v
 }

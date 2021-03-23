@@ -3,7 +3,6 @@ package coreengine
 import (
 	"bytes"
 	"io"
-	"log"
 	"os"
 
 	"github.com/cucumber/godog"
@@ -42,7 +41,7 @@ func toFileGodogProbeHandler(gd *GodogProbe) (int, *bytes.Buffer, error) {
 	if s < 4 {
 		err = os.Remove(o.Name())
 		if err != nil {
-			log.Printf("[WARN] unable to remove empty test result file: %v", err)
+			//log.Printf("[WARN] unable to remove empty test result file: %v", err)
 		}
 	}
 	return status, nil, err

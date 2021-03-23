@@ -1,7 +1,6 @@
 package probr
 
 import (
-	"log"
 	"os"
 
 	"github.com/citihub/probr/config"
@@ -54,6 +53,6 @@ func CleanupTmp() {
 	// Remove tmp folder and its content
 	err := os.RemoveAll(tmpDirFunc())
 	if err != nil {
-		log.Printf("[ERROR] Error removing tmp folder %v", err)
+		//log.Printf("[ERROR] Error removing tmp folder %v", err)
 	}
 }

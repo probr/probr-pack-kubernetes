@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"log"
 	"os"
 	"strings"
 
@@ -51,13 +50,13 @@ type scenarioState struct {
 
 func (state *scenarioState) setup() {
 
-	log.Println("[DEBUG] Setting up \"AccessWhitelistingAzure\"")
+	//log.Println("[DEBUG] Setting up \"AccessWhitelistingAzure\"")
 
 }
 
 func (state *scenarioState) teardown() {
 
-	log.Println("[DEBUG] Teardown completed")
+	//log.Println("[DEBUG] Teardown completed")
 }
 
 func (state *scenarioState) anAzureResourceGroupExists() error {
@@ -77,14 +76,14 @@ func (state *scenarioState) anAzureResourceGroupExists() error {
 
 	stepTrace.WriteString("Check if value for Azure resource group is set in config vars;")
 	if azureutil.ResourceGroup() == "" {
-		log.Printf("[ERROR] Azure resource group config var not set")
+		//log.Printf("[ERROR] Azure resource group config var not set")
 		err = errors.New("Azure resource group config var not set")
 	}
 	if err == nil {
 		stepTrace.WriteString("Check the resource group exists in the specified azure subscription;")
 		_, err = group.Get(state.ctx, azureutil.ResourceGroup())
 		if err != nil {
-			log.Printf("[ERROR] Configured Azure resource group %s does not exists", azureutil.ResourceGroup())
+			//log.Printf("[ERROR] Configured Azure resource group %s does not exists", azureutil.ResourceGroup())
 		}
 	}
 
@@ -122,11 +121,11 @@ func (state *scenarioState) checkPolicyAssigned() error {
 	payload.PolicyAssignment = a
 
 	if err != nil {
-		log.Printf("[ERROR] Policy Assignment error: %v", err)
+		//log.Printf("[ERROR] Policy Assignment error: %v", err)
 		return err
 	}
 
-	log.Printf("[DEBUG] Policy Assignment check: %v [Step PASSED]", *a.Name)
+	//log.Printf("[DEBUG] Policy Assignment check: %v [Step PASSED]", *a.Name)
 	return nil
 }
 
@@ -312,21 +311,23 @@ func (state *scenarioState) examineStorageContainer(containerNameEnvVar string) 
 	}
 
 	stepTrace.WriteString("Checking if it has IP whitelisting;")
-	for _, ipRule := range *networkRuleSet.IPRules {
+	//for _, ipRule := range *networkRuleSet.IPRules {
+	for range *networkRuleSet.IPRules {
 		result = true
-		log.Printf("[DEBUG] IP WhiteListing: %v, %v", *ipRule.IPAddressOrRange, ipRule.Action)
+		//log.Printf("[DEBUG] IP WhiteListing: %v, %v", *ipRule.IPAddressOrRange, ipRule.Action)
 	}
 
 	stepTrace.WriteString("Checking if it has private Endpoint whitelisting;")
-	for _, vnetRule := range *networkRuleSet.VirtualNetworkRules {
+	//for _, vnetRule := range *networkRuleSet.VirtualNetworkRules {
+	for range *networkRuleSet.VirtualNetworkRules {
 		result = true
-		log.Printf("[DEBUG] VNet whitelisting: %v, %v", *vnetRule.VirtualNetworkResourceID, vnetRule.Action)
+		//log.Printf("[DEBUG] VNet whitelisting: %v, %v", *vnetRule.VirtualNetworkResourceID, vnetRule.Action)
 	}
 
 	// TODO: Private Endpoint implementation when it's GA
 
 	if result {
-		log.Printf("[DEBUG] Whitelisting rule exists. [Step PASSED]")
+		//log.Printf("[DEBUG] Whitelisting rule exists. [Step PASSED]")
 		err = nil
 	} else {
 		err = fmt.Errorf("no whitelisting has been defined for %v", accountName)
