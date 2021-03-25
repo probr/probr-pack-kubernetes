@@ -18,7 +18,7 @@ import (
 	"strings"
 
 	"github.com/citihub/probr-pack-kubernetes/audit"
-	"github.com/citihub/probr-pack-kubernetes/config"
+	"github.com/citihub/probr-sdk/config"
 )
 
 type flatObj struct {

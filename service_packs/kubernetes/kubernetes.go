@@ -1,12 +1,12 @@
 package kubernetes
 
 import (
-	"github.com/citihub/probr-pack-kubernetes/config"
 	"github.com/citihub/probr-pack-kubernetes/service_packs/coreengine"
 	cra "github.com/citihub/probr-pack-kubernetes/service_packs/kubernetes/container_registry_access"
 	"github.com/citihub/probr-pack-kubernetes/service_packs/kubernetes/general"
 	"github.com/citihub/probr-pack-kubernetes/service_packs/kubernetes/iam"
 	"github.com/citihub/probr-pack-kubernetes/service_packs/kubernetes/podsecurity"
+	"github.com/citihub/probr-sdk/config"
 	"github.com/markbates/pkger"
 )
 

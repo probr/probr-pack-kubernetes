@@ -7,8 +7,8 @@ import (
 	"log"
 	"path/filepath"
 
-	"github.com/citihub/probr-pack-kubernetes/config"
-	"github.com/citihub/probr-pack-kubernetes/utils"
+	"github.com/citihub/probr-sdk/config"
+	"github.com/citihub/probr-sdk/utils"
 )
 
 type summaryState struct {

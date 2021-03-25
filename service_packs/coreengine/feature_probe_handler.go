@@ -9,7 +9,7 @@ import (
 	"github.com/cucumber/godog"
 	"github.com/cucumber/godog/colors"
 
-	"github.com/citihub/probr-pack-kubernetes/config"
+	"github.com/citihub/probr-sdk/config"
 )
 
 // GodogProbeHandler is a general implementation of ProbeHandlerFunc.  Based on the

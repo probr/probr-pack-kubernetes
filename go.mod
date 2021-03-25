@@ -9,14 +9,12 @@ require (
 	github.com/Azure/go-autorest/autorest v0.11.0
 	github.com/Azure/go-autorest/autorest/azure/auth v0.5.0
 	github.com/Azure/go-autorest/autorest/to v0.4.0
-	github.com/briandowns/spinner v1.12.0
-	github.com/citihub/probr-sdk v0.0.7
+	github.com/Azure/go-autorest/autorest/validation v0.3.0 // indirect
+	github.com/citihub/probr-sdk v0.0.8
 	github.com/cucumber/godog v0.10.0
 	github.com/cucumber/messages-go/v10 v10.0.3
 	github.com/hashicorp/go-hclog v0.15.0
-	github.com/hashicorp/logutils v1.0.0
 	github.com/markbates/pkger v0.17.1
-	gopkg.in/yaml.v2 v2.4.0
 	k8s.io/api v0.19.2
 	k8s.io/apimachinery v0.19.2
 	k8s.io/client-go v0.19.2

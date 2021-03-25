@@ -20,7 +20,7 @@ import (
 	"github.com/citihub/probr-pack-kubernetes/service_packs/storage/azure/policy"
 	"github.com/citihub/probr-pack-kubernetes/service_packs/storage/connection"
 
-	"github.com/citihub/probr-pack-kubernetes/utils"
+	"github.com/citihub/probr-sdk/utils"
 )
 
 const (

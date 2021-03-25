@@ -7,9 +7,9 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/citihub/probr-pack-kubernetes/config"
 	"github.com/citihub/probr-pack-kubernetes/service_packs/coreengine"
-	"github.com/citihub/probr-pack-kubernetes/utils"
+	"github.com/citihub/probr-sdk/config"
+	"github.com/citihub/probr-sdk/utils"
 )
 
 func TestGetAllProbeResults(t *testing.T) {

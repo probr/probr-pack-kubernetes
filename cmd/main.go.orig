@@ -13,7 +13,7 @@ import (
 	"github.com/citihub/probr"
 	"github.com/citihub/probr-pack-kubernetes/audit"
 	cliflags "github.com/citihub/probr-pack-kubernetes/cmd/cli_flags"
-	"github.com/citihub/probr-pack-kubernetes/config"
+	"github.com/citihub/probr-sdk/config"
 )
 
 func main() {

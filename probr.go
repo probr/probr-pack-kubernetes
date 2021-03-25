@@ -4,9 +4,9 @@ import (
 	"log"
 	"os"
 
-	"github.com/citihub/probr-pack-kubernetes/config"
 	servicepacks "github.com/citihub/probr-pack-kubernetes/service_packs"
 	"github.com/citihub/probr-pack-kubernetes/service_packs/coreengine"
+	"github.com/citihub/probr-sdk/config"
 )
 
 var tmpDirFunc = config.Vars.TmpDir // TODO: revise this

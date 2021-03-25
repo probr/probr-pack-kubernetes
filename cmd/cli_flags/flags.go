@@ -5,8 +5,8 @@ import (
 	"log"
 	"os"
 
-	"github.com/citihub/probr-pack-kubernetes/config"
-	"github.com/citihub/probr-pack-kubernetes/utils"
+	"github.com/citihub/probr-sdk/config"
+	"github.com/citihub/probr-sdk/utils"
 )
 
 type flagHandlerFunc func(v interface{})

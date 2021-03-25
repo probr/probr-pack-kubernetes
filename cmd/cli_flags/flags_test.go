@@ -4,7 +4,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/citihub/probr-pack-kubernetes/config"
+	"github.com/citihub/probr-sdk/config"
 )
 
 func TestHandleFlags(t *testing.T) {

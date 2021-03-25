@@ -3,8 +3,8 @@ package kubernetes
 import (
 	"testing"
 
-	"github.com/citihub/probr-pack-kubernetes/config"
 	"github.com/citihub/probr-pack-kubernetes/service_packs/coreengine"
+	"github.com/citihub/probr-sdk/config"
 )
 
 func TestGetProbes(t *testing.T) {

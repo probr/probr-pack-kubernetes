@@ -1,9 +1,9 @@
 package apim
 
 import (
-	"github.com/citihub/probr-pack-kubernetes/config"
 	azurees "github.com/citihub/probr-pack-kubernetes/service_packs/apim/azure/endpoint_security"
 	"github.com/citihub/probr-pack-kubernetes/service_packs/coreengine"
+	"github.com/citihub/probr-sdk/config"
 	"github.com/markbates/pkger"
 )
 

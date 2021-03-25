@@ -12,9 +12,9 @@ import (
 	"time"
 
 	"github.com/citihub/probr-pack-kubernetes/audit"
-	"github.com/citihub/probr-pack-kubernetes/config"
 	"github.com/citihub/probr-pack-kubernetes/service_packs/kubernetes/errors"
-	"github.com/citihub/probr-pack-kubernetes/utils"
+	"github.com/citihub/probr-sdk/config"
+	"github.com/citihub/probr-sdk/utils"
 	apiv1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
