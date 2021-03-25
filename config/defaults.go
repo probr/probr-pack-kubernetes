@@ -2,6 +2,7 @@ package config
 
 import (
 	"fmt"
+	"log"
 	"os"
 	"path/filepath"
 	"strings"
@@ -59,7 +60,7 @@ func homeDir() string {
 func (e *VarOptions) set(field interface{}, varName string, defaultValue interface{}) {
 	switch v := field.(type) {
 	default:
-		//log.Fatalf("unexpected type for %v, %T", varName, v)
+		log.Fatalf("unexpected type for %v, %T", varName, v)
 		panic(fmt.Sprintf("unexpected type for %v, %T", varName, v))
 	case *string:
 		if *field.(*string) == "" {

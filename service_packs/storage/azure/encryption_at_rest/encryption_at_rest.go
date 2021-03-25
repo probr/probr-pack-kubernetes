@@ -3,6 +3,7 @@ package azureear
 import (
 	"context"
 	"fmt"
+	"log"
 	"strings"
 
 	"github.com/citihub/probr/audit"
@@ -44,7 +45,7 @@ func (state *scenarioState) securityControlsThatRestrictDataFromBeingUnencrypted
 
 	// It is available
 
-	//log.Printf("[DEBUG] Azure Storage account is encrypted by default and cannot be turned off. No test to run. Checking Azure Policy. (Unless customise this test to check for specific key usage.")
+	log.Printf("[DEBUG] Azure Storage account is encrypted by default and cannot be turned off. No test to run. Checking Azure Policy. (Unless customise this test to check for specific key usage.")
 	return nil //TODO: Remove this line and return actual err. This is temporary to ensure test doesn't halt and other steps are not skipped
 }
 
@@ -166,7 +167,7 @@ func (state *scenarioState) policyOrRuleAvailable() error {
 	stepTrace.WriteString("TODO: Pending implementation;")
 
 	// It is available
-	//log.Printf("[DEBUG] Azure Storage account is encrypted by default and cannot be turned off. No test to run. Checking Azure Policy. (Unless customise this test to check for specific key usage.")
+	log.Printf("[DEBUG] Azure Storage account is encrypted by default and cannot be turned off. No test to run. Checking Azure Policy. (Unless customise this test to check for specific key usage.")
 	return nil
 }
 

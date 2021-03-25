@@ -2,68 +2,39 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"os"
 	"os/signal"
 	"syscall"
 
 	"github.com/citihub/probr"
+	"github.com/citihub/probr-sdk/logging"
+	"github.com/citihub/probr-sdk/plugin"
 	"github.com/citihub/probr/audit"
 	cliflags "github.com/citihub/probr/cmd/cli_flags"
 	"github.com/citihub/probr/config"
-
-	"github.com/citihub/probr-sdk/plugin"
-	"github.com/hashicorp/go-hclog"
-	hcplugin "github.com/hashicorp/go-plugin"
 )
 
 // ServicePack ...
 type ServicePack struct {
-	logger hclog.Logger
 }
 
 // Greet ...
-func (g *ServicePack) Greet() string {
-	g.logger.Debug("message from ServicePack_Probr.Greet")
-	//g.logger.Debug("args...", os.Args)
+func (sp *ServicePack) Greet() string {
+	log.Printf("[DEBUG] message from ServicePack_Probr.Greet")
+	log.Printf("[DEBUG] args... %v", os.Args)
 
-	//return "Hello Probr!"
-	return ProbrCoreLogic(g.logger)
-}
-
-// handshakeConfigs are used to just do a basic handshake between
-// a hcplugin and host. If the handshake fails, a user friendly error is shown.
-// This prevents users from executing bad hcplugins or executing a hcplugin
-// directory. It is a UX feature, not a security feature.
-var handshakeConfig = hcplugin.HandshakeConfig{
-	ProtocolVersion:  1,
-	MagicCookieKey:   "BASIC_PLUGIN",
-	MagicCookieValue: "probr.servicepack.kubernetes",
+	return ProbrCoreLogic()
 }
 
 func main() {
 
-	logger := hclog.New(&hclog.LoggerOptions{
-		Level:      hclog.Trace,
-		Output:     os.Stderr,
-		JSONFormat: true,
-	})
-
-	spProbr := &ServicePack{
-		logger: logger,
-	}
-	// hcpluginMap is the map of hcplugins we can dispense.
-	var hcpluginMap = map[string]hcplugin.Plugin{
-		"kubernetes": &plugin.ServicePackPlugin{Impl: spProbr},
+	spProbr := &ServicePack{}
+	serveOpts := &plugin.ServeOpts{
+		Pack: spProbr,
 	}
 
-	logger.Debug("message from Probr hcplugin", "foo", "bar")
-
-	hcplugin.Serve(&hcplugin.ServeConfig{
-		HandshakeConfig: handshakeConfig,
-		Plugins:         hcpluginMap,
-	})
-
-	probr.Logger = &logger
+	plugin.Serve(serveOpts)
 }
 
 // setupCloseHandler creates a 'listener' on a new goroutine which will notify the
@@ -75,7 +46,7 @@ func setupCloseHandler() {
 	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
 	go func() {
 		<-c
-		////log.Printf("Execution aborted - %v", "SIGTERM")
+		log.Printf("Execution aborted - %v", "SIGTERM")
 		probr.CleanupTmp()
 		// TODO: Additional cleanup may be needed. For instance, any pods created during tests are not being dropped if aborted.
 		os.Exit(0)
@@ -83,33 +54,36 @@ func setupCloseHandler() {
 }
 
 // ProbrCoreLogic ...
-func ProbrCoreLogic(logger hclog.Logger) string {
-	logger.Debug("message from ProbCoreLogic", "Start")
+func ProbrCoreLogic() string {
+	log.Printf("[INFO] message from ProbCoreLogic: %s", "Start")
 
 	// Setup for handling SIGTERM (Ctrl+C)
 	//setupCloseHandler()
 
 	err := config.Init("") // Create default config
 	if err != nil {
-		////log.Printf("[ERROR] error returned from config.Init: %v", err)
+		log.Printf("[ERROR] error returned from config.Init: %v", err)
 		os.Exit(2)
 	}
 	if len(os.Args[1:]) > 0 {
-		////log.Printf("[DEBUG] Checking for CLI options or flags")
+		log.Printf("[DEBUG] Checking for CLI options or flags")
 		cliflags.HandleRequestForRequiredVars()
-		////log.Printf("[DEBUG] Handle pack option")
+		log.Printf("[DEBUG] Handle pack option")
 		cliflags.HandlePackOption()
 		cliflags.HandleFlags()
 	}
 
 	config.Vars.LogConfigState()
 
-	_, ts, err := probr.RunAllProbes()
+	logWriter := logging.ProbrLoggerOutput()
+	log.SetOutput(logWriter) // TODO: This is a temporary patch, since logger output is being overritten while loading config vars
+
+	s, ts, err := probr.RunAllProbes()
 	if err != nil {
-		//log.Printf("[ERROR] Error executing tests %v", err)
+		log.Printf("[ERROR] Error executing tests %v", err)
 		os.Exit(2) // Exit 2+ is for logic/functional errors
 	}
-	//log.Printf("[INFO] Overall test completion status: %v", s)
+	log.Printf("[INFO] Overall test completion status: %v", s)
 	audit.State.SetProbrStatus()
 
 	out := probr.GetAllProbeResults(ts)
@@ -122,7 +96,7 @@ func ProbrCoreLogic(logger hclog.Logger) string {
 	audit.State.PrintSummary()
 	audit.State.WriteSummary()
 
-	logger.Debug("message from ProbCoreLogic", "Complete")
+	log.Printf("[INFO] message from ProbCoreLogic: %s", "End")
 
 	return "Hello Probr!"
 }

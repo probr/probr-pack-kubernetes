@@ -3,6 +3,7 @@ package general
 
 import (
 	"fmt"
+	"log"
 	"net/url"
 	"strings"
 
@@ -264,7 +265,7 @@ func afterScenario(scenario scenarioState, probe probeStruct, gs *godog.Scenario
 		for _, podName := range scenario.pods {
 			err = conn.DeletePodIfExists(podName, scenario.namespace, probe.Name())
 			if err != nil {
-				//log.Printf(fmt.Sprintf("[ERROR] Could not retrieve pod from namespace '%s' for deletion: %s", scenario.namespace, err))
+				log.Printf(fmt.Sprintf("[ERROR] Could not retrieve pod from namespace '%s' for deletion: %s", scenario.namespace, err))
 			}
 		}
 	}

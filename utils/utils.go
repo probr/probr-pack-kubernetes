@@ -4,6 +4,7 @@ package utils
 import (
 	"fmt"
 	"io/ioutil"
+	"log"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -135,13 +136,13 @@ func AuditPlaceholders() (strings.Builder, interface{}, error) {
 func WriteAllowed(path string, overwrite bool) bool {
 	_, err := os.OpenFile(path, os.O_CREATE|os.O_WRONLY, 0644)
 	if err == nil && overwrite == false {
-		//log.Printf("[ERROR] OverwriteHistoricalAudits is set to false, preventing this from writing to file: %s", path)
+		log.Printf("[ERROR] OverwriteHistoricalAudits is set to false, preventing this from writing to file: %s", path)
 		return false
 	} else if os.IsPermission(err) {
-		//log.Printf("[ERROR] Permissions prevent this from writing to file: %s", path)
+		log.Printf("[ERROR] Permissions prevent this from writing to file: %s", path)
 		return false
 	} else if err != nil {
-		//log.Printf("[ERROR] Could not create or write to file: %s. Error: %s", path, err)
+		log.Printf("[ERROR] Could not create or write to file: %s. Error: %s", path, err)
 		return false
 	}
 	return true

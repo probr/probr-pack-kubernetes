@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log"
 	"strings"
 
 	azureStorage "github.com/Azure/azure-sdk-for-go/services/storage/mgmt/2019-04-01/storage"
@@ -42,7 +43,7 @@ var Probe ProbeStruct
 
 func (state *scenarioState) setup() {
 
-	//log.Println("[DEBUG] Setting up \"scenarioState\"")
+	log.Println("[DEBUG] Setting up \"scenarioState\"")
 
 }
 
@@ -52,11 +53,11 @@ func (state *scenarioState) teardown() {
 		err := connection.DeleteAccount(state.ctx, azureutil.ResourceGroup(), account)
 
 		if err != nil {
-			//log.Printf("[ERROR] error deleting the storageAccount: %v", err)
+			log.Printf("[ERROR] error deleting the storageAccount: %v", err)
 		}
 	}
 
-	//log.Println("[DEBUG] Teardown completed")
+	log.Println("[DEBUG] Teardown completed")
 }
 
 func (state *scenarioState) anAzureResourceGroupExists() error {
@@ -76,14 +77,14 @@ func (state *scenarioState) anAzureResourceGroupExists() error {
 
 	stepTrace.WriteString("Check if value for Azure resource group is set in config vars;")
 	if azureutil.ResourceGroup() == "" {
-		//log.Printf("[ERROR] Azure resource group config var not set")
+		log.Printf("[ERROR] Azure resource group config var not set")
 		err = errors.New("Azure resource group config var not set")
 	}
 	if err == nil {
 		stepTrace.WriteString("Check the resource group exists in the specified azure subscription;")
 		_, err = group.Get(state.ctx, azureutil.ResourceGroup())
 		if err != nil {
-			//log.Printf("[ERROR] Configured Azure resource group %s does not exists", azureutil.ResourceGroup())
+			log.Printf("[ERROR] Configured Azure resource group %s does not exists", azureutil.ResourceGroup())
 		}
 	}
 	return err
@@ -195,7 +196,7 @@ func (state *scenarioState) creationWillWithAnErrorMatching(expectation, errDesc
 		// storage account created so add to state
 		stepTrace.WriteString(fmt.Sprintf(
 			"Created Storage Account: %s;", accountName))
-		//log.Printf("[DEBUG] Created Storage Account: %s", accountName)
+		log.Printf("[DEBUG] Created Storage Account: %s", accountName)
 		state.storageAccounts = append(state.storageAccounts, accountName)
 	}
 
@@ -210,11 +211,11 @@ func (state *scenarioState) creationWillWithAnErrorMatching(expectation, errDesc
 		originalErr := detailedError.Original
 		detailed := originalErr.(*azure.ServiceError)
 
-		//log.Printf("[DEBUG] Detailed Error: %v", detailed)
+		log.Printf("[DEBUG] Detailed Error: %v", detailed)
 
 		if strings.EqualFold(detailed.Code, "RequestDisallowedByPolicy") {
 			stepTrace.WriteString("Request was Disallowed By Policy;")
-			//log.Printf("[DEBUG] Request was Disallowed By Policy: [Step PASSED]")
+			log.Printf("[DEBUG] Request was Disallowed By Policy: [Step PASSED]")
 			return nil
 		}
 
@@ -223,7 +224,7 @@ func (state *scenarioState) creationWillWithAnErrorMatching(expectation, errDesc
 
 	} else if expectation == "Succeed" {
 		if err != nil {
-			//log.Printf("[ERROR] Unexpected failure in create storage ac [Step FAILED]")
+			log.Printf("[ERROR] Unexpected failure in create storage ac [Step FAILED]")
 			return err
 		}
 		return nil

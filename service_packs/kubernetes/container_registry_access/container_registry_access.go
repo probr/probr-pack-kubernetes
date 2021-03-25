@@ -3,6 +3,7 @@ package cra
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/cucumber/godog"
 	apiv1 "k8s.io/api/core/v1"
@@ -201,7 +202,7 @@ func afterScenario(scenario scenarioState, probe probeStruct, gs *godog.Scenario
 		for _, podName := range scenario.pods {
 			err = conn.DeletePodIfExists(podName, scenario.namespace, probe.Name())
 			if err != nil {
-				//log.Printf(fmt.Sprintf("[ERROR] Could not retrieve pod from namespace '%s' for deletion: %s", scenario.namespace, err))
+				log.Printf(fmt.Sprintf("[ERROR] Could not retrieve pod from namespace '%s' for deletion: %s", scenario.namespace, err))
 			}
 		}
 	}

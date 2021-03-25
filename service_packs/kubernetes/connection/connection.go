@@ -6,6 +6,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"log"
 	"strings"
 	"sync"
 	"time"
@@ -94,14 +95,14 @@ func (connection *Conn) GetOrCreateNamespace(namespace string) (*apiv1.Namespace
 
 	if err != nil {
 		if errors.IsStatusCode(409, err) {
-			//log.Printf("[INFO] Namespace %v already exists. Returning existing.", namespace)
+			log.Printf("[INFO] Namespace %v already exists. Returning existing.", namespace)
 			//return it and nil out the err
 			return createdNamespace, nil
 		}
 		return nil, err
 	}
 
-	//log.Printf("[INFO] Namespace %q created.", createdNamespace.GetObjectMeta().GetName())
+	log.Printf("[INFO] Namespace %q created.", createdNamespace.GetObjectMeta().GetName())
 
 	return createdNamespace, nil
 }
@@ -115,8 +116,8 @@ func (connection *Conn) CreatePodFromObject(pod *apiv1.Pod, probeName string) (*
 		return nil, fmt.Errorf("one or more of pod (%v), podName (%v) or namespace (%v) is nil - cannot create POD", pod, podName, namespace)
 	}
 
-	//log.Printf("[INFO] Creating pod %v in namespace %v", podName, namespace)
-	//log.Printf("[DEBUG] Pod details: %+v", *pod)
+	log.Printf("[INFO] Creating pod %v in namespace %v", podName, namespace)
+	log.Printf("[DEBUG] Pod details: %+v", *pod)
 
 	c := connection.clientSet
 
@@ -127,9 +128,9 @@ func (connection *Conn) CreatePodFromObject(pod *apiv1.Pod, probeName string) (*
 
 	res, err := podsClient.Create(ctx, pod, metav1.CreateOptions{})
 	if err != nil {
-		//log.Printf("[INFO] Attempt to create pod '%v' failed with error: '%v'", podName, err)
+		log.Printf("[INFO] Attempt to create pod '%v' failed with error: '%v'", podName, err)
 	} else {
-		//log.Printf("[INFO] Attempt to create pod '%v' succeeded", podName)
+		log.Printf("[INFO] Attempt to create pod '%v' succeeded", podName)
 		audit.State.GetProbeLog(probeName).CountPodCreated(podName)
 	}
 	return res, err
@@ -142,14 +143,14 @@ func (connection *Conn) DeletePodIfExists(podName, namespace, probeName string) 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	//log.Printf("[DEBUG] Attempting to delete pod: %s", podName)
+	log.Printf("[DEBUG] Attempting to delete pod: %s", podName)
 
 	err := podsClient.Delete(ctx, podName, metav1.DeleteOptions{})
 	if err != nil {
 		return err
 	}
 	audit.State.GetProbeLog(probeName).CountPodDestroyed()
-	//log.Printf("[INFO] POD %s deleted.", podName)
+	log.Printf("[INFO] POD %s deleted.", podName)
 	return nil
 }
 
@@ -162,7 +163,7 @@ func (connection *Conn) ExecCommand(cmd, namespace, podName string) (status int,
 	}
 	connection.waitForPod(namespace, podName)
 
-	//log.Printf("[DEBUG] Executing command: \"%s\" on POD '%s' in namespace '%s'", cmd, podName, namespace)
+	log.Printf("[DEBUG] Executing command: \"%s\" on POD '%s' in namespace '%s'", cmd, podName, namespace)
 	request := connection.clientSet.CoreV1().RESTClient().Post().Resource("pods").
 		Name(podName).Namespace(namespace).SubResource("exec")
 
@@ -183,7 +184,7 @@ func (connection *Conn) ExecCommand(cmd, namespace, podName string) (status int,
 
 	request.VersionedParams(&options, parameterCodec)
 
-	//log.Printf("[DEBUG] %s.%s: ExecCommand Request URL: %v", utils.CallerName(2), utils.CallerName(1), request.URL().String())
+	log.Printf("[DEBUG] %s.%s: ExecCommand Request URL: %v", utils.CallerName(2), utils.CallerName(1), request.URL().String())
 	config, err := clientcmd.BuildConfigFromFlags("", config.Vars.ServicePacks.Kubernetes.KubeConfigPath)
 	exec, err := remotecommand.NewSPDYExecutor(config, "POST", request.URL())
 	if err != nil {
@@ -265,7 +266,7 @@ func (connection *Conn) GetPodIPs(namespace, podName string) (podIP string, host
 func (connection *Conn) GetRawResourceByName(apiEndPoint, namespace, resourceType, resourceName string) (resource APIResource, err error) {
 
 	restClient := connection.clientSet.CoreV1().RESTClient()
-	//log.Printf("[DEBUG] REST request: %+v", restClient)
+	log.Printf("[DEBUG] REST request: %+v", restClient)
 
 	getRequest := restClient.Get().
 		AbsPath(apiEndPoint).
@@ -283,13 +284,13 @@ func (connection *Conn) GetRawResourceByName(apiEndPoint, namespace, resourceTyp
 	}
 
 	responseBytes, _ := response.Raw()
-	//responseJSON := string(responseBytes)
-	//log.Printf("[DEBUG] STRING result: %v", responseJSON)
+	responseJSON := string(responseBytes)
+	log.Printf("[DEBUG] STRING result: %v", responseJSON)
 
 	resource = APIResource{}
 	json.Unmarshal(responseBytes, &resource)
 
-	//log.Printf("[DEBUG] JSON result: %+v", resource)
+	log.Printf("[DEBUG] JSON result: %+v", resource)
 
 	return
 }
@@ -320,8 +321,8 @@ func (connection *Conn) PostRawResource(apiEndPoint string, namespace string, re
 	}
 
 	responseBytes, _ := response.Raw()
-	//responseJSON := string(responseBytes)
-	//log.Printf("[DEBUG] STRING result: %v", responseJSON)
+	responseJSON := string(responseBytes)
+	log.Printf("[DEBUG] STRING result: %v", responseJSON)
 
 	resource = APIResource{}
 	json.Unmarshal(responseBytes, &resource)
@@ -342,9 +343,9 @@ func (connection *Conn) setClientConfig() {
 	rawConfig, _ := configLoader.RawConfig()
 
 	if vars.KubeContext == "" {
-		//log.Printf("[INFO] Initializing client with default context")
+		log.Printf("[INFO] Initializing client with default context")
 	} else {
-		//log.Printf("[INFO] Initializing client with context specified in config vars: %v", vars.KubeContext)
+		log.Printf("[INFO] Initializing client with context specified in config vars: %v", vars.KubeContext)
 		connection.modifyContext(rawConfig, vars.KubeContext)
 	}
 
@@ -366,7 +367,7 @@ func (connection *Conn) bootstrapDefaultNamespace() {
 }
 
 func (connection *Conn) modifyContext(rawConfig clientcmdapi.Config, context string) {
-	//log.Printf("[DEBUG] Modifying Kubernetes context based on Probr config vars")
+	log.Printf("[DEBUG] Modifying Kubernetes context based on Probr config vars")
 	if rawConfig.Contexts[context] == nil {
 		connection.clusterIsDeployed = utils.ReformatError("Required context does not exist in provided kubeconfig: %v", context)
 	}
@@ -389,14 +390,14 @@ func (connection *Conn) waitForPod(namespace string, podName string) (err error)
 		return
 	}
 
-	//log.Printf("[INFO] *** Waiting for pod: %s", podName)
+	log.Printf("[INFO] *** Waiting for pod: %s", podName)
 	for e := range w.ResultChan() {
-		//log.Printf("[DEBUG] Watch Probe Type: %v", e.Type)
+		log.Printf("[DEBUG] Watch Probe Type: %v", e.Type)
 		pod, ok := e.Object.(*apiv1.Pod)
 		if !ok {
-			//log.Printf("[WARN] Unexpected Watch Probe Type - skipping")
+			log.Printf("[WARN] Unexpected Watch Probe Type - skipping")
 			if ctx.Err() != nil {
-				//log.Printf("[WARN] Context error received while waiting on pod %v. Error: %v", podName, ctx.Err())
+				log.Printf("[WARN] Context error received while waiting on pod %v. Error: %v", podName, ctx.Err())
 				return ctx.Err()
 			}
 			continue
@@ -405,10 +406,9 @@ func (connection *Conn) waitForPod(namespace string, podName string) (err error)
 			continue
 		}
 
-		//log.Printf("[INFO] Pod %v Phase: %v", pod.GetName(), pod.Status.Phase)
-		//for _, con := range pod.Status.ContainerStatuses {
-		for range pod.Status.ContainerStatuses {
-			//log.Printf("[DEBUG] Container Status: %+v", con)
+		log.Printf("[INFO] Pod %v Phase: %v", pod.GetName(), pod.Status.Phase)
+		for _, con := range pod.Status.ContainerStatuses {
+			log.Printf("[DEBUG] Container Status: %+v", con)
 		}
 
 		err = connection.podInErrorState(pod)
@@ -429,7 +429,7 @@ func (connection *Conn) podInErrorState(p *apiv1.Pod) error {
 		if p.Status.ContainerStatuses[0].State.Waiting != nil {
 			podName := p.GetObjectMeta().GetName()
 			waitReason := p.Status.ContainerStatuses[0].State.Waiting.Reason
-			//log.Printf("[DEBUG] Pod: %v Waiting reason: %v", podName, waitReason)
+			log.Printf("[DEBUG] Pod: %v Waiting reason: %v", podName, waitReason)
 
 			if strings.Contains(waitReason, "error") {
 				return utils.ReformatError("Pod '%s' is in an error state: %v", podName, waitReason)

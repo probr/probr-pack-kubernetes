@@ -3,6 +3,7 @@ package connection
 import (
 	"context"
 	"fmt"
+	"log"
 
 	"github.com/Azure/azure-sdk-for-go/services/storage/mgmt/2019-04-01/storage"
 	"github.com/Azure/go-autorest/autorest/azure/auth"
@@ -81,7 +82,7 @@ func AccountProperties(ctx context.Context, rgName, accountName string) (storage
 func AccountPrimaryKey(ctx context.Context, accountName, accountGroupName string) string {
 	response, err := getAccountKeys(ctx, accountName, accountGroupName)
 	if err != nil {
-		//log.Fatalf("failed to list keys: %v", err)
+		log.Fatalf("failed to list keys: %v", err)
 	}
 	return *(((*response.Keys)[0]).Value)
 }
@@ -102,7 +103,7 @@ func accountClient() storage.AccountsClient {
 	if err == nil {
 		c.Authorizer = authorizerToken
 	} else {
-		//log.Printf("[ERROR] Unable to authorise Storage Account accountClient: %v", err)
+		log.Printf("[ERROR] Unable to authorise Storage Account accountClient: %v", err)
 	}
 	return c
 }

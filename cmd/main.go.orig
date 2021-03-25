@@ -23,12 +23,12 @@ func main() {
 
 	err := config.Init("") // Create default config
 	if err != nil {
-		//log.Printf("[ERROR] error returned from config.Init: %v", err)
+		log.Printf("[ERROR] error returned from config.Init: %v", err)
 		exit(2)
 	}
 
 	if len(os.Args[1:]) > 0 {
-		//log.Printf("[DEBUG] Checking for CLI options or flags")
+		log.Printf("[DEBUG] Checking for CLI options or flags")
 		cliflags.HandleRequestForRequiredVars()
 		cliflags.HandlePackOption()
 		// TODO: Find a way to get loglevel handling to work ABOVE this point,
@@ -47,10 +47,10 @@ func main() {
 
 	s, ts, err := probr.RunAllProbes()
 	if err != nil {
-		//log.Printf("[ERROR] Error executing tests %v", err)
+		log.Printf("[ERROR] Error executing tests %v", err)
 		exit(2) // Exit 2+ is for logic/functional errors
 	}
-	//log.Printf("[INFO] Overall test completion status: %v", s)
+	log.Printf("[INFO] Overall test completion status: %v", s)
 	audit.State.SetProbrStatus()
 
 	out := probr.GetAllProbeResults(ts)
@@ -87,7 +87,7 @@ func setupCloseHandler() {
 	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
 	go func() {
 		<-c
-		//log.Printf("Execution aborted - %v", "SIGTERM")
+		log.Printf("Execution aborted - %v", "SIGTERM")
 		probr.CleanupTmp()
 		// TODO: Additional cleanup may be needed. For instance, any pods created during tests are not being dropped if aborted.
 		os.Exit(0)
