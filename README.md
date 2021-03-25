@@ -23,7 +23,7 @@ The following elements are required to get started running the Probr Kubernetes 
 
 ### Get the executable
 
-- **Option 1** - Download the latest Probr package by clicking the corresponding asset on our [release page](https://github.com/citihub/probr/releases).
+- **Option 1** - Download the latest Probr package by clicking the corresponding asset on our [release page](https://github.com/citihub/probr-pack-kubernetes/releases).
 - **Option 2** - You may build the edge version of Probr by using `go build -o probr.exe cmd/main.go` from the source code. This may also be necessary if an executable compatible with your system is not available in on the release page.
 - **Option 3** - There is an example Dockerfile in [examples/docker](./examples/docker) which will build a Docker image with both Probr and [Cucumber HTML Reporter](https://www.npmjs.com/package/cucumber-html-reporter)
 
@@ -218,4 +218,4 @@ Some generalized probes target all providers, but others are only useful for spe
 
 ## Development & Contributing
 
-Please see the [contributing docs](https://github.com/citihub/probr/blob/master/CONTRIBUTING.md) for information on how to develop and contribute to this repository as either a maintainer or open source contributor (the same rules apply for both).
+Please see the [contributing docs](https://github.com/citihub/probr-pack-kubernetes/blob/master/CONTRIBUTING.md) for information on how to develop and contribute to this repository as either a maintainer or open source contributor (the same rules apply for both).

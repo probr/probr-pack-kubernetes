@@ -6,7 +6,7 @@ import (
 
 	"github.com/Azure/azure-sdk-for-go/services/resources/mgmt/2019-01-01/policy"
 	"github.com/Azure/go-autorest/autorest/azure/auth"
-	azureutil "github.com/citihub/probr/service_packs/storage/azure"
+	azureutil "github.com/citihub/probr-pack-kubernetes/service_packs/storage/azure"
 )
 
 // DefinitionByName get a Policy Definition by name.

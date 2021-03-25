@@ -12,12 +12,12 @@ import (
 	"github.com/Azure/go-autorest/autorest/azure"
 	"github.com/cucumber/godog"
 
-	"github.com/citihub/probr/audit"
-	"github.com/citihub/probr/service_packs/coreengine"
-	azureutil "github.com/citihub/probr/service_packs/storage/azure"
-	"github.com/citihub/probr/service_packs/storage/azure/group"
-	"github.com/citihub/probr/service_packs/storage/connection"
-	"github.com/citihub/probr/utils"
+	"github.com/citihub/probr-pack-kubernetes/audit"
+	"github.com/citihub/probr-pack-kubernetes/service_packs/coreengine"
+	azureutil "github.com/citihub/probr-pack-kubernetes/service_packs/storage/azure"
+	"github.com/citihub/probr-pack-kubernetes/service_packs/storage/azure/group"
+	"github.com/citihub/probr-pack-kubernetes/service_packs/storage/connection"
+	"github.com/citihub/probr-pack-kubernetes/utils"
 )
 
 type scenarioState struct {

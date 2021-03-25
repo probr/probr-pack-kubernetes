@@ -95,10 +95,10 @@ github.com/cespare/xxhash/v2 v2.1.1/go.mod h1:VGX0DQ3Q6kWi7AoAeZDth3/j3BFtOZR5XL
 github.com/chzyer/logex v1.1.10/go.mod h1:+Ywpsq7O8HXn0nuIou7OrIPyXbp3wmkHB+jjWRnGsAI=
 github.com/chzyer/readline v0.0.0-20180603132655-2972be24d48e/go.mod h1:nSuG5e5PlCu98SY8svDHJxuZscDgtXS6KTTbou5AhLI=
 github.com/chzyer/test v0.0.0-20180213035817-a1ea475d72b1/go.mod h1:Q3SI9o4m/ZMnBNeIyt5eFwwo7qiLfzFZmjNmxjkiQlU=
+github.com/citihub/probr v0.9.0 h1:bm1voHPRTnXGuwm1e9iryq2xuhWbtummQinMfZbQz9w=
 github.com/citihub/probr v0.9.0/go.mod h1:pKoI3nkEW7rWoUbV8pT8GPbyzCA1ncBNMg55DXuIa7o=
-github.com/citihub/probr-sdk v0.0.1 h1:ynKa2GdIvH7tqrw9uL8pwQ2XTHOddnx24JnfuXfxI+A=
-github.com/citihub/probr-sdk v0.0.1/go.mod h1:Oy5uKKtrcLFZZz8K1odo34iItPWigzVP5qcBMSa6g/Q=
-github.com/citihub/probr-sdk v0.0.6 h1:MDYy6nsf5lCJMfQ8QZGu/Ir/JOEZkqE3HsYnk+T5I5M=
+github.com/citihub/probr-sdk v0.0.7 h1:O47ZfKWTB8ftpBvIXpApVLoz/uN2WACvaiEDa9wWfNA=
+github.com/citihub/probr-sdk v0.0.7/go.mod h1:WT1klNYlA1EwaWWvJt3HfwGsDNispZYpmLj8jRSM3qE=
 github.com/client9/misspell v0.3.4/go.mod h1:qj6jICC3Q7zFZvVWo7KLAzC3yx5G7kyvSDkc90ppPyw=
 github.com/coreos/go-iptables v0.3.0/go.mod h1:/mVI274lEDI2ns62jHCDnCyBF9Iwsmekav8Dbxlm1MU=
 github.com/creack/pty v1.1.9/go.mod h1:oKZEueFk5CKHvIhNR5MUki03XCEU+Q6VDXinZuGJ33E=

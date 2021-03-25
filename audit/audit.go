@@ -5,8 +5,8 @@ import (
 	"io/ioutil"
 	"strings"
 
-	"github.com/citihub/probr/config"
-	"github.com/citihub/probr/utils"
+	"github.com/citihub/probr-pack-kubernetes/config"
+	"github.com/citihub/probr-pack-kubernetes/utils"
 )
 
 // ProbeAudit is used to hold all information related to probe execution

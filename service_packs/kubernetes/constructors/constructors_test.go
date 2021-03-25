@@ -9,8 +9,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/citihub/probr/config"
-	"github.com/citihub/probr/utils"
+	"github.com/citihub/probr-pack-kubernetes/config"
+	"github.com/citihub/probr-pack-kubernetes/utils"
 	apiv1 "k8s.io/api/core/v1"
 )
 

@@ -1,12 +1,12 @@
-package probr
+package pack
 
 import (
 	"log"
 	"os"
 
-	"github.com/citihub/probr/config"
-	servicepacks "github.com/citihub/probr/service_packs"
-	"github.com/citihub/probr/service_packs/coreengine"
+	"github.com/citihub/probr-pack-kubernetes/config"
+	servicepacks "github.com/citihub/probr-pack-kubernetes/service_packs"
+	"github.com/citihub/probr-pack-kubernetes/service_packs/coreengine"
 )
 
 var tmpDirFunc = config.Vars.TmpDir // TODO: revise this

@@ -1,4 +1,4 @@
-package probr
+package pack
 
 import (
 	"github.com/hashicorp/go-hclog"

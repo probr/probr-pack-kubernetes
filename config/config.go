@@ -12,7 +12,7 @@ import (
 	"strings"
 
 	"github.com/briandowns/spinner"
-	"github.com/citihub/probr/utils"
+	"github.com/citihub/probr-pack-kubernetes/utils"
 	"gopkg.in/yaml.v2"
 )
 

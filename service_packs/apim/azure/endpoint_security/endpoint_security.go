@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/citihub/probr/audit"
-	"github.com/citihub/probr/service_packs/coreengine"
+	"github.com/citihub/probr-pack-kubernetes/audit"
+	"github.com/citihub/probr-pack-kubernetes/service_packs/coreengine"
 	"github.com/cucumber/godog"
 )
 

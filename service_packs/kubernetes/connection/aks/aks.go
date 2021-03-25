@@ -5,7 +5,7 @@ import (
 	"log"
 
 	aibv1 "github.com/Azure/aad-pod-identity/pkg/apis/aadpodidentity"
-	"github.com/citihub/probr/service_packs/kubernetes/connection"
+	"github.com/citihub/probr-pack-kubernetes/service_packs/kubernetes/connection"
 )
 
 // AKS implements the Azure Kubernetes Service wrapper

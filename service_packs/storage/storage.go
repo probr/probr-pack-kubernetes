@@ -1,11 +1,11 @@
 package storage
 
 import (
-	"github.com/citihub/probr/config"
-	"github.com/citihub/probr/service_packs/coreengine"
-	azureaw "github.com/citihub/probr/service_packs/storage/azure/access_whitelisting"
-	azureear "github.com/citihub/probr/service_packs/storage/azure/encryption_at_rest"
-	azureeif "github.com/citihub/probr/service_packs/storage/azure/encryption_in_flight"
+	"github.com/citihub/probr-pack-kubernetes/config"
+	"github.com/citihub/probr-pack-kubernetes/service_packs/coreengine"
+	azureaw "github.com/citihub/probr-pack-kubernetes/service_packs/storage/azure/access_whitelisting"
+	azureear "github.com/citihub/probr-pack-kubernetes/service_packs/storage/azure/encryption_at_rest"
+	azureeif "github.com/citihub/probr-pack-kubernetes/service_packs/storage/azure/encryption_in_flight"
 	"github.com/markbates/pkger"
 )
 

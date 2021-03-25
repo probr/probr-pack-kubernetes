@@ -1,10 +1,10 @@
 package servicepacks
 
 import (
-	"github.com/citihub/probr/service_packs/apim"
-	"github.com/citihub/probr/service_packs/coreengine"
-	"github.com/citihub/probr/service_packs/kubernetes"
-	"github.com/citihub/probr/service_packs/storage"
+	"github.com/citihub/probr-pack-kubernetes/service_packs/apim"
+	"github.com/citihub/probr-pack-kubernetes/service_packs/coreengine"
+	"github.com/citihub/probr-pack-kubernetes/service_packs/kubernetes"
+	"github.com/citihub/probr-pack-kubernetes/service_packs/storage"
 )
 
 func packs() (packs map[string][]coreengine.Probe) {

@@ -11,9 +11,9 @@ import (
 	"github.com/briandowns/spinner"
 
 	"github.com/citihub/probr"
-	"github.com/citihub/probr/audit"
-	cliflags "github.com/citihub/probr/cmd/cli_flags"
-	"github.com/citihub/probr/config"
+	"github.com/citihub/probr-pack-kubernetes/audit"
+	cliflags "github.com/citihub/probr-pack-kubernetes/cmd/cli_flags"
+	"github.com/citihub/probr-pack-kubernetes/config"
 )
 
 func main() {

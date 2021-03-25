@@ -17,8 +17,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/citihub/probr/audit"
-	"github.com/citihub/probr/config"
+	"github.com/citihub/probr-pack-kubernetes/audit"
+	"github.com/citihub/probr-pack-kubernetes/config"
 )
 
 type flatObj struct {

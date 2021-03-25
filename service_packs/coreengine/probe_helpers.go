@@ -10,8 +10,8 @@ import (
 
 	"github.com/cucumber/godog"
 
-	"github.com/citihub/probr/config"
-	"github.com/citihub/probr/utils"
+	"github.com/citihub/probr-pack-kubernetes/config"
+	"github.com/citihub/probr-pack-kubernetes/utils"
 )
 
 // Probe is an interface used by probes that are to be exported from any service pack

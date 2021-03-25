@@ -1,4 +1,4 @@
-package probr
+package pack
 
 import (
 	"io/ioutil"
@@ -7,9 +7,9 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/citihub/probr/config"
-	"github.com/citihub/probr/service_packs/coreengine"
-	"github.com/citihub/probr/utils"
+	"github.com/citihub/probr-pack-kubernetes/config"
+	"github.com/citihub/probr-pack-kubernetes/service_packs/coreengine"
+	"github.com/citihub/probr-pack-kubernetes/utils"
 )
 
 func TestGetAllProbeResults(t *testing.T) {

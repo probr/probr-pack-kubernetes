@@ -7,12 +7,12 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/citihub/probr"
+	pack "github.com/citihub/probr-pack-kubernetes"
+	"github.com/citihub/probr-pack-kubernetes/audit"
+	cliflags "github.com/citihub/probr-pack-kubernetes/cmd/cli_flags"
+	"github.com/citihub/probr-pack-kubernetes/config"
 	"github.com/citihub/probr-sdk/logging"
 	"github.com/citihub/probr-sdk/plugin"
-	"github.com/citihub/probr/audit"
-	cliflags "github.com/citihub/probr/cmd/cli_flags"
-	"github.com/citihub/probr/config"
 )
 
 // ServicePack ...
@@ -47,7 +47,7 @@ func setupCloseHandler() {
 	go func() {
 		<-c
 		log.Printf("Execution aborted - %v", "SIGTERM")
-		probr.CleanupTmp()
+		pack.CleanupTmp()
 		// TODO: Additional cleanup may be needed. For instance, any pods created during tests are not being dropped if aborted.
 		os.Exit(0)
 	}()
@@ -78,7 +78,7 @@ func ProbrCoreLogic() string {
 	logWriter := logging.ProbrLoggerOutput()
 	log.SetOutput(logWriter) // TODO: This is a temporary patch, since logger output is being overritten while loading config vars
 
-	s, ts, err := probr.RunAllProbes()
+	s, ts, err := pack.RunAllProbes()
 	if err != nil {
 		log.Printf("[ERROR] Error executing tests %v", err)
 		os.Exit(2) // Exit 2+ is for logic/functional errors
@@ -86,7 +86,7 @@ func ProbrCoreLogic() string {
 	log.Printf("[INFO] Overall test completion status: %v", s)
 	audit.State.SetProbrStatus()
 
-	out := probr.GetAllProbeResults(ts)
+	out := pack.GetAllProbeResults(ts)
 	if out == nil || len(out) == 0 {
 		audit.State.Meta["no probes completed"] = fmt.Sprintf(
 			"Probe results not written to file, possibly due to all being excluded or permissions on the specified output directory: %s",

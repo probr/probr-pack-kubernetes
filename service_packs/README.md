@@ -143,7 +143,7 @@ of step functions.
       // service_packs/service_packs.go
       import (
          ...   
-         "github.com/citihub/probr/service_packs/storage"
+         "github.com/citihub/probr-pack-kubernetes/service_packs/storage"
       )
       ...
       func packs() (packs map[string][]coreengine.Probe) {

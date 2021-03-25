@@ -1,4 +1,4 @@
-module github.com/citihub/probr
+module github.com/citihub/probr-pack-kubernetes
 
 go 1.14
 
