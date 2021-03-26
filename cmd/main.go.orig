@@ -11,7 +11,7 @@ import (
 	"github.com/briandowns/spinner"
 
 	"github.com/citihub/probr"
-	"github.com/citihub/probr-pack-kubernetes/audit"
+	"github.com/citihub/probr-sdk/audit"
 	cliflags "github.com/citihub/probr-pack-kubernetes/cmd/cli_flags"
 	"github.com/citihub/probr-sdk/config"
 )

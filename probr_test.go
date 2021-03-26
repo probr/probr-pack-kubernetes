@@ -7,8 +7,8 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/citihub/probr-pack-kubernetes/service_packs/coreengine"
 	"github.com/citihub/probr-sdk/config"
+	"github.com/citihub/probr-sdk/probeengine"
 	"github.com/citihub/probr-sdk/utils"
 )
 
@@ -27,7 +27,7 @@ func TestGetAllProbeResults(t *testing.T) {
 	}()
 
 	type args struct {
-		ps *coreengine.ProbeStore
+		ps *probeengine.ProbeStore
 	}
 	tests := []struct {
 		testName       string
@@ -37,7 +37,7 @@ func TestGetAllProbeResults(t *testing.T) {
 	}{
 		{
 			testName:       "ShouldCleanupTmpDir",
-			testArgs:       args{coreengine.NewProbeStore()},
+			testArgs:       args{probeengine.NewProbeStore()},
 			expectedResult: map[string]string{},
 		},
 	}

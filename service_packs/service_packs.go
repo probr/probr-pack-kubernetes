@@ -1,25 +1,21 @@
 package servicepacks
 
 import (
-	"github.com/citihub/probr-pack-kubernetes/service_packs/apim"
-	"github.com/citihub/probr-pack-kubernetes/service_packs/coreengine"
 	"github.com/citihub/probr-pack-kubernetes/service_packs/kubernetes"
-	"github.com/citihub/probr-pack-kubernetes/service_packs/storage"
+	"github.com/citihub/probr-sdk/probeengine"
 )
 
-func packs() (packs map[string][]coreengine.Probe) {
-	packs = make(map[string][]coreengine.Probe)
+func packs() (packs map[string][]probeengine.Probe) {
+	packs = make(map[string][]probeengine.Probe)
 
 	packs["kubernetes"] = kubernetes.GetProbes()
-	packs["storage"] = storage.GetProbes()
-	packs["apim"] = apim.GetProbes()
 
 	return
 }
 
-func makeGodogProbe(pack string, p coreengine.Probe) *coreengine.GodogProbe {
-	descriptor := coreengine.ProbeDescriptor{Group: coreengine.Kubernetes, Name: p.Name()}
-	return &coreengine.GodogProbe{
+func makeGodogProbe(pack string, p probeengine.Probe) *probeengine.GodogProbe {
+	descriptor := probeengine.ProbeDescriptor{Group: probeengine.Kubernetes, Name: p.Name()}
+	return &probeengine.GodogProbe{
 		ProbeDescriptor:     &descriptor,
 		ProbeInitializer:    p.ProbeInitialize,
 		ScenarioInitializer: p.ScenarioInitialize,
@@ -28,8 +24,8 @@ func makeGodogProbe(pack string, p coreengine.Probe) *coreengine.GodogProbe {
 }
 
 // GetAllProbes returns a list of probes that are ready to be run by Godog
-func GetAllProbes() []*coreengine.GodogProbe {
-	var allProbes []*coreengine.GodogProbe
+func GetAllProbes() []*probeengine.GodogProbe {
+	var allProbes []*probeengine.GodogProbe
 
 	for packName, pack := range packs() {
 		for _, probe := range pack {

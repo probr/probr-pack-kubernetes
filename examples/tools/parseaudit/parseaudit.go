@@ -17,7 +17,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/citihub/probr-pack-kubernetes/audit"
+	"github.com/citihub/probr-sdk/audit"
 	"github.com/citihub/probr-sdk/config"
 )
 

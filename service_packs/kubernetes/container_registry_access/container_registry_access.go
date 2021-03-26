@@ -8,12 +8,12 @@ import (
 	"github.com/cucumber/godog"
 	apiv1 "k8s.io/api/core/v1"
 
-	"github.com/citihub/probr-pack-kubernetes/audit"
-	"github.com/citihub/probr-pack-kubernetes/service_packs/coreengine"
 	"github.com/citihub/probr-pack-kubernetes/service_packs/kubernetes/connection"
 	"github.com/citihub/probr-pack-kubernetes/service_packs/kubernetes/constructors"
 	"github.com/citihub/probr-pack-kubernetes/service_packs/kubernetes/errors"
+	"github.com/citihub/probr-sdk/audit"
 	"github.com/citihub/probr-sdk/config"
+	"github.com/citihub/probr-sdk/probeengine"
 	"github.com/citihub/probr-sdk/utils"
 )
 
@@ -148,7 +148,7 @@ func (probe probeStruct) Name() string {
 
 // Path presents the path of these feature files for external reference
 func (probe probeStruct) Path() string {
-	return coreengine.GetFeaturePath("service_packs", "kubernetes", probe.Name())
+	return probeengine.GetFeaturePath("service_packs", "kubernetes", probe.Name())
 }
 
 // ProbeInitialize handles any overall Test Suite initialisation steps.  This is registered with the
@@ -194,7 +194,7 @@ func beforeScenario(s *scenarioState, probeName string, gs *godog.Scenario) {
 	s.audit = audit.State.GetProbeLog(probeName).InitializeAuditor(gs.Name, gs.Tags)
 	s.pods = make([]string, 0)
 	s.namespace = config.Vars.ServicePacks.Kubernetes.ProbeNamespace
-	coreengine.LogScenarioStart(gs)
+	probeengine.LogScenarioStart(gs)
 }
 
 func afterScenario(scenario scenarioState, probe probeStruct, gs *godog.Scenario, err error) {
@@ -206,7 +206,7 @@ func afterScenario(scenario scenarioState, probe probeStruct, gs *godog.Scenario
 			}
 		}
 	}
-	coreengine.LogScenarioEnd(gs)
+	probeengine.LogScenarioEnd(gs)
 }
 
 func getContainerRegistryFromConfig(accessLevel bool) string {

@@ -5,15 +5,15 @@ import (
 	"os"
 
 	servicepacks "github.com/citihub/probr-pack-kubernetes/service_packs"
-	"github.com/citihub/probr-pack-kubernetes/service_packs/coreengine"
 	"github.com/citihub/probr-sdk/config"
+	"github.com/citihub/probr-sdk/probeengine"
 )
 
 var tmpDirFunc = config.Vars.TmpDir // TODO: revise this
 
 // RunAllProbes retrieves and executes all probes that have been included
-func RunAllProbes() (int, *coreengine.ProbeStore, error) {
-	ts := coreengine.NewProbeStore()
+func RunAllProbes() (int, *probeengine.ProbeStore, error) {
+	ts := probeengine.NewProbeStore()
 
 	for _, probe := range servicepacks.GetAllProbes() {
 		ts.AddProbe(probe)
@@ -24,7 +24,7 @@ func RunAllProbes() (int, *coreengine.ProbeStore, error) {
 }
 
 //GetAllProbeResults maps ProbeStore results to strings
-func GetAllProbeResults(ps *coreengine.ProbeStore) map[string]string {
+func GetAllProbeResults(ps *probeengine.ProbeStore) map[string]string {
 	defer CleanupTmp()
 
 	out := make(map[string]string)
@@ -39,7 +39,7 @@ func GetAllProbeResults(ps *coreengine.ProbeStore) map[string]string {
 	return out
 }
 
-func readProbeResults(ps *coreengine.ProbeStore, name string) (probeResults, probeName string, err error) {
+func readProbeResults(ps *probeengine.ProbeStore, name string) (probeResults, probeName string, err error) {
 	p, err := ps.GetProbe(name)
 	if err != nil {
 		return

@@ -4,22 +4,18 @@ go 1.14
 
 require (
 	github.com/Azure/aad-pod-identity v1.7.0
-	github.com/Azure/azure-sdk-for-go v44.2.0+incompatible
-	github.com/Azure/azure-storage-blob-go v0.12.0
-	github.com/Azure/go-autorest/autorest v0.11.0
-	github.com/Azure/go-autorest/autorest/azure/auth v0.5.0
-	github.com/Azure/go-autorest/autorest/to v0.4.0
-	github.com/Azure/go-autorest/autorest/validation v0.3.0 // indirect
-	github.com/citihub/probr-sdk v0.0.8
+	github.com/Azure/go-autorest/autorest v0.11.0 // indirect
+	github.com/Azure/go-autorest/autorest/adal v0.9.2 // indirect
+	github.com/citihub/probr-sdk v0.0.10
 	github.com/cucumber/godog v0.10.0
-	github.com/cucumber/messages-go/v10 v10.0.3
 	github.com/hashicorp/go-hclog v0.15.0
 	github.com/markbates/pkger v0.17.1
+	golang.org/x/sys v0.0.0-20200828194041-157a740278f4 // indirect
 	k8s.io/api v0.19.2
 	k8s.io/apimachinery v0.19.2
 	k8s.io/client-go v0.19.2
 )
 
-//replace github.com/citihub/probr-sdk => ../probr-sdk
+// replace github.com/citihub/probr-sdk => ../probr-sdk
 
 //Line above is intended to be used during dev only when editing modules locally.

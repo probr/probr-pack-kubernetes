@@ -1,21 +1,21 @@
 package kubernetes
 
 import (
-	"github.com/citihub/probr-pack-kubernetes/service_packs/coreengine"
 	cra "github.com/citihub/probr-pack-kubernetes/service_packs/kubernetes/container_registry_access"
 	"github.com/citihub/probr-pack-kubernetes/service_packs/kubernetes/general"
 	"github.com/citihub/probr-pack-kubernetes/service_packs/kubernetes/iam"
 	"github.com/citihub/probr-pack-kubernetes/service_packs/kubernetes/podsecurity"
 	"github.com/citihub/probr-sdk/config"
+	"github.com/citihub/probr-sdk/probeengine"
 	"github.com/markbates/pkger"
 )
 
 // GetProbes returns a list of probe objects
-func GetProbes() []coreengine.Probe {
+func GetProbes() []probeengine.Probe {
 	if config.Vars.ServicePacks.Kubernetes.IsExcluded() {
 		return nil
 	}
-	return []coreengine.Probe{
+	return []probeengine.Probe{
 		cra.Probe,
 		general.Probe,
 		podsecurity.Probe,

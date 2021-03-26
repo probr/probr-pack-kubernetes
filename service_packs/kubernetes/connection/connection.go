@@ -11,8 +11,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/citihub/probr-pack-kubernetes/audit"
 	"github.com/citihub/probr-pack-kubernetes/service_packs/kubernetes/errors"
+	"github.com/citihub/probr-sdk/audit"
 	"github.com/citihub/probr-sdk/config"
 	"github.com/citihub/probr-sdk/utils"
 	apiv1 "k8s.io/api/core/v1"

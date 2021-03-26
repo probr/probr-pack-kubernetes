@@ -61,9 +61,9 @@ of step functions.
          "storage_packs/storage/encryption_at_rest"
          "storage_packs/storage/encryption_in_flight"
       )
-      func GetProbes() []coreengine.Probe {
+      func GetProbes() []probeengine.Probe {
          ...
-         return []coreengine.Probe{
+         return []probeengine.Probe{
             access_whitelisting.Probe,
             encryption_at_rest.Probe,
             encryption_in_flight.Probe,
@@ -92,7 +92,7 @@ of step functions.
          type ProbeStruct struct{} 
          var Probe ProbeStruct   // allows the probe to be added to the ProbeStore
          func (p ProbeStruct) Name() string {return "my-probe-name"} // Used in storage_packs/storage_packs.go
-         func (p ProbeStruct) Path() string { return coreengine.GetFeaturePath("service_packs", "kubernetes", p.Name()) } // Allows for custom pack file structure
+         func (p ProbeStruct) Path() string { return probeengine.GetFeaturePath("service_packs", "kubernetes", p.Name()) } // Allows for custom pack file structure
          func ProbeInitialize(ctx *godog.TestSuiteContext) {} // required by the Godog handler
          func ScenarioInitialize(ctx *godog.ScenarioContext) {} // defines each step, required by the Godog handler
       ```
@@ -146,7 +146,7 @@ of step functions.
          "github.com/citihub/probr-pack-kubernetes/service_packs/storage"
       )
       ...
-      func packs() (packs map[string][]coreengine.Probe) {
+      func packs() (packs map[string][]probeengine.Probe) {
          ...
          packs["storage"] = storage.GetProbes()
          return

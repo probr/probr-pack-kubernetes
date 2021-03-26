@@ -3,12 +3,12 @@ package kubernetes
 import (
 	"testing"
 
-	"github.com/citihub/probr-pack-kubernetes/service_packs/coreengine"
 	"github.com/citihub/probr-sdk/config"
+	"github.com/citihub/probr-sdk/probeengine"
 )
 
 func TestGetProbes(t *testing.T) {
-	pack := make([]coreengine.Probe, 0)
+	pack := make([]probeengine.Probe, 0)
 	pack = GetProbes()
 	// No required vars set
 	if len(pack) > 0 {

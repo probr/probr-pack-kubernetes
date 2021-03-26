@@ -8,8 +8,8 @@ import (
 	"syscall"
 
 	pack "github.com/citihub/probr-pack-kubernetes"
-	"github.com/citihub/probr-pack-kubernetes/audit"
 	cliflags "github.com/citihub/probr-pack-kubernetes/cmd/cli_flags"
+	"github.com/citihub/probr-sdk/audit"
 	"github.com/citihub/probr-sdk/config"
 	"github.com/citihub/probr-sdk/logging"
 	"github.com/citihub/probr-sdk/plugin"
