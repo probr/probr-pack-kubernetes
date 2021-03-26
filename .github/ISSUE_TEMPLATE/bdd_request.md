@@ -4,8 +4,8 @@ about: Suggest new BDD scenario specification
 title: "[Scenario]"
 labels: feature request, scenario
 assignees: ''
-
 ---
+
 **Please write a rough BDD specification**
 _[Replace sample below with actual BDD specification. See Gherkin syntax for reference: https://cucumber.io/docs/gherkin/reference]_
 ```

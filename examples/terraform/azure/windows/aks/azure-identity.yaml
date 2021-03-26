@@ -1,8 +1,0 @@
-apiVersion: "aadpodidentity.k8s.io/v1"
-kind: AzureIdentity
-metadata:
-  name: "probr-probe"
-spec:
-  type: 0
-  ResourceID: /subscriptions/${subscription_id}/resourceGroups/${node_rg_name}/providers/Microsoft.ManagedIdentity/userAssignedIdentities/${msi_name}
-  ClientID: ${msi_object_id}
