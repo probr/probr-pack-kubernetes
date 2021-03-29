@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"os"
 	"os/signal"
@@ -14,15 +13,16 @@ import (
 	"github.com/citihub/probr-sdk/logging"
 	"github.com/citihub/probr-sdk/plugin"
 	"github.com/citihub/probr-sdk/probeengine"
+	"github.com/citihub/probr-sdk/utils"
 )
 
 // ServicePack ...
 type ServicePack struct {
 }
 
-// Greet ...
-func (sp *ServicePack) Greet() string {
-	log.Printf("[DEBUG] message from ServicePack_Probr.Greet")
+// RunProbes ...
+func (sp *ServicePack) RunProbes() error {
+	log.Printf("[DEBUG] message from ServicePack_Probr.RunProbes")
 	log.Printf("[DEBUG] args... %v", os.Args)
 
 	return ProbrCoreLogic()
@@ -58,16 +58,16 @@ func setupCloseHandler() {
 }
 
 // ProbrCoreLogic ...
-func ProbrCoreLogic() string {
+func ProbrCoreLogic() (err error) {
 	log.Printf("[INFO] message from ProbCoreLogic: %s", "Start")
 
 	// Setup for handling SIGTERM (Ctrl+C)
 	//setupCloseHandler()
 
-	err := config.Init("") // Create default config
+	err = config.Init("") // Create default config
 	if err != nil {
 		log.Printf("[ERROR] error returned from config.Init: %v", err)
-		os.Exit(2)
+		return
 	}
 	if len(os.Args[1:]) > 0 {
 		log.Printf("[DEBUG] Checking for CLI options or flags")
@@ -85,22 +85,19 @@ func ProbrCoreLogic() string {
 	s, ts, err := probeengine.RunAllProbes("kubernetes", pack.GetProbes())
 	if err != nil {
 		log.Printf("[ERROR] Error executing tests %v", err)
-		os.Exit(2) // Exit 2+ is for logic/functional errors
+		return
 	}
 	log.Printf("[INFO] Overall test completion status: %v", s)
 	audit.State.SetProbrStatus()
 
-	out := probeengine.GetAllProbeResults(ts)
-	if out == nil || len(out) == 0 {
-		audit.State.Meta["no probes completed"] = fmt.Sprintf(
-			"Probe results not written to file, possibly due to all being excluded or permissions on the specified output directory: %s",
-			config.Vars.CucumberDir(),
-		)
-	}
+	_, success := probeengine.GetAllProbeResults(ts) // TODO: Use the results provided here
 	audit.State.PrintSummary()
 	audit.State.WriteSummary()
 
 	log.Printf("[INFO] message from ProbCoreLogic: %s", "End")
 
-	return "Hello Probr!"
+	if !success {
+		return utils.ReformatError("One or more probe scenarios were not successful. View the output logs for more details.")
+	}
+	return
 }
