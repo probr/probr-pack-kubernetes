@@ -7,8 +7,8 @@ import (
 	"syscall"
 
 	pack "github.com/citihub/probr-pack-kubernetes"
-	cliflags "github.com/citihub/probr-pack-kubernetes/cmd/cli_flags"
 	"github.com/citihub/probr-sdk/audit"
+	cliflags "github.com/citihub/probr-sdk/cli_flags"
 	"github.com/citihub/probr-sdk/config"
 	"github.com/citihub/probr-sdk/logging"
 	"github.com/citihub/probr-sdk/plugin"
@@ -60,6 +60,8 @@ func setupCloseHandler() {
 // ProbrCoreLogic ...
 func ProbrCoreLogic() (err error) {
 	log.Printf("[INFO] message from ProbCoreLogic: %s", "Start")
+	defer probeengine.CleanupTmp()
+	setupCloseHandler()
 
 	// Setup for handling SIGTERM (Ctrl+C)
 	//setupCloseHandler()
