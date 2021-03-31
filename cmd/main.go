@@ -76,7 +76,7 @@ func ProbrCoreLogic() (err error) {
 		cliflags.HandleRequestForRequiredVars()
 		log.Printf("[DEBUG] Handle pack option")
 		cliflags.HandlePackOption()
-		cliflags.HandleFlags()
+		parseFlags()
 	}
 
 	config.Vars.LogConfigState()
@@ -102,4 +102,30 @@ func ProbrCoreLogic() (err error) {
 		return utils.ReformatError("One or more probe scenarios were not successful. View the output logs for more details.")
 	}
 	return
+}
+
+func parseFlags() {
+	var flags cliflags.Flags
+
+	flags.NewStringFlag("varsfile", "path to config file", cliflags.VarsFileHandler)
+	flags.NewStringFlag("writedirectory", "output directory", cliflags.WriteDirHandler)
+	flags.NewStringFlag("loglevel", "set log level", cliflags.LoglevelHandler)
+	flags.NewStringFlag("resultsformat", "set the bdd results format (default = cucumber)", cliflags.ResultsformatHandler)
+	flags.NewStringFlag("tags", "feature tags to include or exclude", cliflags.TagsHandler)
+
+	flags.NewStringFlag("kubeconfig", "kube config file", kubeConfigHandler)
+
+	flags.ExecuteHandlers()
+
+}
+
+func kubeConfigHandler(v *string) {
+	value := *v
+	if len(value) > 0 {
+		config.Vars.ServicePacks.Kubernetes.KubeConfigPath = value
+		log.Printf("[NOTICE] Kubeconfig path has been overridden via command line")
+	}
+	if len(config.Vars.ServicePacks.Kubernetes.KubeConfigPath) == 0 {
+		log.Printf("[NOTICE] No kubeconfig path specified. Falling back to default paths.")
+	}
 }
