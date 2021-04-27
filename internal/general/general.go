@@ -11,11 +11,11 @@ import (
 
 	"github.com/cucumber/godog"
 
-	"github.com/citihub/probr-pack-kubernetes/internal/connection"
-	"github.com/citihub/probr-pack-kubernetes/internal/constructors"
 	"github.com/citihub/probr-sdk/audit"
 	"github.com/citihub/probr-sdk/config"
 	"github.com/citihub/probr-sdk/probeengine"
+	"github.com/citihub/probr-sdk/providers/kubernetes/connection"
+	"github.com/citihub/probr-sdk/providers/kubernetes/constructors"
 	"github.com/citihub/probr-sdk/utils"
 )
 
@@ -201,6 +201,60 @@ func (scenario *scenarioState) theResultOfAProcessInsideThePodEstablishingADirec
 	return err
 }
 
+func (scenario *scenarioState) podCreationInNamespace(result, namespace string) error {
+	// Standard auditing logic to ensures panics are also audited
+	stepTrace, payload, err := utils.AuditPlaceholders()
+	defer func() {
+		scenario.audit.AuditScenarioStep(scenario.currentStep, stepTrace.String(), payload, err)
+	}()
+
+	stepTrace.WriteString(fmt.Sprintf("Build a pod spec with default values; "))
+
+	var ns string
+	switch namespace {
+	case "probr":
+		ns = config.Vars.ServicePacks.Kubernetes.ProbeNamespace
+	case "default":
+		ns = "default"
+	default:
+		return utils.ReformatError("Unknown namespace '%s' passed to podCreationNamespace", namespace)
+	}
+
+	podObject := constructors.PodSpec(Probe.Name(), ns)
+
+	stepTrace.WriteString(fmt.Sprintf("Create pod from spec; "))
+	createdPodObject, creationErr := scenario.createPodfromObject(podObject)
+
+	switch result {
+	case "succeeds":
+		if creationErr != nil {
+			err = utils.ReformatError("Pod creation in namespace %s did not succeed: %v", ns, creationErr)
+		}
+	case "fails":
+		if creationErr == nil {
+			err = utils.ReformatError("Pod creation in namespace %s succeeded but should have failed", ns)
+		}
+	default:
+		err = utils.ReformatError("Unrecognised result '%s' passed to podCreationNamespace", result)
+	}
+
+	payload = struct {
+		RequestedPod   *apiv1.Pod
+		Namespace      string
+		ExpectedResult string
+		CreatedPod     *apiv1.Pod
+		CreationError  error
+	}{
+		RequestedPod:   podObject,
+		Namespace:      ns,
+		ExpectedResult: result,
+		CreatedPod:     createdPodObject,
+		CreationError:  creationErr,
+	}
+
+	return err
+}
+
 // Name presents the name of this probe for external reference
 func (probe probeStruct) Name() string {
 	return "general"
@@ -238,6 +292,8 @@ func (probe probeStruct) ScenarioInitialize(ctx *godog.ScenarioContext) {
 	ctx.Step(`^a pod is deployed in the cluster$`, scenario.aPodIsDeployedInTheCluster)
 	ctx.Step(`^the result of a process inside the pod establishing a direct http\(s\) connection to "([^"]*)" is "([^"]*)"$`, scenario.theResultOfAProcessInsideThePodEstablishingADirectHTTPConnectionToXIsY)
 
+	ctx.Step(`^pod creation "([^"]*)" in the "([^"]*)" namespace$`, scenario.podCreationInNamespace)
+
 	ctx.AfterScenario(func(s *godog.Scenario, err error) {
 		afterScenario(scenario, probe, s, err)
 	})
@@ -265,7 +321,10 @@ func afterScenario(scenario scenarioState, probe probeStruct, gs *godog.Scenario
 		for _, podName := range scenario.pods {
 			err = conn.DeletePodIfExists(podName, scenario.namespace, probe.Name())
 			if err != nil {
-				log.Printf(fmt.Sprintf("[ERROR] Could not retrieve pod from namespace '%s' for deletion: %s", scenario.namespace, err))
+				err = conn.DeletePodIfExists(podName, "default", probe.Name()) // TODO: Optimize this
+				if err != nil {
+					log.Printf(fmt.Sprintf("[ERROR] Could not retrieve pod from namespace '%s' for deletion: %s", scenario.namespace, err))
+				}
 			}
 		}
 	}

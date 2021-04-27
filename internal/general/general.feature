@@ -9,9 +9,9 @@ Feature: General Cluster Security Configurations
         Given a Kubernetes cluster exists which we can deploy into
 
     @k-gen-001
-    Scenario: Ensure Kubernetes Web UI is disabled 
-        The Kubernetes Web UI (Dashboard) has been a historical source of vulnerability and should only be deployed when necessary. 
-        
+    Scenario: Ensure Kubernetes Web UI is disabled
+        The Kubernetes Web UI (Dashboard) has been a historical source of vulnerability and should only be deployed when necessary.
+
         Then the Kubernetes Web UI is disabled
 
     @k-gen-002
@@ -21,9 +21,14 @@ Feature: General Cluster Security Configurations
 
         When a pod is deployed in the cluster
         Then the result of a process inside the pod establishing a direct http(s) connection to "<URL>" is "<RESULT>"
-        
+
         Examples:
             | URL                       | RESULT  |
             | http://www.google.com     | blocked |
             | http://www.microsoft.com  | blocked |
             | http://www.ubuntu.com     | blocked |
+
+    @k-gen-003
+    Scenario: The default namespace should not be used
+        When pod creation "succeeds" in the "probr" namespace
+        Then pod creation "fails" in the "default" namespace

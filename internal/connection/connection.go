@@ -11,7 +11,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/citihub/probr-pack-kubernetes/internal/errors"
+	"github.com/citihub/probr-sdk/providers/kubernetes/errors"
 	"github.com/citihub/probr-sdk/audit"
 	"github.com/citihub/probr-sdk/config"
 	"github.com/citihub/probr-sdk/utils"
