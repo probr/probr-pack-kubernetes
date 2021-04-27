@@ -1,6 +1,9 @@
 package main
 
 import (
+	"flag"
+	"fmt"
+	"io"
 	"log"
 	"os"
 	"os/signal"
@@ -16,6 +19,28 @@ import (
 	"github.com/citihub/probr-sdk/utils"
 )
 
+var (
+	// ServicePackName is the display name for the service pack
+	ServicePackName = "Kubernetes" // TODO: Return binary name instead?
+
+	// Version is the main version number that is being run at the moment
+	Version = "0.0.2"
+
+	// Prerelease is a marker for the version. If this is "" (empty string)
+	// then it means that it is a final release. Otherwise, this is a pre-release
+	// such as "dev" (in development), "beta", "rc", etc.
+	// This should only be modified thru ldflags in make file. See 'make release'
+	Prerelease = "dev"
+
+	// GitCommitHash references the commit id at build time
+	// This should only be modified thru ldflags in make file. See 'make release'
+	GitCommitHash = ""
+
+	// BuiltAt is the build date
+	// This should only be modified thru ldflags in make file. See 'make release'
+	BuiltAt = ""
+)
+
 // ServicePack ...
 type ServicePack struct {
 }
@@ -29,16 +54,34 @@ func (sp *ServicePack) RunProbes() error {
 }
 
 func main() {
-	if len(os.Args) > 1 && os.Args[1] == "debug" {
-		ProbrCoreLogic()
-		return
-	}
-	spProbr := &ServicePack{}
-	serveOpts := &plugin.ServeOpts{
-		Pack: spProbr,
-	}
 
-	plugin.Serve(serveOpts)
+	// > probr version [-v]
+	versionCmd := flag.NewFlagSet("version", flag.ExitOnError)
+	verboseVersionFlag := versionCmd.Bool("v", false, "Display extended version information")
+
+	subCommand := ""
+	if len(os.Args) > 1 {
+		subCommand = os.Args[1]
+	}
+	switch subCommand {
+	case "version":
+		versionCmd.Parse(os.Args[2:])
+		printVersion(os.Stdout, *verboseVersionFlag)
+
+	default:
+		if len(os.Args) > 1 && os.Args[1] == "debug" { // TODO: Check this logic
+			ProbrCoreLogic()
+			return
+		}
+
+		// Serve plugin
+		spProbr := &ServicePack{}
+		serveOpts := &plugin.ServeOpts{
+			Pack: spProbr,
+		}
+
+		plugin.Serve(serveOpts)
+	}
 }
 
 // setupCloseHandler creates a 'listener' on a new goroutine which will notify the
@@ -128,4 +171,27 @@ func kubeConfigHandler(v *string) {
 	if len(config.Vars.ServicePacks.Kubernetes.KubeConfigPath) == 0 {
 		log.Printf("[NOTICE] No kubeconfig path specified. Falling back to default paths.")
 	}
+}
+
+func printVersion(w io.Writer, verbose bool) {
+
+	if verbose {
+		fmt.Fprintf(w, "Service Pack : %s", ServicePackName)
+		fmt.Fprintln(w)
+		fmt.Fprintf(w, "Version      : %s", getVersion())
+		fmt.Fprintln(w)
+		fmt.Fprintf(w, "Commit       : %s", GitCommitHash)
+		fmt.Fprintln(w)
+		fmt.Fprintf(w, "Built at     : %s", BuiltAt)
+	} else {
+		fmt.Fprintf(w, "Version      : %s", getVersion())
+	}
+
+}
+
+func getVersion() string {
+	if Prerelease != "" {
+		return fmt.Sprintf("%s-%s", Version, Prerelease)
+	}
+	return Version
 }

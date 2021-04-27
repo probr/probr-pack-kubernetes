@@ -253,6 +253,7 @@ probr
 static-content/
 .kube/
 config.yml
+kubernetes
 
 # Ignoring pkger buffer, as it should be regenerated on every build
 pkged.go
