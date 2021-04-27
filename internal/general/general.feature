@@ -19,7 +19,7 @@ Feature: General Cluster Security Configurations
         Ensure that containers running inside Kubernetes clusters cannot directly access the Internet
         So that Internet traffic can be inspected and controlled
 
-        When a pod is deployed in the cluster
+        When pod creation "succeeds" in the "probr" namespace
         Then the result of a process inside the pod establishing a direct http(s) connection to "<URL>" is "<RESULT>"
 
         Examples:

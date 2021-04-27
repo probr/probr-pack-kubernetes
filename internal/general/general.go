@@ -29,7 +29,7 @@ type scenarioState struct {
 	namespace   string
 	audit       *audit.ScenarioAudit
 	probe       *audit.Probe
-	pods        []string
+	pods        map[string][]string // A Key/Value collection to store all pods created within scenario. Key is the namespace where pods are created.
 }
 
 // Probe meets the service pack interface for adding the logic from this file
@@ -93,37 +93,6 @@ func (scenario *scenarioState) theKubernetesWebUIIsDisabled() error {
 	return err
 }
 
-func (scenario *scenarioState) aPodIsDeployedInTheCluster() error {
-
-	// Standard auditing logic to ensures panics are also audited
-	stepTrace, payload, err := utils.AuditPlaceholders()
-	defer func() {
-		scenario.audit.AuditScenarioStep(scenario.currentStep, stepTrace.String(), payload, err)
-	}()
-
-	stepTrace.WriteString(fmt.Sprintf("Build a pod spec with default values; "))
-	podObject := constructors.PodSpec(Probe.Name(), config.Vars.ServicePacks.Kubernetes.ProbeNamespace)
-
-	stepTrace.WriteString(fmt.Sprintf("Create pod from spec; "))
-	createdPodObject, creationErr := scenario.createPodfromObject(podObject)
-
-	if creationErr != nil {
-		err = utils.ReformatError("Pod creation did not succeed: %v", creationErr)
-	}
-
-	payload = struct {
-		RequestedPod  *apiv1.Pod
-		CreatedPod    *apiv1.Pod
-		CreationError error
-	}{
-		RequestedPod:  podObject,
-		CreatedPod:    createdPodObject,
-		CreationError: creationErr,
-	}
-
-	return err
-}
-
 func (scenario *scenarioState) theResultOfAProcessInsideThePodEstablishingADirectHTTPConnectionToXIsY(urlAddress, result string) error {
 	// Supported values for urlAddress:
 	//	A valid absolute path URL with http(s) prefix
@@ -163,9 +132,10 @@ func (scenario *scenarioState) theResultOfAProcessInsideThePodEstablishingADirec
 
 	// Create a curl command to access the supplied url and only show http response in stdout.
 	cmd := "curl -s -o /dev/null -I -L -w %{http_code} " + urlAddress
+	podName := scenario.pods[scenario.namespace][0]
 
 	stepTrace.WriteString(fmt.Sprintf("Attempt to run command in the pod: '%s'; ", cmd))
-	exitCode, stdOut, _, cmdErr := conn.ExecCommand(cmd, scenario.namespace, scenario.pods[0])
+	exitCode, stdOut, _, cmdErr := conn.ExecCommand(cmd, scenario.namespace, podName)
 
 	// Validate that no internal error occurred during execution of curl command
 	if cmdErr != nil && exitCode == -1 {
@@ -190,7 +160,7 @@ func (scenario *scenarioState) theResultOfAProcessInsideThePodEstablishingADirec
 		CurlExitCode         int
 		StdOut               string
 	}{
-		PodName:              scenario.pods[0],
+		PodName:              podName,
 		Namespace:            scenario.namespace,
 		Command:              cmd,
 		ExpectedCurlExitCode: expectedCurlExitCode,
@@ -201,15 +171,34 @@ func (scenario *scenarioState) theResultOfAProcessInsideThePodEstablishingADirec
 	return err
 }
 
-func (scenario *scenarioState) podCreationInNamespace(result, namespace string) error {
+func (scenario *scenarioState) podCreationInNamespace(expectedResult, namespace string) error {
+	// Supported values for expectedResult:
+	//	'succeeds'
+	//	'fails'
+	//
+	// Supported values for namespace:
+	//	'probr'
+	//	'default'
+
 	// Standard auditing logic to ensures panics are also audited
 	stepTrace, payload, err := utils.AuditPlaceholders()
 	defer func() {
 		scenario.audit.AuditScenarioStep(scenario.currentStep, stepTrace.String(), payload, err)
 	}()
 
-	stepTrace.WriteString(fmt.Sprintf("Build a pod spec with default values; "))
+	// Validate input value
+	var shouldCreatePod bool
+	switch expectedResult {
+	case "succeeds":
+		shouldCreatePod = true
+	case "fails":
+		shouldCreatePod = false
+	default:
+		err = utils.ReformatError("Unexpected value provided for expectedResult: '%s' Expected values: ['succeeds', 'fails']", expectedResult)
+		return err
+	}
 
+	// Validate input value
 	var ns string
 	switch namespace {
 	case "probr":
@@ -217,25 +206,26 @@ func (scenario *scenarioState) podCreationInNamespace(result, namespace string) 
 	case "default":
 		ns = "default"
 	default:
-		return utils.ReformatError("Unknown namespace '%s' passed to podCreationNamespace", namespace)
+		err = utils.ReformatError("Unexpected value provided for namespace: '%s' Expected values: ['probr', 'default']", namespace)
+		return err
 	}
 
+	stepTrace.WriteString(fmt.Sprintf("Build a pod spec with default values; "))
 	podObject := constructors.PodSpec(Probe.Name(), ns)
 
 	stepTrace.WriteString(fmt.Sprintf("Create pod from spec; "))
 	createdPodObject, creationErr := scenario.createPodfromObject(podObject)
 
-	switch result {
-	case "succeeds":
+	stepTrace.WriteString(fmt.Sprintf("Validate pod creation %s; ", expectedResult))
+	switch shouldCreatePod {
+	case true:
 		if creationErr != nil {
-			err = utils.ReformatError("Pod creation in namespace %s did not succeed: %v", ns, creationErr)
+			err = utils.ReformatError("Pod creation in namespace '%s' did not succeed: %v", ns, creationErr)
 		}
-	case "fails":
+	case false:
 		if creationErr == nil {
-			err = utils.ReformatError("Pod creation in namespace %s succeeded but should have failed", ns)
+			err = utils.ReformatError("Pod creation in namespace '%s' succeeded but should have failed", ns)
 		}
-	default:
-		err = utils.ReformatError("Unrecognised result '%s' passed to podCreationNamespace", result)
 	}
 
 	payload = struct {
@@ -247,7 +237,7 @@ func (scenario *scenarioState) podCreationInNamespace(result, namespace string) 
 	}{
 		RequestedPod:   podObject,
 		Namespace:      ns,
-		ExpectedResult: result,
+		ExpectedResult: expectedResult,
 		CreatedPod:     createdPodObject,
 		CreationError:  creationErr,
 	}
@@ -289,10 +279,8 @@ func (probe probeStruct) ScenarioInitialize(ctx *godog.ScenarioContext) {
 
 	// Steps
 	ctx.Step(`^the Kubernetes Web UI is disabled$`, scenario.theKubernetesWebUIIsDisabled)
-	ctx.Step(`^a pod is deployed in the cluster$`, scenario.aPodIsDeployedInTheCluster)
-	ctx.Step(`^the result of a process inside the pod establishing a direct http\(s\) connection to "([^"]*)" is "([^"]*)"$`, scenario.theResultOfAProcessInsideThePodEstablishingADirectHTTPConnectionToXIsY)
-
 	ctx.Step(`^pod creation "([^"]*)" in the "([^"]*)" namespace$`, scenario.podCreationInNamespace)
+	ctx.Step(`^the result of a process inside the pod establishing a direct http\(s\) connection to "([^"]*)" is "([^"]*)"$`, scenario.theResultOfAProcessInsideThePodEstablishingADirectHTTPConnectionToXIsY)
 
 	ctx.AfterScenario(func(s *godog.Scenario, err error) {
 		afterScenario(scenario, probe, s, err)
@@ -311,22 +299,22 @@ func beforeScenario(s *scenarioState, probeName string, gs *godog.Scenario) {
 	s.name = gs.Name
 	s.probe = audit.State.GetProbeLog(probeName)
 	s.audit = audit.State.GetProbeLog(probeName).InitializeAuditor(gs.Name, gs.Tags)
-	s.pods = make([]string, 0)
+	s.pods = make(map[string][]string)
 	s.namespace = config.Vars.ServicePacks.Kubernetes.ProbeNamespace
 	probeengine.LogScenarioStart(gs)
 }
 
 func afterScenario(scenario scenarioState, probe probeStruct, gs *godog.Scenario, err error) {
 	if config.Vars.ServicePacks.Kubernetes.KeepPods == "false" {
-		for _, podName := range scenario.pods {
-			err = conn.DeletePodIfExists(podName, scenario.namespace, probe.Name())
-			if err != nil {
-				err = conn.DeletePodIfExists(podName, "default", probe.Name()) // TODO: Optimize this
+		for namespace, createdPods := range scenario.pods {
+			for _, podName := range createdPods {
+				err = conn.DeletePodIfExists(podName, namespace, probe.Name())
 				if err != nil {
 					log.Printf(fmt.Sprintf("[ERROR] Could not retrieve pod from namespace '%s' for deletion: %s", scenario.namespace, err))
 				}
 			}
 		}
+
 	}
 	probeengine.LogScenarioEnd(gs)
 }
@@ -334,7 +322,9 @@ func afterScenario(scenario scenarioState, probe probeStruct, gs *godog.Scenario
 func (scenario *scenarioState) createPodfromObject(podObject *apiv1.Pod) (createdPodObject *apiv1.Pod, err error) {
 	createdPodObject, err = conn.CreatePodFromObject(podObject, Probe.Name())
 	if err == nil {
-		scenario.pods = append(scenario.pods, createdPodObject.ObjectMeta.Name)
+		scenario.namespace = createdPodObject.ObjectMeta.Namespace
+		podName := createdPodObject.ObjectMeta.Name
+		scenario.pods[scenario.namespace] = append(scenario.pods[scenario.namespace], podName)
 	}
 	return
 }
