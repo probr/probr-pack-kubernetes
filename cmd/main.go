@@ -10,7 +10,8 @@ import (
 	"syscall"
 
 	pack "github.com/citihub/probr-pack-kubernetes"
-	"github.com/citihub/probr-sdk/audit"
+	"github.com/citihub/probr-pack-kubernetes/internal/summary"
+	audit "github.com/citihub/probr-sdk/audit"
 	cliflags "github.com/citihub/probr-sdk/cli_flags"
 	"github.com/citihub/probr-sdk/config"
 	"github.com/citihub/probr-sdk/logging"
@@ -104,10 +105,9 @@ func setupCloseHandler() {
 func ProbrCoreLogic() (err error) {
 	log.Printf("[INFO] message from ProbCoreLogic: %s", "Start")
 	defer probeengine.CleanupTmp()
-	setupCloseHandler()
+	setupCloseHandler() // Sigterm protection
 
-	// Setup for handling SIGTERM (Ctrl+C)
-	//setupCloseHandler()
+	summary.State = audit.NewSummaryState("kubernetes")
 
 	err = config.Init("") // Create default config
 	if err != nil {
@@ -127,17 +127,18 @@ func ProbrCoreLogic() (err error) {
 	logWriter := logging.ProbrLoggerOutput()
 	log.SetOutput(logWriter) // TODO: This is a temporary patch, since logger output is being overritten while loading config vars
 
-	s, ts, err := probeengine.RunAllProbes("kubernetes", pack.GetProbes())
+	store := probeengine.NewProbeStore("kubernetes", &summary.State)
+	s, err := store.RunAllProbes(pack.GetProbes())
 	if err != nil {
 		log.Printf("[ERROR] Error executing tests %v", err)
 		return
 	}
 	log.Printf("[INFO] Overall test completion status: %v", s)
-	audit.State.SetProbrStatus()
+	summary.State.SetProbrStatus()
 
-	_, success := probeengine.GetAllProbeResults(ts) // TODO: Use the results provided here
-	audit.State.PrintSummary()
-	audit.State.WriteSummary()
+	_, success := probeengine.GetAllProbeResults(store) // TODO: Use the results provided here
+	summary.State.PrintSummary()
+	summary.State.WriteSummary()
 
 	log.Printf("[INFO] message from ProbCoreLogic: %s", "End")
 

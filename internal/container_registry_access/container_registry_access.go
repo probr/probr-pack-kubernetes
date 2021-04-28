@@ -8,12 +8,13 @@ import (
 	"github.com/cucumber/godog"
 	apiv1 "k8s.io/api/core/v1"
 
+	"github.com/citihub/probr-pack-kubernetes/internal/summary"
+	audit "github.com/citihub/probr-sdk/audit"
+	"github.com/citihub/probr-sdk/config"
+	"github.com/citihub/probr-sdk/probeengine"
 	"github.com/citihub/probr-sdk/providers/kubernetes/connection"
 	"github.com/citihub/probr-sdk/providers/kubernetes/constructors"
 	"github.com/citihub/probr-sdk/providers/kubernetes/errors"
-	"github.com/citihub/probr-sdk/audit"
-	"github.com/citihub/probr-sdk/config"
-	"github.com/citihub/probr-sdk/probeengine"
 	"github.com/citihub/probr-sdk/utils"
 )
 
@@ -27,7 +28,7 @@ type scenarioState struct {
 	name        string
 	currentStep string
 	namespace   string
-	audit       *audit.ScenarioAudit
+	audit       *audit.Scenario
 	probe       *audit.Probe
 	pods        []string
 }
@@ -190,8 +191,8 @@ func (probe probeStruct) ScenarioInitialize(ctx *godog.ScenarioContext) {
 
 func beforeScenario(s *scenarioState, probeName string, gs *godog.Scenario) {
 	s.name = gs.Name
-	s.probe = audit.State.GetProbeLog(probeName)
-	s.audit = audit.State.GetProbeLog(probeName).InitializeAuditor(gs.Name, gs.Tags)
+	s.probe = summary.State.GetProbeLog(probeName)
+	s.audit = summary.State.GetProbeLog(probeName).InitializeAuditor(gs.Name, gs.Tags)
 	s.pods = make([]string, 0)
 	s.namespace = config.Vars.ServicePacks.Kubernetes.ProbeNamespace
 	probeengine.LogScenarioStart(gs)
