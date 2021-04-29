@@ -9,7 +9,7 @@ go-package:
 
 go-build:
 	@echo "  >  Building binary..."
-	go build -o kubernetes cmd/main.go
+	go build -o kubernetes -ldflags="-X 'main.GitCommitHash=`git rev-parse --short HEAD`' -X 'main.BuiltAt=`date +%FT%T%z`'" cmd/main.go
 
 pkgr-clean:
 	@echo "  >  Removing pkged.go to avoid accidental re-use of old files..."
