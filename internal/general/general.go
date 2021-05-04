@@ -48,7 +48,7 @@ func (scenario *scenarioState) aKubernetesClusterIsDeployed() error {
 		scenario.audit.AuditScenarioStep(scenario.currentStep, stepTrace.String(), payload, err)
 	}()
 
-	stepTrace.WriteString(fmt.Sprintf("Validate that a cluster can be reached using the specified kube config and context; "))
+	stepTrace.WriteString("Validate that a cluster can be reached using the specified kube config and context; ")
 
 	payload = struct {
 		KubeConfigPath string
@@ -225,10 +225,10 @@ func (scenario *scenarioState) podCreationInNamespace(expectedResult, namespace 
 		return err
 	}
 
-	stepTrace.WriteString(fmt.Sprintf("Build a pod spec with default values; "))
+	stepTrace.WriteString("Build a pod spec with default values; ")
 	podObject := constructors.PodSpec(Probe.Name(), ns, config.Vars.AuthorisedContainerImage)
 
-	stepTrace.WriteString(fmt.Sprintf("Create pod from spec; "))
+	stepTrace.WriteString("Create pod from spec; ")
 	createdPodObject, creationErr := scenario.createPodfromObject(podObject)
 
 	stepTrace.WriteString(fmt.Sprintf("Validate pod creation %s; ", expectedResult))
@@ -319,13 +319,13 @@ func beforeScenario(s *scenarioState, probeName string, gs *godog.Scenario) {
 	probeengine.LogScenarioStart(gs)
 }
 
-func afterScenario(scenario scenarioState, probe probeStruct, gs *godog.Scenario, err error) {
+func afterScenario(scenario scenarioState, probe probeStruct, gs *godog.Scenario, err error) { // TODO: err is overwitten before first use
 	if config.Vars.KeepPods == "false" {
 		for namespace, createdPods := range scenario.pods {
 			for _, podName := range createdPods {
 				err = conn.DeletePodIfExists(podName, namespace, probe.Name())
 				if err != nil {
-					log.Printf(fmt.Sprintf("[ERROR] Could not retrieve pod from namespace '%s' for deletion: %s", scenario.namespace, err))
+					log.Printf("[ERROR] Could not retrieve pod from namespace '%s' for deletion: %s", scenario.namespace, err)
 				}
 			}
 		}

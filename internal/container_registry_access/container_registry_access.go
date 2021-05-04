@@ -47,7 +47,7 @@ func (scenario *scenarioState) aKubernetesClusterIsDeployed() error {
 		scenario.audit.AuditScenarioStep(scenario.currentStep, stepTrace.String(), payload, err)
 	}()
 
-	stepTrace.WriteString(fmt.Sprintf("Validate that a cluster can be reached using the specified kube config and context; "))
+	stepTrace.WriteString("Validate that a cluster can be reached using the specified kube config and context; ")
 
 	payload = struct {
 		KubeConfigPath string
@@ -207,7 +207,7 @@ func afterScenario(scenario scenarioState, probe probeStruct, gs *godog.Scenario
 		for _, podName := range scenario.pods {
 			err = conn.DeletePodIfExists(podName, scenario.namespace, probe.Name())
 			if err != nil {
-				log.Printf(fmt.Sprintf("[ERROR] Could not retrieve pod from namespace '%s' for deletion: %s", scenario.namespace, err))
+				log.Printf("[ERROR] Could not retrieve pod from namespace '%s' for deletion: %s", scenario.namespace, err)
 			}
 		}
 	}

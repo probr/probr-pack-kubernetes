@@ -33,7 +33,6 @@ type scenarioState struct {
 	probeAudit  *audit.Probe
 	audit       *audit.Scenario
 	pods        []string
-	given       bool
 }
 
 // Probe meets the service pack interface for adding the logic from this file
@@ -58,7 +57,7 @@ func (scenario *scenarioState) aKubernetesClusterIsDeployed() error {
 		scenario.audit.AuditScenarioStep(scenario.currentStep, stepTrace.String(), payload, err)
 	}()
 
-	stepTrace.WriteString(fmt.Sprintf("Validate that a cluster can be reached using the specified kube config and context; "))
+	stepTrace.WriteString("Validate that a cluster can be reached using the specified kube config and context; ")
 
 	payload = struct {
 		KubeConfigPath string
@@ -81,7 +80,7 @@ func (scenario *scenarioState) toDo(todo string) error {
 		scenario.audit.AuditScenarioStep(scenario.currentStep, stepTrace.String(), payload, err)
 	}()
 
-	stepTrace.WriteString(fmt.Sprintf("This step was included to inform developers that a scenario is incomplete; "))
+	stepTrace.WriteString("This step was included to inform developers that a scenario is incomplete; ")
 	payload = struct {
 		TODO string
 	}{TODO: todo}
@@ -112,7 +111,7 @@ func (scenario *scenarioState) podCreationResultsWithXSetToYInThePodSpec(result,
 		return
 	}
 
-	stepTrace.WriteString(fmt.Sprintf("Build a pod spec with default values; "))
+	stepTrace.WriteString("Build a pod spec with default values; ")
 	pod := constructors.PodSpec(Probe.Name(), config.Vars.ProbeNamespace, config.Vars.AuthorisedContainerImage)
 
 	// Any key that expects a non-bool value should have it's own case here to handle the pod modification
@@ -135,7 +134,7 @@ func (scenario *scenarioState) podCreationResultsWithXSetToYInThePodSpec(result,
 		return
 	}
 
-	stepTrace.WriteString(fmt.Sprintf("Create pod from spec; "))
+	stepTrace.WriteString("Create pod from spec; ")
 	createdPod, creationErr := scenario.createPodfromObject(pod)
 
 	stepTrace.WriteString(fmt.Sprintf("Validate pod creation %s; ", result))
@@ -312,10 +311,10 @@ func (scenario *scenarioState) thePodIPAndHostIPHaveDifferentValues() (err error
 		scenario.audit.AuditScenarioStep(scenario.currentStep, stepTrace.String(), payload, err)
 	}()
 
-	stepTrace.WriteString(fmt.Sprintf("Retrieve IP values from created pod; "))
+	stepTrace.WriteString("Retrieve IP values from created pod; ")
 	podIP, hostIP, err := conn.GetPodIPs(config.Vars.ProbeNamespace, scenario.pods[0])
 
-	stepTrace.WriteString(fmt.Sprintf("Validate that PodIP and HostIP have different values; "))
+	stepTrace.WriteString("Validate that PodIP and HostIP have different values; ")
 	if err != nil && podIP == hostIP {
 		err = utils.ReformatError("Pod IP and Host IP are identical, but should not be")
 	}
@@ -395,12 +394,12 @@ func beforeScenario(s *scenarioState, probeName string, gs *godog.Scenario) {
 	probeengine.LogScenarioStart(gs)
 }
 
-func afterScenario(scenario scenarioState, probe probeStruct, gs *godog.Scenario, err error) {
+func afterScenario(scenario scenarioState, probe probeStruct, gs *godog.Scenario, err error) { // TODO: err is overwritten before first use
 	if config.Vars.KeepPods == "false" {
 		for _, podName := range scenario.pods {
 			err = conn.DeletePodIfExists(podName, scenario.namespace, probe.Name())
 			if err != nil {
-				log.Printf(fmt.Sprintf("[ERROR] Could not retrieve pod from namespace '%s' for deletion: %s", scenario.namespace, err))
+				log.Printf("[ERROR] Could not retrieve pod from namespace '%s' for deletion: %s", scenario.namespace, err)
 			}
 		}
 	}

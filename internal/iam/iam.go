@@ -50,7 +50,7 @@ func (scenario *scenarioState) aKubernetesClusterIsDeployed() error {
 		scenario.audit.AuditScenarioStep(scenario.currentStep, stepTrace.String(), payload, err)
 	}()
 
-	stepTrace.WriteString(fmt.Sprintf("Validate that a cluster can be reached using the specified kube config and context; "))
+	stepTrace.WriteString("Validate that a cluster can be reached using the specified kube config and context; ")
 
 	payload = struct {
 		KubeConfigPath string
@@ -92,12 +92,10 @@ func (scenario *scenarioState) aResourceTypeXCalledYExistsInNamespaceCalledZ(res
 	// Validate input
 	switch resourceType {
 	case "AzureIdentity":
-		stepTrace.WriteString(fmt.Sprintf(
-			"Retrieve Azure Identities from cluster; "))
+		stepTrace.WriteString("Retrieve Azure Identities from cluster; ")
 		foundInNamespace, resource, findErr = azureIdentityExistsInNamespace(resourceName, namespace)
 	case "AzureIdentityBinding":
-		stepTrace.WriteString(fmt.Sprintf(
-			"Retrieve Azure Identity Bindings from cluster; "))
+		stepTrace.WriteString("Retrieve Azure Identity Bindings from cluster; ")
 		foundInNamespace, resource, findErr = azureIdentityBindingExistsInNamespace(resourceName, namespace)
 	default:
 		err = utils.ReformatError("Unexpected value provided for resourceType: %s", resourceType)
@@ -172,7 +170,7 @@ func (scenario *scenarioState) iSucceedToCreateASimplePodInNamespaceAssignedWith
 	// This is prone to error if not configured correctly.
 	// Should revisit how to handle this.
 
-	stepTrace.WriteString(fmt.Sprintf("Build a pod spec with default values; "))
+	stepTrace.WriteString("Build a pod spec with default values; ")
 	podObject := constructors.PodSpec(Probe.Name(), config.Vars.ProbeNamespace, config.Vars.AuthorisedContainerImage)
 	// TODO: Delete iam-azi-test-aib-curl.yaml file from 'assets' folder
 
@@ -184,7 +182,7 @@ func (scenario *scenarioState) iSucceedToCreateASimplePodInNamespaceAssignedWith
 	// Ref: https://docs.microsoft.com/en-us/azure/aks/use-azure-ad-pod-identity
 	podObject.Labels["aadpodidbinding"] = aadPodIDBinding
 
-	stepTrace.WriteString(fmt.Sprintf("Create pod from spec; "))
+	stepTrace.WriteString("Create pod from spec; ")
 	createdPodObject, creationErr := scenario.createPodfromObject(podObject)
 
 	stepTrace.WriteString("Validate pod creation succeeds; ")
@@ -531,12 +529,12 @@ func beforeScenario(s *scenarioState, probeName string, gs *godog.Scenario) {
 	probeengine.LogScenarioStart(gs)
 }
 
-func afterScenario(scenario scenarioState, probe probeStruct, gs *godog.Scenario, err error) {
+func afterScenario(scenario scenarioState, probe probeStruct, gs *godog.Scenario, err error) { // TODO: err is overwritten before first use
 	if config.Vars.KeepPods == "false" {
 		for _, podName := range scenario.pods {
 			err = conn.DeletePodIfExists(podName, scenario.namespace, probe.Name())
 			if err != nil {
-				log.Printf(fmt.Sprintf("[ERROR] Could not retrieve pod from namespace '%s' for deletion: %s", scenario.namespace, err))
+				log.Printf("[ERROR] Could not retrieve pod from namespace '%s' for deletion: %s", scenario.namespace, err)
 			}
 		}
 	}

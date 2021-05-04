@@ -85,7 +85,7 @@ func (amc *AzureManagedCluster) ClusterHasRoleAssignment(resourceGroupName, clus
 	roleDefinitionID := fmt.Sprintf("/subscriptions/%s/providers/Microsoft.Authorization/roleDefinitions/%s", amc.credentials.SubscriptionID, roleDefName)
 
 	log.Printf("[DEBUG] Checking Managed Cluster for role name")
-	filter := fmt.Sprintf("atScope()")
+	filter := "atScope()"
 
 	resourceProviderNamespace := "Microsoft.ContainerService"
 	parentResourcePath := ""
