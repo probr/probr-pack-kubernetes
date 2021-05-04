@@ -102,7 +102,7 @@ func (scenario *scenarioState) podCreationResultsWithXSetToYInThePodSpec(result,
 	}
 
 	stepTrace.WriteString(fmt.Sprintf("Build a pod spec with default values; "))
-	pod := constructors.PodSpec(Probe.Name(), config.Vars.ProbeNamespace)
+	pod := constructors.PodSpec(Probe.Name(), config.Vars.ProbeNamespace, config.Vars.AuthorisedContainerImage)
 
 	// Any key that expects a non-bool value should have it's own case here to handle the pod modification
 

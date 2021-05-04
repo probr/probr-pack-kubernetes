@@ -17,7 +17,7 @@ type parsedVars struct {
 
 	// Set by vars file; must match struct 'kubernetes'
 	ApprovedVolumeTypes               []string
-	AuthorisedContainerRegistry       string
+	AuthorisedContainerImage          string
 	Azure                             k8sAzure
 	ContainerRequiredDropCapabilities []string
 	ContainerAllowedAddCapabilities   []string
@@ -29,7 +29,7 @@ type parsedVars struct {
 	SystemClusterRoles                []string
 	SystemNamespace                   string
 	UnapprovedHostPort                string
-	UnauthorisedContainerRegistry     string
+	UnauthorisedContainerImage        string
 }
 
 // VarsFile contains all top-level config vars
@@ -49,8 +49,8 @@ type kubernetes struct {
 	KubeConfigPath                    string   `yaml:"KubeConfig"`
 	KubeContext                       string   `yaml:"KubeContext"`
 	SystemClusterRoles                []string `yaml:"SystemClusterRoles"`
-	AuthorisedContainerRegistry       string   `yaml:"AuthorisedContainerRegistry"`
-	UnauthorisedContainerRegistry     string   `yaml:"UnauthorisedContainerRegistry"`
+	AuthorisedContainerImage          string   `yaml:"AuthorisedContainerImage"`
+	UnauthorisedContainerImage        string   `yaml:"UnauthorisedContainerImage"`
 	ProbeImage                        string   `yaml:"ProbeImage"`
 	ContainerRequiredDropCapabilities []string `yaml:"ContainerRequiredDropCapabilities"`
 	ContainerAllowedAddCapabilities   []string `yaml:"ContainerAllowedAddCapabilities"`

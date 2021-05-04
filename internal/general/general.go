@@ -213,7 +213,7 @@ func (scenario *scenarioState) podCreationInNamespace(expectedResult, namespace 
 	}
 
 	stepTrace.WriteString(fmt.Sprintf("Build a pod spec with default values; "))
-	podObject := constructors.PodSpec(Probe.Name(), ns)
+	podObject := constructors.PodSpec(Probe.Name(), ns, config.Vars.AuthorisedContainerImage)
 
 	stepTrace.WriteString(fmt.Sprintf("Create pod from spec; "))
 	createdPodObject, creationErr := scenario.createPodfromObject(podObject)

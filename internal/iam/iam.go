@@ -163,7 +163,7 @@ func (scenario *scenarioState) iSucceedToCreateASimplePodInNamespaceAssignedWith
 	// Should revisit how to handle this.
 
 	stepTrace.WriteString(fmt.Sprintf("Build a pod spec with default values; "))
-	podObject := constructors.PodSpec(Probe.Name(), config.Vars.ProbeNamespace)
+	podObject := constructors.PodSpec(Probe.Name(), config.Vars.ProbeNamespace, config.Vars.AuthorisedContainerImage)
 	// TODO: Delete iam-azi-test-aib-curl.yaml file from 'assets' folder
 
 	stepTrace.WriteString(fmt.Sprintf("Add '%s' namespace to pod spec; ", scenario.namespace))

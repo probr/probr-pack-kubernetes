@@ -97,11 +97,10 @@ func (scenario *scenarioState) podCreationXWithContainerImageFromYRegistry(expec
 	}
 
 	stepTrace.WriteString("Build a pod spec with default values; ")
-	podObject := constructors.PodSpec(Probe.Name(), scenario.namespace)
+	podObject := constructors.PodSpec(Probe.Name(), scenario.namespace, config.Vars.AuthorisedContainerImage)
 
 	stepTrace.WriteString(fmt.Sprintf("Set container image registry to '%s' value in pod spec; ", registryAccess))
-	imageRegistry := getImageFromConfig(isRegistryAuthorized)
-	podObject.Spec.Containers[0].Image = imageRegistry
+	podObject.Spec.Containers[0].Image = imageFromConfig(isRegistryAuthorized)
 
 	stepTrace.WriteString("Create pod from spec; ")
 	createdPodObject, creationErr := scenario.createPodfromObject(podObject) // Pod name is saved to scenario state if successful
@@ -116,7 +115,7 @@ func (scenario *scenarioState) podCreationXWithContainerImageFromYRegistry(expec
 		if creationErr == nil {
 			err = utils.ReformatError("Pod creation succeeded, but should have been denied")
 		} else {
-			stepTrace.WriteString(fmt.Sprintf("Check that pod creation failed due to expected reason (403 Forbidden); "))
+			stepTrace.WriteString("Check that pod creation failed due to expected reason (403 Forbidden); ")
 			if !errors.IsStatusCode(403, creationErr) {
 				err = utils.ReformatError("Unexpected error during Pod creation : %v", creationErr)
 			}
@@ -126,14 +125,12 @@ func (scenario *scenarioState) podCreationXWithContainerImageFromYRegistry(expec
 	payload = struct {
 		ExpectedResult string
 		RegistryAccess string
-		ImageRegistry  string
 		RequestedPod   *apiv1.Pod
 		CreatedPod     *apiv1.Pod
 		CreationError  error
 	}{
 		ExpectedResult: expectedResult,
 		RegistryAccess: registryAccess,
-		ImageRegistry:  imageRegistry,
 		RequestedPod:   podObject,
 		CreatedPod:     createdPodObject,
 		CreationError:  creationErr,
@@ -210,17 +207,11 @@ func afterScenario(scenario scenarioState, probe probeStruct, gs *godog.Scenario
 	probeengine.LogScenarioEnd(gs)
 }
 
-func getContainerRegistryFromConfig(accessLevel bool) string {
-	if accessLevel {
-		return config.Vars.AuthorisedContainerRegistry
+func imageFromConfig(authorized bool) string {
+	if authorized {
+		return config.Vars.AuthorisedContainerImage
 	}
-	return config.Vars.UnauthorisedContainerRegistry
-}
-
-func getImageFromConfig(accessLevel bool) string {
-	registry := getContainerRegistryFromConfig(accessLevel)
-	//full image is the repository + the configured image
-	return registry + "/" + config.Vars.ProbeImage
+	return config.Vars.UnauthorisedContainerImage
 }
 
 func (scenario *scenarioState) createPodfromObject(podObject *apiv1.Pod) (createdPodObject *apiv1.Pod, err error) {

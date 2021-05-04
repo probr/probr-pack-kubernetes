@@ -9,7 +9,6 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/citihub/probr-pack-kubernetes/internal/config"
 	"github.com/citihub/probr-sdk/utils"
 	apiv1 "k8s.io/api/core/v1"
 )
@@ -46,6 +45,7 @@ func TestPodSpec(t *testing.T) {
 	type args struct {
 		baseName                 string
 		namespace                string
+		image                    string
 		containerSecurityContext *apiv1.SecurityContext
 	}
 	tests := []struct {
@@ -93,14 +93,15 @@ func TestPodSpec(t *testing.T) {
 			},
 		},
 		{
-			name: "Container uses the default probr image name",
+			name: "Container uses the provided probr image name",
 			args: args{
 				baseName:  "pod4",
 				namespace: "pod4",
+				image:     "thisImage",
 			},
 			want: func(gotPod *apiv1.Pod, args args, t *testing.T) {
 				gotImageName := gotPod.Spec.Containers[0].Image
-				wantImageName := DefaultProbrImageName()
+				wantImageName := "thisImage"
 				if strings.Compare(gotImageName, wantImageName) != 0 {
 					t.Errorf("PodSpec() got image name '%s', but wanted: '%s'", gotImageName, wantImageName)
 				}
@@ -161,7 +162,7 @@ func TestPodSpec(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := PodSpec(tt.args.baseName, tt.args.namespace)
+			got := PodSpec(tt.args.baseName, tt.args.namespace, tt.args.image)
 			tt.want(got, tt.args, t)
 		})
 	}
@@ -211,37 +212,6 @@ func TestDefaultPodSecurityContext(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			if got := DefaultPodSecurityContext(); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("DefaultPodSecurityContext() = %v, want %v", got, tt.want)
-			}
-		})
-	}
-}
-
-func TestDefaultProbrImageName(t *testing.T) {
-	tests := []struct {
-		name     string
-		registry string
-		image    string
-		want     string
-	}{
-		{
-			name:     "Ensure probr image name is built by joining the registry and image specified in config vars",
-			registry: "string1",
-			image:    "string2",
-			want:     "string1/string2",
-		},
-		{
-			name:     "Ensure probr image name is built by joining the registry and image specified in config vars",
-			registry: "registryName",
-			image:    "imageName",
-			want:     "registryName/imageName",
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			config.Vars.AuthorisedContainerRegistry = tt.registry
-			config.Vars.ProbeImage = tt.image
-			if got := DefaultProbrImageName(); got != tt.want {
-				t.Errorf("DefaultProbrImageName() = %v, want %v", got, tt.want)
 			}
 		})
 	}
