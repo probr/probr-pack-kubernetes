@@ -31,6 +31,9 @@ type Conn struct {
 	clientSet         *kubernetes.Clientset
 	clientConfig      *rest.Config
 	clusterIsDeployed error
+	KubeConfigPath    string
+	KubeContext       string
+	Namespace         string
 }
 
 // Connection should be used instead of Conn within probes to allow mocking during testing
@@ -59,7 +62,27 @@ type APIResource struct {
 var instance *Conn
 var once sync.Once
 
+// NewConnection retrieves the connection object. Instantiates the connection if necessary
+func NewConnection(kubeConfigPath, kubeContext, namespace string) *Conn {
+	defer func() {
+		// Much of the client-go logic results in panics instead of handled errors
+		if err := recover(); err != nil {
+			log.Fatalf("[DEBUG] Failed to initialize connection: (%s->%s) %s", utils.CallerName(5), utils.CallerName(4), err)
+		}
+	}()
+	instance := &Conn{
+		KubeConfigPath: kubeConfigPath,
+		KubeContext:    kubeContext,
+		Namespace:      namespace,
+	}
+	instance.setClientConfig()
+	instance.setClientSet()
+	instance.bootstrapDefaultNamespace()
+	return instance
+}
+
 // Get retrieves the connection object. Instantiates the connection if necessary
+// Deprecated. Logic will change in a follow-up PR to have the pack config manage connection state
 func Get() *Conn {
 	defer func() {
 		if err := recover(); err != nil {
@@ -68,10 +91,7 @@ func Get() *Conn {
 		}
 	}()
 	once.Do(func() {
-		instance = &Conn{}
-		instance.setClientConfig()
-		instance.setClientSet()
-		instance.bootstrapDefaultNamespace()
+		instance = NewConnection(config.Vars.KubeConfigPath, config.Vars.KubeContext, config.Vars.ProbeNamespace)
 	})
 	return instance
 }
@@ -197,7 +217,7 @@ func (connection *Conn) ExecCommand(cmd, namespace, podName string) (status int,
 	request.VersionedParams(&options, parameterCodec)
 
 	log.Printf("[DEBUG] %s.%s: ExecCommand Request URL: %v", utils.CallerName(2), utils.CallerName(1), request.URL().String())
-	config, err := clientcmd.BuildConfigFromFlags("", config.Vars.KubeConfigPath)
+	config, err := clientcmd.BuildConfigFromFlags("", connection.KubeConfigPath)
 	exec, err := remotecommand.NewSPDYExecutor(config, "POST", request.URL())
 	if err != nil {
 		err = utils.ReformatError("Failed to create Executor: %v", err)
@@ -418,15 +438,15 @@ func (connection *Conn) setClientConfig() {
 
 	configLoader := clientcmd.NewNonInteractiveDeferredLoadingClientConfig(
 
-		&clientcmd.ClientConfigLoadingRules{ExplicitPath: config.Vars.KubeConfigPath},
+		&clientcmd.ClientConfigLoadingRules{ExplicitPath: connection.KubeConfigPath},
 		&clientcmd.ConfigOverrides{ClusterInfo: clientcmdapi.Cluster{Server: ""}})
 	rawConfig, _ := configLoader.RawConfig()
 
-	if config.Vars.KubeContext == "" {
+	if connection.KubeContext == "" {
 		log.Printf("[INFO] Initializing client with default context")
 	} else {
-		log.Printf("[INFO] Initializing client with context specified in config vars: %v", config.Vars.KubeContext)
-		connection.modifyContext(rawConfig, config.Vars.KubeContext)
+		log.Printf("[INFO] Initializing client with context specified in config vars: %v", connection.KubeContext)
+		connection.modifyContext(rawConfig, connection.KubeContext)
 	}
 
 	connection.clientConfig, err = configLoader.ClientConfig()
@@ -440,7 +460,7 @@ func (connection *Conn) bootstrapDefaultNamespace() {
 	if err != nil {
 		return
 	}
-	_, err = connection.GetOrCreateNamespace(config.Vars.ProbeNamespace)
+	_, err = connection.GetOrCreateNamespace(connection.Namespace)
 	if err != nil {
 		connection.clusterIsDeployed = utils.ReformatError("Failed to retrieve or create default Probr namespace: %v", err)
 	}
