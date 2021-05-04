@@ -11,11 +11,11 @@ import (
 
 	"github.com/cucumber/godog"
 
+	"github.com/citihub/probr-pack-kubernetes/internal/config"
 	"github.com/citihub/probr-pack-kubernetes/internal/connection"
 	"github.com/citihub/probr-pack-kubernetes/internal/constructors"
 	"github.com/citihub/probr-pack-kubernetes/internal/summary"
 	audit "github.com/citihub/probr-sdk/audit"
-	"github.com/citihub/probr-sdk/config"
 	"github.com/citihub/probr-sdk/probeengine"
 
 	"github.com/citihub/probr-sdk/utils"
@@ -50,8 +50,8 @@ func (scenario *scenarioState) aKubernetesClusterIsDeployed() error {
 		KubeConfigPath string
 		KubeContext    string
 	}{
-		config.Vars.ServicePacks.Kubernetes.KubeConfigPath,
-		config.Vars.ServicePacks.Kubernetes.KubeContext,
+		config.Vars.KubeConfigPath,
+		config.Vars.KubeContext,
 	}
 
 	err = conn.ClusterIsDeployed() // Must be assigned to 'err' be audited
@@ -65,8 +65,8 @@ func (scenario *scenarioState) theKubernetesWebUIIsDisabled() error {
 		scenario.audit.AuditScenarioStep(scenario.currentStep, stepTrace.String(), payload, err)
 	}()
 
-	kubeSystemNamespace := config.Vars.ServicePacks.Kubernetes.SystemNamespace
-	dashboardPodNamePrefix := config.Vars.ServicePacks.Kubernetes.DashboardPodNamePrefix
+	kubeSystemNamespace := config.Vars.SystemNamespace
+	dashboardPodNamePrefix := config.Vars.DashboardPodNamePrefix
 	stepTrace.WriteString(fmt.Sprintf("Attempt to find a pod in the '%s' namespace with the prefix '%s'; ", kubeSystemNamespace, dashboardPodNamePrefix))
 
 	stepTrace.WriteString(fmt.Sprintf("Get all pods from '%s' namespace; ", kubeSystemNamespace))
@@ -204,7 +204,7 @@ func (scenario *scenarioState) podCreationInNamespace(expectedResult, namespace 
 	var ns string
 	switch namespace {
 	case "probr":
-		ns = config.Vars.ServicePacks.Kubernetes.ProbeNamespace
+		ns = config.Vars.ProbeNamespace
 	case "default":
 		ns = "default"
 	default:
@@ -302,12 +302,12 @@ func beforeScenario(s *scenarioState, probeName string, gs *godog.Scenario) {
 	s.probe = summary.State.GetProbeLog(probeName)
 	s.audit = summary.State.GetProbeLog(probeName).InitializeAuditor(gs.Name, gs.Tags)
 	s.pods = make(map[string][]string)
-	s.namespace = config.Vars.ServicePacks.Kubernetes.ProbeNamespace
+	s.namespace = config.Vars.ProbeNamespace
 	probeengine.LogScenarioStart(gs)
 }
 
 func afterScenario(scenario scenarioState, probe probeStruct, gs *godog.Scenario, err error) {
-	if config.Vars.ServicePacks.Kubernetes.KeepPods == "false" {
+	if config.Vars.KeepPods == "false" {
 		for namespace, createdPods := range scenario.pods {
 			for _, podName := range createdPods {
 				err = conn.DeletePodIfExists(podName, namespace, probe.Name())

@@ -257,3 +257,6 @@ kubernetes
 
 # Ignoring pkger buffer, as it should be regenerated on every build
 pkged.go
+
+# Dir may be created during dev/debugging
+main/

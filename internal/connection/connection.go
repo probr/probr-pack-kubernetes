@@ -11,8 +11,8 @@ import (
 	"sync"
 	"time"
 
+	"github.com/citihub/probr-pack-kubernetes/internal/config"
 	"github.com/citihub/probr-pack-kubernetes/internal/errors"
-	"github.com/citihub/probr-sdk/config"
 	"github.com/citihub/probr-sdk/utils"
 	apiv1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -197,7 +197,7 @@ func (connection *Conn) ExecCommand(cmd, namespace, podName string) (status int,
 	request.VersionedParams(&options, parameterCodec)
 
 	log.Printf("[DEBUG] %s.%s: ExecCommand Request URL: %v", utils.CallerName(2), utils.CallerName(1), request.URL().String())
-	config, err := clientcmd.BuildConfigFromFlags("", config.Vars.ServicePacks.Kubernetes.KubeConfigPath)
+	config, err := clientcmd.BuildConfigFromFlags("", config.Vars.KubeConfigPath)
 	exec, err := remotecommand.NewSPDYExecutor(config, "POST", request.URL())
 	if err != nil {
 		err = utils.ReformatError("Failed to create Executor: %v", err)
@@ -415,19 +415,18 @@ func (connection *Conn) setClientConfig() {
 	// Adapted from clientcmd.BuildConfigFromFlags:
 	// https://github.com/kubernetes/client-go/blob/5ab99756f65dbf324e5adf9bd020a20a024bad85/tools/clientcmd/client_config.go#L606
 	var err error
-	vars := &config.Vars.ServicePacks.Kubernetes
 
 	configLoader := clientcmd.NewNonInteractiveDeferredLoadingClientConfig(
 
-		&clientcmd.ClientConfigLoadingRules{ExplicitPath: vars.KubeConfigPath},
+		&clientcmd.ClientConfigLoadingRules{ExplicitPath: config.Vars.KubeConfigPath},
 		&clientcmd.ConfigOverrides{ClusterInfo: clientcmdapi.Cluster{Server: ""}})
 	rawConfig, _ := configLoader.RawConfig()
 
-	if vars.KubeContext == "" {
+	if config.Vars.KubeContext == "" {
 		log.Printf("[INFO] Initializing client with default context")
 	} else {
-		log.Printf("[INFO] Initializing client with context specified in config vars: %v", vars.KubeContext)
-		connection.modifyContext(rawConfig, vars.KubeContext)
+		log.Printf("[INFO] Initializing client with context specified in config vars: %v", config.Vars.KubeContext)
+		connection.modifyContext(rawConfig, config.Vars.KubeContext)
 	}
 
 	connection.clientConfig, err = configLoader.ClientConfig()
@@ -441,7 +440,7 @@ func (connection *Conn) bootstrapDefaultNamespace() {
 	if err != nil {
 		return
 	}
-	_, err = connection.GetOrCreateNamespace(config.Vars.ServicePacks.Kubernetes.ProbeNamespace)
+	_, err = connection.GetOrCreateNamespace(config.Vars.ProbeNamespace)
 	if err != nil {
 		connection.clusterIsDeployed = utils.ReformatError("Failed to retrieve or create default Probr namespace: %v", err)
 	}

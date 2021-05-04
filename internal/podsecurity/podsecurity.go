@@ -8,12 +8,12 @@ import (
 
 	"github.com/cucumber/godog"
 
+	"github.com/citihub/probr-pack-kubernetes/internal/config"
 	"github.com/citihub/probr-pack-kubernetes/internal/connection"
 	"github.com/citihub/probr-pack-kubernetes/internal/constructors"
 	"github.com/citihub/probr-pack-kubernetes/internal/errors"
 	"github.com/citihub/probr-pack-kubernetes/internal/summary"
 	audit "github.com/citihub/probr-sdk/audit"
-	"github.com/citihub/probr-sdk/config"
 	"github.com/citihub/probr-sdk/probeengine"
 	"github.com/citihub/probr-sdk/utils"
 
@@ -60,8 +60,8 @@ func (scenario *scenarioState) aKubernetesClusterIsDeployed() error {
 		KubeConfigPath string
 		KubeContext    string
 	}{
-		config.Vars.ServicePacks.Kubernetes.KubeConfigPath,
-		config.Vars.ServicePacks.Kubernetes.KubeContext,
+		config.Vars.KubeConfigPath,
+		config.Vars.KubeContext,
 	}
 
 	err = conn.ClusterIsDeployed() // Must be assigned to 'err' be audited
@@ -102,7 +102,7 @@ func (scenario *scenarioState) podCreationResultsWithXSetToYInThePodSpec(result,
 	}
 
 	stepTrace.WriteString(fmt.Sprintf("Build a pod spec with default values; "))
-	pod := constructors.PodSpec(Probe.Name(), config.Vars.ServicePacks.Kubernetes.ProbeNamespace)
+	pod := constructors.PodSpec(Probe.Name(), config.Vars.ProbeNamespace)
 
 	// Any key that expects a non-bool value should have it's own case here to handle the pod modification
 
@@ -292,7 +292,7 @@ func (scenario *scenarioState) thePodIPAndHostIPHaveDifferentValues() (err error
 	}()
 
 	stepTrace.WriteString(fmt.Sprintf("Retrieve IP values from created pod; "))
-	podIP, hostIP, err := conn.GetPodIPs(config.Vars.ServicePacks.Kubernetes.ProbeNamespace, scenario.pods[0])
+	podIP, hostIP, err := conn.GetPodIPs(config.Vars.ProbeNamespace, scenario.pods[0])
 
 	stepTrace.WriteString(fmt.Sprintf("Validate that PodIP and HostIP have different values; "))
 	if err != nil && podIP == hostIP {
@@ -370,12 +370,12 @@ func beforeScenario(s *scenarioState, probeName string, gs *godog.Scenario) {
 	s.probeAudit = summary.State.GetProbeLog(probeName)
 	s.audit = summary.State.GetProbeLog(probeName).InitializeAuditor(gs.Name, gs.Tags)
 	s.pods = make([]string, 0)
-	s.namespace = config.Vars.ServicePacks.Kubernetes.ProbeNamespace
+	s.namespace = config.Vars.ProbeNamespace
 	probeengine.LogScenarioStart(gs)
 }
 
 func afterScenario(scenario scenarioState, probe probeStruct, gs *godog.Scenario, err error) {
-	if config.Vars.ServicePacks.Kubernetes.KeepPods == "false" {
+	if config.Vars.KeepPods == "false" {
 		for _, podName := range scenario.pods {
 			err = conn.DeletePodIfExists(podName, scenario.namespace, probe.Name())
 			if err != nil {

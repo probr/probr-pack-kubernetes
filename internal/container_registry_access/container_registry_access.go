@@ -8,12 +8,12 @@ import (
 	"github.com/cucumber/godog"
 	apiv1 "k8s.io/api/core/v1"
 
+	"github.com/citihub/probr-pack-kubernetes/internal/config"
 	"github.com/citihub/probr-pack-kubernetes/internal/connection"
 	"github.com/citihub/probr-pack-kubernetes/internal/constructors"
 	"github.com/citihub/probr-pack-kubernetes/internal/errors"
 	"github.com/citihub/probr-pack-kubernetes/internal/summary"
 	audit "github.com/citihub/probr-sdk/audit"
-	"github.com/citihub/probr-sdk/config"
 	"github.com/citihub/probr-sdk/probeengine"
 	"github.com/citihub/probr-sdk/utils"
 )
@@ -49,8 +49,8 @@ func (scenario *scenarioState) aKubernetesClusterIsDeployed() error {
 		KubeConfigPath string
 		KubeContext    string
 	}{
-		config.Vars.ServicePacks.Kubernetes.KubeConfigPath,
-		config.Vars.ServicePacks.Kubernetes.KubeContext,
+		config.Vars.KubeConfigPath,
+		config.Vars.KubeContext,
 	}
 
 	err = conn.ClusterIsDeployed() // Must be assigned to 'err' be audited
@@ -194,12 +194,12 @@ func beforeScenario(s *scenarioState, probeName string, gs *godog.Scenario) {
 	s.probe = summary.State.GetProbeLog(probeName)
 	s.audit = summary.State.GetProbeLog(probeName).InitializeAuditor(gs.Name, gs.Tags)
 	s.pods = make([]string, 0)
-	s.namespace = config.Vars.ServicePacks.Kubernetes.ProbeNamespace
+	s.namespace = config.Vars.ProbeNamespace
 	probeengine.LogScenarioStart(gs)
 }
 
 func afterScenario(scenario scenarioState, probe probeStruct, gs *godog.Scenario, err error) {
-	if config.Vars.ServicePacks.Kubernetes.KeepPods == "false" {
+	if config.Vars.KeepPods == "false" {
 		for _, podName := range scenario.pods {
 			err = conn.DeletePodIfExists(podName, scenario.namespace, probe.Name())
 			if err != nil {
@@ -212,15 +212,15 @@ func afterScenario(scenario scenarioState, probe probeStruct, gs *godog.Scenario
 
 func getContainerRegistryFromConfig(accessLevel bool) string {
 	if accessLevel {
-		return config.Vars.ServicePacks.Kubernetes.AuthorisedContainerRegistry
+		return config.Vars.AuthorisedContainerRegistry
 	}
-	return config.Vars.ServicePacks.Kubernetes.UnauthorisedContainerRegistry
+	return config.Vars.UnauthorisedContainerRegistry
 }
 
 func getImageFromConfig(accessLevel bool) string {
 	registry := getContainerRegistryFromConfig(accessLevel)
 	//full image is the repository + the configured image
-	return registry + "/" + config.Vars.ServicePacks.Kubernetes.ProbeImage
+	return registry + "/" + config.Vars.ProbeImage
 }
 
 func (scenario *scenarioState) createPodfromObject(podObject *apiv1.Pod) (createdPodObject *apiv1.Pod, err error) {

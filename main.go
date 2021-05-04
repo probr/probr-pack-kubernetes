@@ -9,14 +9,15 @@ import (
 	"os/signal"
 	"syscall"
 
+	"github.com/citihub/probr-pack-kubernetes/internal/config"
 	"github.com/citihub/probr-pack-kubernetes/internal/summary"
 	"github.com/citihub/probr-pack-kubernetes/pack"
-	"github.com/citihub/probr-pack-kubernetes/settings"
+
+	sdk "github.com/citihub/probr-sdk"
 	audit "github.com/citihub/probr-sdk/audit"
-	"github.com/citihub/probr-sdk/config"
 	"github.com/citihub/probr-sdk/logging"
 	"github.com/citihub/probr-sdk/plugin"
-	"github.com/citihub/probr-sdk/probeengine"
+	probeengine "github.com/citihub/probr-sdk/probeengine"
 	"github.com/citihub/probr-sdk/utils"
 )
 
@@ -42,9 +43,6 @@ var (
 	BuiltAt = ""
 )
 
-// Settings contains all configuration values
-var Settings settings.PackSettings
-
 // ServicePack ...
 type ServicePack struct {
 }
@@ -59,19 +57,27 @@ func (sp *ServicePack) RunProbes() error {
 
 func main() {
 
+	versionCmd, runCmd := setFlags()
+	handleCommands(versionCmd, runCmd)
+}
+
+func setFlags() (versionCmd, runCmd *flag.FlagSet) {
 	// > probr version [-v]
-	versionCmd := flag.NewFlagSet("version", flag.ExitOnError)
-	settings.VersionCliFlags.Verbose = versionCmd.Bool("v", false, "Display extended version information")
+	versionCmd = flag.NewFlagSet("version", flag.ExitOnError)
+	config.Vars.Verbose = *versionCmd.Bool("v", false, "Display extended version information") // TODO: Harness '-v' in the standard probr execution
 
 	// > probr
-	runCmd := flag.NewFlagSet("run", flag.ExitOnError)
-	settings.RunCliFlags.VarsFile = runCmd.String("varsfile", "", "path to config file")
-	settings.RunCliFlags.WriteDirectory = runCmd.String("writedirectory", "", "output directory")
-	settings.RunCliFlags.LogLevel = runCmd.String("loglevel", "", "set log level")
-	settings.RunCliFlags.ResultsFormat = runCmd.String("resultsformat", "", "set the bdd results format (default = cucumber)")
-	settings.RunCliFlags.Tags = runCmd.String("tags", "", "feature tags to include or exclude")
-	settings.RunCliFlags.KubeConfig = runCmd.String("kubeconfig", "", "kube config file")
+	runCmd = flag.NewFlagSet("run", flag.ExitOnError)
+	runCmd.StringVar(&config.Vars.VarsFile, "varsfile", "", "path to config file")
+	runCmd.StringVar(&config.Vars.WriteDirectory, "writedirectory", "", "output directory")
+	runCmd.StringVar(&config.Vars.LogLevel, "loglevel", "", "set log level")
+	runCmd.StringVar(&config.Vars.ResultsFormat, "resultsformat", "", "set the bdd results format (default = cucumber)")
+	runCmd.StringVar(&config.Vars.Tags, "tags", "", "feature tags to include or exclude")
+	runCmd.StringVar(&config.Vars.KubeConfigPath, "kubeconfig", "", "kube config file")
+	return
+}
 
+func handleCommands(versionCmd, runCmd *flag.FlagSet) {
 	subCommand := ""
 	if len(os.Args) > 1 {
 		subCommand = os.Args[1]
@@ -79,16 +85,18 @@ func main() {
 	switch subCommand {
 	case "version":
 		versionCmd.Parse(os.Args[2:])
-		printVersion(os.Stdout, *settings.VersionCliFlags.Verbose)
+		printVersion(os.Stdout)
 
 	case "debug": // Same cli args as run. Use this to bypass plugin and execute directly for debugging
 		// Parse cli args
 		runCmd.Parse(os.Args[2:]) // Skip first arg as it will be 'debug'
+		log.Printf("[ERROR] ---->>> %s", config.Vars.VarsFile)
 		ProbrCoreLogic()
 
 	default:
 		// Parse cli args
 		runCmd.Parse(os.Args[1:])
+		log.Printf("[ERROR] ---->>> %s", config.Vars.VarsFile)
 
 		// Serve plugin
 		spProbr := &ServicePack{}
@@ -110,7 +118,7 @@ func setupCloseHandler() {
 	go func() {
 		<-c
 		log.Printf("Execution aborted - %v", "SIGTERM")
-		probeengine.CleanupTmp()
+		defer sdk.GlobalConfig.CleanupTmp()
 		// TODO: Additional cleanup may be needed. For instance, any pods created during tests are not being dropped if aborted.
 		os.Exit(0)
 	}()
@@ -118,21 +126,18 @@ func setupCloseHandler() {
 
 // ProbrCoreLogic ...
 func ProbrCoreLogic() (err error) {
-	log.Printf("[INFO] message from ProbCoreLogic: %s", "Start")
-	defer probeengine.CleanupTmp()
+	defer sdk.GlobalConfig.CleanupTmp()
 	setupCloseHandler() // Sigterm protection
 
 	summary.State = audit.NewSummaryState("kubernetes")
 
-	Settings = settings.NewSettings()
-	Settings.Load()
-
+	config.Vars.Init()
 	config.Vars.LogConfigState() // TODO: Update this func to accept a generic object, so that global and local settings can be logged (if needed)
 
 	logWriter := logging.ProbrLoggerOutput()
 	log.SetOutput(logWriter) // TODO: This is a temporary patch, since logger output is being overritten while loading config vars
 
-	store := probeengine.NewProbeStore("kubernetes", &summary.State)
+	store := probeengine.NewProbeStore("kubernetes", config.Vars.Tags, &summary.State)
 	s, err := store.RunAllProbes(pack.GetProbes())
 	if err != nil {
 		log.Printf("[ERROR] Error executing tests %v", err)
@@ -145,44 +150,15 @@ func ProbrCoreLogic() (err error) {
 	summary.State.PrintSummary()
 	summary.State.WriteSummary()
 
-	log.Printf("[INFO] message from ProbCoreLogic: %s", "End")
-
 	if !success || summary.State.ProbesFailed > 0 { //Adding this until 'success' can be fixed. See above TODO
 		return utils.ReformatError("One or more probe scenarios were not successful. View the output logs for more details.")
 	}
 	return
 }
 
-// func parseFlags() {
-// 	var flags cliflags.Flags
+func printVersion(w io.Writer) {
 
-// 	flags.NewStringFlag("varsfile", "path to config file", cliflags.VarsFileHandler)
-
-// 	flags.NewStringFlag("writedirectory", "output directory", cliflags.WriteDirHandler)
-// 	flags.NewStringFlag("loglevel", "set log level", cliflags.LoglevelHandler)
-// 	flags.NewStringFlag("resultsformat", "set the bdd results format (default = cucumber)", cliflags.ResultsformatHandler)
-// 	flags.NewStringFlag("tags", "feature tags to include or exclude", cliflags.TagsHandler)
-
-// 	flags.NewStringFlag("kubeconfig", "kube config file", kubeConfigHandler)
-
-// 	flags.ExecuteHandlers()
-
-// }
-
-// func kubeConfigHandler(v *string) {
-// 	value := *v
-// 	if len(value) > 0 {
-// 		config.Vars.ServicePacks.Kubernetes.KubeConfigPath = value
-// 		log.Printf("[NOTICE] Kubeconfig path has been overridden via command line")
-// 	}
-// 	if len(config.Vars.ServicePacks.Kubernetes.KubeConfigPath) == 0 {
-// 		log.Printf("[NOTICE] No kubeconfig path specified. Falling back to default paths.")
-// 	}
-// }
-
-func printVersion(w io.Writer, verbose bool) {
-
-	if verbose {
+	if config.Vars.Verbose {
 		fmt.Fprintf(w, "Service Pack : %s", ServicePackName)
 		fmt.Fprintln(w)
 		fmt.Fprintf(w, "Version      : %s", getVersion())

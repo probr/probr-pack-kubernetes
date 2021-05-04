@@ -4,7 +4,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/citihub/probr-sdk/config"
+	"github.com/citihub/probr-pack-kubernetes/internal/config"
 	"github.com/citihub/probr-sdk/utils"
 )
 

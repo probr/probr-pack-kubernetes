@@ -9,7 +9,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/citihub/probr-sdk/config"
+	"github.com/citihub/probr-pack-kubernetes/internal/config"
 	"github.com/citihub/probr-sdk/utils"
 	apiv1 "k8s.io/api/core/v1"
 )
@@ -238,8 +238,8 @@ func TestDefaultProbrImageName(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			config.Vars.ServicePacks.Kubernetes.AuthorisedContainerRegistry = tt.registry
-			config.Vars.ServicePacks.Kubernetes.ProbeImage = tt.image
+			config.Vars.AuthorisedContainerRegistry = tt.registry
+			config.Vars.ProbeImage = tt.image
 			if got := DefaultProbrImageName(); got != tt.want {
 				t.Errorf("DefaultProbrImageName() = %v, want %v", got, tt.want)
 			}

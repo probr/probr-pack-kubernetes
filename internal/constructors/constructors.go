@@ -9,7 +9,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/citihub/probr-sdk/config"
+	"github.com/citihub/probr-pack-kubernetes/internal/config"
 	"github.com/citihub/probr-sdk/utils"
 	apiv1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
@@ -93,8 +93,8 @@ func DefaultProbrImageName() string {
 	// Service pack will not start without these vars, so we can rely on them being present
 	return fmt.Sprintf(
 		"%s/%s",
-		config.Vars.ServicePacks.Kubernetes.AuthorisedContainerRegistry,
-		config.Vars.ServicePacks.Kubernetes.ProbeImage)
+		config.Vars.AuthorisedContainerRegistry,
+		config.Vars.ProbeImage)
 }
 
 // DefaultEntrypoint is used by all default pods
