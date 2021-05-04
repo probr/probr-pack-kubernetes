@@ -44,8 +44,12 @@ func (scenario *scenarioState) aKubernetesClusterIsDeployed() error {
 	// Standard auditing logic to ensures panics are also audited
 	stepTrace, payload, err := utils.AuditPlaceholders()
 	defer func() {
+		if panicErr := recover(); panicErr != nil {
+			err = utils.ReformatError("[ERROR] Unexpected behavior occured: %s", panicErr)
+		}
 		scenario.audit.AuditScenarioStep(scenario.currentStep, stepTrace.String(), payload, err)
 	}()
+
 	stepTrace.WriteString(fmt.Sprintf("Validate that a cluster can be reached using the specified kube config and context; "))
 
 	payload = struct {
@@ -74,6 +78,9 @@ func (scenario *scenarioState) aResourceTypeXCalledYExistsInNamespaceCalledZ(res
 	// Standard auditing logic to ensures panics are also audited
 	stepTrace, payload, err := utils.AuditPlaceholders()
 	defer func() {
+		if panicErr := recover(); panicErr != nil {
+			err = utils.ReformatError("[ERROR] Unexpected behavior occured: %s", panicErr)
+		}
 		scenario.audit.AuditScenarioStep(scenario.currentStep, stepTrace.String(), payload, err)
 	}()
 
@@ -132,6 +139,9 @@ func (scenario *scenarioState) iSucceedToCreateASimplePodInNamespaceAssignedWith
 	// Standard auditing logic to ensures panics are also audited
 	stepTrace, payload, err := utils.AuditPlaceholders()
 	defer func() {
+		if panicErr := recover(); panicErr != nil {
+			err = utils.ReformatError("[ERROR] Unexpected behavior occured: %s", panicErr)
+		}
 		scenario.audit.AuditScenarioStep(scenario.currentStep, stepTrace.String(), payload, err)
 	}()
 
@@ -207,6 +217,9 @@ func (scenario *scenarioState) anAttemptToObtainAnAccessTokenFromThatPodShouldX(
 	// Standard auditing logic to ensures panics are also audited
 	stepTrace, payload, err := utils.AuditPlaceholders()
 	defer func() {
+		if panicErr := recover(); panicErr != nil {
+			err = utils.ReformatError("[ERROR] Unexpected behavior occured: %s", panicErr)
+		}
 		scenario.audit.AuditScenarioStep(scenario.currentStep, stepTrace.String(), payload, err)
 	}()
 
@@ -276,6 +289,9 @@ func (scenario *scenarioState) iCreateAnAzureIdentityBindingCalledInANondefaultN
 	// Standard auditing logic to ensures panics are also audited
 	stepTrace, payload, err := utils.AuditPlaceholders()
 	defer func() {
+		if panicErr := recover(); panicErr != nil {
+			err = utils.ReformatError("[ERROR] Unexpected behavior occured: %s", panicErr)
+		}
 		scenario.audit.AuditScenarioStep(scenario.currentStep, stepTrace.String(), payload, err)
 	}()
 
@@ -313,6 +329,9 @@ func (scenario *scenarioState) theClusterHasManagedIdentityComponentsDeployed() 
 	// Standard auditing logic to ensures panics are also audited
 	stepTrace, payload, err := utils.AuditPlaceholders()
 	defer func() {
+		if panicErr := recover(); panicErr != nil {
+			err = utils.ReformatError("[ERROR] Unexpected behavior occured: %s", panicErr)
+		}
 		scenario.audit.AuditScenarioStep(scenario.currentStep, stepTrace.String(), payload, err)
 	}()
 
@@ -365,6 +384,9 @@ func (scenario *scenarioState) theExecutionOfAXCommandInsideTheMICPodIsY(command
 	// Standard auditing logic to ensures panics are also audited
 	stepTrace, payload, err := utils.AuditPlaceholders()
 	defer func() {
+		if panicErr := recover(); panicErr != nil {
+			err = utils.ReformatError("[ERROR] Unexpected behavior occured: %s", panicErr)
+		}
 		scenario.audit.AuditScenarioStep(scenario.currentStep, stepTrace.String(), payload, err)
 	}()
 

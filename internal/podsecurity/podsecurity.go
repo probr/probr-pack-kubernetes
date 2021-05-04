@@ -52,8 +52,12 @@ func (scenario *scenarioState) aKubernetesClusterIsDeployed() error {
 	// Standard auditing logic to ensures panics are also audited
 	stepTrace, payload, err := utils.AuditPlaceholders()
 	defer func() {
+		if panicErr := recover(); panicErr != nil {
+			err = utils.ReformatError("[ERROR] Unexpected behavior occured: %s", panicErr)
+		}
 		scenario.audit.AuditScenarioStep(scenario.currentStep, stepTrace.String(), payload, err)
 	}()
+
 	stepTrace.WriteString(fmt.Sprintf("Validate that a cluster can be reached using the specified kube config and context; "))
 
 	payload = struct {
@@ -71,8 +75,12 @@ func (scenario *scenarioState) aKubernetesClusterIsDeployed() error {
 func (scenario *scenarioState) toDo(todo string) error {
 	stepTrace, payload, err := utils.AuditPlaceholders()
 	defer func() {
+		if panicErr := recover(); panicErr != nil {
+			err = utils.ReformatError("[ERROR] Unexpected behavior occured: %s", panicErr)
+		}
 		scenario.audit.AuditScenarioStep(scenario.currentStep, stepTrace.String(), payload, err)
 	}()
+
 	stepTrace.WriteString(fmt.Sprintf("This step was included to inform developers that a scenario is incomplete; "))
 	payload = struct {
 		TODO string
@@ -93,6 +101,9 @@ func (scenario *scenarioState) podCreationResultsWithXSetToYInThePodSpec(result,
 
 	stepTrace, payload, err := utils.AuditPlaceholders()
 	defer func() {
+		if panicErr := recover(); panicErr != nil {
+			err = utils.ReformatError("[ERROR] Unexpected behavior occured: %s", panicErr)
+		}
 		scenario.audit.AuditScenarioStep(scenario.currentStep, stepTrace.String(), payload, err)
 	}()
 
@@ -167,6 +178,9 @@ func (scenario *scenarioState) theExecutionOfAXCommandInsideThePodIsY(permission
 
 	stepTrace, payload, err := utils.AuditPlaceholders()
 	defer func() {
+		if panicErr := recover(); panicErr != nil {
+			err = utils.ReformatError("[ERROR] Unexpected behavior occured: %s", panicErr)
+		}
 		scenario.audit.AuditScenarioStep(scenario.currentStep, stepTrace.String(), payload, err)
 	}()
 
@@ -234,8 +248,12 @@ func (scenario *scenarioState) aXInspectionShouldOnlyShowTheContainerProcesses(i
 
 	stepTrace, payload, err := utils.AuditPlaceholders()
 	defer func() {
+		if panicErr := recover(); panicErr != nil {
+			err = utils.ReformatError("[ERROR] Unexpected behavior occured: %s", panicErr)
+		}
 		scenario.audit.AuditScenarioStep(scenario.currentStep, stepTrace.String(), payload, err)
 	}()
+
 	var command string
 	switch inspectionType {
 	case "process":
@@ -288,6 +306,9 @@ func (scenario *scenarioState) aXInspectionShouldOnlyShowTheContainerProcesses(i
 func (scenario *scenarioState) thePodIPAndHostIPHaveDifferentValues() (err error) {
 	stepTrace, payload, err := utils.AuditPlaceholders()
 	defer func() {
+		if panicErr := recover(); panicErr != nil {
+			err = utils.ReformatError("[ERROR] Unexpected behavior occured: %s", panicErr)
+		}
 		scenario.audit.AuditScenarioStep(scenario.currentStep, stepTrace.String(), payload, err)
 	}()
 
