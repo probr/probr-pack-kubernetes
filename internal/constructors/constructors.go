@@ -167,7 +167,7 @@ func uniquePodName(baseName string) string {
 	//take base and add some uniqueness
 	t := time.Now()
 	rand.Seed(t.UnixNano())
-	uniq := fmt.Sprintf("%v-%v", t.Format("020106-150405"), rand.Intn(100))
+	uniq := fmt.Sprintf("%v-%v%v", t.Format("020106-150405"), rand.Intn(100), rand.Intn(100))
 
 	return fmt.Sprintf("%v-%v", baseName, uniq)
 }
