@@ -20,9 +20,6 @@ import (
 
 type probeStruct struct{}
 
-// Will provide functionality to interact with K8s cluster
-var conn connection.Connection
-
 // scenarioState holds the steps and state for any scenario in this probe
 type scenarioState struct {
 	name        string
@@ -57,7 +54,7 @@ func (scenario *scenarioState) aKubernetesClusterIsDeployed() error {
 		config.Vars.KubeContext,
 	}
 
-	err = conn.ClusterIsDeployed() // Must be assigned to 'err' be audited
+	err = connection.State.ClusterIsDeployed() // Must be assigned to 'err' be audited
 	return err
 }
 
@@ -160,7 +157,6 @@ func (probe probeStruct) Path() string {
 // test handler as part of the init() function.
 func (probe probeStruct) ProbeInitialize(ctx *godog.TestSuiteContext) {
 	ctx.BeforeSuite(func() {
-		conn = connection.Get()
 	})
 
 	ctx.AfterSuite(func() {
@@ -205,7 +201,7 @@ func beforeScenario(s *scenarioState, probeName string, gs *godog.Scenario) {
 func afterScenario(scenario scenarioState, probe probeStruct, gs *godog.Scenario, err error) {
 	if config.Vars.KeepPods == "false" {
 		for _, podName := range scenario.pods {
-			err = conn.DeletePodIfExists(podName, scenario.namespace, probe.Name())
+			err = connection.State.DeletePodIfExists(podName, scenario.namespace, probe.Name())
 			if err != nil {
 				log.Printf("[ERROR] Could not retrieve pod from namespace '%s' for deletion: %s", scenario.namespace, err)
 			}
@@ -222,7 +218,7 @@ func imageFromConfig(authorized bool) string {
 }
 
 func (scenario *scenarioState) createPodfromObject(podObject *apiv1.Pod) (createdPodObject *apiv1.Pod, err error) {
-	createdPodObject, err = conn.CreatePodFromObject(podObject, Probe.Name())
+	createdPodObject, err = connection.State.CreatePodFromObject(podObject, Probe.Name())
 	if err == nil {
 		scenario.pods = append(scenario.pods, createdPodObject.ObjectMeta.Name)
 	}

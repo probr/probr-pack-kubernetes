@@ -37,7 +37,6 @@ type scenarioState struct {
 // Probe meets the service pack interface for adding the logic from this file
 var Probe probeStruct
 var scenario scenarioState
-var conn connection.Connection
 var azureK8S *aks.AKS
 
 func (scenario *scenarioState) aKubernetesClusterIsDeployed() error {
@@ -60,7 +59,7 @@ func (scenario *scenarioState) aKubernetesClusterIsDeployed() error {
 		config.Vars.KubeContext,
 	}
 
-	err = conn.ClusterIsDeployed() // Must be assigned to 'err' be audited
+	err = connection.State.ClusterIsDeployed() // Must be assigned to 'err' be audited
 	return err
 }
 
@@ -247,7 +246,7 @@ func (scenario *scenarioState) anAttemptToObtainAnAccessTokenFromThatPodShouldX(
 	cmd := "curl http://169.254.169.254/metadata/identity/oauth2/token?api-version=2018-02-01&resource=https%3A%2F%2Fmanagement.azure.com%2F -H Metadata:true -s"
 
 	stepTrace.WriteString(fmt.Sprintf("Attempt to run command in the pod: '%s'; ", cmd))
-	_, stdOut, _, cmdErr := conn.ExecCommand(cmd, scenario.namespace, podName)
+	_, stdOut, _, cmdErr := connection.State.ExecCommand(cmd, scenario.namespace, podName)
 
 	// Validate that no internal error occurred during execution of curl command
 	if cmdErr != nil {
@@ -337,7 +336,7 @@ func (scenario *scenarioState) theClusterHasManagedIdentityComponentsDeployed() 
 	stepTrace.WriteString(fmt.Sprintf(
 		"Get pods from '%s' namespace; ", identityPodsNamespace))
 	// look for the mic pods
-	podList, getErr := conn.GetPodsByNamespace(identityPodsNamespace)
+	podList, getErr := connection.State.GetPodsByNamespace(identityPodsNamespace)
 
 	if getErr != nil {
 		err = utils.ReformatError("An error occurred when trying to retrieve pods %v", err)
@@ -417,7 +416,7 @@ func (scenario *scenarioState) theExecutionOfAXCommandInsideTheMICPodIsY(command
 	identityPodsNamespace := config.Vars.Azure.IdentityNamespace
 	stepTrace.WriteString(fmt.Sprintf(
 		"Attempt to execute command '%s' in MIC pod '%s'; ", cmd, scenario.micPodName))
-	exitCode, stdOut, _, cmdErr := conn.ExecCommand(cmd, identityPodsNamespace, scenario.micPodName)
+	exitCode, stdOut, _, cmdErr := connection.State.ExecCommand(cmd, identityPodsNamespace, scenario.micPodName)
 
 	// Validate that no internal error occurred during execution of curl command
 	if cmdErr != nil && exitCode == -1 {
@@ -477,8 +476,7 @@ func (probe probeStruct) Path() string {
 // test handler as part of the init() function.
 func (probe probeStruct) ProbeInitialize(ctx *godog.TestSuiteContext) {
 	ctx.BeforeSuite(func() {
-		conn = connection.Get()
-		azureK8S = aks.NewAKS(conn)
+		azureK8S = aks.NewAKS(connection.State)
 
 		//setup AzureIdentity stuff ..??  Or should this be a pre-test setup
 	})
@@ -532,7 +530,7 @@ func beforeScenario(s *scenarioState, probeName string, gs *godog.Scenario) {
 func afterScenario(scenario scenarioState, probe probeStruct, gs *godog.Scenario, err error) { // TODO: err is overwritten before first use
 	if config.Vars.KeepPods == "false" {
 		for _, podName := range scenario.pods {
-			err = conn.DeletePodIfExists(podName, scenario.namespace, probe.Name())
+			err = connection.State.DeletePodIfExists(podName, scenario.namespace, probe.Name())
 			if err != nil {
 				log.Printf("[ERROR] Could not retrieve pod from namespace '%s' for deletion: %s", scenario.namespace, err)
 			}
@@ -542,7 +540,7 @@ func afterScenario(scenario scenarioState, probe probeStruct, gs *godog.Scenario
 }
 
 func (scenario *scenarioState) createPodfromObject(podObject *apiv1.Pod) (createdPodObject *apiv1.Pod, err error) {
-	createdPodObject, err = conn.CreatePodFromObject(podObject, Probe.Name())
+	createdPodObject, err = connection.State.CreatePodFromObject(podObject, Probe.Name())
 	if err == nil {
 		scenario.pods = append(scenario.pods, createdPodObject.ObjectMeta.Name)
 	}

@@ -23,8 +23,6 @@ import (
 
 type probeStruct struct{}
 
-var conn connection.Connection
-
 type scenarioState struct {
 	name        string
 	currentStep string
@@ -58,7 +56,7 @@ func (scenario *scenarioState) aKubernetesClusterIsDeployed() error {
 		config.Vars.KubeContext,
 	}
 
-	err = conn.ClusterIsDeployed() // Must be assigned to 'err' be audited
+	err = connection.State.ClusterIsDeployed() // Must be assigned to 'err' be audited
 	return err
 }
 
@@ -77,7 +75,7 @@ func (scenario *scenarioState) theKubernetesWebUIIsDisabled() error {
 	stepTrace.WriteString(fmt.Sprintf("Attempt to find a pod in the '%s' namespace with the prefix '%s'; ", kubeSystemNamespace, dashboardPodNamePrefix))
 
 	stepTrace.WriteString(fmt.Sprintf("Get all pods from '%s' namespace; ", kubeSystemNamespace))
-	podList, getError := conn.GetPodsByNamespace(kubeSystemNamespace) // Also validates if provided namespace is valid
+	podList, getError := connection.State.GetPodsByNamespace(kubeSystemNamespace) // Also validates if provided namespace is valid
 	if getError != nil {
 		err = utils.ReformatError("An error occurred while retrieving pods from '%s' namespace. Error: %s", kubeSystemNamespace, getError)
 		return err
@@ -147,7 +145,7 @@ func (scenario *scenarioState) theResultOfAProcessInsideThePodEstablishingADirec
 	podName := scenario.pods[scenario.namespace][0]
 
 	stepTrace.WriteString(fmt.Sprintf("Attempt to run command in the pod: '%s'; ", cmd))
-	exitCode, stdOut, _, cmdErr := conn.ExecCommand(cmd, scenario.namespace, podName)
+	exitCode, stdOut, _, cmdErr := connection.State.ExecCommand(cmd, scenario.namespace, podName)
 
 	// Validate that no internal error occurred during execution of curl command
 	if cmdErr != nil && exitCode == -1 {
@@ -275,7 +273,6 @@ func (probe probeStruct) Path() string {
 func (probe probeStruct) ProbeInitialize(ctx *godog.TestSuiteContext) {
 
 	ctx.BeforeSuite(func() {
-		conn = connection.Get()
 	})
 
 	ctx.AfterSuite(func() {})
@@ -323,7 +320,7 @@ func afterScenario(scenario scenarioState, probe probeStruct, gs *godog.Scenario
 	if config.Vars.KeepPods == "false" {
 		for namespace, createdPods := range scenario.pods {
 			for _, podName := range createdPods {
-				err = conn.DeletePodIfExists(podName, namespace, probe.Name())
+				err = connection.State.DeletePodIfExists(podName, namespace, probe.Name())
 				if err != nil {
 					log.Printf("[ERROR] Could not retrieve pod from namespace '%s' for deletion: %s", scenario.namespace, err)
 				}
@@ -335,7 +332,7 @@ func afterScenario(scenario scenarioState, probe probeStruct, gs *godog.Scenario
 }
 
 func (scenario *scenarioState) createPodfromObject(podObject *apiv1.Pod) (createdPodObject *apiv1.Pod, err error) {
-	createdPodObject, err = conn.CreatePodFromObject(podObject, Probe.Name())
+	createdPodObject, err = connection.State.CreatePodFromObject(podObject, Probe.Name())
 	if err == nil {
 		scenario.namespace = createdPodObject.ObjectMeta.Namespace
 		podName := createdPodObject.ObjectMeta.Name

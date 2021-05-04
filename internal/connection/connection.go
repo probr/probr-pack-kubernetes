@@ -11,7 +11,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/citihub/probr-pack-kubernetes/internal/config"
 	"github.com/citihub/probr-pack-kubernetes/internal/errors"
 	"github.com/citihub/probr-sdk/utils"
 	apiv1 "k8s.io/api/core/v1"
@@ -78,21 +77,6 @@ func NewConnection(kubeConfigPath, kubeContext, namespace string) *Conn {
 	instance.setClientConfig()
 	instance.setClientSet()
 	instance.bootstrapDefaultNamespace()
-	return instance
-}
-
-// Get retrieves the connection object. Instantiates the connection if necessary
-// Deprecated. Logic will change in a follow-up PR to have the pack config manage connection state
-func Get() *Conn {
-	defer func() {
-		if err := recover(); err != nil {
-			// TODO: If this recovers, all tests will report as passing. Modify the 'if given' logic.
-			log.Printf("[DEBUG] Failed to initialize connection: (%s->%s) %s", utils.CallerName(5), utils.CallerName(4), err)
-		}
-	}()
-	once.Do(func() {
-		instance = NewConnection(config.Vars.KubeConfigPath, config.Vars.KubeContext, config.Vars.ProbeNamespace)
-	})
 	return instance
 }
 

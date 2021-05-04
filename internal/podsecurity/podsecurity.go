@@ -23,8 +23,6 @@ import (
 type probeStruct struct {
 }
 
-var conn connection.Connection
-
 // scenarioState holds the steps and state for any scenario in this probe
 type scenarioState struct {
 	name        string
@@ -40,7 +38,7 @@ var Probe probeStruct
 var scenario scenarioState
 
 func (scenario *scenarioState) createPodfromObject(podObject *apiv1.Pod) (createdPodObject *apiv1.Pod, err error) {
-	createdPodObject, err = conn.CreatePodFromObject(podObject, Probe.Name())
+	createdPodObject, err = connection.State.CreatePodFromObject(podObject, Probe.Name())
 	if err == nil {
 		scenario.pods = append(scenario.pods, createdPodObject.ObjectMeta.Name)
 	}
@@ -67,7 +65,7 @@ func (scenario *scenarioState) aKubernetesClusterIsDeployed() error {
 		config.Vars.KubeContext,
 	}
 
-	err = conn.ClusterIsDeployed() // Must be assigned to 'err' be audited
+	err = connection.State.ClusterIsDeployed() // Must be assigned to 'err' be audited
 	return err
 }
 
@@ -218,7 +216,7 @@ func (scenario *scenarioState) theExecutionOfAXCommandInsideThePodIsY(permission
 
 	}
 	stepTrace.WriteString("Attempt to run a command in the pod that was created by the previous step; ")
-	exitCode, stdout, stderr, err := conn.ExecCommand(cmd, scenario.namespace, scenario.pods[0])
+	exitCode, stdout, stderr, err := connection.State.ExecCommand(cmd, scenario.namespace, scenario.pods[0])
 
 	payload = struct {
 		Command          string
@@ -264,7 +262,7 @@ func (scenario *scenarioState) aXInspectionShouldOnlyShowTheContainerProcesses(i
 		return
 	}
 	entrypoint := strings.Join(constructors.DefaultEntrypoint(), " ")
-	exitCode, stdout, _, err := conn.ExecCommand(command, scenario.namespace, scenario.pods[0])
+	exitCode, stdout, _, err := connection.State.ExecCommand(command, scenario.namespace, scenario.pods[0])
 
 	if err != nil {
 		// TODO: Validate that this fails as expected
@@ -312,7 +310,7 @@ func (scenario *scenarioState) thePodIPAndHostIPHaveDifferentValues() (err error
 	}()
 
 	stepTrace.WriteString("Retrieve IP values from created pod; ")
-	podIP, hostIP, err := conn.GetPodIPs(config.Vars.ProbeNamespace, scenario.pods[0])
+	podIP, hostIP, err := connection.State.GetPodIPs(config.Vars.ProbeNamespace, scenario.pods[0])
 
 	stepTrace.WriteString("Validate that PodIP and HostIP have different values; ")
 	if err != nil && podIP == hostIP {
@@ -345,7 +343,6 @@ func (probe probeStruct) Path() string {
 // test handler as part of the init() function.
 func (probe probeStruct) ProbeInitialize(ctx *godog.TestSuiteContext) {
 	ctx.BeforeSuite(func() {
-		conn = connection.Get()
 	})
 
 	ctx.AfterSuite(func() {
@@ -397,7 +394,7 @@ func beforeScenario(s *scenarioState, probeName string, gs *godog.Scenario) {
 func afterScenario(scenario scenarioState, probe probeStruct, gs *godog.Scenario, err error) { // TODO: err is overwritten before first use
 	if config.Vars.KeepPods == "false" {
 		for _, podName := range scenario.pods {
-			err = conn.DeletePodIfExists(podName, scenario.namespace, probe.Name())
+			err = connection.State.DeletePodIfExists(podName, scenario.namespace, probe.Name())
 			if err != nil {
 				log.Printf("[ERROR] Could not retrieve pod from namespace '%s' for deletion: %s", scenario.namespace, err)
 			}

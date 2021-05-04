@@ -10,6 +10,7 @@ import (
 	"syscall"
 
 	"github.com/citihub/probr-pack-kubernetes/internal/config"
+	"github.com/citihub/probr-pack-kubernetes/internal/connection"
 	"github.com/citihub/probr-pack-kubernetes/internal/summary"
 	"github.com/citihub/probr-pack-kubernetes/pack"
 
@@ -133,6 +134,8 @@ func ProbrCoreLogic() (err error) {
 
 	config.Vars.Init()
 	config.Vars.LogConfigState() // TODO: Update this func to accept a generic object, so that global and local settings can be logged (if needed)
+
+	connection.Connect()
 
 	logWriter := logging.ProbrLoggerOutput()
 	log.SetOutput(logWriter) // TODO: This is a temporary patch, since logger output is being overritten while loading config vars
