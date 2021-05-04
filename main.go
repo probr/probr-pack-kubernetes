@@ -47,7 +47,7 @@ var (
 type ServicePack struct {
 }
 
-// RunProbes ...
+// RunProbes is required to meet the Probr Service Pack interface
 func (sp *ServicePack) RunProbes() error {
 	log.Printf("[DEBUG] message from ServicePack_Probr.RunProbes")
 	log.Printf("[DEBUG] args... %v", os.Args)
@@ -55,8 +55,8 @@ func (sp *ServicePack) RunProbes() error {
 	return ProbrCoreLogic()
 }
 
+// main is executed when this file is called as a binary or `go run`
 func main() {
-
 	versionCmd, runCmd := setFlags()
 	handleCommands(versionCmd, runCmd)
 }

@@ -1,8 +1,10 @@
 package config
 
 type parsedVars struct {
-	// Can be set by flags or vars file
-	VarsFile       string
+	// Must be set via CLI flag
+	VarsFile string
+
+	// Can be set by CLI flags or vars file
 	WriteDirectory string
 	LogLevel       string
 	ResultsFormat  string

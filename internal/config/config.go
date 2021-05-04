@@ -31,6 +31,9 @@ func (ctx *parsedVars) Init() (err error) {
 	return
 }
 
+// decode uses an SDK helper to create a YAML file decoder,
+// parse the file to an object, then extracts the values from
+// ServicePacks.Kubernetes into this context
 func (ctx *parsedVars) decode() (err error) {
 	var unParsed varsFile
 	configDecoder, file, err := sdkConfig.NewConfigDecoder(ctx.VarsFile)
