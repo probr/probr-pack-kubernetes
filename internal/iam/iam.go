@@ -9,14 +9,15 @@ import (
 	"github.com/cucumber/godog"
 	apiv1 "k8s.io/api/core/v1"
 
-	"github.com/citihub/probr-pack-kubernetes/internal/azure/aks"
 	"github.com/citihub/probr-pack-kubernetes/internal/config"
 	"github.com/citihub/probr-pack-kubernetes/internal/connection"
-	"github.com/citihub/probr-pack-kubernetes/internal/constructors"
-	"github.com/citihub/probr-pack-kubernetes/internal/errors"
 	"github.com/citihub/probr-pack-kubernetes/internal/summary"
 	audit "github.com/citihub/probr-sdk/audit"
 	"github.com/citihub/probr-sdk/probeengine"
+	"github.com/citihub/probr-sdk/providers/azure/aks"
+	sdkConnection "github.com/citihub/probr-sdk/providers/kubernetes/connection"
+	"github.com/citihub/probr-sdk/providers/kubernetes/constructors"
+	"github.com/citihub/probr-sdk/providers/kubernetes/errors"
 	"github.com/citihub/probr-sdk/utils"
 )
 
@@ -86,7 +87,7 @@ func (scenario *scenarioState) aResourceTypeXCalledYExistsInNamespaceCalledZ(res
 	// TODO: This implementation is coupled to Azure. How should we deal with this when segregating service pack?
 
 	var foundInNamespace bool
-	var resource connection.APIResource
+	var resource sdkConnection.APIResource
 	var findErr error
 	// Validate input
 	switch resourceType {
@@ -115,7 +116,7 @@ func (scenario *scenarioState) aResourceTypeXCalledYExistsInNamespaceCalledZ(res
 	payload = struct {
 		CustomResourceType string
 		CustomResourceName string
-		Resource           connection.APIResource
+		Resource           sdkConnection.APIResource
 	}{
 		CustomResourceType: resourceType,
 		CustomResourceName: resourceName,
@@ -310,7 +311,7 @@ func (scenario *scenarioState) iCreateAnAzureIdentityBindingCalledInANondefaultN
 		Namespace                   string
 		AzureIdentityBindingName    string
 		AzureIdentityName           string
-		CreatedAzureIdentityBinding connection.APIResource
+		CreatedAzureIdentityBinding sdkConnection.APIResource
 	}{
 		Namespace:                   probrNameSpace,
 		AzureIdentityBindingName:    aibName,
@@ -547,7 +548,7 @@ func (scenario *scenarioState) createPodfromObject(podObject *apiv1.Pod) (create
 	return
 }
 
-func azureIdentityExistsInNamespace(azureIdentityName, namespace string) (exists bool, resource connection.APIResource, err error) {
+func azureIdentityExistsInNamespace(azureIdentityName, namespace string) (exists bool, resource sdkConnection.APIResource, err error) {
 
 	resource, getError := azureK8S.GetIdentityByNameAndNamespace(azureIdentityName, namespace)
 	if getError != nil {
@@ -563,7 +564,7 @@ func azureIdentityExistsInNamespace(azureIdentityName, namespace string) (exists
 	return
 }
 
-func azureIdentityBindingExistsInNamespace(azureIdentityBindingName, namespace string) (exists bool, resource connection.APIResource, err error) {
+func azureIdentityBindingExistsInNamespace(azureIdentityBindingName, namespace string) (exists bool, resource sdkConnection.APIResource, err error) {
 
 	resource, getError := azureK8S.GetIdentityBindingByNameAndNamespace(azureIdentityBindingName, namespace)
 	if getError != nil {
@@ -580,7 +581,7 @@ func azureIdentityBindingExistsInNamespace(azureIdentityBindingName, namespace s
 }
 
 // azureCreateAIB creates an AzureIdentityBinding in the cluster
-func azureCreateAIB(namespace, aibName, aiName string) (aibResource connection.APIResource, err error) {
+func azureCreateAIB(namespace, aibName, aiName string) (aibResource sdkConnection.APIResource, err error) {
 
 	resource, createErr := azureK8S.CreateAIB(namespace, aibName, aiName)
 	if errors.IsStatusCode(409, createErr) { // Already Exists
