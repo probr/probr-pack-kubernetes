@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 
 	sdkConfig "github.com/citihub/probr-sdk/config"
+	"github.com/citihub/probr-sdk/config/setter"
 	"github.com/citihub/probr-sdk/utils"
 )
 
@@ -69,35 +70,35 @@ func (ctx *parsedVars) setEnvAndDefaults() {
 	// 2. Name of env var to check
 	// 3. Default value to set if flags, vars file, and env have not provided a value
 
-	sdkConfig.SetVar(&ctx.Tags, "PROBR_TAGS", "")
-	sdkConfig.SetVar(&ctx.WriteDirectory, "PROBR_WRITE_DIRECTORY", "probr_output")
-	sdkConfig.SetVar(&ctx.LogLevel, "PROBR_LOG_LEVEL", "DEBUG")
-	sdkConfig.SetVar(&ctx.ResultsFormat, "PROBR_RESULTS_FORMAT", "cucumber")
+	setter.SetVar(&ctx.Tags, "PROBR_TAGS", "")
+	setter.SetVar(&ctx.WriteDirectory, "PROBR_WRITE_DIRECTORY", "probr_output")
+	setter.SetVar(&ctx.LogLevel, "PROBR_LOG_LEVEL", "DEBUG")
+	setter.SetVar(&ctx.ResultsFormat, "PROBR_RESULTS_FORMAT", "cucumber")
 
-	sdkConfig.SetVar(&ctx.KeepPods, "PROBR_KEEP_PODS", "false")
-	sdkConfig.SetVar(&ctx.KubeConfigPath, "KUBE_CONFIG", getDefaultKubeConfigPath())
-	sdkConfig.SetVar(&ctx.KubeContext, "KUBE_CONTEXT", "")
-	sdkConfig.SetVar(&ctx.SystemClusterRoles, "", []string{"system:", "aks", "cluster-admin", "policy-agent"})
-	sdkConfig.SetVar(&ctx.AuthorisedContainerImage, "PROBR_AUTHORISED_IMAGE", "")
-	sdkConfig.SetVar(&ctx.UnauthorisedContainerImage, "PROBR_UNAUTHORISED_IMAGE", "")
-	sdkConfig.SetVar(&ctx.ProbeImage, "PROBR_PROBE_IMAGE", "citihub/probr-probe")
-	sdkConfig.SetVar(&ctx.ContainerRequiredDropCapabilities, "PROBR_REQUIRED_DROP_CAPABILITIES", []string{"NET_RAW"})
-	sdkConfig.SetVar(&ctx.ContainerAllowedAddCapabilities, "PROBR_ALLOWED_ADD_CAPABILITIES", []string{""})
-	sdkConfig.SetVar(&ctx.ApprovedVolumeTypes, "PROBR_APPROVED_VOLUME_TYPES", []string{"configmap", "emptydir", "persistentvolumeclaim"})
-	sdkConfig.SetVar(&ctx.UnapprovedHostPort, "PROBR_UNAPPROVED_HOSTPORT", "22")
-	sdkConfig.SetVar(&ctx.SystemNamespace, "PROBR_K8S_SYSTEM_NAMESPACE", "kube-system")
-	sdkConfig.SetVar(&ctx.DashboardPodNamePrefix, "PROBR_K8S_DASHBOARD_PODNAMEPREFIX", "kubernetes-dashboard")
-	sdkConfig.SetVar(&ctx.ProbeNamespace, "PROBR_K8S_PROBE_NAMESPACE", "probr-general-test-ns")
-	sdkConfig.SetVar(&ctx.Azure.DefaultNamespaceAIB, "DEFAULT_NS_AZURE_IDENTITY_BINDING", "probr-aib")
-	sdkConfig.SetVar(&ctx.Azure.IdentityNamespace, "PROBR_K8S_AZURE_IDENTITY_NAMESPACE", "kube-system")
+	setter.SetVar(&ctx.KeepPods, "PROBR_KEEP_PODS", "false")
+	setter.SetVar(&ctx.KubeConfigPath, "KUBE_CONFIG", getDefaultKubeConfigPath())
+	setter.SetVar(&ctx.KubeContext, "KUBE_CONTEXT", "")
+	setter.SetVar(&ctx.SystemClusterRoles, "", []string{"system:", "aks", "cluster-admin", "policy-agent"})
+	setter.SetVar(&ctx.AuthorisedContainerImage, "PROBR_AUTHORISED_IMAGE", "")
+	setter.SetVar(&ctx.UnauthorisedContainerImage, "PROBR_UNAUTHORISED_IMAGE", "")
+	setter.SetVar(&ctx.ProbeImage, "PROBR_PROBE_IMAGE", "citihub/probr-probe")
+	setter.SetVar(&ctx.ContainerRequiredDropCapabilities, "PROBR_REQUIRED_DROP_CAPABILITIES", []string{"NET_RAW"})
+	setter.SetVar(&ctx.ContainerAllowedAddCapabilities, "PROBR_ALLOWED_ADD_CAPABILITIES", []string{""})
+	setter.SetVar(&ctx.ApprovedVolumeTypes, "PROBR_APPROVED_VOLUME_TYPES", []string{"configmap", "emptydir", "persistentvolumeclaim"})
+	setter.SetVar(&ctx.UnapprovedHostPort, "PROBR_UNAPPROVED_HOSTPORT", "22")
+	setter.SetVar(&ctx.SystemNamespace, "PROBR_K8S_SYSTEM_NAMESPACE", "kube-system")
+	setter.SetVar(&ctx.DashboardPodNamePrefix, "PROBR_K8S_DASHBOARD_PODNAMEPREFIX", "kubernetes-dashboard")
+	setter.SetVar(&ctx.ProbeNamespace, "PROBR_K8S_PROBE_NAMESPACE", "probr-general-test-ns")
+	setter.SetVar(&ctx.Azure.DefaultNamespaceAIB, "DEFAULT_NS_AZURE_IDENTITY_BINDING", "probr-aib")
+	setter.SetVar(&ctx.Azure.IdentityNamespace, "PROBR_K8S_AZURE_IDENTITY_NAMESPACE", "kube-system")
 
 	// TODO: move this logic to SDK
-	sdkConfig.SetVar(&ctx.CloudProviders.Azure.TenantID, "AZURE_TENANT_ID", "")
-	sdkConfig.SetVar(&ctx.CloudProviders.Azure.SubscriptionID, "AZURE_SUBSCRIPTION_ID", "")
-	sdkConfig.SetVar(&ctx.CloudProviders.Azure.ClientID, "AZURE_CLIENT_ID", "")
-	sdkConfig.SetVar(&ctx.CloudProviders.Azure.ClientSecret, "AZURE_CLIENT_SECRET", "")
-	sdkConfig.SetVar(&ctx.CloudProviders.Azure.ResourceGroup, "AZURE_RESOURCE_GROUP", "")
-	sdkConfig.SetVar(&ctx.CloudProviders.Azure.ResourceLocation, "AZURE_RESOURCE_LOCATION", "")
+	setter.SetVar(&ctx.CloudProviders.Azure.TenantID, "AZURE_TENANT_ID", "")
+	setter.SetVar(&ctx.CloudProviders.Azure.SubscriptionID, "AZURE_SUBSCRIPTION_ID", "")
+	setter.SetVar(&ctx.CloudProviders.Azure.ClientID, "AZURE_CLIENT_ID", "")
+	setter.SetVar(&ctx.CloudProviders.Azure.ClientSecret, "AZURE_CLIENT_SECRET", "")
+	setter.SetVar(&ctx.CloudProviders.Azure.ResourceGroup, "AZURE_RESOURCE_GROUP", "")
+	setter.SetVar(&ctx.CloudProviders.Azure.ResourceLocation, "AZURE_RESOURCE_LOCATION", "")
 }
 
 func getDefaultKubeConfigPath() string {

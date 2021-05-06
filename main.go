@@ -91,13 +91,11 @@ func handleCommands(versionCmd, runCmd *flag.FlagSet) {
 	case "debug": // Same cli args as run. Use this to bypass plugin and execute directly for debugging
 		// Parse cli args
 		runCmd.Parse(os.Args[2:]) // Skip first arg as it will be 'debug'
-		log.Printf("[ERROR] ---->>> %s", config.Vars.VarsFile)
 		ProbrCoreLogic()
 
 	default:
 		// Parse cli args
 		runCmd.Parse(os.Args[1:])
-		log.Printf("[ERROR] ---->>> %s", config.Vars.VarsFile)
 
 		// Serve plugin
 		spProbr := &ServicePack{}
