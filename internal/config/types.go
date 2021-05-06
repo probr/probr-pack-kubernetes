@@ -1,5 +1,9 @@
 package config
 
+import (
+	sdkConfig "github.com/citihub/probr-sdk/config"
+)
+
 type parsedVars struct {
 	// Must be set via CLI flag
 	VarsFile string
@@ -13,7 +17,7 @@ type parsedVars struct {
 	Verbose        bool
 
 	// Set by vars file; defined in SDK
-	CloudProviders cloudProviders
+	CloudProviders sdkConfig.CloudProviders
 
 	// Set by vars file; must match struct 'kubernetes'
 	ApprovedVolumeTypes               []string
@@ -34,10 +38,10 @@ type parsedVars struct {
 
 // VarsFile contains all top-level config vars
 type varsFile struct {
-	CloudProviders cloudProviders `yaml:"CloudProviders"`
-	ServicePacks   servicePacks   `yaml:"ServicePacks"`
-	TagExclusions  []string       `yaml:"TagExclusions"`
-	TagInclusions  []string       `yaml:"TagInclusions"`
+	CloudProviders sdkConfig.CloudProviders `yaml:"CloudProviders"`
+	ServicePacks   servicePacks             `yaml:"ServicePacks"`
+	TagExclusions  []string                 `yaml:"TagExclusions"`
+	TagInclusions  []string                 `yaml:"TagInclusions"`
 }
 
 type servicePacks struct {
@@ -60,22 +64,6 @@ type kubernetes struct {
 	ProbeNamespace                    string   `yaml:"ProbeNamespace"`
 	DashboardPodNamePrefix            string   `yaml:"DashboardPodNamePrefix"`
 	Azure                             k8sAzure `yaml:"Azure"`
-}
-
-type azure struct {
-	Excluded         string `yaml:"Excluded"`
-	TenantID         string `yaml:"TenantID"`
-	SubscriptionID   string `yaml:"SubscriptionID"`
-	ClientID         string `yaml:"ClientID"`
-	ClientSecret     string `yaml:"ClientSecret"`
-	ResourceGroup    string `yaml:"ResourceGroup"`
-	ResourceLocation string `yaml:"ResourceLocation"`
-	ManagementGroup  string `yaml:"ManagementGroup"`
-}
-
-// TODO: move this to SDK
-type cloudProviders struct {
-	Azure azure `yaml:"Azure"`
 }
 
 // K8sAzure contains Azure-specific options for the Kubernetes service pack
