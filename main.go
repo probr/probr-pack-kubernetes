@@ -7,6 +7,7 @@ import (
 	"log"
 	"os"
 	"os/signal"
+	"strings"
 	"syscall"
 
 	"github.com/citihub/probr-pack-kubernetes/internal/config"
@@ -70,11 +71,7 @@ func setFlags() (versionCmd, runCmd *flag.FlagSet) {
 	// > probr
 	runCmd = flag.NewFlagSet("run", flag.ExitOnError)
 	runCmd.StringVar(&config.Vars.VarsFile, "varsfile", "", "path to config file")
-	runCmd.StringVar(&config.Vars.WriteDirectory, "writedirectory", "", "output directory")
-	runCmd.StringVar(&config.Vars.LogLevel, "loglevel", "", "set log level")
-	runCmd.StringVar(&config.Vars.ResultsFormat, "resultsformat", "", "set the bdd results format (default = cucumber)")
-	runCmd.StringVar(&config.Vars.Tags, "tags", "", "feature tags to include or exclude")
-	runCmd.StringVar(&config.Vars.KubeConfigPath, "kubeconfig", "", "kube config file")
+	runCmd.StringVar(&config.Vars.Kube.KubeConfigPath, "kubeconfig", "", "kube config file")
 	return
 }
 
@@ -138,7 +135,8 @@ func ProbrCoreLogic() (err error) {
 	logWriter := logging.ProbrLoggerOutput()
 	log.SetOutput(logWriter) // TODO: This is a temporary patch, since logger output is being overritten while loading config vars
 
-	store := probeengine.NewProbeStore("kubernetes", config.Vars.Tags, &summary.State)
+	tags := strings.Join(config.Vars.Kube.TagInclusions, ",") // TODO: Parse inclusions+exclusions
+	store := probeengine.NewProbeStore("kubernetes", tags, &summary.State)
 	s, err := store.RunAllProbes(pack.GetProbes())
 	if err != nil {
 		log.Printf("[ERROR] Error executing tests %v", err)

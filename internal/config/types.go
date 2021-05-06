@@ -1,47 +1,10 @@
 package config
 
-import (
-	sdkConfig "github.com/citihub/probr-sdk/config"
-)
-
-type parsedVars struct {
-	// Must be set via CLI flag
-	VarsFile string
-
-	// Can be set by CLI flags or vars file
-	WriteDirectory string
-	LogLevel       string
-	ResultsFormat  string
-	Tags           string
-	KubeConfigPath string
-	Verbose        bool
-
-	// Set by vars file; defined in SDK
-	CloudProviders sdkConfig.CloudProviders
-
-	// Set by vars file; must match struct 'kubernetes'
-	ApprovedVolumeTypes               []string
-	AuthorisedContainerImage          string
-	Azure                             k8sAzure
-	ContainerRequiredDropCapabilities []string
-	ContainerAllowedAddCapabilities   []string
-	DashboardPodNamePrefix            string
-	KeepPods                          string
-	KubeContext                       string
-	ProbeImage                        string
-	ProbeNamespace                    string
-	SystemClusterRoles                []string
-	SystemNamespace                   string
-	UnapprovedHostPort                string
-	UnauthorisedContainerImage        string
-}
-
-// VarsFile contains all top-level config vars
-type varsFile struct {
-	CloudProviders sdkConfig.CloudProviders `yaml:"CloudProviders"`
-	ServicePacks   servicePacks             `yaml:"ServicePacks"`
-	TagExclusions  []string                 `yaml:"TagExclusions"`
-	TagInclusions  []string                 `yaml:"TagInclusions"`
+type varOptions struct {
+	VarsFile     string
+	Verbose      bool
+	ServicePacks servicePacks `yaml:"ServicePacks"`
+	Kube         kubernetes
 }
 
 type servicePacks struct {
@@ -64,6 +27,8 @@ type kubernetes struct {
 	ProbeNamespace                    string   `yaml:"ProbeNamespace"`
 	DashboardPodNamePrefix            string   `yaml:"DashboardPodNamePrefix"`
 	Azure                             k8sAzure `yaml:"Azure"`
+	TagInclusions                     []string `yaml:"TagInclusions"`
+	TagExclusions                     []string `yaml:"TagExclusions"`
 }
 
 // K8sAzure contains Azure-specific options for the Kubernetes service pack
