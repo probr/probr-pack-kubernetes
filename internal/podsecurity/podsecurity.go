@@ -61,8 +61,8 @@ func (scenario *scenarioState) aKubernetesClusterIsDeployed() error {
 		KubeConfigPath string
 		KubeContext    string
 	}{
-		config.Vars.Kube.KubeConfigPath,
-		config.Vars.Kube.KubeContext,
+		config.Vars.ServicePacks.Kubernetes.KubeConfigPath,
+		config.Vars.ServicePacks.Kubernetes.KubeContext,
 	}
 
 	err = connection.State.ClusterIsDeployed() // Must be assigned to 'err' be audited
@@ -110,7 +110,7 @@ func (scenario *scenarioState) podCreationResultsWithXSetToYInThePodSpec(result,
 	}
 
 	stepTrace.WriteString("Build a pod spec with default values; ")
-	pod := constructors.PodSpec(Probe.Name(), config.Vars.Kube.ProbeNamespace, config.Vars.Kube.AuthorisedContainerImage)
+	pod := constructors.PodSpec(Probe.Name(), config.Vars.ServicePacks.Kubernetes.ProbeNamespace, config.Vars.ServicePacks.Kubernetes.AuthorisedContainerImage)
 
 	// Any key that expects a non-bool value should have it's own case here to handle the pod modification
 
@@ -310,7 +310,7 @@ func (scenario *scenarioState) thePodIPAndHostIPHaveDifferentValues() (err error
 	}()
 
 	stepTrace.WriteString("Retrieve IP values from created pod; ")
-	podIP, hostIP, err := connection.State.GetPodIPs(config.Vars.Kube.ProbeNamespace, scenario.pods[0])
+	podIP, hostIP, err := connection.State.GetPodIPs(config.Vars.ServicePacks.Kubernetes.ProbeNamespace, scenario.pods[0])
 
 	stepTrace.WriteString("Validate that PodIP and HostIP have different values; ")
 	if err != nil && podIP == hostIP {
@@ -387,12 +387,12 @@ func beforeScenario(s *scenarioState, probeName string, gs *godog.Scenario) {
 	s.probeAudit = summary.State.GetProbeLog(probeName)
 	s.audit = summary.State.GetProbeLog(probeName).InitializeAuditor(gs.Name, gs.Tags)
 	s.pods = make([]string, 0)
-	s.namespace = config.Vars.Kube.ProbeNamespace
+	s.namespace = config.Vars.ServicePacks.Kubernetes.ProbeNamespace
 	probeengine.LogScenarioStart(gs)
 }
 
 func afterScenario(scenario scenarioState, probe probeStruct, gs *godog.Scenario, err error) { // TODO: err is overwritten before first use
-	if config.Vars.Kube.KeepPods == "false" {
+	if config.Vars.ServicePacks.Kubernetes.KeepPods == "false" {
 		for _, podName := range scenario.pods {
 			err = connection.State.DeletePodIfExists(podName, scenario.namespace, probe.Name())
 			if err != nil {

@@ -50,8 +50,8 @@ func (scenario *scenarioState) aKubernetesClusterIsDeployed() error {
 		KubeConfigPath string
 		KubeContext    string
 	}{
-		config.Vars.Kube.KubeConfigPath,
-		config.Vars.Kube.KubeContext,
+		config.Vars.ServicePacks.Kubernetes.KubeConfigPath,
+		config.Vars.ServicePacks.Kubernetes.KubeContext,
 	}
 
 	err = connection.State.ClusterIsDeployed() // Must be assigned to 'err' be audited
@@ -101,7 +101,7 @@ func (scenario *scenarioState) podCreationXWithContainerImageFromYRegistry(expec
 	}
 
 	stepTrace.WriteString("Build a pod spec with default values; ")
-	podObject := constructors.PodSpec(Probe.Name(), scenario.namespace, config.Vars.Kube.AuthorisedContainerImage)
+	podObject := constructors.PodSpec(Probe.Name(), scenario.namespace, config.Vars.ServicePacks.Kubernetes.AuthorisedContainerImage)
 
 	stepTrace.WriteString(fmt.Sprintf("Set container image registry to '%s' value in pod spec; ", registryAccess))
 	podObject.Spec.Containers[0].Image = imageFromConfig(isRegistryAuthorized)
@@ -194,12 +194,12 @@ func beforeScenario(s *scenarioState, probeName string, gs *godog.Scenario) {
 	s.probe = summary.State.GetProbeLog(probeName)
 	s.audit = summary.State.GetProbeLog(probeName).InitializeAuditor(gs.Name, gs.Tags)
 	s.pods = make([]string, 0)
-	s.namespace = config.Vars.Kube.ProbeNamespace
+	s.namespace = config.Vars.ServicePacks.Kubernetes.ProbeNamespace
 	probeengine.LogScenarioStart(gs)
 }
 
 func afterScenario(scenario scenarioState, probe probeStruct, gs *godog.Scenario, err error) {
-	if config.Vars.Kube.KeepPods == "false" {
+	if config.Vars.ServicePacks.Kubernetes.KeepPods == "false" {
 		for _, podName := range scenario.pods {
 			err = connection.State.DeletePodIfExists(podName, scenario.namespace, probe.Name())
 			if err != nil {
@@ -212,9 +212,9 @@ func afterScenario(scenario scenarioState, probe probeStruct, gs *godog.Scenario
 
 func imageFromConfig(authorized bool) string {
 	if authorized {
-		return config.Vars.Kube.AuthorisedContainerImage
+		return config.Vars.ServicePacks.Kubernetes.AuthorisedContainerImage
 	}
-	return config.Vars.Kube.UnauthorisedContainerImage
+	return config.Vars.ServicePacks.Kubernetes.UnauthorisedContainerImage
 }
 
 func (scenario *scenarioState) createPodfromObject(podObject *apiv1.Pod) (createdPodObject *apiv1.Pod, err error) {

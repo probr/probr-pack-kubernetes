@@ -52,8 +52,8 @@ func (scenario *scenarioState) aKubernetesClusterIsDeployed() error {
 		KubeConfigPath string
 		KubeContext    string
 	}{
-		config.Vars.Kube.KubeConfigPath,
-		config.Vars.Kube.KubeContext,
+		config.Vars.ServicePacks.Kubernetes.KubeConfigPath,
+		config.Vars.ServicePacks.Kubernetes.KubeContext,
 	}
 
 	err = connection.State.ClusterIsDeployed() // Must be assigned to 'err' be audited
@@ -70,8 +70,8 @@ func (scenario *scenarioState) theKubernetesWebUIIsDisabled() error {
 		scenario.audit.AuditScenarioStep(scenario.currentStep, stepTrace.String(), payload, err)
 	}()
 
-	kubeSystemNamespace := config.Vars.Kube.SystemNamespace
-	dashboardPodNamePrefix := config.Vars.Kube.DashboardPodNamePrefix
+	kubeSystemNamespace := config.Vars.ServicePacks.Kubernetes.SystemNamespace
+	dashboardPodNamePrefix := config.Vars.ServicePacks.Kubernetes.DashboardPodNamePrefix
 	stepTrace.WriteString(fmt.Sprintf("Attempt to find a pod in the '%s' namespace with the prefix '%s'; ", kubeSystemNamespace, dashboardPodNamePrefix))
 
 	stepTrace.WriteString(fmt.Sprintf("Get all pods from '%s' namespace; ", kubeSystemNamespace))
@@ -215,7 +215,7 @@ func (scenario *scenarioState) podCreationInNamespace(expectedResult, namespace 
 	var ns string
 	switch namespace {
 	case "probr":
-		ns = config.Vars.Kube.ProbeNamespace
+		ns = config.Vars.ServicePacks.Kubernetes.ProbeNamespace
 	case "default":
 		ns = "default"
 	default:
@@ -224,7 +224,7 @@ func (scenario *scenarioState) podCreationInNamespace(expectedResult, namespace 
 	}
 
 	stepTrace.WriteString("Build a pod spec with default values; ")
-	podObject := constructors.PodSpec(Probe.Name(), ns, config.Vars.Kube.AuthorisedContainerImage)
+	podObject := constructors.PodSpec(Probe.Name(), ns, config.Vars.ServicePacks.Kubernetes.AuthorisedContainerImage)
 
 	stepTrace.WriteString("Create pod from spec; ")
 	createdPodObject, creationErr := scenario.createPodfromObject(podObject)
@@ -312,12 +312,12 @@ func beforeScenario(s *scenarioState, probeName string, gs *godog.Scenario) {
 	s.probe = summary.State.GetProbeLog(probeName)
 	s.audit = summary.State.GetProbeLog(probeName).InitializeAuditor(gs.Name, gs.Tags)
 	s.pods = make(map[string][]string)
-	s.namespace = config.Vars.Kube.ProbeNamespace
+	s.namespace = config.Vars.ServicePacks.Kubernetes.ProbeNamespace
 	probeengine.LogScenarioStart(gs)
 }
 
 func afterScenario(scenario scenarioState, probe probeStruct, gs *godog.Scenario, err error) { // TODO: err is overwitten before first use
-	if config.Vars.Kube.KeepPods == "false" {
+	if config.Vars.ServicePacks.Kubernetes.KeepPods == "false" {
 		for namespace, createdPods := range scenario.pods {
 			for _, podName := range createdPods {
 				err = connection.State.DeletePodIfExists(podName, namespace, probe.Name())

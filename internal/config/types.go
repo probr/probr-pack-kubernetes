@@ -4,7 +4,6 @@ type varOptions struct {
 	VarsFile     string
 	Verbose      bool
 	ServicePacks servicePacks `yaml:"ServicePacks"`
-	Kube         kubernetes
 }
 
 type servicePacks struct {

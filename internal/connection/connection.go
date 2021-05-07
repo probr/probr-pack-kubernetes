@@ -12,10 +12,10 @@ import (
 // State is a stateful Kubernetes API wrapper
 var State *connection.Conn
 
-// Connect initializes connection.State using values from config.Vars.Kube
+// Connect initializes connection.State using values from config.Vars.ServicePacks.Kubernetes
 func Connect() {
 	log.Printf("[DEBUG] Initializing connection with namespace '%s' and context '%s' using kubeconfig: %s",
-		config.Vars.Kube.KubeConfigPath, config.Vars.Kube.KubeContext, config.Vars.Kube.ProbeNamespace)
-	State = connection.NewConnection(config.Vars.Kube.KubeConfigPath, config.Vars.Kube.KubeContext, config.Vars.Kube.ProbeNamespace)
+		config.Vars.ServicePacks.Kubernetes.KubeConfigPath, config.Vars.ServicePacks.Kubernetes.KubeContext, config.Vars.ServicePacks.Kubernetes.ProbeNamespace)
+	State = connection.NewConnection(config.Vars.ServicePacks.Kubernetes.KubeConfigPath, config.Vars.ServicePacks.Kubernetes.KubeContext, config.Vars.ServicePacks.Kubernetes.ProbeNamespace)
 	log.Print("[DEBUG] Initialized Kubernetes API connection")
 }

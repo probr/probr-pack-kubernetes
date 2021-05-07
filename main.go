@@ -14,8 +14,8 @@ import (
 	"github.com/citihub/probr-pack-kubernetes/internal/summary"
 	"github.com/citihub/probr-pack-kubernetes/pack"
 
-	sdk "github.com/citihub/probr-sdk"
 	audit "github.com/citihub/probr-sdk/audit"
+	sdkConfig "github.com/citihub/probr-sdk/config"
 	"github.com/citihub/probr-sdk/logging"
 	"github.com/citihub/probr-sdk/plugin"
 	probeengine "github.com/citihub/probr-sdk/probeengine"
@@ -70,7 +70,7 @@ func setFlags() (versionCmd, runCmd *flag.FlagSet) {
 	// > probr
 	runCmd = flag.NewFlagSet("run", flag.ExitOnError)
 	runCmd.StringVar(&config.Vars.VarsFile, "varsfile", "", "path to config file")
-	runCmd.StringVar(&config.Vars.Kube.KubeConfigPath, "kubeconfig", "", "kube config file")
+	runCmd.StringVar(&config.Vars.ServicePacks.Kubernetes.KubeConfigPath, "kubeconfig", "", "kube config file")
 	return
 }
 
@@ -113,7 +113,7 @@ func setupCloseHandler() {
 	go func() {
 		<-c
 		log.Printf("Execution aborted - %v", "SIGTERM")
-		defer sdk.GlobalConfig.CleanupTmp()
+		defer sdkConfig.GlobalConfig.CleanupTmp()
 		// TODO: Additional cleanup may be needed. For instance, any pods created during tests are not being dropped if aborted.
 		os.Exit(0)
 	}()
@@ -121,13 +121,11 @@ func setupCloseHandler() {
 
 // ProbrCoreLogic ...
 func ProbrCoreLogic() (err error) {
-	defer sdk.GlobalConfig.CleanupTmp()
+	defer sdkConfig.GlobalConfig.CleanupTmp()
 	setupCloseHandler() // Sigterm protection
 
-	summary.State = audit.NewSummaryState("kubernetes")
-
 	config.Vars.Init()
-	config.Vars.LogConfigState() // TODO: Update this func to accept a generic object, so that global and local settings can be logged (if needed)
+	summary.State = audit.NewSummaryState("kubernetes") // TODO: make pack name a const
 
 	connection.Connect()
 
@@ -166,7 +164,6 @@ func printVersion(w io.Writer) {
 	} else {
 		fmt.Fprintf(w, "Version      : %s", getVersion())
 	}
-
 }
 
 func getVersion() string {

@@ -25,9 +25,9 @@ func (ctx *varOptions) Init() (err error) {
 	} else {
 		log.Printf("[DEBUG] No vars file provided, unexpected behavior may occur")
 	}
-
-	ctx.Kube = ctx.ServicePacks.Kubernetes
-	ctx.Kube.setEnvAndDefaults()
+	sdkConfig.GlobalConfig.VarsFile = ctx.VarsFile
+	sdkConfig.GlobalConfig.Init()
+	ctx.ServicePacks.Kubernetes.setEnvAndDefaults()
 
 	log.Printf("[DEBUG] Config initialized by %s", utils.CallerName(1))
 	return
@@ -59,7 +59,7 @@ func (ctx *varOptions) LogConfigState() {
 }
 
 func (ctx *varOptions) Tags() string {
-	return sdkConfig.ParseTags(ctx.Kube.TagInclusions, ctx.Kube.TagExclusions)
+	return sdkConfig.ParseTags(ctx.ServicePacks.Kubernetes.TagInclusions, ctx.ServicePacks.Kubernetes.TagExclusions)
 }
 
 // setEnvOrDefaults will set value from os.Getenv and default to the specified value

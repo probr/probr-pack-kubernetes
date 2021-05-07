@@ -56,8 +56,8 @@ func (scenario *scenarioState) aKubernetesClusterIsDeployed() error {
 		KubeConfigPath string
 		KubeContext    string
 	}{
-		config.Vars.Kube.KubeConfigPath,
-		config.Vars.Kube.KubeContext,
+		config.Vars.ServicePacks.Kubernetes.KubeConfigPath,
+		config.Vars.ServicePacks.Kubernetes.KubeContext,
 	}
 
 	err = connection.State.ClusterIsDeployed() // Must be assigned to 'err' be audited
@@ -156,11 +156,11 @@ func (scenario *scenarioState) iSucceedToCreateASimplePodInNamespaceAssignedWith
 	// Validate input
 	switch namespace {
 	case "the probr":
-		scenario.namespace = config.Vars.Kube.ProbeNamespace
+		scenario.namespace = config.Vars.ServicePacks.Kubernetes.ProbeNamespace
 		aadPodIDBinding = aibName // TODO: This value is the same in both config and feature file
 	case "the default":
 		scenario.namespace = "default"
-		aadPodIDBinding = config.Vars.Kube.Azure.DefaultNamespaceAIB // TODO: This value is the same in both config and feature file
+		aadPodIDBinding = config.Vars.ServicePacks.Kubernetes.Azure.DefaultNamespaceAIB // TODO: This value is the same in both config and feature file
 	default:
 		err = utils.ReformatError("Unexpected value provided for namespace: %s", namespace)
 		return err
@@ -171,7 +171,7 @@ func (scenario *scenarioState) iSucceedToCreateASimplePodInNamespaceAssignedWith
 	// Should revisit how to handle this.
 
 	stepTrace.WriteString("Build a pod spec with default values; ")
-	podObject := constructors.PodSpec(Probe.Name(), config.Vars.Kube.ProbeNamespace, config.Vars.Kube.AuthorisedContainerImage)
+	podObject := constructors.PodSpec(Probe.Name(), config.Vars.ServicePacks.Kubernetes.ProbeNamespace, config.Vars.ServicePacks.Kubernetes.AuthorisedContainerImage)
 	// TODO: Delete iam-azi-test-aib-curl.yaml file from 'assets' folder
 
 	stepTrace.WriteString(fmt.Sprintf("Add '%s' namespace to pod spec; ", scenario.namespace))
@@ -333,7 +333,7 @@ func (scenario *scenarioState) theClusterHasManagedIdentityComponentsDeployed() 
 		scenario.audit.AuditScenarioStep(scenario.currentStep, stepTrace.String(), payload, err)
 	}()
 
-	identityPodsNamespace := config.Vars.Kube.Azure.IdentityNamespace
+	identityPodsNamespace := config.Vars.ServicePacks.Kubernetes.Azure.IdentityNamespace
 	stepTrace.WriteString(fmt.Sprintf(
 		"Get pods from '%s' namespace; ", identityPodsNamespace))
 	// look for the mic pods
@@ -414,7 +414,7 @@ func (scenario *scenarioState) theExecutionOfAXCommandInsideTheMICPodIsY(command
 		return err
 	}
 
-	identityPodsNamespace := config.Vars.Kube.Azure.IdentityNamespace
+	identityPodsNamespace := config.Vars.ServicePacks.Kubernetes.Azure.IdentityNamespace
 	stepTrace.WriteString(fmt.Sprintf(
 		"Attempt to execute command '%s' in MIC pod '%s'; ", cmd, scenario.micPodName))
 	exitCode, stdOut, _, cmdErr := connection.State.ExecCommand(cmd, identityPodsNamespace, scenario.micPodName)
@@ -523,13 +523,13 @@ func beforeScenario(s *scenarioState, probeName string, gs *godog.Scenario) {
 	s.probeAudit = summary.State.GetProbeLog(probeName)
 	s.audit = summary.State.GetProbeLog(probeName).InitializeAuditor(gs.Name, gs.Tags)
 	s.pods = make([]string, 0)
-	s.namespace = config.Vars.Kube.ProbeNamespace
+	s.namespace = config.Vars.ServicePacks.Kubernetes.ProbeNamespace
 	s.azureIdentityBindings = make([]string, 0)
 	probeengine.LogScenarioStart(gs)
 }
 
 func afterScenario(scenario scenarioState, probe probeStruct, gs *godog.Scenario, err error) { // TODO: err is overwritten before first use
-	if config.Vars.Kube.KeepPods == "false" {
+	if config.Vars.ServicePacks.Kubernetes.KeepPods == "false" {
 		for _, podName := range scenario.pods {
 			err = connection.State.DeletePodIfExists(podName, scenario.namespace, probe.Name())
 			if err != nil {
