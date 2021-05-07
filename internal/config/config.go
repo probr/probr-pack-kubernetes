@@ -58,6 +58,10 @@ func (ctx *varOptions) LogConfigState() {
 	// }
 }
 
+func (ctx *varOptions) Tags() string {
+	return sdkConfig.ParseTags(ctx.Kube.TagInclusions, ctx.Kube.TagExclusions)
+}
+
 // setEnvOrDefaults will set value from os.Getenv and default to the specified value
 func (ctx *kubernetes) setEnvAndDefaults() {
 	// Notes on SetVar's values:

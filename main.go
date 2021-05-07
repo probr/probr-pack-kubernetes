@@ -7,7 +7,6 @@ import (
 	"log"
 	"os"
 	"os/signal"
-	"strings"
 	"syscall"
 
 	"github.com/citihub/probr-pack-kubernetes/internal/config"
@@ -135,8 +134,7 @@ func ProbrCoreLogic() (err error) {
 	logWriter := logging.ProbrLoggerOutput()
 	log.SetOutput(logWriter) // TODO: This is a temporary patch, since logger output is being overritten while loading config vars
 
-	tags := strings.Join(config.Vars.Kube.TagInclusions, ",") // TODO: Parse inclusions+exclusions
-	store := probeengine.NewProbeStore("kubernetes", tags, &summary.State)
+	store := probeengine.NewProbeStore("kubernetes", config.Vars.Tags(), &summary.State)
 	s, err := store.RunAllProbes(pack.GetProbes())
 	if err != nil {
 		log.Printf("[ERROR] Error executing tests %v", err)
