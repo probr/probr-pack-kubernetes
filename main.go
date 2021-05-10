@@ -51,9 +51,6 @@ type ServicePack struct {
 
 // RunProbes is required to meet the Probr Service Pack interface
 func (sp *ServicePack) RunProbes() error {
-	log.Printf("[DEBUG] message from ServicePack_Probr.RunProbes")
-	log.Printf("[DEBUG] args... %v", os.Args)
-
 	return ProbrCoreLogic()
 }
 
@@ -142,11 +139,10 @@ func ProbrCoreLogic() (err error) {
 	log.Printf("[INFO] Overall test completion status: %v", s)
 	summary.State.SetProbrStatus()
 
-	_, success := probeengine.GetAllProbeResults(store) // TODO: This is returning success=true despite failing probes.
 	summary.State.PrintSummary()
 	summary.State.WriteSummary()
 
-	if !success || summary.State.ProbesFailed > 0 { //Adding this until 'success' can be fixed. See above TODO
+	if summary.State.ProbesFailed > 0 {
 		return utils.ReformatError("One or more probe scenarios were not successful. View the output logs for more details.")
 	}
 	return
