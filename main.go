@@ -16,7 +16,6 @@ import (
 
 	audit "github.com/citihub/probr-sdk/audit"
 	sdkConfig "github.com/citihub/probr-sdk/config"
-	"github.com/citihub/probr-sdk/logging"
 	"github.com/citihub/probr-sdk/plugin"
 	probeengine "github.com/citihub/probr-sdk/probeengine"
 	"github.com/citihub/probr-sdk/utils"
@@ -126,9 +125,6 @@ func ProbrCoreLogic() (err error) {
 	summary.State = audit.NewSummaryState(ServicePackName)
 
 	connection.Connect()
-
-	logWriter := logging.ProbrLoggerOutput()
-	log.SetOutput(logWriter) // TODO: This is a temporary patch, since logger output is being overritten while loading config vars
 
 	store := probeengine.NewProbeStore(ServicePackName, config.Vars.Tags(), &summary.State)
 	s, err := store.RunAllProbes(pack.GetProbes())
