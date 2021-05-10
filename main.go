@@ -24,7 +24,8 @@ import (
 
 var (
 	// ServicePackName is the name for the service pack
-	ServicePackName = "Kubernetes" // TODO: Return binary name instead?
+	// TODO: Return binary name instead? Or add this to the interface to use instead of the binary name?
+	ServicePackName = "Kubernetes"
 
 	// Version is the main version number that is being run at the moment
 	Version = "0.0.2"
@@ -125,14 +126,14 @@ func ProbrCoreLogic() (err error) {
 	setupCloseHandler() // Sigterm protection
 
 	config.Vars.Init()
-	summary.State = audit.NewSummaryState("kubernetes") // TODO: make pack name a const
+	summary.State = audit.NewSummaryState(ServicePackName)
 
 	connection.Connect()
 
 	logWriter := logging.ProbrLoggerOutput()
 	log.SetOutput(logWriter) // TODO: This is a temporary patch, since logger output is being overritten while loading config vars
 
-	store := probeengine.NewProbeStore("kubernetes", config.Vars.Tags(), &summary.State)
+	store := probeengine.NewProbeStore(ServicePackName, config.Vars.Tags(), &summary.State)
 	s, err := store.RunAllProbes(pack.GetProbes())
 	if err != nil {
 		log.Printf("[ERROR] Error executing tests %v", err)
