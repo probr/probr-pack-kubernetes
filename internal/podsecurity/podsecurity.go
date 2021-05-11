@@ -39,7 +39,7 @@ var scenario scenarioState
 
 func (scenario *scenarioState) createPodfromObject(podObject *apiv1.Pod) (createdPodObject *apiv1.Pod, err error) {
 	createdPodObject, err = connection.State.CreatePodFromObject(podObject, Probe.Name())
-	if err == nil {
+	if createdPodObject != nil && createdPodObject.ObjectMeta.Name != "" {
 		scenario.pods = append(scenario.pods, createdPodObject.ObjectMeta.Name)
 	}
 	return
@@ -145,7 +145,7 @@ func (scenario *scenarioState) podCreationResultsWithXSetToYInThePodSpec(result,
 		if creationErr == nil {
 			err = utils.ReformatError("Pod creation succeeded, but should have failed")
 		} else {
-			if !errors.IsStatusCode(403, creationErr) {
+			if !errors.IsStatusCode(403, creationErr) && !strings.Contains(creationErr.Error(), "ErrImagePull") {
 				err = utils.ReformatError("Unexpected error during Pod creation : %v", creationErr)
 			}
 		}
@@ -163,15 +163,16 @@ func (scenario *scenarioState) podCreationResultsWithXSetToYInThePodSpec(result,
 	return
 }
 
-func (scenario *scenarioState) theExecutionOfAXCommandInsideThePodIsY(permission, result string) error {
-	// Supported permissions:
+func (scenario *scenarioState) theExecutionOfAXCommandInsideThePodIsY(cmdType, result string) error {
+	// Supported cmdType:
 	//     'non-privileged'
 	//     'privileged'
 	//     'root'
+	//     'ping'
 	//
 	// Supported results:
 	//     'successful'
-	//     'rejected'
+	//     'prevented'
 
 	stepTrace, payload, err := utils.AuditPlaceholders()
 	defer func() {
@@ -186,30 +187,32 @@ func (scenario *scenarioState) theExecutionOfAXCommandInsideThePodIsY(permission
 		err = utils.ReformatError("Pod failed to create in the previous step")
 		return err
 	}
+	var expectedExitCodes []int
+	var expectedFailureCodes []int
 
 	var cmd string
-	switch permission {
+	switch cmdType {
 	case "non-privileged":
 		cmd = "ls"
 	case "privileged":
 		cmd = "mount /fake /fake"
+		expectedFailureCodes = []int{1, 32}
 	case "root":
 		cmd = "touch /dev/probr"
+		expectedFailureCodes = []int{1}
 	case "ping":
 		cmd = "ping google.com"
+		expectedFailureCodes = []int{1, 2}
 	default:
-		err = utils.ReformatError("Unexpected value provided for command permission type: %s", permission) // No payload is necessary if an invalid value was provided
+		err = utils.ReformatError("Unexpected value provided for command type: %s", cmdType) // No payload is necessary if an invalid value was provided
 		return err
 	}
 
-	var expectedExitCode int
 	switch result {
 	case "successful":
-		expectedExitCode = 0
-	case "unsuccessful":
-		expectedExitCode = 1
-	case "prevented by restricted permissions":
-		expectedExitCode = 32
+		expectedExitCodes = []int{0}
+	case "prevented":
+		expectedExitCodes = expectedFailureCodes
 	default:
 		err = utils.ReformatError("Unexpected value provided for expected command result: %s", result) // No payload is necessary if an invalid value was provided
 		return err
@@ -219,21 +222,36 @@ func (scenario *scenarioState) theExecutionOfAXCommandInsideThePodIsY(permission
 	exitCode, stdout, stderr, err := connection.State.ExecCommand(cmd, scenario.namespace, scenario.pods[0])
 
 	payload = struct {
-		Command          string
-		StdOut           string
-		StdErr           string
-		ExitCode         int
-		ExpectedExitCode int
+		Command           string
+		StdOut            string
+		StdErr            string
+		ExecErr           error
+		ExitCode          int
+		ExpectedExitCodes []int
 	}{
-		Command:          cmd,
-		StdOut:           stdout,
-		StdErr:           stderr,
-		ExitCode:         exitCode,
-		ExpectedExitCode: expectedExitCode,
+		Command:           cmd,
+		StdOut:            stdout,
+		StdErr:            stderr,
+		ExecErr:           err,
+		ExitCode:          exitCode,
+		ExpectedExitCodes: expectedExitCodes,
 	}
 
-	if exitCode == expectedExitCode {
-		err = nil
+	// Validate that no internal error occurred during execution of curl command
+	if stderr != "" && exitCode == 0 {
+		err = utils.ReformatError("Unknown error raised when attempting to execute '%s' inside container. Please review audit output for more information.", cmd)
+		return err
+	}
+
+	var exitKnown bool
+	for _, expectedCode := range expectedExitCodes {
+		if exitCode == expectedCode {
+			exitKnown = true
+			err = nil
+		}
+	}
+	if !exitKnown {
+		err = utils.ReformatError("Unexpected exit code: %d. Please review audit output for more information.", exitCode)
 	}
 	return err
 }

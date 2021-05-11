@@ -417,13 +417,7 @@ func (scenario *scenarioState) theExecutionOfAXCommandInsideTheMICPodIsY(command
 	identityPodsNamespace := config.Vars.ServicePacks.Kubernetes.Azure.IdentityNamespace
 	stepTrace.WriteString(fmt.Sprintf(
 		"Attempt to execute command '%s' in MIC pod '%s'; ", cmd, scenario.micPodName))
-	exitCode, stdOut, _, cmdErr := connection.State.ExecCommand(cmd, identityPodsNamespace, scenario.micPodName)
-
-	// Validate that no internal error occurred during execution of curl command
-	if cmdErr != nil && exitCode == -1 {
-		err = utils.ReformatError("Error raised when attempting to execute command inside container: %v", cmdErr)
-		return err
-	}
+	exitCode, stdOut, _, err := connection.State.ExecCommand(cmd, identityPodsNamespace, scenario.micPodName)
 
 	payload = struct {
 		MICPodName       string
@@ -432,6 +426,7 @@ func (scenario *scenarioState) theExecutionOfAXCommandInsideTheMICPodIsY(command
 		ExpectedExitCode int
 		ExitCode         int
 		StdOut           string
+		ExecErr          error
 	}{
 		MICPodName:       scenario.micPodName,
 		Namespace:        identityPodsNamespace,
@@ -439,6 +434,7 @@ func (scenario *scenarioState) theExecutionOfAXCommandInsideTheMICPodIsY(command
 		ExpectedExitCode: expectedExitCode,
 		ExitCode:         exitCode,
 		StdOut:           stdOut,
+		ExecErr:          err,
 	}
 
 	// TODO: Review this
@@ -453,11 +449,13 @@ func (scenario *scenarioState) theExecutionOfAXCommandInsideTheMICPodIsY(command
 	// Ref:
 	//  https://hub.docker.com/_/microsoft-k8s-aad-pod-identity-mic?tab=description
 	//  https://github.com/GoogleContainerTools/distroless
+	// Validate that no internal error occurred during execution of curl command
+	stepTrace.WriteString("Validate exit code from command execution; ")
 
-	stepTrace.WriteString("Check expected exit code from command execution; ")
-	if exitCode != expectedExitCode {
-		err = utils.ReformatError("Unexpected exit code: %d Error: %v", exitCode, cmdErr)
-		return err
+	if err != nil && exitCode == -1 {
+		err = utils.ReformatError("Error raised when attempting to execute command inside container: %v", err)
+	} else if exitCode != expectedExitCode {
+		err = utils.ReformatError("Unexpected exit code: %d Error: %v", exitCode, err)
 	}
 
 	return err
@@ -542,7 +540,7 @@ func afterScenario(scenario scenarioState, probe probeStruct, gs *godog.Scenario
 
 func (scenario *scenarioState) createPodfromObject(podObject *apiv1.Pod) (createdPodObject *apiv1.Pod, err error) {
 	createdPodObject, err = connection.State.CreatePodFromObject(podObject, Probe.Name())
-	if err == nil {
+	if createdPodObject != nil && createdPodObject.ObjectMeta.Name != "" {
 		scenario.pods = append(scenario.pods, createdPodObject.ObjectMeta.Name)
 	}
 	return

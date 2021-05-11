@@ -100,12 +100,9 @@ func (scenario *scenarioState) theKubernetesWebUIIsDisabled() error {
 	return err
 }
 
-func (scenario *scenarioState) theResultOfAProcessInsideThePodEstablishingADirectHTTPConnectionToXIsY(urlAddress, result string) error {
+func (scenario *scenarioState) theResultOfAProcessInsideThePodEstablishingADirectHTTPConnectionToXIsBlocked(urlAddress string) error {
 	// Supported values for urlAddress:
 	//	A valid absolute path URL with http(s) prefix
-	//
-	// Supported values for result:
-	//	'blocked'
 
 	// Standard auditing logic to ensures panics are also audited
 	stepTrace, payload, err := utils.AuditPlaceholders()
@@ -127,57 +124,63 @@ func (scenario *scenarioState) theResultOfAProcessInsideThePodEstablishingADirec
 		err = utils.ReformatError("Pod failed to create in the previous step")
 		return err
 	}
-
-	// Validate input value
-	var expectedCurlExitCode int
-	switch result {
-	case "blocked":
-		expectedCurlExitCode = 6
-		// Expecting curl exit code 6 (Couldn't resolve host) //TODO Confirm exit code is 7 in GCP
-		// Ref: https://everything.curl.dev/usingcurl/returns
-	default:
-		err = utils.ReformatError("Unexpected value provided for expected command result: %s", result)
-		return err
-	}
-
-	// Create a curl command to access the supplied url and only show http response in stdout.
-	cmd := "curl -s -o /dev/null -I -L -w %{http_code} " + urlAddress
 	podName := scenario.pods[scenario.namespace][0]
 
-	stepTrace.WriteString(fmt.Sprintf("Attempt to run command in the pod: '%s'; ", cmd))
-	exitCode, stdOut, _, cmdErr := connection.State.ExecCommand(cmd, scenario.namespace, podName)
+	// Ref: https://everything.curl.dev/usingcurl/returns
+	// 6: Couldn't resolve host
+	// 28: command timed out
+	expectedExitCodes := []int{6, 28, 35}
+	expectedExitMessage := "Action: Deny"           // TODO: This is the AZF response. Consider making this a config option, or extend to include other potential responses.
+	cmd := fmt.Sprintf("curl -m 10 %s", urlAddress) // 10 second timeout should be enough
 
-	// Validate that no internal error occurred during execution of curl command
-	if cmdErr != nil && exitCode == -1 {
-		err = utils.ReformatError("Error raised when attempting to execute curl command inside container: %v", cmdErr)
-		return err
-	}
-
-	// TODO: Confirm this implementation:
-	// Expected Exit Code from Curl command is:	6
-
-	stepTrace.WriteString("Check expected exit code was raised from curl command; ")
-	if exitCode != expectedCurlExitCode {
-		err = utils.ReformatError("Unexpected exit code: %d Error: %v", exitCode, cmdErr)
-		return err
-	}
+	stepTrace.WriteString("Attempt to run curl command in the pod; ")
+	exitCode, stdOut, stdErr, err := connection.State.ExecCommand(cmd, scenario.namespace, podName)
 
 	payload = struct {
-		PodName              string
-		Namespace            string
-		Command              string
-		ExpectedCurlExitCode int
-		CurlExitCode         int
-		StdOut               string
+		PodName             string
+		Namespace           string
+		Command             string
+		ExpectedExitCodes   []int
+		ExpectedExitMessage string
+		ExitCode            int
+		StdOut              string
+		StdErr              string
+		ExecErr             error
 	}{
-		PodName:              podName,
-		Namespace:            scenario.namespace,
-		Command:              cmd,
-		ExpectedCurlExitCode: expectedCurlExitCode,
-		CurlExitCode:         exitCode,
-		StdOut:               stdOut,
+		PodName:             podName,
+		Namespace:           scenario.namespace,
+		Command:             cmd,
+		ExpectedExitCodes:   expectedExitCodes,
+		ExpectedExitMessage: expectedExitMessage,
+		ExitCode:            exitCode,
+		StdOut:              stdOut,
+		StdErr:              stdErr,
+		ExecErr:             err,
 	}
 
+	stepTrace.WriteString("Validate that an expected exit occurred from curl command; ")
+
+	// Succeed if the expected message was found
+	if strings.Contains(stdOut, expectedExitMessage) {
+		return nil
+	}
+
+	// Validate that no internal error occurred during execution of curl command
+	if stdErr != "" && exitCode == 0 {
+		err = utils.ReformatError("Unknown error raised when attempting to execute '%s' inside container. Please review audit output for more information.", cmd)
+		return err
+	}
+
+	var exitKnown bool
+	for _, expectedCode := range expectedExitCodes {
+		if exitCode == expectedCode {
+			exitKnown = true
+			err = nil
+		}
+	}
+	if !exitKnown {
+		err = utils.ReformatError("Unexpected exit code: %d. Please review audit output for more information.", exitCode)
+	}
 	return err
 }
 
@@ -292,7 +295,7 @@ func (probe probeStruct) ScenarioInitialize(ctx *godog.ScenarioContext) {
 	// Steps
 	ctx.Step(`^the Kubernetes Web UI is disabled$`, scenario.theKubernetesWebUIIsDisabled)
 	ctx.Step(`^pod creation "([^"]*)" in the "([^"]*)" namespace$`, scenario.podCreationInNamespace)
-	ctx.Step(`^the result of a process inside the pod establishing a direct http\(s\) connection to "([^"]*)" is "([^"]*)"$`, scenario.theResultOfAProcessInsideThePodEstablishingADirectHTTPConnectionToXIsY)
+	ctx.Step(`^the result of a process inside the pod establishing a direct http\(s\) connection to "([^"]*)" is "([^"]*)"$`, scenario.theResultOfAProcessInsideThePodEstablishingADirectHTTPConnectionToXIsBlocked)
 
 	ctx.AfterScenario(func(s *godog.Scenario, err error) {
 		afterScenario(scenario, probe, s, err)
@@ -333,7 +336,7 @@ func afterScenario(scenario scenarioState, probe probeStruct, gs *godog.Scenario
 
 func (scenario *scenarioState) createPodfromObject(podObject *apiv1.Pod) (createdPodObject *apiv1.Pod, err error) {
 	createdPodObject, err = connection.State.CreatePodFromObject(podObject, Probe.Name())
-	if err == nil {
+	if createdPodObject != nil && createdPodObject.ObjectMeta.Name != "" {
 		scenario.namespace = createdPodObject.ObjectMeta.Namespace
 		podName := createdPodObject.ObjectMeta.Name
 		scenario.pods[scenario.namespace] = append(scenario.pods[scenario.namespace], podName)

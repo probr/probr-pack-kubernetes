@@ -35,7 +35,7 @@ Feature: Pod Security
 
         When pod creation "succeeds" with "allowPrivilegeEscalation" set to "<VALUE>" in the pod spec
         Then the execution of a "non-privileged" command inside the pod is "successful"
-        But the execution of a "privileged" command inside the pod is "prevented by restricted permissions"
+        But the execution of a "privileged" command inside the pod is "prevented"
 
         Examples:
             | VALUE                     |
@@ -160,7 +160,7 @@ Feature: Pod Security
             - CIS Kubernetes Benchmark v1.6.0 - 5.2.6
 
         When pod creation "succeeds" with "user" set to "1000" in the pod spec
-        Then the execution of a "root" command inside the pod is "unsuccessful"
+        Then the execution of a "root" command inside the pod is "prevented"
 
     @k-pod-011
     Scenario: Ensure that the seccomp profile is set to docker/default in all pod definitions
@@ -203,4 +203,4 @@ Feature: Pod Security
             - CIS Kubernetes Benchmark v1.6.0 - 5.2.7
 
         When pod creation "succeeds" with "capabilities" set to "drop NET_RAW" in the pod spec
-        Then the execution of a "ping" command inside the pod is "unsuccessful"
+        Then the execution of a "ping" command inside the pod is "prevented"

@@ -4,6 +4,7 @@ package cra
 import (
 	"fmt"
 	"log"
+	"strings"
 
 	"github.com/cucumber/godog"
 	apiv1 "k8s.io/api/core/v1"
@@ -120,7 +121,7 @@ func (scenario *scenarioState) podCreationXWithContainerImageFromYRegistry(expec
 			err = utils.ReformatError("Pod creation succeeded, but should have been denied")
 		} else {
 			stepTrace.WriteString("Check that pod creation failed due to expected reason (403 Forbidden); ")
-			if !errors.IsStatusCode(403, creationErr) {
+			if !errors.IsStatusCode(403, creationErr) && !strings.Contains(creationErr.Error(), "ErrImagePull") {
 				err = utils.ReformatError("Unexpected error during Pod creation : %v", creationErr)
 			}
 		}
@@ -219,7 +220,7 @@ func imageFromConfig(authorized bool) string {
 
 func (scenario *scenarioState) createPodfromObject(podObject *apiv1.Pod) (createdPodObject *apiv1.Pod, err error) {
 	createdPodObject, err = connection.State.CreatePodFromObject(podObject, Probe.Name())
-	if err == nil {
+	if createdPodObject != nil && createdPodObject.ObjectMeta.Name != "" {
 		scenario.pods = append(scenario.pods, createdPodObject.ObjectMeta.Name)
 	}
 	return
