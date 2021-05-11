@@ -1,34 +1,59 @@
-release: go-tidy go-test go-package go-release pkgr-clean
-rc: go-tidy go-test go-package go-release-candidate pkgr-clean
-binary: go-tidy go-test go-package go-build pkgr-clean
-quick: go-package go-build pkgr-clean
+PACKNAME=kubernetes
+BUILD_FLAGS=-X 'main.GitCommitHash=`git rev-parse --short HEAD`' -X 'main.BuiltAt=`date +%FT%T%z`'
+BUILD_WIN=@env GOOS=windows GOARCH=amd64 go build -o $(PACKNAME).exe
+BUILD_LINUX=@env GOOS=linux GOARCH=amd64 go build -o $(PACKNAME)
+BUILD_MAC=@env GOOS=darwin GOARCH=amd64 go build -o $(PACKNAME)-darwin
 
-go-package:
-	@echo "  >  Packaging static files..."
-	pkger
+release: go-package go-release pkgr-clean
+release-candidate: go-package go-release-candidate pkgr-clean
+binary: go-package go-build pkgr-clean
+
+go-release: release-nix release-win release-mac
 
 go-build:
-	@echo "  >  Building binary..."
-	go build -o kubernetes -ldflags="-X 'main.GitCommitHash=`git rev-parse --short HEAD`' -X 'main.BuiltAt=`date +%FT%T%z`'"
+	@echo "  >  Building binary ..."
+	@go build -o $(PACKNAME) -ldflags="$(BUILD_FLAGS)"
+
+go-package: go-tidy go-test
+	@echo "  >  Packaging static files..."
+	@pkger
 
 pkgr-clean:
 	@echo "  >  Removing pkged.go to avoid accidental re-use of old files..."
-	rm pkged.go
+	@rm pkged.go
 
 go-test:
-	@echo "  >  Validating code..."
-	golint ./...
-	go vet ./...
-	go test ./...
+	@echo "  >  Validating code ..."
+	@golint ./...
+	@go vet ./...
+	@go test ./...
 
 go-tidy:
 	@echo "  >  Tidying go.mod ..."
-	go mod tidy
+	@go mod tidy
 
-go-release-candidate: binary
-	@echo "  >  Building release candidate ..."
-	go build -o kubernetes -ldflags="-X 'main.GitCommitHash=`git rev-parse --short HEAD`' -X 'main.BuiltAt=`date +%FT%T%z`' -X 'main.Prerelease=rc'"
+go-test-cov:
+	@echo "Running tests and generating coverage output ..."
+	@go test ./... -coverprofile coverage.out -covermode count
+	@sleep 2 # Sleeping to allow for coverage.out file to get generated
+	@echo "Current test coverage : $(shell go tool cover -func=coverage.out | grep total | grep -Eo '[0-9]+\.[0-9]+') %"
 
-go-release: binary
-	@echo "  >  Building release ..."
-	go build -o kubernetes -ldflags="-X 'main.GitCommitHash=`git rev-parse --short HEAD`' -X 'main.BuiltAt=`date +%FT%T%z`' -X 'main.Prerelease='"
+go-release-candidate: go-tidy go-test
+	@echo "  >  Building release candidate for Linux..."
+	$(BUILD_LINUX) -ldflags="$(BUILD_FLAGS) -X 'main.VersionPostfix=nix-rc'"
+	@echo "  >  Building release candidate for Windows..."
+	$(BUILD_WIN) -ldflags="$(BUILD_FLAGS) -X 'main.VersionPostfix=win-rc'"
+	@echo "  >  Building release for Darwin..."
+	$(BUILD_MAC) -ldflags="$(BUILD_FLAGS) -X 'main.VersionPostfix=darwin-rc'"
+
+release-nix:
+	@echo "  >  Building release for Linux..."
+	$(BUILD_LINUX) -ldflags="$(BUILD_FLAGS) -X 'main.VersionPostfix=linux'"
+
+release-win:
+	@echo "  >  Building release for Windows..."
+	$(BUILD_WIN) -ldflags="$(BUILD_FLAGS) -X 'main.VersionPostfix=windows'"
+
+release-mac:
+	@echo "  >  Building release for Darwin..."
+	$(BUILD_MAC) -ldflags="$(BUILD_FLAGS) -X 'main.VersionPostfix=darwin'"

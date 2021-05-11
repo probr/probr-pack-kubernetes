@@ -254,6 +254,7 @@ static-content/
 .kube/
 config.yml
 kubernetes
+kubernetes-darwin
 
 # Ignoring pkger buffer, as it should be regenerated on every build
 pkged.go
