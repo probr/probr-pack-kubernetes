@@ -34,7 +34,6 @@ When submitting pull requests, make sure to do the following:
 - Remove trailing whitespace. Many editors will do this automatically.
 - Ensure any new files have a trailing newline
 
-
 ## Continuous Integration
 
 Probr uses Github Actions for all CI tasks. You may review the existing workflows in `.github/workflows`. Results of checks will automatically be pushed to PRs and may block merging if checks fail.
@@ -42,6 +41,3 @@ Probr uses Github Actions for all CI tasks. You may review the existing workflow
 ## Logging
 
 Probr is extremely dependent on clean and clear logs for its success. Please follow the [Log Filter Guidelines](internal/config/README.md) to add useful logs to your code.
-
-[conduct]: https://github.com/citihub/probr-pack-kubernetes/blob/master/code-of-conduct.md
-[logs]: https://github.com/citihub/probr-pack-kubernetes/blob/master/internal/config/README.md
