@@ -295,7 +295,7 @@ func (probe probeStruct) ScenarioInitialize(ctx *godog.ScenarioContext) {
 	// Steps
 	ctx.Step(`^the Kubernetes Web UI is disabled$`, scenario.theKubernetesWebUIIsDisabled)
 	ctx.Step(`^pod creation "([^"]*)" in the "([^"]*)" namespace$`, scenario.podCreationInNamespace)
-	ctx.Step(`^the result of a process inside the pod establishing a direct http\(s\) connection to "([^"]*)" is "([^"]*)"$`, scenario.theResultOfAProcessInsideThePodEstablishingADirectHTTPConnectionToXIsBlocked)
+	ctx.Step(`^the result of a process inside the pod establishing a direct connection to "([^"]*)" is blocked$`, scenario.theResultOfAProcessInsideThePodEstablishingADirectHTTPConnectionToXIsBlocked)
 
 	ctx.AfterScenario(func(s *godog.Scenario, err error) {
 		afterScenario(scenario, probe, s, err)
