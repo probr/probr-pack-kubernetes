@@ -1,0 +1,8 @@
+# All PRs in this repository will be blocked
+# until they have been approved by a maintainer
+
+* @probr/maintainers
+
+# Anything relating to the actual probe logic
+# should be reviewed by this repo's lead maintainer
+internal/ @eddie-knight
