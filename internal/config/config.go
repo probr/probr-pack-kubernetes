@@ -6,9 +6,9 @@ import (
 	"os"
 	"path/filepath"
 
-	sdkConfig "github.com/citihub/probr-sdk/config"
-	"github.com/citihub/probr-sdk/config/setter"
-	"github.com/citihub/probr-sdk/utils"
+	sdkConfig "github.com/probr/probr-sdk/config"
+	"github.com/probr/probr-sdk/config/setter"
+	"github.com/probr/probr-sdk/utils"
 )
 
 // Vars is a stateful object containing the variables required to execute this pack

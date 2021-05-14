@@ -1,15 +1,15 @@
 # Probr Kubernetes Service Pack
 
-The [Probr](https://github.com/citihub/probr-core) Kubernetes Service pack provides a variety of provider-agnostic compliance checks.
+The [Probr](https://github.com/probr/probr) Kubernetes Service pack provides a variety of provider-agnostic compliance checks.
 
-Get the latest stable version [here](https://github.com/citihub/probr-pack-kubernetes/releases/latest).
+Get the latest stable version [here](https://github.com/probr/probr-pack-kubernetes/releases/latest).
 
 ## To Build from Source
 
 The following will build a binary named "kubernetes":
 
 ```sh
-git clone https://github.com/citihub/probr-pack-kubernetes.git
+git clone https://github.com/probr/probr-pack-kubernetes.git
 cd probr-pack-kubernetes
 make binary
 ```
@@ -20,7 +20,7 @@ Move the `kubernetes` binary into your probr service pack location (default is `
 
 You will need:
 
-1. [Probr Core](https://github.com/citihub/probr-core) to execute this service pack.
+1. [Probr Core](https://github.com/probr/probr) to execute this service pack.
 1. A Kubernetes Cluster
 1. An active kubeconfig against the cluster, that can deploy into the probe namespace (see config below. Default is probr-general-test-ns)
 

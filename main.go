@@ -9,16 +9,16 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/citihub/probr-pack-kubernetes/internal/config"
-	"github.com/citihub/probr-pack-kubernetes/internal/connection"
-	"github.com/citihub/probr-pack-kubernetes/internal/summary"
-	"github.com/citihub/probr-pack-kubernetes/pack"
+	"github.com/probr/probr-pack-kubernetes/internal/config"
+	"github.com/probr/probr-pack-kubernetes/internal/connection"
+	"github.com/probr/probr-pack-kubernetes/internal/summary"
+	"github.com/probr/probr-pack-kubernetes/pack"
 
-	audit "github.com/citihub/probr-sdk/audit"
-	sdkConfig "github.com/citihub/probr-sdk/config"
-	"github.com/citihub/probr-sdk/plugin"
-	probeengine "github.com/citihub/probr-sdk/probeengine"
-	"github.com/citihub/probr-sdk/utils"
+	audit "github.com/probr/probr-sdk/audit"
+	sdkConfig "github.com/probr/probr-sdk/config"
+	"github.com/probr/probr-sdk/plugin"
+	probeengine "github.com/probr/probr-sdk/probeengine"
+	"github.com/probr/probr-sdk/utils"
 )
 
 var (

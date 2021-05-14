@@ -1,12 +1,12 @@
 package pack
 
 import (
-	cra "github.com/citihub/probr-pack-kubernetes/internal/container_registry_access"
-	"github.com/citihub/probr-pack-kubernetes/internal/general"
-	"github.com/citihub/probr-pack-kubernetes/internal/iam"
-	"github.com/citihub/probr-pack-kubernetes/internal/podsecurity"
-	"github.com/citihub/probr-sdk/probeengine"
 	"github.com/markbates/pkger"
+	cra "github.com/probr/probr-pack-kubernetes/internal/container_registry_access"
+	"github.com/probr/probr-pack-kubernetes/internal/general"
+	"github.com/probr/probr-pack-kubernetes/internal/iam"
+	"github.com/probr/probr-pack-kubernetes/internal/podsecurity"
+	"github.com/probr/probr-sdk/probeengine"
 )
 
 // GetProbes returns a list of probe objects

@@ -3,8 +3,8 @@ package connection
 import (
 	"log"
 
-	"github.com/citihub/probr-pack-kubernetes/internal/config"
-	"github.com/citihub/probr-sdk/providers/kubernetes/connection"
+	"github.com/probr/probr-pack-kubernetes/internal/config"
+	"github.com/probr/probr-sdk/providers/kubernetes/connection"
 )
 
 // TODO: Decide whether this 'connection.state' is the best naming convention

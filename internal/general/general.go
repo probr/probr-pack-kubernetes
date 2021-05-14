@@ -11,14 +11,14 @@ import (
 
 	"github.com/cucumber/godog"
 
-	"github.com/citihub/probr-pack-kubernetes/internal/config"
-	"github.com/citihub/probr-pack-kubernetes/internal/connection"
-	"github.com/citihub/probr-pack-kubernetes/internal/summary"
-	audit "github.com/citihub/probr-sdk/audit"
-	"github.com/citihub/probr-sdk/probeengine"
-	"github.com/citihub/probr-sdk/providers/kubernetes/constructors"
+	"github.com/probr/probr-pack-kubernetes/internal/config"
+	"github.com/probr/probr-pack-kubernetes/internal/connection"
+	"github.com/probr/probr-pack-kubernetes/internal/summary"
+	audit "github.com/probr/probr-sdk/audit"
+	"github.com/probr/probr-sdk/probeengine"
+	"github.com/probr/probr-sdk/providers/kubernetes/constructors"
 
-	"github.com/citihub/probr-sdk/utils"
+	"github.com/probr/probr-sdk/utils"
 )
 
 type probeStruct struct{}
