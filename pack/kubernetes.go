@@ -4,7 +4,6 @@ import (
 	"github.com/markbates/pkger"
 	cra "github.com/probr/probr-pack-kubernetes/internal/container_registry_access"
 	"github.com/probr/probr-pack-kubernetes/internal/general"
-	"github.com/probr/probr-pack-kubernetes/internal/iam"
 	"github.com/probr/probr-pack-kubernetes/internal/podsecurity"
 	"github.com/probr/probr-sdk/probeengine"
 )
@@ -15,7 +14,6 @@ func GetProbes() []probeengine.Probe {
 		cra.Probe,
 		general.Probe,
 		podsecurity.Probe,
-		iam.Probe,
 	}
 }
 
@@ -24,5 +22,4 @@ func init() {
 	pkger.Include("/internal/container_registry_access/container_registry_access.feature")
 	pkger.Include("/internal/general/general.feature")
 	pkger.Include("/internal/podsecurity/podsecurity.feature")
-	pkger.Include("/internal/iam/iam.feature")
 }
