@@ -13,7 +13,7 @@ type servicePacks struct {
 }
 
 type kubernetes struct {
-	kc.Kubernetes
+	kc.Kubernetes                     `yaml:",inline"`
 	SystemClusterRoles                []string `yaml:"SystemClusterRoles"`
 	UnauthorisedContainerImage        string   `yaml:"UnauthorisedContainerImage"`
 	ProbeImage                        string   `yaml:"ProbeImage"`
