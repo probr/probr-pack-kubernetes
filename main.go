@@ -138,7 +138,9 @@ func ProbrCoreLogic() (err error) {
 	summary.State.PrintSummary()
 	summary.State.WriteSummary()
 
-	if summary.State.ProbesFailed > 0 {
+	if summary.State.ProbesPassed == 0 && summary.State.ProbesFailed == 0 {
+		return utils.ReformatError("No probes ran, or all probes given statements were not met.")
+	} else if summary.State.ProbesFailed > 0 {
 		return utils.ReformatError("One or more probe scenarios were not successful. View the output logs for more details.")
 	}
 	return
