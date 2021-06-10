@@ -1,5 +1,7 @@
 package config
 
+import kc "github.com/probr/probr-sdk/providers/kubernetes/config"
+
 type varOptions struct {
 	VarsFile     string
 	Verbose      bool
@@ -11,11 +13,8 @@ type servicePacks struct {
 }
 
 type kubernetes struct {
-	KeepPods                          string   `yaml:"KeepPods"` // TODO: Change type to bool, this would allow us to remove logic from kubernetes.GetKeepPodsFromConfig()
-	KubeConfigPath                    string   `yaml:"KubeConfig"`
-	KubeContext                       string   `yaml:"KubeContext"`
+	kc.Kubernetes                     `yaml:",inline"`
 	SystemClusterRoles                []string `yaml:"SystemClusterRoles"`
-	AuthorisedContainerImage          string   `yaml:"AuthorisedContainerImage"`
 	UnauthorisedContainerImage        string   `yaml:"UnauthorisedContainerImage"`
 	ProbeImage                        string   `yaml:"ProbeImage"`
 	ContainerRequiredDropCapabilities []string `yaml:"ContainerRequiredDropCapabilities"`
@@ -23,7 +22,6 @@ type kubernetes struct {
 	ApprovedVolumeTypes               []string `yaml:"ApprovedVolumeTypes"`
 	UnapprovedHostPort                string   `yaml:"UnapprovedHostPort"`
 	SystemNamespace                   string   `yaml:"SystemNamespace"`
-	ProbeNamespace                    string   `yaml:"ProbeNamespace"`
 	DashboardPodNamePrefix            string   `yaml:"DashboardPodNamePrefix"`
 	Azure                             k8sAzure `yaml:"Azure"`
 	TagInclusions                     []string `yaml:"TagInclusions"`

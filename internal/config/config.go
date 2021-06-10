@@ -2,6 +2,7 @@ package config
 
 import (
 	"encoding/json"
+	"io/ioutil"
 	"log"
 	"os"
 	"path/filepath"
@@ -52,12 +53,18 @@ func (ctx *varOptions) decode() (err error) {
 func (ctx *varOptions) LogConfigState() {
 	json, _ := json.MarshalIndent(ctx, "", "  ")
 	log.Printf("[INFO] Config State: %s", json)
-	// path := filepath.Join("config.json")
-	// if ctx.WriteConfig == "true" && utils.WriteAllowed(path) {
-	// 	data := []byte(json)
-	// 	ioutil.WriteFile(path, data, 0644)
-	// 	//log.Printf("[NOTICE] Config State written to file %s", path)
-	// }
+}
+
+func (ctx *varOptions) WriteConfigState() {
+	json, _ := json.MarshalIndent(ctx, "", "  ")
+	path := filepath.Join("config.json")
+	if utils.WriteAllowed(path) {
+		data := []byte(json)
+		ioutil.WriteFile(path, data, 0644)
+		log.Printf("[NOTICE] Config State written to file %s", path)
+	} else {
+		log.Printf("[ERROR] Failed to write config to %s", path)
+	}
 }
 
 func (ctx *varOptions) Tags() string {
