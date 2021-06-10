@@ -16,6 +16,7 @@ import (
 
 	audit "github.com/probr/probr-sdk/audit"
 	sdkConfig "github.com/probr/probr-sdk/config"
+	_ "github.com/probr/probr-sdk/logging"
 	"github.com/probr/probr-sdk/plugin"
 	probeengine "github.com/probr/probr-sdk/probeengine"
 	"github.com/probr/probr-sdk/utils"
