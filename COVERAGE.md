@@ -1,10 +1,11 @@
 # Probr Kubernetes Service Pack
 ## Probes Provenance
 
-The Kubernetes Probr service pack has been built based on the [CIS GKE Benchmark 1.5.1](https://www.cisecurity.org/cis-benchmarks/).  
+The Kubernetes Probr service pack has been built based on the [CIS Kubernetes Benchmark 1.5.1](https://www.cisecurity.org/cis-benchmarks/).  
 
-This pack only implements the probe that can be run in any distribution / managed Kubernetes services. We currently have a complimentary Service Pack for AKS, with plans for GKE and EKS.
+This pack only implements the benchmarks that can be run _as an end user_ in any managed Kubernetes services. It doesn't look "under the hood" - use a tool like [kube-bench](https://github.com/aquasecurity/kube-bench) for that.
 
+We currently have a complimentary Service Pack for [AKS](https://github.com/probr/probr-pack-aks), with plans for GKE and EKS.
 
 ## Controls covered
 
