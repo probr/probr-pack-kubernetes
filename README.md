@@ -4,6 +4,8 @@ The [Probr](https://github.com/probr/probr) Kubernetes Service pack provides a v
 
 Get the latest stable version [here](https://github.com/probr/probr-pack-kubernetes/releases/latest).
 
+Click [here](./COVERAGE.md) to see the current state of the probes in this pack.
+
 ## To Build from Source
 
 The following will build a binary named "kubernetes":
