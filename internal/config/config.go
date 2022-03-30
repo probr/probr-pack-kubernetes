@@ -84,7 +84,6 @@ func (ctx *kubernetes) setEnvAndDefaults() {
 	setter.SetVar(&ctx.SystemClusterRoles, "", []string{"system:", "aks", "cluster-admin", "policy-agent"})
 	setter.SetVar(&ctx.AuthorisedContainerImage, "PROBR_AUTHORISED_IMAGE", "")
 	setter.SetVar(&ctx.UnauthorisedContainerImage, "PROBR_UNAUTHORISED_IMAGE", "")
-	setter.SetVar(&ctx.ProbeImage, "PROBR_PROBE_IMAGE", "citihub/probr-probe")
 	setter.SetVar(&ctx.ContainerRequiredDropCapabilities, "PROBR_REQUIRED_DROP_CAPABILITIES", []string{"NET_RAW"})
 	setter.SetVar(&ctx.ContainerAllowedAddCapabilities, "PROBR_ALLOWED_ADD_CAPABILITIES", []string{""})
 	setter.SetVar(&ctx.ApprovedVolumeTypes, "PROBR_APPROVED_VOLUME_TYPES", []string{"configmap", "emptydir", "persistentvolumeclaim"})
