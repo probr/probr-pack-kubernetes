@@ -106,7 +106,7 @@ func handleCommands(versionCmd, runCmd *flag.FlagSet) {
 // our clean up procedure and exiting the program.
 // Ref: https://golangcode.com/handle-ctrl-c-exit-in-terminal/
 func setupCloseHandler() {
-	c := make(chan os.Signal)
+	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
 	go func() {
 		<-c
