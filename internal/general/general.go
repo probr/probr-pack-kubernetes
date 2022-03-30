@@ -125,12 +125,16 @@ func (scenario *scenarioState) theResultOfAProcessInsideThePodEstablishingADirec
 		return err
 	}
 	podName := scenario.pods[scenario.namespace][0]
-
-	// Ref: https://everything.curl.dev/usingcurl/returns
+        
+	// Curl Exit Codes
 	// 6: Couldn't resolve host
+	// 7: Failed to connect
 	// 28: command timed out
-	expectedExitCodes := []int{6, 28, 35}
+	// 35: SSL connect error
+	expectedExitCodes := []int{6, 7, 28, 35}
+	
 	expectedExitMessage := "Action: Deny"           // TODO: This is the AZF response. Consider making this a config option, or extend to include other potential responses.
+	
 	cmd := fmt.Sprintf("curl -m 10 %s", urlAddress) // 10 second timeout should be enough
 
 	stepTrace.WriteString("Attempt to run curl command in the pod; ")
