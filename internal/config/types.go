@@ -16,7 +16,6 @@ type kubernetes struct {
 	kc.Kubernetes                     `yaml:",inline"`
 	SystemClusterRoles                []string `yaml:"SystemClusterRoles"`
 	UnauthorisedContainerImage        string   `yaml:"UnauthorisedContainerImage"`
-	ProbeImage                        string   `yaml:"ProbeImage"`
 	ContainerRequiredDropCapabilities []string `yaml:"ContainerRequiredDropCapabilities"`
 	ContainerAllowedAddCapabilities   []string `yaml:"ContainerAllowedAddCapabilities"`
 	ApprovedVolumeTypes               []string `yaml:"ApprovedVolumeTypes"`
