@@ -201,7 +201,7 @@ func (scenario *scenarioState) theExecutionOfAXCommandInsideThePodIsY(cmdType, r
 		cmd = "touch /dev/probr"
 		expectedFailureCodes = []int{1}
 	case "ping":
-		cmd = "ping google.com"
+		cmd = "ping -w 4 google.com"
 		expectedFailureCodes = []int{1, 2}
 	default:
 		err = utils.ReformatError("Unexpected value provided for command type: %s", cmdType) // No payload is necessary if an invalid value was provided
