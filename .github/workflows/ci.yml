@@ -17,6 +17,8 @@ jobs:
     - name: Setup GO environment
       run: |
             export GOBIN=$GOPATH/bin
+            export PATH=$PATH:$GOPATH/bin
+            export PATH=$PATH:$GOROOT/bin
             go mod download
             go get github.com/markbates/pkger/cmd/pkger
             go get -t .
