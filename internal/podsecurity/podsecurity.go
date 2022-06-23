@@ -245,7 +245,7 @@ func (scenario *scenarioState) theExecutionOfAXCommandInsideThePodIsY(cmdType, r
 	}
 	if !exitKnown && exitCode == 0 {
 		err = utils.ReformatError("'%s' succeeded with exit code %d, but shouldn't have.", cmd, exitCode)
-	else if !exitKnown {
+	} else if !exitKnown {
 		err = utils.ReformatError("Unexpected exit code: %d. Please review audit output for more information.", exitCode)
 	}
 	return err
