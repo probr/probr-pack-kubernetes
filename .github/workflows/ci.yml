@@ -17,9 +17,8 @@ jobs:
     - name: Setup GO environment
       run: |
             go mod download
-            go get -u golang.org/x/lint/golint
-            go get -t .
             go get github.com/markbates/pkger/cmd/pkger
+            go get -t .
             pkger -h
 
     - name: Vet
