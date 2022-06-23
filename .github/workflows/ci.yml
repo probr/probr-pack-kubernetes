@@ -22,6 +22,7 @@ jobs:
             go mod download
             go get github.com/markbates/pkger/cmd/pkger
             go get -t .
+            go env
             pkger -h
 
     - name: Vet
