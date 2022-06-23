@@ -16,6 +16,7 @@ jobs:
 
     - name: Setup GO environment
       run: |
+            export GOBIN=$GOPATH/bin
             go mod download
             go get github.com/markbates/pkger/cmd/pkger
             go get -t .
@@ -23,7 +24,7 @@ jobs:
 
     - name: Vet
       run: |
-        go vet ./...
+            go vet ./...
 
     - name: Unit tests
       run: |
