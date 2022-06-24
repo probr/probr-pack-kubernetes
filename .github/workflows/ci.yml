@@ -9,7 +9,6 @@ on:
 env:
   GO111MODULE: ""
   GOARCH: "amd64"
-  GOBIN: ""
   GOCACHE: "/home/runner/.cache/go-build"
   GOENV: "/home/runner/.config/go/env"
   GOEXE: ""
@@ -23,6 +22,7 @@ env:
   GONOSUMDB: ""
   GOOS: "linux"
   GOPATH: "/home/runner/go"
+  GOBIN: "$GOPATH/bin"
   GOPRIVATE: ""
   GOPROXY: "https://proxy.golang.org,direct"
   GOROOT: "/opt/hostedtoolcache/go/1.18.3/x64"
