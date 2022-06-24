@@ -22,7 +22,7 @@ env:
   GONOSUMDB: ""
   GOOS: "linux"
   GOPATH: "/home/runner/go"
-  GOBIN: $GOPATH/bin
+  GOBIN: "/home/runner/go/bin"
   GOPRIVATE: ""
   GOPROXY: "https://proxy.golang.org,direct"
   GOROOT: "/opt/hostedtoolcache/go/1.18.3/x64"
