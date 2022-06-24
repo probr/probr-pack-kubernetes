@@ -62,6 +62,7 @@ jobs:
             go mod download
             go get github.com/markbates/pkger/cmd/pkger
             go get -t .
+            go mod tidy
             pkger -h
 
     - name: Vet
