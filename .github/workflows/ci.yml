@@ -4,7 +4,50 @@ on:
       - main
     paths-ignore:
       - "**/*.md"
-  
+
+# Set ENV to match the output of setup-go
+env:
+  GO111MODULE: ""
+  GOARCH: "amd64"
+  GOBIN: ""
+  GOCACHE: "/home/runner/.cache/go-build"
+  GOENV: "/home/runner/.config/go/env"
+  GOEXE: ""
+  GOEXPERIMENT: ""
+  GOFLAGS: ""
+  GOHOSTARCH: "amd64"
+  GOHOSTOS: "linux"
+  GOINSECURE: ""
+  GOMODCACHE: "/home/runner/go/pkg/mod"
+  GONOPROXY: ""
+  GONOSUMDB: ""
+  GOOS: "linux"
+  GOPATH: "/home/runner/go"
+  GOPRIVATE: ""
+  GOPROXY: "https://proxy.golang.org,direct"
+  GOROOT: "/opt/hostedtoolcache/go/1.18.3/x64"
+  GOSUMDB: "sum.golang.org"
+  GOTMPDIR: ""
+  GOTOOLDIR: "/opt/hostedtoolcache/go/1.18.3/x64/pkg/tool/linux_amd64"
+  GOVCS: ""
+  GOVERSION: "go1.18.3"
+  GCCGO: "gccgo"
+  GOAMD64: "v1"
+  AR: "ar"
+  CC: "gcc"
+  CXX: "g++"
+  CGO_ENABLED: "1"
+  GOMOD: "/home/runner/work/probr-pack-kubernetes/probr-pack-kubernetes/go.mod"
+  GOWORK: ""
+  CGO_CFLAGS: "-g -O2"
+  CGO_CPPFLAGS: ""
+  CGO_CXXFLAGS: "-g -O2"
+  CGO_FFLAGS: "-g -O2"
+  CGO_LDFLAGS: "-g -O2"
+  PKG_CONFIG: "pkg-config"
+  GOGCCFLAGS: "-fPIC -m64 -pthread -fmessage-length=0 -fdebug-prefix-map=/tmp/go-build4269875138=/tmp/go-build -gno-record-gcc-switches"
+
+
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -13,57 +56,12 @@ jobs:
     - uses: actions/setup-go@v3
       with:
         go-version: '^1.14.0'
-    - name: Make envfile
-      uses: SpicyPizza/create-envfile@v1.3
-      with:
-        GO111MODULE: ""
-        GOARCH: "amd64"
-        GOBIN: ""
-        GOCACHE: "/home/runner/.cache/go-build"
-        GOENV: "/home/runner/.config/go/env"
-        GOEXE: ""
-        GOEXPERIMENT: ""
-        GOFLAGS: ""
-        GOHOSTARCH: "amd64"
-        GOHOSTOS: "linux"
-        GOINSECURE: ""
-        GOMODCACHE: "/home/runner/go/pkg/mod"
-        GONOPROXY: ""
-        GONOSUMDB: ""
-        GOOS: "linux"
-        GOPATH: "/home/runner/go"
-        GOPRIVATE: ""
-        GOPROXY: "https://proxy.golang.org,direct"
-        GOROOT: "/opt/hostedtoolcache/go/1.18.3/x64"
-        GOSUMDB: "sum.golang.org"
-        GOTMPDIR: ""
-        GOTOOLDIR: "/opt/hostedtoolcache/go/1.18.3/x64/pkg/tool/linux_amd64"
-        GOVCS: ""
-        GOVERSION: "go1.18.3"
-        GCCGO: "gccgo"
-        GOAMD64: "v1"
-        AR: "ar"
-        CC: "gcc"
-        CXX: "g++"
-        CGO_ENABLED: "1"
-        GOMOD: "/home/runner/work/probr-pack-kubernetes/probr-pack-kubernetes/go.mod"
-        GOWORK: ""
-        CGO_CFLAGS: "-g -O2"
-        CGO_CPPFLAGS: ""
-        CGO_CXXFLAGS: "-g -O2"
-        CGO_FFLAGS: "-g -O2"
-        CGO_LDFLAGS: "-g -O2"
-        PKG_CONFIG: "pkg-config"
-        GOGCCFLAGS: "-fPIC -m64 -pthread -fmessage-length=0 -fdebug-prefix-map=/tmp/go-build4269875138=/tmp/go-build -gno-record-gcc-switches"
 
     - name: Setup GO environment
       run: |
-            export GOPATH="/home/runner/go"
-            echo "::set-env name=GOPATH::$GOPATH"
             go mod download
             go get github.com/markbates/pkger/cmd/pkger
             go get -t .
-            go env
             pkger -h
 
     - name: Vet
