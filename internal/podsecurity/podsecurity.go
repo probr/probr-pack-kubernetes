@@ -201,7 +201,7 @@ func (scenario *scenarioState) theExecutionOfAXCommandInsideThePodIsY(cmdType, r
 		cmd = "touch /dev/probr"
 		expectedFailureCodes = []int{1}
 	case "ping":
-		cmd = "ping google.com"
+		cmd = "ping -w 4 google.com"
 		expectedFailureCodes = []int{1, 2}
 	default:
 		err = utils.ReformatError("Unexpected value provided for command type: %s", cmdType) // No payload is necessary if an invalid value was provided
@@ -216,7 +216,6 @@ func (scenario *scenarioState) theExecutionOfAXCommandInsideThePodIsY(cmdType, r
 	default:
 		err = utils.ReformatError("Unexpected value provided for expected command result: %s", result) // No payload is necessary if an invalid value was provided
 		return err
-
 	}
 	stepTrace.WriteString("Attempt to run a command in the pod that was created by the previous step; ")
 	exitCode, stdout, stderr, err := connection.State.ExecCommand(cmd, scenario.namespace, scenario.pods[0])
@@ -237,12 +236,6 @@ func (scenario *scenarioState) theExecutionOfAXCommandInsideThePodIsY(cmdType, r
 		ExpectedExitCodes: expectedExitCodes,
 	}
 
-	// Validate that no internal error occurred during execution of curl command
-	if stderr != "" && exitCode == 0 {
-		err = utils.ReformatError("Unknown error raised when attempting to execute '%s' inside container. Please review audit output for more information.", cmd)
-		return err
-	}
-
 	var exitKnown bool
 	for _, expectedCode := range expectedExitCodes {
 		if exitCode == expectedCode {
@@ -250,7 +243,9 @@ func (scenario *scenarioState) theExecutionOfAXCommandInsideThePodIsY(cmdType, r
 			err = nil
 		}
 	}
-	if !exitKnown {
+	if !exitKnown && exitCode == 0 {
+		err = utils.ReformatError("'%s' succeeded with exit code %d, but shouldn't have.", cmd, exitCode)
+	} else if !exitKnown {
 		err = utils.ReformatError("Unexpected exit code: %d. Please review audit output for more information.", exitCode)
 	}
 	return err
